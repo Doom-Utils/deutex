@@ -138,14 +138,14 @@ Int16 Chsize(int handle,Int32 newsize)
 /*
 ** Delete a file
 */
-void Unlink(char *file)
+void Unlink(const char *file)
 {  remove (file);
 }
 
 /*
 ** Get a file time stamp. (date of last modification)
 */
-Int32 GetFileTime(char *path)
+Int32 GetFileTime(const char *path)
 { Int32 time;
   struct stat statbuf;
   stat(path,&statbuf);
@@ -155,7 +155,7 @@ Int32 GetFileTime(char *path)
 /*
 ** Set a file time stamp.
 */
-void SetFileTime(char *path, Int32 time)
+void SetFileTime(const char *path, Int32 time)
 {
   struct utimbuf stime;
   stime.modtime=stime.actime=time;
@@ -168,7 +168,7 @@ void SetFileTime(char *path, Int32 time)
 /*
 ** Copy memory
 */
-void Memcpy(void huge *dest,const void huge *src, Int32 n)
+void Memcpy(void huge *dest,const void huge *src, long n)
 { if(n<0) Bug("MovInf"); /*move inf to zero*/
   if(n==0)return;
 #if DT_OS == 'd'
@@ -187,7 +187,7 @@ void Memcpy(void huge *dest,const void huge *src, Int32 n)
 /*
 ** Set memory
 */
-void Memset(void huge *dest,char car, Int32 n)
+void Memset(void huge *dest,char car, long n)
 { if(n<0) Bug("MStInf"); /*set inf to zero*/
   if(n==0)return;
 #if DT_OS == 'd'
@@ -210,7 +210,7 @@ void Memset(void huge *dest,char car, Int32 n)
 #define SIZE_THRESHOLD        0x400L
 #define SIZE_OF_BLOCK        0xFFFL
 /* actually, this is (size - 1) */
-void huge *Malloc( Int32 size)
+void huge *Malloc (long size)
 {
    void huge *ret;
    if(size<1)
@@ -232,7 +232,7 @@ void huge *Malloc( Int32 size)
 /*
 ** Reallocate memory
 */
-void huge *Realloc( void huge *old, Int32 size)
+void huge *Realloc (void huge *old, long size)
 {  void huge *ret;
 
    if(size<1)
@@ -271,7 +271,9 @@ void ToLowerCase(char *file)
   for(i=0;(i<128)&&(file[i]!='\0');i++)
          file[i]=tolower((((Int16)file[i])&0xFF));
 }
-static void NameDir(char file[128], char *path,char *dir,char *sdir)
+
+static void NameDir(char file[128], const char *path, const char *dir, const
+    char *sdir)
 {
    file[0]='.';
    file[1]='\0';
@@ -285,7 +287,8 @@ static void NameDir(char file[128], char *path,char *dir,char *sdir)
 /*
 ** Create directory if it does not exists
 */
-void MakeDir(char file[128], char *path,char *dir,char *sdir)
+void MakeDir(char file[128], const char *path, const char *dir, const char
+    *sdir)
 {  NameDir(file,path,dir,sdir);
 #if DT_OS == 'd'
 #  if DT_CC == 'd'
@@ -309,7 +312,8 @@ void MakeDir(char file[128], char *path,char *dir,char *sdir)
 ** Create a file name, by concatenation
 ** returns TRUE if file exists FALSE otherwise
 */
-Bool MakeFileName(char file[128], char *path,char *dir,char *sdir,char *name,char *extens)
+Bool MakeFileName(char file[128], const char *path, const char *dir, const
+    char *sdir, const char *name, const char *extens)
 {  FILE *fp;
    char name2[8];  /* AYM 1999-01-13: keep checker happy */
    /* deal with VILE strange name
@@ -356,7 +360,7 @@ Bool MakeFileName(char file[128], char *path,char *dir,char *sdir,char *name,cha
 /*
 ** Get the root name of a WAD file
 */
-void GetNameOfWAD(char name[8],char *path)
+void GetNameOfWAD(char name[8], const char *path)
 { Int16 n, nam,len;
   len=(Int16)strlen(path);
   /*find end of DOS or Unix path*/
@@ -405,7 +409,7 @@ void PrintCopyright(void)
 /*****************************************************/
 
 /* convert 8 byte string to upper case, 0 padded*/
-void Normalise(char dest[8], char *src)  /*strupr*/
+void Normalise(char dest[8], const char *src)  /*strupr*/
 { Int16 n;Bool pad=FALSE; char c='A';
   for(n=0;n<8;n++)
   { c= (pad==TRUE)? '\0': src[n];
@@ -476,7 +480,7 @@ void ProgErrorCancel(void)
 void ProgErrorAction(void (*action)(void))
 { Action = action;
 }
-void ProgError( char *errstr, ...)
+void ProgError (const char *errstr, ...)
 {
    va_list args;va_start( args, errstr);
    fprintf(Stderr, "\nError: *** ");
@@ -487,7 +491,7 @@ void ProgError( char *errstr, ...)
    PrintExit();
    exit( -5);
 }
-void Bug( char *errstr, ...)
+void Bug (const char *errstr, ...)
 {  va_list args;va_start( args, errstr);
    fprintf(Stderr, "\nBug: *** ");
    vfprintf(Stderr, errstr, args);
@@ -497,41 +501,42 @@ void Bug( char *errstr, ...)
    PrintExit();
    exit( -10);
 }
-void Warning( char *str, ...)
+void Warning (const char *str, ...)
 {  va_list args;va_start( args, str);
    fprintf(Stdwarn, "Warning: ** ");
    vfprintf(Stdwarn, str, args);
    fprintf(Stdwarn, " **\n");
    va_end( args);
 }
-void Legal(char *str, ...)
+void Legal(const char *str, ...)
 {  va_list args;va_start( args, str);
    vfprintf(stdout, str, args);
    va_end( args);
 }
-void Output(char *str, ...)
+void Output (const char *str, ...)
 {  va_list args;va_start( args, str);
    vfprintf(Stdout, str, args);
    va_end( args);
 }
-void Info(char *str, ...)
+void Info (const char *str, ...)
 {  va_list args;va_start( args, str);
    if(Verbosity>=1)
      vfprintf(Stdinfo, str, args);
    va_end( args);
 }
-void Phase(char *str, ...)
+void Phase (const char *str, ...)
 {  va_list args;va_start( args, str);
    if(Verbosity>=2)
      vfprintf(Stdinfo, str, args);
    va_end( args);
 }
-void Detail(char *str, ...)
+void Detail (const char *str, ...)
 {  va_list args;va_start( args, str);
    if(Verbosity>=3)
      vfprintf(Stdinfo, str, args);
    va_end( args);
 }
+
 #if 0
 Int16 NbP=0;
 void Progress(void)
@@ -542,6 +547,7 @@ void Progress(void)
     fprintf(Stdinfo,"\n");
   }
 }
+
 void ProgressEnds(void)
 { fprintf(Stdinfo,"\n");
 }

@@ -13,22 +13,18 @@ BUILDING AND INSTALLING ON UNIX
   such as Linux.
   1) Type "make"
   2) As root, type "make install"
-  See making.txt for details.
+  See INSTALL for details.
 
 BUILDING AND INSTALLING ON DOS
 
-  You need a C development environment with "make" and a C compiler,
-  such as DJGPP, Cygwin or Borland C.
-  1) Type "make"
-  2) Copy the new "deutex.exe" and "deusf.exe" somewhere in your PATH.
-  See making.txt for details.
+  See INSTALL.
 
 LEGAL
 
   DeuTex is Copyright Olivier Montanuy 1994-1995 and Copyright André
   Majorel 1999 and available under the terms of the GPL, except lzw.c
   which is Copyright David Koblas and others and available under the
-  terms of the PBMPLUS license. See LICENSE.
+  terms of the PBMPLUS license. See the LICENSE file.
   All trademarks are the property of their owners.
 
 CONTACT

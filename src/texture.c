@@ -372,10 +372,27 @@ void TXUreadTEXTURE(char huge *Data,Int32 DataSz,char huge *Patch, Int32 PatchSz
   /*read textures*/
   for (t = 0; t <Numtex; t++)
   { Pos= peek_i32_le (&Data[4L+t*4L]);
+    /* Kludge: -8 because there is no name field */
+    if (texture_format == TF_NAMELESS)
+      Pos -= 8;
     dummy=Pos+sizeof(struct TEXDEF); /*would BUG GCC else!*/
     if(dummy>DataSz) ProgError("TEXTURE entry too small");
-    texdef= (struct TEXDEF huge *)(&Data[Pos]);
-    Normalise(tname,texdef->name);
+    texdef = (struct TEXDEF huge *) (Data + Pos);
+    if (texture_format == TF_NAMELESS)  /* No name. Make one up (TEXnnnn) */
+    {
+      if (t > 9999)
+      {
+	Warning ("More than 10000 textures!");
+        break;
+      }
+      sprintf (tname, "TEX%04d", (int) t);
+    }
+    else if (texture_format == TF_NORMAL)
+    {
+      Normalise(tname,texdef->name);
+    }
+    else
+      Bug ("Bad tf %d", (int) texture_format);
     Xsize = peek_i16_le (&texdef->xsize);
     if((Xsize<0)||(Xsize>4096))        ProgError("texture width out of bound");
     Ysize = peek_i16_le (&texdef->ysize);
@@ -387,7 +404,7 @@ void TXUreadTEXTURE(char huge *Data,Int32 DataSz,char huge *Patch, Int32 PatchSz
     /* declare texture */
     TXUdefineCurTex(tname,Xsize,Ysize,Redefn);
     /* set Position to start of patches defs*/
-    Pos= Pos+sizeof(struct TEXDEF);
+    Pos += sizeof(struct TEXDEF);
     dummy=Pos+(Numpat*sizeof(struct PATDEF));
     if(dummy>DataSz)              ProgError("TEXTURE entry too small");
     for (p = 0; p < Numpat; p++, Pos+=sizeof(struct PATDEF))
@@ -524,7 +541,7 @@ void TXUlistTex(void)
 /*
 ** write texture as text file
 */
-void TXUwriteTexFile(char *file)
+void TXUwriteTexFile(const char *file)
 {  Int16 t,p,pat,top;
    char pname[8];
    FILE *out;
@@ -559,7 +576,7 @@ void TXUwriteTexFile(char *file)
 ** read texture as text file
 **
 */
-void TXUreadTexFile(char *file,Bool Redefn)
+void TXUreadTexFile(const char *file,Bool Redefn)
 {  Int16 Pindex;
    Int16 xsize=0,ysize=0,ofsx=0,ofsy=0;
    char tname[8];  

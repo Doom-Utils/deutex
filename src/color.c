@@ -51,6 +51,24 @@ static  UInt8 COLinvisib;
 static Bool COLok=FALSE;
 
 
+/*
+ *	pixel_cmp
+ *	Compare two PIXEL structure à la memcmp()
+ */
+static int pixel_cmp (const void *pixel1, const void *pixel2)
+{
+  const struct PIXEL *const p1 = (const struct PIXEL *) pixel1;
+  const struct PIXEL *const p2 = (const struct PIXEL *) pixel2;
+  if (p1->R != p2->R)
+     return p1->R - p2->R;
+  if (p1->G != p2->G)
+     return p1->G - p2->G;
+  if (p1->B != p2->B)
+     return p1->B - p2->B;
+  return 0;
+
+}
+
 const int COLsame = 3;
 Int16 COLdiff( UInt8 R,  UInt8 G,  UInt8 B, UInt8 idx)
 {
@@ -200,10 +218,12 @@ void COLinit( UInt8 invR, UInt8 invG, UInt8 invB,char huge *Colors, Int16 Colsz)
    { i = 0xff;
      name = "Heretic";
    }
+#if 0
    else if (0)  /* FIXME */
    {
      name = "Hexen";
    }
+#endif
    else if (COLpal[0].R == 0 && COLpal[0].G == 0 && COLpal[0].B == 0
      && COLpal[240].R == 0 && COLpal[240].G == 0 && COLpal[240].B == 0)
    { i = 0xf0;
@@ -227,15 +247,27 @@ void COLinit( UInt8 invR, UInt8 invG, UInt8 invB,char huge *Colors, Int16 Colsz)
    COLinv.R=COLpal[i].R=invR;
    COLinv.G=COLpal[i].G=invG;
    COLinv.B=COLpal[i].B=invB;
-   /*
-   ** init hash table
-   */
-   COLhash=(UInt8 huge *)Malloc(HashSz);
-   Memset(COLhash,COLinvisib,HashSz); /*clear hash table*/
 
-   for(i=0;i<256;i++)
-   { if((UInt8)i!=COLinvisib)
-	   COLputColHash(i,COLpal[i].R,COLpal[i].G,COLpal[i].B);
+   /* Init hash table.
+      We take special care of hashing only unique RGB triplets.
+      This precaution is unnecessary for Doom, Heretic, Hexen
+      and Strife but Doom alpha O.2, 0.4 and 0.5 have a PLAYPAL
+      that contains many duplicates that would fill the hash
+      table with useless data. -- AYM 1999-09-18 */
+   {
+     const int COLOURS = 256;
+     struct PIXEL *unique = Malloc (COLOURS * sizeof *unique);
+     for (i = 0; i < COLOURS; i++)
+       unique[i] = COLpal[i];
+     qsort (unique, COLOURS, sizeof *unique, pixel_cmp);
+     COLhash=(UInt8 huge *)Malloc(HashSz);
+     Memset(COLhash,COLinvisib,HashSz); /*clear hash table*/
+     for (i=0; i<COLOURS; i++)
+     { if ((UInt8)i!=COLinvisib
+	 && (i == 0 || pixel_cmp (unique + i, unique + i - 1) != 0))
+	     COLputColHash (i, unique[i].R, unique[i].G, unique[i].B);
+     }
+     Free (unique);
    }
 }
 void COLfree(void)

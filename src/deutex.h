@@ -250,17 +250,26 @@ typedef Int16 ENTRY;
 Bool LetsHaveFunBaby(long guesswhat);
 /*compose.c: TEXTURE list*/
 /*compose.c: TEXTURE insertion...rather, WAD composition*/
-void CMPOmakePWAD( char *doomwad,WADTYPE type, char *PWADname,
-			 char *DataDir,char *texin,NTRYB select,
+void CMPOmakePWAD(const char *doomwad,WADTYPE type, const char *PWADname,
+			 const char *DataDir, const char *texin,NTRYB select,
 			 char trnR, char trnG, char trnB,Bool George);
 /*substit.c: DOOM.EXE string substitution*/
 void EXE2list(FILE *out,char *doomexe,Int32 start,Int16 thres);
-void EXEsubstit(char *texin,char *doomexe,Int32 start,Int16 thres);
+void EXEsubstit(const char *texin,const char *doomexe,Int32 start,Int16 thres);
 
-void XTRlistDir(char *doomwad,char *wadin,NTRYB select);
+void XTRlistDir(const char *doomwad,const char *wadin,NTRYB select);
 
-void XTRvoidSpacesInWAD(char *wadin);
+void XTRvoidSpacesInWAD(const char *wadin);
 
-void XTRcompakWAD(char *DataDir,char *wadin, char *texout,Bool ShowIdx);
-void XTRstructureTest(char *doomwad,char *wadin);
-void XTRtextureUsed(char *wadin);
+void XTRcompakWAD(const char *DataDir, const char *wadin, const char
+    *texout,Bool ShowIdx);
+void XTRstructureTest(const char *doomwad, const char *wadin);
+void XTRtextureUsed(const char *wadin);
+
+
+typedef enum { TF_NORMAL, TF_NAMELESS, TF_NONE } texture_format_t;
+typedef enum { TL_NORMAL, TL_TEXTURES, TL_NONE } texture_lump_t;
+extern texture_format_t texture_format;
+extern texture_lump_t   texture_lump;
+
+

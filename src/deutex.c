@@ -50,6 +50,7 @@ Place, Suite 330, Boston, MA 02111-1307, USA.
 #define AUTO_BUG_INSERT                TRUE
 
 #include "deutex.h"
+#include <stdarg.h>
 #include <ctype.h>
 #include "tools.h"
 #include "mkwad.h"
@@ -71,8 +72,8 @@ char file[128];        /* general use file name*/
 static WADTYPE Type;        /*IWAD type*/
 static NTRYB Select;
 
-static char *DataDir=NULL;
-static char *DoomDir=NULL;
+static const char *DataDir=NULL;
+static const char *DoomDir=NULL;
 static char MainWAD[128];	/* name of the main wad file */
 #if defined DeuTex
 static char WadInf[128];	/* name of the wadinfo file */
@@ -85,17 +86,26 @@ static Bool WSafe;
 static Bool George;
 #endif /*DeuTex*/
 char trnR,trnG,trnB;
+texture_format_t texture_format = TF_NORMAL;
+texture_lump_t   texture_lump   = TL_NORMAL;
 
-
+typedef void (*comfun_t) (int argc, const char *argv[]);
 static int is_prefix (const char *s1, const char *s2);
+#ifdef DeuTex
+static void call_opt (comfun_t func, ...);
+#endif
 
 
 /*
 ** commands
 */
-void COMhelp(int argc, char **argv);
-void COMmanopt(int argc, char **argv);
-void COMformat(int argc, char **argv);
+void COMhelp(int argc, const char *argv[]);
+void COMmanopt(int argc, const char *argv[]);
+void COMformat(int argc, const char *argv[]);
+void COMipf (int argc, const char *argv[]);
+void COMitf (int argc, const char *argv[]);
+void COMitl (int argc, const char *argv[]);
+
 /*
 ** WinTex comand line replaces
 ** -out
@@ -106,8 +116,8 @@ void COMformat(int argc, char **argv);
 ** -colRrGgBb  red = (R-'A')*16+(r-'A')
 */
 #if defined DeuTex
-void COMwintxn(int argc, char **argv)
-{  char *num;
+void COMwintxn(int argc, const char *argv[])
+{  const char *num;
    PrintInit(TRUE);                /*-out*/
    PrintVerbosity(3);                /*-v3*/
    DoomDir=argv[1];                /*doom*/
@@ -124,7 +134,7 @@ void COMwintxn(int argc, char **argv)
     ((int)trnR&0xFF),((int)trnG&0xFF),((int)trnB&0xFF));
    (void)argc;
 }
-void COMwintxm(int argc, char **argv)
+void COMwintxm(int argc, const char *argv[])
 {  PrintInit(TRUE);                /*-out*/
    PrintVerbosity(3);                /*-v3*/
    DoomDir=argv[1];                /*doom*/
@@ -134,7 +144,7 @@ void COMwintxm(int argc, char **argv)
    (void)argc;
 }
 #endif /*DeuTex*/
-void COMwintex(int argc, char **argv)
+void COMwintex(int argc, const char *argv[])
 {  PrintInit(TRUE);                /*-out*/
    PrintVerbosity(3);                /*-v3*/
    DoomDir=NULL;
@@ -144,53 +154,86 @@ void COMwintex(int argc, char **argv)
    trnR= 0;trnG= 255;trnB= 255;
    (void)argc;
 }
-void COMverbose(int argc, char **argv)
+void COMverbose(int argc, const char *argv[])
 {  PrintVerbosity(argv[0][2]-'0');
    Info("Verbosity level is %c.\n",argv[0][2]);
    (void)argc;
 }
-void COMdoom(int argc, char **argv)
+
+void COMdoom(int argc, const char *argv[])
 {  DoomDir=argv[1];
-	Info("Main directory: %s.\n",DoomDir);
-	(void)argc;
+   Info("Main directory: %s.\n",DoomDir);
+   (void)argc;
 }
-void COMmain(int argc, char **argv)
+
+#ifdef DeuTex
+void COMdoom02(int argc, const char *argv[])
+{  call_opt (COMdoom, argv[1], NULL);
+   call_opt (COMipf,  "alpha", NULL);
+   call_opt (COMitf,  "none",  NULL);
+   call_opt (COMitl,  "none",  NULL);
+   (void)argc;
+}
+
+void COMdoom04(int argc, const char *argv[])
+{  call_opt (COMdoom, argv[1],    NULL);
+   call_opt (COMipf,  "alpha",    NULL);
+   call_opt (COMitf,  "nameless", NULL);
+   call_opt (COMitl,  "textures", NULL);
+   (void)argc;
+}
+
+void COMdoom05(int argc, const char *argv[])
+{  call_opt (COMdoom, argv[1],    NULL);
+   call_opt (COMipf,  "alpha",    NULL);
+   call_opt (COMitl,  "textures", NULL);
+   (void)argc;
+}
+
+void COMdoompr(int argc, const char *argv[])
+{  call_opt (COMdoom, argv[1],  NULL);
+   call_opt (COMipf,  "pr",     NULL);
+   (void)argc;
+}
+#endif
+
+void COMmain(int argc, const char *argv[])
 {  DoomDir=NULL;
-	strncpy(MainWAD,argv[1],128);
-	Info("Main IWAD file: %s.\n",MainWAD);
-	(void)argc;
+   strncpy(MainWAD,argv[1],128);
+   Info("Main IWAD file: %s.\n",MainWAD);
+   (void)argc;
 }
-void COMwadir(int argc, char **argv)
+void COMwadir(int argc, const char *argv[])
 { XTRlistDir(MainWAD,((argc<2)? NULL: argv[1]),Select);
 }
-void COMadd(int argc, char **argv)
+void COMadd(int argc, const char *argv[])
 { ADDallSpriteFloor(argv[2],MainWAD,argv[1],Select);
   (void)argc;
 }
-void COMapp(int argc, char **argv)
+void COMapp(int argc, const char *argv[])
 { ADDappendSpriteFloor(MainWAD,argv[1],Select);
   (void)argc;
 }
-void COMapps(int argc, char **argv)
+void COMapps(int argc, const char *argv[])
 { Select= (BALL) & (~BFLAT); /*no flats*/
   ADDappendSpriteFloor(MainWAD,argv[1],Select);
   (void)argc;
 }
-void COMappf(int argc, char **argv)
+void COMappf(int argc, const char *argv[])
 { Select= (BALL) & (~BSPRITE); /*no sprites*/
   ADDappendSpriteFloor(MainWAD,argv[1],Select);
   (void)argc;
 }
-void COMjoin(int argc, char **argv)
+void COMjoin(int argc, const char *argv[])
 { ADDjoinWads(MainWAD,argv[1],argv[2],Select);
   (void)argc;
 }
-void COMmerge(int argc, char **argv)
+void COMmerge(int argc, const char *argv[])
 { Select     = BALL;
   PSTmergeWAD(MainWAD,argv[1],Select);
   (void)argc;
 }
-void COMrestor(int argc, char **argv)
+void COMrestor(int argc, const char *argv[])
 { HDRrestoreWAD((argc>=2)? argv[1]:MainWAD);
 }
 
@@ -199,12 +242,12 @@ void COMrestor(int argc, char **argv)
 /*
 ** Selections
 */
-void COMsprit(int argc, char **argv)
+void COMsprit(int argc, const char *argv[])
 { Select&= ~BFLAT;
   Info("Select SPRITES\n");
   (void)argc;(void)argv;
 }
-void COMflat(int argc, char **argv)
+void COMflat(int argc, const char *argv[])
 { Select&= ~BSPRITE;
   Info("Select FLATS\n");
   (void)argc;(void)argv;
@@ -214,62 +257,62 @@ void COMflat(int argc, char **argv)
 /*
 ** Selections
 */
-void COMsprit(int argc, char **argv)
+void COMsprit(int argc, const char *argv[])
 { Select|=BSPRITE;
   Info("Select SPRITES\n");
   (void)argc;(void)argv;
 }
-void COMflat(int argc, char **argv)
+void COMflat(int argc, const char *argv[])
 { Select|=BFLAT;
   Info("Select FLATS\n");
   (void)argc;(void)argv;
 }
-void COMlevel(int argc, char **argv)
+void COMlevel(int argc, const char *argv[])
 { Select|=BLEVEL;
   Info("Select LEVELS\n");
   (void)argc;(void)argv;
 }
-void COMlump(int argc, char **argv)
+void COMlump(int argc, const char *argv[])
 { Select|=BLUMP;
   Info("Select LUMPS\n");
   (void)argc;(void)argv;
 }
-void COMtextur(int argc, char **argv)
+void COMtextur(int argc, const char *argv[])
 { Select|=BTEXTUR;
   Info("Select TEXTURES\n");
   (void)argc;(void)argv;
 }
-void COMsound(int argc, char **argv)
+void COMsound(int argc, const char *argv[])
 { Select|=BSOUND;
   Info("Select SOUNDS\n");
   (void)argc;(void)argv;
 }
-void COMmusic(int argc, char **argv)
+void COMmusic(int argc, const char *argv[])
 { Select|=BMUSIC;
   Info("Select MUSICS\n");
   (void)argc;(void)argv;
 }
-void COMgraphic(int argc, char **argv)
+void COMgraphic(int argc, const char *argv[])
 { Select|=BGRAPHIC;
   Info("Select GRAPHICS\n");
   (void)argc;(void)argv;
 }
-void COMpatch(int argc, char **argv)
+void COMpatch(int argc, const char *argv[])
 { Select|=BPATCH;
   Info("Select PATCHES\n");
   (void)argc;(void)argv;
 }
-void COMgeorge(int argc, char **argv)
+void COMgeorge(int argc, const char *argv[])
 { George=TRUE;
   Info("Use S_END for sprites.\n");
   (void)argc;(void)argv;
 }
 
 
-void PicDebug(char *file,char *DataDir,char *name);
+void PicDebug(char *file, const char *DataDir, const char *name);
 
 
-void COMdebug(int argc, char **argv)
+void COMdebug(int argc, const char *argv[])
 {
 #if 1
 #include "color.h"
@@ -289,57 +332,57 @@ void COMdebug(int argc, char **argv)
 #endif
   (void)argc;(void)argv;
 }
-void COMdeu(int argc, char **argv)
+void COMdeu(int argc, const char *argv[])
 { HowMuchJunk=MAXJUNK64;
   Info("Some junk will be added at end of WAD, for DEU 5.21.\n");
   (void)argc;(void)argv;
 }
-void COMdir(int argc, char **argv)
+void COMdir(int argc, const char *argv[])
 { DataDir=argv[1];
   Info("Files will be saved in directory %s.\n",DataDir);
   (void)argc;
 }
-void COMfullsnd(int argc, char **argv)
+void COMfullsnd(int argc, const char *argv[])
 { fullSND=TRUE;
   Info("Saving complete sounds.\n");
   (void)argc;(void)argv;
 }
-void COMstroy(int argc, char **argv)
+void COMstroy(int argc, const char *argv[])
 { WSafe=FALSE;
   Info("Overwrite existing files.\n");
   if(argc)(void)argv;
 }
-void COMgif(int argc, char **argv)
+void COMgif(int argc, const char *argv[])
 { Picture=PICGIF;
   Info("Saving pictures as GIF (.gif)\n");
   (void)argc;(void)argv;
 }
-void COMbmp(int argc, char **argv)
+void COMbmp(int argc, const char *argv[])
 { Picture=PICBMP;
   Info("Saving pictures as BMP (.bmp)\n");
   (void)argc;(void)argv;
 }
-void COMppm(int argc, char **argv)
+void COMppm(int argc, const char *argv[])
 { Picture=PICPPM;
   Info("Saving pictures as rawbits (P6) PPM (.ppm)\n");
   (void)argc;(void)argv;
 }
-void COMau(int argc, char **argv)
+void COMau(int argc, const char *argv[])
 { Sound=SNDAU;
   Info("Save sounds as Sun audio (.au)\n");
   (void)argc;(void)argv;
 }
-void COMwave(int argc, char **argv)
+void COMwave(int argc, const char *argv[])
 { Sound=SNDWAV;
   Info("Save sounds as wave (.wav)\n");
   (void)argc;(void)argv;
 }
-void COMvoc(int argc, char **argv)
+void COMvoc(int argc, const char *argv[])
 { Sound=SNDVOC;
   Info("Save sounds as voc (.voc)\n");
   (void)argc;(void)argv;
 }
-void COMrgb(int argc, char **argv)
+void COMrgb(int argc, const char *argv[])
 { trnR=(char)(atoi(argv[1])&0xFF);
   trnG=(char)(atoi(argv[2])&0xFF);
   trnB=(char)(atoi(argv[3])&0xFF);
@@ -348,7 +391,7 @@ void COMrgb(int argc, char **argv)
   (void)argc;
 }
 
-void COMle (int argc, char **argv)
+void COMle (int argc, const char *argv[])
 {
   set_input_wad_endianness (0);
   set_output_wad_endianness (0);
@@ -356,7 +399,7 @@ void COMle (int argc, char **argv)
   (void) argv;
 }
 
-void COMbe (int argc, char **argv)
+void COMbe (int argc, const char *argv[])
 {
   set_input_wad_endianness (1);
   set_output_wad_endianness (1);
@@ -364,49 +407,78 @@ void COMbe (int argc, char **argv)
   (void) argv;
 }
 
-void COMile (int argc, char **argv)
+void COMile (int argc, const char *argv[])
 {
   set_input_wad_endianness (0);
   (void) argc;
   (void) argv;
 }
 
-void COMibe (int argc, char **argv)
+void COMibe (int argc, const char *argv[])
 {
   set_input_wad_endianness (1);
   (void) argc;
   (void) argv;
 }
 
-void COMole (int argc, char **argv)
+void COMole (int argc, const char *argv[])
 {
   set_output_wad_endianness (0);
   (void) argc;
   (void) argv;
 }
 
-void COMobe (int argc, char **argv)
+void COMobe (int argc, const char *argv[])
 {
   set_output_wad_endianness (1);
   (void) argc;
   (void) argv;
 }
 
-void COMpf (int argc, char **argv)
+void COMipf (int argc, const char *argv[])
 {
-  if (argc == 2 && ! strcmp (argv[1], "alpha"))
+  if (argc >= 2 && ! strcmp (argv[1], "alpha"))
     picture_format = PF_ALPHA;
-  else if (argc == 2 && ! strcmp (argv[1], "normal"))
+  else if (argc >= 2 && ! strcmp (argv[1], "pr"))
+    picture_format = PF_PR;
+  else if (argc >= 2 && ! strcmp (argv[1], "normal"))
     picture_format = PF_NORMAL;
   else
-    ProgError ("Usage is \"-pf {normal|alpha}\"");
+    ProgError ("Usage is \"-ipf {alpha|pr|normal}\"");
+  Info ("Input picture format is \"%s\"\n", argv[1]);
+}
+
+void COMitf (int argc, const char *argv[])
+{
+  if (argc >= 2 && ! strcmp (argv[1], "none"))
+    texture_format = TF_NONE;
+  else if (argc >= 2 && ! strcmp (argv[1], "nameless"))
+    texture_format = TF_NAMELESS;
+  else if (argc >= 2 && ! strcmp (argv[1], "normal"))
+    texture_format = TF_NORMAL;
+  else
+    ProgError ("Usage is \"-itf {none|nameless|normal}\"");
+  Info ("Input texture format is \"%s\"\n", argv[1]);
+}
+
+void COMitl (int argc, const char *argv[])
+{
+  if (argc >= 2 && ! strcmp (argv[1], "none"))
+    texture_lump = TL_NONE;
+  else if (argc >= 2 && ! strcmp (argv[1], "textures"))
+    texture_lump = TL_TEXTURES;
+  else if (argc >= 2 && ! strcmp (argv[1], "normal"))
+    texture_lump = TL_NORMAL;
+  else
+    ProgError ("Usage is \"-itl {none|textures|normal}\"");
+  Info ("Input texture lump is \"%s\"\n", argv[1]);
 }
 
 /*
 ** Build an IWAD
 **
 */
-void COMiwad(int argc, char **argv)
+void COMiwad(int argc, const char *argv[])
 { Type=IWAD;
   Info("Build an IWAD file.\n");
   (void)argc;(void)argv;
@@ -416,8 +488,8 @@ void COMiwad(int argc, char **argv)
 **
 */
 
-void COMmake(int argc, char **argv)
-{ char *wadinf,*wadout;
+void COMmake(int argc, const char *argv[])
+{ const char *wadinf,*wadout;
   if(WadInfOk==FALSE)
   { MakeFileName(WadInf,DataDir,"","","WADINFO","TXT");
   }
@@ -426,8 +498,8 @@ void COMmake(int argc, char **argv)
   CMPOmakePWAD(MainWAD,Type,wadout,DataDir,wadinf,Select,trnR,trnG,trnB,George);
   (void)argc;
 }
-void COMxtra(int argc, char **argv)
-{ char *wadinf, *wadin;
+void COMxtra(int argc, const char *argv[])
+{ const char *wadinf, *wadin;
   if(WadInfOk==FALSE)
   { MakeFileName(WadInf,DataDir,"","","WADINFO","TXT");
   }
@@ -435,25 +507,25 @@ void COMxtra(int argc, char **argv)
   if(argc<=2){wadinf=WadInf;}else{wadinf=argv[2];}
   XTRextractWAD(MainWAD,DataDir,wadin,wadinf,Picture,Sound,fullSND,Select,trnR,trnG,trnB,WSafe);
 }
-void COMget(int argc, char **argv)
+void COMget(int argc, const char *argv[])
 { XTRgetEntry(MainWAD,DataDir,((argc<3)? MainWAD: argv[2]),argv[1],Picture,Sound,fullSND,trnR,trnG,trnB);
 }
-void COMpackNorm(int argc, char **argv)
+void COMpackNorm(int argc, const char *argv[])
 { XTRcompakWAD(DataDir,(argc>1)? argv[1]: MainWAD,(argc>2)? argv[2]:NULL,FALSE);
 }
-void COMpackGfx(int argc, char **argv)
+void COMpackGfx(int argc, const char *argv[])
 { XTRcompakWAD(DataDir,(argc>1)? argv[1]: MainWAD,(argc>2)? argv[2]:NULL,TRUE);
 }
-void COMvoid(int argc, char **argv)
+void COMvoid(int argc, const char *argv[])
 {  XTRvoidSpacesInWAD(argv[1]);
 	(void)argc;
 }
-void COMusedtex(int argc, char **argv)
+void COMusedtex(int argc, const char *argv[])
 { XTRtextureUsed((argc>1)? argv[1]: MainWAD);
 }
 #endif /*DeuTex*/
 
-void COMcheck(int argc, char **argv)
+void COMcheck(int argc, const char *argv[])
 { XTRstructureTest(MainWAD,argv[1]);
   (void)argc;
 }
@@ -468,7 +540,7 @@ typedef struct
 { COMTYPE type;
        char argc;
 	  char *com;
-	              void (*exec)(int argc, char **argv);
+	            comfun_t exec;
 			         char *use;
 				         char *help;
 } comdef_t;
@@ -492,6 +564,12 @@ static comdef_t Com[]=
 #endif /*DeuTex*/
  {OPT,1,"wtx",      COMwintex, "<iwad>","WinTex shortcut"},
  {OPT,1,"doom",     COMdoom,   "<dir>","indicate the directory of Doom/Doom II"},
+#ifdef DeuTex
+ {OPT,1,"doom02",   COMdoom02, "<dir>","indicate the directory of Doom alpha 0.2"},
+ {OPT,1,"doom04",   COMdoom04, "<dir>","indicate the directory of Doom alpha 0.4"},
+ {OPT,1,"doom05",   COMdoom05, "<dir>","indicate the directory of Doom alpha 0.5"},
+ {OPT,1,"doompr",   COMdoompr, "<dir>","indicate the directory of Doom press release pre-beta"},
+#endif
  {OPT,1,"heretic",  COMdoom,   "<dir>","indicate the directory of Heretic"},
  {OPT,1,"hexen",    COMdoom,   "<dir>","indicate the directory of Hexen"},
  {OPT,1,"strife",   COMdoom,   "<dir>","indicate the directory of Strife"},
@@ -536,7 +614,9 @@ static comdef_t Com[]=
  {OPT,0,"ile",      COMile,    NULL,   "input wads are little endian (default)"},
  {OPT,0,"obe",      COMobe,    NULL,   "create big endian wads (default LE)"},
  {OPT,0,"ole",      COMole,    NULL,   "create little endian wads (default)"},
- {OPT,1,"pf",       COMpf,     "{normal|alpha}", "picture format (default is \"normal\")"},
+ {OPT,1,"ipf",      COMipf,    "{alpha|pr|normal}", "picture format (default is \"normal\")"},
+ {OPT,1,"itf",      COMitf,    "{none|nameless|normal}", "texture format (default is \"normal\")"},
+ {OPT,1,"itl",      COMitl,    "{none|textures|normal}", "texture lump (default is \"normal\")"},
 #endif /* DeuTex */
 
 #if defined DeuTex
@@ -573,9 +653,8 @@ static comdef_t Com[]=
  {END,0,"",         COMhelp,   NULL,   ""}
 };
 
-int main( int argc, char **argv)
-{  char c;
-   FILE *fp;
+int main( int argc, const char *argv[])
+{  FILE *fp;
 
    /* Options for which you don't want the banners */
    if (argc == 2 && ! strcmp (argv[1], "--version"))
@@ -730,18 +809,20 @@ got_it:
          { /*
            ** look for main wad
            */
-           if(    MakeFileName(MainWAD,DoomDir,"","","doom","wad")!=TRUE
-	       && MakeFileName(MainWAD,DoomDir,"","","doom2","wad")!=TRUE
-               && MakeFileName(MainWAD,DoomDir,"","","heretic","wad")!=TRUE
-               && MakeFileName(MainWAD,DoomDir,"","","hexen","wad")!=TRUE
-               && MakeFileName(MainWAD,DoomDir,"","","strife1","wad")!=TRUE
-               && MakeFileName(MainWAD,".",    "","","doom","wad")!=TRUE
-	       && MakeFileName(MainWAD,".",    "","","doom2","wad")!=TRUE
-               && MakeFileName(MainWAD,".",    "","","heretic","wad")!=TRUE
-               && MakeFileName(MainWAD,".",    "","","hexen","wad")!=TRUE
-               && MakeFileName(MainWAD,".",    "","","strife1","wad")!=TRUE)
-             ProgError("Can't find any of doom.wad, doom2.wad, heretic.wad,"
-		 " hexen.wad, strife1.wad");
+           if(    MakeFileName(MainWAD,DoomDir,"","","doompres","wad")!=TRUE
+	       && MakeFileName(MainWAD,DoomDir,"","","doom",    "wad")!=TRUE
+	       && MakeFileName(MainWAD,DoomDir,"","","doom2",   "wad")!=TRUE
+               && MakeFileName(MainWAD,DoomDir,"","","heretic", "wad")!=TRUE
+               && MakeFileName(MainWAD,DoomDir,"","","hexen",   "wad")!=TRUE
+               && MakeFileName(MainWAD,DoomDir,"","","strife1", "wad")!=TRUE
+               && MakeFileName(MainWAD,".",    "","","doompres","wad")!=TRUE
+               && MakeFileName(MainWAD,".",    "","","doom",    "wad")!=TRUE
+	       && MakeFileName(MainWAD,".",    "","","doom2",   "wad")!=TRUE
+               && MakeFileName(MainWAD,".",    "","","heretic", "wad")!=TRUE
+               && MakeFileName(MainWAD,".",    "","","hexen",   "wad")!=TRUE
+               && MakeFileName(MainWAD,".",    "","","strife1", "wad")!=TRUE)
+             ProgError("Can't find any of doom.wad, doom2.wad, doompres.wad,"
+		 " heretic.wad, hexen.wad, strife1.wad");
          }
          /*selection bytes*/
 #if defined DeuTex
@@ -769,7 +850,7 @@ got_it:
 ** Print Help
 */
 #define COLUMN1_WIDTH 22
-void COMhelp(int argc, char **argv)
+void COMhelp(int argc, const char *argv[])
 { const comdef_t *d;
   Output("Help for %s:\n",DEUTEXNAME);
   for(d = Com; d->type != END; d++)
@@ -824,7 +905,7 @@ static char *Format[] =
   NULL
 };
 #endif /*DeuSF*/
-void COMformat(int argc, char **argv)
+void COMformat(int argc, const char *argv[])
 { int i;
   for(i=0;Format[i]!=NULL;i++)
   { Output("%s\n",Format[i]);
@@ -939,7 +1020,7 @@ static void troff_puts (const char *s/*, char font*/)
 }
 
 
-void COMmanopt(int argc, char **argv)
+void COMmanopt(int argc, const char *argv[])
 { const comdef_t *d;
   for (d = Com; d->type != END; d++)
   {
@@ -1045,5 +1126,33 @@ static int is_prefix (const char *s1, const char *s2)
       return 0;
   }
 }
+
+
+#ifdef DeuTex
+/*
+ *	call_opt
+ *	Equivalent to having the same option on the command line
+ */
+static void call_opt (comfun_t func, ...)
+{
+   int argc;
+   const char *argv[10];
+   va_list args;
+
+   argv[0] = "BUG!";
+   va_start (args, func);
+   for (argc = 1; argc < sizeof argv / sizeof *argv; argc++)
+   {
+      argv[argc] = va_arg (args, const char *);
+      if (argv[argc] == NULL)
+      {
+	 argc++;
+	 break;
+      }
+   }
+   func (argc, argv);
+}
+#endif
+
 
 #endif /*DeuTex and DeuSF*/

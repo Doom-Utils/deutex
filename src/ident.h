@@ -27,9 +27,9 @@ Place, Suite 330, Boston, MA 02111-1307, USA.
 /* Entry Identification */
 ENTRY huge *IDENTentriesIWAD(struct WADINFO *wad,char huge *Pnam,Int32 Pnamsz,Bool Fast);
 ENTRY huge *IDENTentriesPWAD(struct WADINFO *wad,char huge *Pnam,Int32 Pnamsz);
-Int16 IDENTlevel(char *buffer);
+Int16 IDENTlevel(const char *buffer);
 /* Level Part Identification */
-Int16 IDENTlevelPart(char *name);
+Int16 IDENTlevelPart(const char *name);
 /* Insertion point determination*/
 Int16 IDENTinsrY(PICTYPE type,Int16 insrY,Int16 szy);
 Int16 IDENTinsrX(PICTYPE type,Int16 insrX,Int16 szx);

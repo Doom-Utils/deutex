@@ -99,7 +99,7 @@ void TXTcloseR(struct TXTFILE *TXT)
   fclose(TXT->fp);
   Free(TXT);
 }
-struct TXTFILE *TXTopenR(char *file)
+struct TXTFILE *TXTopenR(const char *file)
 { struct TXTFILE *TXT;
   /*characters*/
   if(TXTok!=TRUE)  TXTinit();
@@ -311,7 +311,7 @@ static Bool TXTboundSection(struct TXTFILE *TXT)
   }
   return TRUE;
 }
-Bool TXTseekSection(struct TXTFILE *TXT,char *section)
+Bool TXTseekSection(struct TXTFILE *TXT,const char *section)
 {
   if(TXTok!=TRUE) Bug("TxtSks");
   /*seek begin of file*/
@@ -353,7 +353,8 @@ Bool TXTreadPatchDef(struct TXTFILE *TXT,char name[8],Int16 *ofsx,Int16 *ofsy)
 /*
 **TXTentryParse(name,filenam,&X,&Y,&Repeat,TXT,TRUE)
 */
-Bool TXTentryParse(char *name,char *filenam,Int16 *x,Int16 *y,Bool *repeat, struct TXTFILE *TXT, Bool XY)
+Bool TXTentryParse(char *name,char *filenam,Int16 *x,Int16 *y,Bool
+    *repeat, struct TXTFILE *TXT, Bool XY)
 { Int16 c=0,val=0; Bool comment;
   Int16 xx=INVALIDINT,yy=INVALIDINT;
   if(TXTreadIdent(TXT,name)!=TRUE) return FALSE;
@@ -397,7 +398,7 @@ Bool TXTentryParse(char *name,char *filenam,Int16 *x,Int16 *y,Bool *repeat, stru
 /*
 ** For any Writing of text files
 */
-struct TXTFILE *TXTopenW(char *file) /*open, and init if needed*/
+struct TXTFILE *TXTopenW(const char *file) /*open, and init if needed*/
 { struct TXTFILE *TXT;
   /*characters*/
   if(TXTok!=TRUE)  TXTinit();
@@ -427,11 +428,11 @@ void   TXTcloseW(struct TXTFILE *TXT)
 /*
 ** To write entries
 */
-void TXTaddSection(struct TXTFILE *TXT,char *def)
+void TXTaddSection(struct TXTFILE *TXT,const char *def)
 { if(TXTok!=TRUE) Bug("TxtAdS");
   fprintf(TXT->fp,"[%.8s]\n",def);
 }
-void TXTaddEntry(struct TXTFILE *TXT,char *name,char *filenam,Int16 x,Int16 y,Bool repeat, Bool XY)
+void TXTaddEntry(struct TXTFILE *TXT,const char *name,const char *filenam,Int16 x,Int16 y,Bool repeat, Bool XY)
 { if(TXTok!=TRUE) Bug("TxtAdE");
   fprintf(TXT->fp,"%.8s",name);
 /* fprintf(TXT->fp,"%.8s=",name);*/
@@ -443,7 +444,7 @@ void TXTaddEntry(struct TXTFILE *TXT,char *name,char *filenam,Int16 x,Int16 y,Bo
     fprintf(TXT->fp,"\t*");
   fprintf(TXT->fp,"\n");
 }
-void TXTaddComment(struct TXTFILE *TXT,char *text)
+void TXTaddComment(struct TXTFILE *TXT,const char *text)
 { if(TXTok!=TRUE) Bug("TxtAdC");
   fprintf(TXT->fp,";%.256s\n",text);
 }

@@ -34,14 +34,14 @@ void PrintExit(void);
 
 void ProgErrorCancel(void);
 void ProgErrorAction(void (*action)(void));
-void ProgError( char *, ...);    /*fatal error. halt.*/
-void Bug( char *, ...);          /*fatal bug. halt*/
-void Warning( char *str, ...);   /*I'm not happy*/
-void Output(char *str, ...); /*command text output*/
-void Info(char *str, ...);   /*useful indications*/
-void Phase(char *str, ...);  /*phase of executions*/
-void Detail(char *str, ...); /*technical details*/
-void Legal(char *str, ...);  /*legal output*/
+void ProgError (const char *, ...);    /*fatal error. halt.*/
+void Bug (const char *, ...);          /*fatal bug. halt*/
+void Warning (const char *str, ...);   /*I'm not happy*/
+void Output (const char *str, ...); /*command text output*/
+void Info (const char *str, ...);   /*useful indications*/
+void Phase (const char *str, ...);  /*phase of executions*/
+void Detail (const char *str, ...); /*technical details*/
+void Legal (const char *str, ...);  /*legal output*/
 
 
 
@@ -51,21 +51,23 @@ void Legal(char *str, ...);  /*legal output*/
 
 /** FILE name , for lumps and BMP **/
 void ToLowerCase(char *file);
-void MakeDir(char file[128], char *path,char *dir,char *sdir);
-Bool MakeFileName(char file[128], char *path,char *dir,char *sdir,char *name,char *extens);
-void GetNameOfWAD(char name[8],char *path);
+void MakeDir(char file[128], const char *path, const char *dir, const char
+    *sdir);
+Bool MakeFileName(char file[128], const char *path, const char *dir, const
+    char *sdir, const char *name, const char *extens);
+void GetNameOfWAD(char name[8], const char *path);
 Int16 Chsize(int handle,Int32 newsize);
-Int32 GetFileTime(char *path);
-void SetFileTime(char *path, Int32 time);
-void Unlink(char *file);
-void Memcpy(void huge *dest,const void huge *src, Int32 n);
-void Memset(void huge *dest,char car, Int32 n);
-void huge *Malloc( Int32 size);
-void huge *Realloc( void huge *old, Int32 size);
+Int32 GetFileTime(const char *path);
+void SetFileTime(const char *path, Int32 time);
+void Unlink(const char *file);
+void Memcpy (void huge *dest,const void huge *src, long n);
+void Memset (void huge *dest,char car, long n);
+void huge *Malloc (long size);
+void huge *Realloc (void huge *old, long size);
 void Free( void huge *);
 
 
-void Normalise(char dest[8], char *src);
+void Normalise(char dest[8], const char *src);
 
 void Progress(void);
 void ProgressEnds(void);

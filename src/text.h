@@ -37,14 +37,15 @@ struct TXTFILE
 ** For any Reading of TEXT files
 */
 void   TXTinit(void);
-struct TXTFILE *TXTopenR(char *file); /*open, and init if needed*/
+struct TXTFILE *TXTopenR(const char *file); /*open, and init if needed*/
 void   TXTcloseR(struct TXTFILE *TXT);
 /*
 ** To read entries
 */
 Bool   TXTskipComment(struct TXTFILE *TXT);
-Bool   TXTseekSection(struct TXTFILE *TXT,char *def);
-Bool   TXTentryParse(char *name,char *filenam,Int16 *x,Int16 *y,Bool *repeat, struct TXTFILE *TXT, Bool XY);
+Bool   TXTseekSection(struct TXTFILE *TXT,const char *def);
+Bool   TXTentryParse(char *name,char *filenam,Int16 *x,Int16
+    *y,Bool *repeat, struct TXTFILE *TXT, Bool XY);
 /*
 ** To read textures
 */
@@ -59,12 +60,13 @@ Int16  TXTreadShort(struct TXTFILE *TXT);
 /*
 ** For any Writing of text files
 */
-struct TXTFILE *TXTopenW(char *file); /*open, and init if needed*/
+struct TXTFILE *TXTopenW(const char *file); /*open, and init if needed*/
 void   TXTcloseW(struct TXTFILE *TXT);
 /*
 ** To write entries
 */
-void TXTaddSection(struct TXTFILE *TXT,char *def);
-void TXTaddEntry(struct TXTFILE *TXT,char *name,char *filenam,Int16 x,Int16 y,Bool repeat, Bool XY);
-void TXTaddComment(struct TXTFILE *TXT,char *text);
+void TXTaddSection(struct TXTFILE *TXT,const char *def);
+void TXTaddEntry(struct TXTFILE *TXT,const char *name,const char
+    *filenam,Int16 x,Int16 y,Bool repeat, Bool XY);
+void TXTaddComment(struct TXTFILE *TXT,const char *text);
 

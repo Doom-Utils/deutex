@@ -35,7 +35,7 @@ Place, Suite 330, Boston, MA 02111-1307, USA.
 /*compile only for DeuTex*/
 #if defined DeuTex
 
-static void AddSomeJunk(char *file);
+static void AddSomeJunk(const char *file);
 /************Begin Tex2Ascii module *************************
 **
 ** Translate TEXTURE1,TEXTURE2 and PNAME in
@@ -79,7 +79,8 @@ extern char file[128];
 /*
 ** Can't handle PATCHES redefined from WAD
 */
-Bool CMPOcopyFromWAD(Int32 *size,struct WADINFO *rwad,char *DataDir,char *Dir,char *nam,char *filenam)
+Bool CMPOcopyFromWAD(Int32 *size,struct WADINFO *rwad,const char *DataDir,
+    const char *Dir,const char *nam, const char *filenam)
 {  static struct WADINFO pwad;
    Int16 entry;
    if(MakeFileName(file,DataDir,Dir,"",filenam,"WAD")!=TRUE)
@@ -98,7 +99,9 @@ Bool CMPOcopyFromWAD(Int32 *size,struct WADINFO *rwad,char *DataDir,char *Dir,ch
 ** must=TRUE is picture must exist
 ** returns picture type
 */
-Int16 CMPOloadPic(Int32 *size,struct WADINFO *rwad,char *file,char *DataDir,char *Dir,char *nam,char *filenam, Int16 Type, Int16 OfsX, Int16 OfsY)
+Int16 CMPOloadPic(Int32 *size,struct WADINFO *rwad, char *file, const
+    char *DataDir,const char *Dir, const char *nam, const char *filenam, Int16
+    Type, Int16 OfsX, Int16 OfsY)
 { int res=PICNONE;
   if(MakeFileName(file,DataDir,Dir,"",filenam,"ppm")==TRUE)
      res=PICPPM;
@@ -124,7 +127,7 @@ Int16 CMPOloadPic(Int32 *size,struct WADINFO *rwad,char *file,char *DataDir,char
 }
 
 struct WADINFO *CMPOrwad;
-char *CMPOwadout=NULL;
+const char *CMPOwadout=NULL;
 void CMPOerrorAction(void)
 { if(CMPOwadout==NULL) return;
   WADRclose(CMPOrwad); /*close file*/
@@ -133,8 +136,8 @@ void CMPOerrorAction(void)
 
 
 
-void CMPOmakePWAD( char *doomwad,WADTYPE type, char *PWADname,
-		     char *DataDir,char *texin, NTRYB select,
+void CMPOmakePWAD(const char *doomwad,WADTYPE type, const char *PWADname,
+		     const char *DataDir, const char *texin, NTRYB select,
 		     char trnR, char trnG, char trnB, Bool George)
 {  /*
    ** type PWAD as we are generating a real PWAD
@@ -624,7 +627,7 @@ void CMPOmakePWAD( char *doomwad,WADTYPE type, char *PWADname,
 /***************** Hack the IWAD *********************/
 extern Int16 HowMuchJunk;
 static char Junk[]="*** This junk is here for DEU 5.21. I am repeating myself anyway.... ********";
-static void AddSomeJunk(char *file)
+static void AddSomeJunk(const char *file)
 {  FILE *out;Int16 n;
    out=fopen(file,FOPEN_AB); /*open R/W at the end*/
    if(out==NULL) ProgError("Can't write file %s\n",file);

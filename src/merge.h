@@ -23,12 +23,12 @@ Place, Suite 330, Boston, MA 02111-1307, USA.
 
 
 /*merge a WAD into an IWAD*/
-void PSTmergeWAD(char *doomwad,char *wadin,NTRYB select);
+void PSTmergeWAD(const char *doomwad, const char *wadin,NTRYB select);
 /*put all sprites in another WAD, like DMADDS*/
-void ADDallSpriteFloor(char *wadout,char *doomwad,char *wadin,NTRYB select);
+void ADDallSpriteFloor(const char *wadout,const char *doomwad,const char *wadin,NTRYB select);
 /*append all sprites*/
-void ADDappendSpriteFloor(char *doomwad,char *wadin,NTRYB select);
+void ADDappendSpriteFloor(const char *doomwad,const char *wadin,NTRYB select);
 /*join two WADs, including textures and pnames*/
-void ADDjoinWads(char *doomwad,char *wadres,char *wadext,NTRYB select);
+void ADDjoinWads(const char *doomwad,const char *wadres,const char *wadext,NTRYB select);
 /*restore a modified WAD*/
-void HDRrestoreWAD(char *wadres);
+void HDRrestoreWAD(const char *wadres);

@@ -27,7 +27,7 @@ Bool PICsaveInFile(char *file,PICTYPE type,char huge *pic,Int32 picsz,Int16 *pXi
 Int32 PICsaveInWAD(struct WADINFO *info,char *file,PICTYPE type,Int16 Xinsr,Int16 Yinsr,IMGTYPE Picture);
 /* last call COLfree();*/
 
-extern enum { PF_NORMAL, PF_ALPHA } picture_format;
+extern enum { PF_NORMAL, PF_ALPHA, PF_PR } picture_format;
 
 /*picture.c: only for test*/
 void GIFtoBMP(char *file,char *bmpdir,char *name);

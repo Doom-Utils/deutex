@@ -47,9 +47,9 @@ Int32 TXUwriteTEXTUREtoWAD(struct WADINFO *info);
 	/*write the TEXTURE entry in Wad*/
 void TXUreadTEXTURE(char huge *Data,Int32 DataSz,char huge *Patch,Int32 PatchSz,Bool Redefn);
 	/*read texture from raw data = TEXTURE entry */
-void TXUwriteTexFile(char *file);
+void TXUwriteTexFile(const char *file);
 	/*write the TEXTURE entry to a file*/
-void TXUreadTexFile(char *file,Bool Redefn);
+void TXUreadTexFile(const char *file,Bool Redefn);
 	/*checkif the composition of textues in okay*/
 Bool TXUcheckTex(Int16 npatch,Int16 huge *PszX);
 	/*declare a fake texure. to list textures*/

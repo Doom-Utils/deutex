@@ -36,12 +36,8 @@ Edit docsrc/todo.html instead.
        lumps with weird characters in their names. However, that might
        cause compatilibity problems with the DOS version.
      * The presence of the GIF routines might prevent DeuTex to be
-       distributed in the "free" section of Debian. Would it be
-       sufficient to #ifdef them out ?
-     * Finish -pf
-     * RAWtoPPM() forgets to replace occurrences of the transparent
-       colour by its nearest colour. Thus, CEIL4_1 is extracted with a
-       cyan background.
+       distributed in the main section of Debian. Would it be sufficient
+       to #ifdef them out ?
      * The command line interface is not always intuitive and fussy about
        the position of certain options.
      * Regarding audio support, Matthew W. Miller <mattm@infinet.com>
@@ -115,6 +111,18 @@ WARNING unknown palette. Using colour 0xff as transparentcolour.
 Some graphics may appear moth-eaten.
 Making lumps
 Bug: *** idinx ***
+     * WinTex status: add link to www.doomworld.com/deskdoom/
+       (thomas@uprun.com)
+     * Why does "deutex -ipf alpha -doom .. -sprites -graphics -patches
+       -xtract" trigger "Error: *** Can't open file ./lumps/titlepic.lmp
+       ***" ?
+     * When extracting the Doom alpha 0.2 iwad, "Can't find PNAMES in
+       wad".
+     * Alpha: extracting levels not possible yet. Some graphics are
+       extracted as lumps (MSKUL*, TITLEPIC...).
+     * Building seems to be slower than extracting. Perhaps RAWtoPIC
+       could use some optimization.
+     * Include the palettes in the distribution.
 
 References
 

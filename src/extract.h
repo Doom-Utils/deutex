@@ -23,13 +23,14 @@ Place, Suite 330, Boston, MA 02111-1307, USA.
 
 
 /*extract.c: list dir and extract entries*/
-void XTRextractWAD(char *doomwad,char *DataDir,char *wadin, char *texout,
-	IMGTYPE Picture,SNDTYPE Sound,Bool fullSND,NTRYB select,
-	char trnR, char trnG, char trnB,Bool WSafe);
+void XTRextractWAD(const char *doomwad, const char *DataDir, const char
+    *wadin, const char *texout, IMGTYPE Picture,SNDTYPE Sound,Bool
+    fullSND,NTRYB select, char trnR, char trnG, char trnB,Bool WSafe);
+
 /*extract.c: get a single entry*/
-void XTRgetEntry(char *doomwad,char *DataDir,char *wadin,char *entry,
-	IMGTYPE Picture,SNDTYPE Sound,Bool fullSND,
-	char trnR, char trnG, char trnB);
+void XTRgetEntry(const char *doomwad, const char *DataDir, const char *wadin,
+    const char *entry, IMGTYPE Picture,SNDTYPE Sound,Bool fullSND, char trnR,
+    char trnG, char trnB);
 
 /*obsolete junk*/
 void XTRtextureList(char *doomwad,char *DataDir);

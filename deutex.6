@@ -20,7 +20,7 @@
 .\" with this library; if not, write to the Free Software Foundation, Inc.,
 .\" 59 Temple Place, Suite 330, Boston, MA 02111-1307, USA.
 .\" 
-.TH DEUTEX 6 1999-09-10 "DeuTex 4.0.1"
+.TH DEUTEX 6 1999-09-19 "DeuTex 4.0.2"
 .SH NAME
 deutex, deusf \- do things with wad files
 .SH SYNOPSIS
@@ -140,6 +140,18 @@ Debug mode.
 \fB\-doom \fP\fIdir\fP
 (opt.) Indicate the directory of Doom/Doom II.
 .TP 14
+\fB\-doom02 \fP\fIdir\fP
+(opt.) Indicate the directory of Doom alpha 0.2.
+.TP 14
+\fB\-doom04 \fP\fIdir\fP
+(opt.) Indicate the directory of Doom alpha 0.4.
+.TP 14
+\fB\-doom05 \fP\fIdir\fP
+(opt.) Indicate the directory of Doom alpha 0.5.
+.TP 14
+\fB\-doompr \fP\fIdir\fP
+(opt.) Indicate the directory of Doom press release pre-beta.
+.TP 14
 \fB\-heretic \fP\fIdir\fP
 (opt.) Indicate the directory of Heretic.
 .TP 14
@@ -248,8 +260,14 @@ Same as above.
 \fB\-ole\fP
 (opt.) Create little endian wads (default).
 .TP 14
-\fB\-pf \fP\fR{\fP\fBnormal\fP\fR|\fP\fBalpha\fP\fR}\fP
+\fB\-ipf \fP\fR{\fP\fBalpha\fP\fR|\fP\fBpr\fP\fR|\fP\fBnormal\fP\fR}\fP
 (opt.) Picture format (default is "normal").
+.TP 14
+\fB\-ipf \fP\fR{\fP\fBnone\fP\fR|\fP\fBnameless\fP\fR|\fP\fBnormal\fP\fR}\fP
+(opt.) Texture format (default is "normal").
+.TP 14
+\fB\-itl \fP\fR{\fP\fBnone\fP\fR|\fP\fBtextures\fP\fR|\fP\fBnormal\fP\fR}\fP
+(opt.) Texture lump (default is "normal").
 .TP 14
 \fB\-iwad\fP
 (opt.) Compose iwad, not pwad.

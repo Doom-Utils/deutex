@@ -35,7 +35,7 @@ Place, Suite 330, Boston, MA 02111-1307, USA.
 /*compile only for DeuTex*/
 #if defined DeuTex
 
-enum { PF_NORMAL, PF_ALPHA } picture_format = PF_NORMAL;
+enum { PF_NORMAL, PF_ALPHA, PF_PR } picture_format = PF_NORMAL;
 
 
 
@@ -55,7 +55,7 @@ enum { PF_NORMAL, PF_ALPHA } picture_format = PF_NORMAL;
 */
 
 
-static char huge *PICtoRAW(Int16 *prawX,Int16 *prawY,Int16 *pXinsr,Int16 *pYinsr,char huge *pic,Int32 picsz,char transparent);
+static char huge *PICtoRAW(Int16 *prawX,Int16 *prawY,Int16 *pXinsr,Int16 *pYinsr,const char huge *pic,Int32 picsz,char transparent);
 static char huge *RAWtoPIC(Int32 *ppicsz, char huge *raw, Int16 rawX, Int16 rawY,Int16 Xinsr,Int16 Yinsr, char transparent);
 
 
@@ -75,7 +75,7 @@ static void RAWtoGIF(char *file,char huge *raw,Int16 rawX,Int16 rawY,struct PIXE
 **  BMP->GIF
 */
 #if 0
-void PicDebug(char *file,char *bmpdir,char *name)
+void PicDebug(char *file, const char *bmpdir, const char *name)
 {  char huge *raw;
    Int16 rawX,rawY;
    struct PIXEL huge * doompal;
@@ -96,7 +96,7 @@ void PicDebug(char *file,char *bmpdir,char *name)
 **  GIF->BMP
 */
 #if 1
-void PicDebug(char *file,char *bmpdir,char *name)
+void PicDebug(char *file,const char *bmpdir, const char *name)
 {  char huge *raw;
    Int16 rawX=0,rawY=0;
    struct PIXEL huge * doompal;
@@ -440,72 +440,131 @@ char huge *RAWtoPIC(Int32 *ppicsz, char huge *raw, Int16 rawX, Int16 rawY,Int16 
 **       char raw[rawX*rawY];
 **  NULL if it's not a valid pic
 */
-char huge *PICtoRAW(Int16 *prawX,Int16 *prawY,Int16 *pXinsr,Int16 *pYinsr,char huge *pic,Int32 picsz,char transparent)
+char huge *PICtoRAW(Int16 *prawX,Int16 *prawY,Int16 *pXinsr,Int16 *pYinsr, const char huge *pic,Int32 picsz,char transparent)
 {  Int16 rawX,rawY,x,y;         /*pixels*/
-   struct PICHEAD huge *pichead;
-   Int32 huge *ColOfs;            /*position of column*/
-   /*columns composed of sets */
-   char huge *Set;
+   const void *offsets;
+   const unsigned char *p;
+   /* Last byte of pic buffer */
+   const unsigned char *pic_end = ((const unsigned char *) pic) + picsz - 1;
+   Int16 xofs;
+   Int16 yofs;
+   /*columns composed of posts */
    Int32 colnbase,setpos;
-   Int16 setc,setcount;
    /*raw picture*/
    char col,notransp;
    char huge *raw;
    Int32 rawpos,rawsz;
+   /* Details of picture format in wad */
+   int dummy_bytes  = picture_format == PF_NORMAL;
+   int long_header  = picture_format != PF_ALPHA;
+   int long_offsets = picture_format == PF_NORMAL;
 
-   notransp=0;/*this is to avoid trouble when the transparent index is used in a picture*/
-   pichead = (struct PICHEAD huge *)pic;
-   read_i16_le (&pichead->Xsz, &rawX);
-   read_i16_le (&pichead->Ysz, &rawY);
-   ColOfs  = (Int32 huge *)(pic+(sizeof(struct PICHEAD)));
-   colnbase =sizeof(struct PICHEAD)+((Int32)rawX)*sizeof(Int32);
-   /*
-   ** check up
-   */
+   notransp=0;/* this is to avoid trouble when the transparent
+		 index is used in a picture */
+   
+   /* Read the picture header */
+   p = (const unsigned char *) pic;
+   if (long_header)
+   {
+      read_i16_le (p, &rawX);
+      p += 2;
+      read_i16_le (p, &rawY);
+      p += 2;
+      read_i16_le (p, &xofs);
+      p += 2;
+      read_i16_le (p, &yofs);
+      p += 2;
+   }
+   else
+   {
+      rawX = *p++;
+      rawY = *p++;
+      xofs = *p++;
+      yofs = *p++;
+   }
    if((rawX<1)||(rawX>320))return NULL; /*illegal height*/
    if((rawY<1)||(rawY>200))return NULL; /*illegal width*/
+
+   /* Skip past the column offsets */
+   offsets = p;
+   if (long_offsets)
+   {
+      p += 4 * rawX;
+      colnbase = p - (const unsigned char *) pic;
+   }
+   else
+   {
+      p += 2 * rawX;
+      colnbase = p - (const unsigned char *) pic;
+   }
+
+   /* Read all columns, post by post */
+   /* allocate raw. (care: free it if error, before exit) */
+   rawsz = (long) rawX * rawY;
+   raw = (char huge *) Malloc (rawsz);
+   Memset (raw, transparent, rawsz);
    for(x=0;x<rawX;x++)
    {
-      read_i32_le (ColOfs + x, &setpos);
-      if(setpos<colnbase) return NULL; /*too low*/
-      if(setpos>=picsz) return NULL;  /*too high*/
-      /*BUG: false assumption more rigorous than pix format*/
-      /*if(x>0)if(pic[(ColOfs[x]-1)]!=0xFF)return NULL;*/
-   }
-   /*
-   ** allocate raw. (care: free it if error, before exit)
-   */
-   rawsz=((Int32)rawX)*((Int32)rawY);
-   raw = (char huge *)Malloc(rawsz);
-   Memset(raw,transparent,rawsz);
-   /*
-   **
-   */
-   for(x=0;x<rawX;x++)
-   {  read_i32_le (ColOfs + x, &setpos);  /*position of column*/
-      while(1)
-      { if(setpos>=picsz)               { Free(raw);return NULL;}
-        Set=(char huge *)(&pic[setpos]);
-        if(Set[0]==(char)0xFF) break;   /*last set*/
-        if(setpos+3>=picsz)             { Free(raw);return NULL;}
-        setcount=((Int16)Set[1])&0xFF;
-        if(setpos+3+setcount+1>=picsz)  { Free(raw);return NULL;}
-        y=((Int16)Set[0])&0xFF;
-        for(setc=0;setc<setcount;setc++,y++)
+      const unsigned char *post;
+      if (long_offsets)
+	 read_i32_le (((const Int32 *) offsets) + x, &setpos);
+      else
+      {
+	 /* In principle, the offset is signed. However, considering it
+	    unsigned helps extracting patches larger than 32 kB, like
+	    W18_1 (alpha) or SKY* (PR). Interestingly, Doom alpha and
+	    Doom PR treat the offset as signed, which is why some
+	    textures appear with tutti-frutti on the right. -- AYM
+	    1999-09-18 */
+	 UInt16 ofs; 
+	 read_i16_le (((const Int16 *) offsets) + x, (Int16 *) &ofs);
+	 setpos = ofs;
+      }
+      if (setpos < 0)
+      {
+	 Warning ("Column %d has bad lump offset %ld. Skipping column.",
+	     (int) x, (long) setpos);
+	 continue;
+      }
+      if (setpos < colnbase)
+      {
+	 Warning ("Column %d has bad offset %ld. Picture must be corrupt.",
+	     (int) x, (long) setpos);
+      }
+      /* Read an entire post */
+      for (post = (const unsigned char *) (pic + setpos);;)
+      {
+	int post_length;
+	const unsigned char *post_end;
+	if (post > pic_end) { Free(raw);return NULL;}
+	/* Read the header of the post */
+	if (*post == 0xff)
+	   break;                         /* Last post */
+	y           = *post++;
+	post_length = *post++;
+	if (dummy_bytes)
+	   post++;
+	post_end = post + post_length;
+        if (post_end > pic_end)  { Free(raw);return NULL;}
+	/* Read the middle of the post */
+        for (;post < post_end; y++)
         { if(y>=rawY)                   { Free(raw);return NULL;}
-          col=Set[3+setc];
+          col = *post++;
           if(col==transparent){col=notransp;}
           rawpos=((Int32)x)+((Int32)rawX)*((Int32)y);
           raw[rawpos]=col;
         }
-        setpos+=3+setcount+1;
+	/* Read the trailer of the post */
+	if (dummy_bytes)
+	   post++;
       }
    }
+
    /*return*/
-   read_i16_le (&pichead->Xinsr, pXinsr);
-   read_i16_le (&pichead->Yinsr, pYinsr);
-   *prawX=rawX;
-   *prawY=rawY;
+   *pXinsr = xofs;
+   *pYinsr = yofs;
+   *prawX  = rawX;
+   *prawY  = rawY;
    return raw;
 }
 /******************* End DoomPic module ************************/

@@ -46,7 +46,7 @@ static char *IdentView(char view)
   return Views[0];
 }
 
-void XTRlistDir(char *doomwad,char *wadin, NTRYB select)
+void XTRlistDir(const char *doomwad, const char *wadin, NTRYB select)
 {  Int16 n;
    static struct WADINFO pwad;
    static struct WADINFO iwad;
@@ -203,7 +203,7 @@ int XTRdirCmp(const void *d1,const void *d2)
 	return 0;
 }
 
-void XTRvoidSpacesInWAD(char *wadin)
+void XTRvoidSpacesInWAD(const char *wadin)
 {  Int16 n;
 	static struct WADINFO pwad;
 	Int32 ntry;
@@ -330,7 +330,7 @@ void CheckLevels(struct WADINFO *pwad, Bool IsDef)
 ** 
 ** this is absolutely sub optimal. 
 */
-void XTRstructureTest(char *doomwad,char *wadin)
+void XTRstructureTest(const char *doomwad,const char *wadin)
 { static struct WADINFO pwad,iwad;
   char huge *Pnames;
   Int16 p,pnm,nbPatchs;
@@ -518,7 +518,7 @@ void XTRstructureTest(char *doomwad,char *wadin)
 ** Test a PWAD
 ** 
 */
-void XTRtextureUsed(char *wadin)
+void XTRtextureUsed(const char *wadin)
 { static struct WADINFO pwad;
   /*read PNAME in wad, if defined*/
   Phase("listing texture used in the levels of %s\n",wadin);
@@ -545,7 +545,7 @@ void XTRtextureUsed(char *wadin)
 **
 ** Optimise for speed with a CRC-based check
 */
-void XTRcompakWAD(char *DataDir,char *wadin, char *texout,Bool ShowIdx)
+void XTRcompakWAD(const char *DataDir,const char *wadin, const char *texout,Bool ShowIdx)
 {  static struct WADINFO pwad;
    struct WADDIR huge *pdir;
    Int16 pnb;

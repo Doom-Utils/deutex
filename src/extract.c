@@ -42,11 +42,18 @@ Place, Suite 330, Boston, MA 02111-1307, USA.
 */
 
 extern char file[128];
+
+static void stop (void)
+{
+  ;
+}
+
 /*
 ** try to save entry as BitMap .BMP
 */
 static Bool XTRbmpSave(Int16 *pinsrX,Int16 *pinsrY,struct WADDIR huge *entry,
-                 PICTYPE type,char *DataDir,char *dir,struct WADINFO *info,IMGTYPE Picture,Bool WSafe)
+		 PICTYPE type,const char *DataDir,const char *dir,struct
+		 WADINFO *info,IMGTYPE Picture,Bool WSafe)
 {  Bool res;
    Int32 start=entry->start;
    Int32 size =entry->size;
@@ -70,6 +77,9 @@ static Bool XTRbmpSave(Int16 *pinsrX,Int16 *pinsrY,struct WADDIR huge *entry,
    buffer=(char huge *)Malloc(size);
    WADRseek(info,start);
    WADRreadBytes(info,buffer,size);
+   /* DEBUG */
+   if (! strncmp (name, "W18_1", 8))
+     stop ();
    res = PICsaveInFile(file,type,buffer,size,pinsrX,pinsrY,Picture);
    if(res==TRUE)Detail("Saved picture as %s\n",file);
    Free(buffer);
@@ -78,9 +88,9 @@ static Bool XTRbmpSave(Int16 *pinsrX,Int16 *pinsrY,struct WADDIR huge *entry,
 /*
 ** extract entries from a WAD
 */
-void XTRextractWAD(char *doomwad,char *DataDir,char *wadin, char *wadinfo,
-        IMGTYPE Picture,SNDTYPE Sound,Bool fullSND,NTRYB select,
-        char trnR, char trnG, char trnB,Bool WSafe)
+void XTRextractWAD(const char *doomwad, const char *DataDir, const char
+    *wadin, const char *wadinfo, IMGTYPE Picture,SNDTYPE Sound,Bool
+    fullSND,NTRYB select, char trnR, char trnG, char trnB,Bool WSafe)
 { static struct WADINFO pwad;
   static struct WADINFO iwad;
   static struct WADINFO lwad;
@@ -245,8 +255,17 @@ if(select&BTEXTUR)
       }
       TXTaddComment(TXT,"List of definitions for TEXTURE1");
       TXTaddSection(TXT,"TEXTURE1");
-      TXTaddEntry(TXT,pdir[p].name,NULL,INVALIDINT,INVALIDINT,FALSE,FALSE);
-      res=MakeFileName(file,DataDir,"TEXTURES","",pdir[p].name,"TXT");
+      
+      {
+	 const char *name;
+         /* Always extract TEXTURES as texture1.txt ! -- AYM 1999-09-18 */
+	 if (texture_lump == TL_TEXTURES)
+	    name = "TEXTURE1";
+	 else
+	    name = pdir[p].name;
+	 TXTaddEntry(TXT,name,NULL,INVALIDINT,INVALIDINT,FALSE,FALSE);
+	 res=MakeFileName(file,DataDir,"TEXTURES","",name,"TXT");
+      }
       if((WSafe==TRUE)&&(res==TRUE))
       {         Warning("will not overwrite file %s",file);
       }
@@ -447,7 +466,7 @@ if(select&BTEXTUR)
         else
         { ostart=pwad.dir[p].start; osize=pwad.dir[p].size;
           if(XTRbmpSave(&insrX,&insrY,&pdir[p],PSPRIT,DataDir,"SPRITES",&pwad,Picture,WSafe)!=TRUE)
-          { Warning("failed to write Sprite %.8s",pwad.dir[p].name);
+          { Warning("failed to write sprite %.8s",pwad.dir[p].name);
           }
           else
           { TXTaddEntry(TXT,pdir[p].name,NULL,insrX,insrY,FALSE,TRUE);
@@ -473,7 +492,7 @@ if(select&BTEXTUR)
          { TXTaddEntry(TXT,pdir[p].name,NULL,INVALIDINT,INVALIDINT,FALSE,FALSE);
          }
          else
-         { Warning("failed to write Patch %.8s",pwad.dir[p].name);
+         { Warning("failed to write patch %.8s",pwad.dir[p].name);
          }
        }
      }
@@ -503,7 +522,7 @@ if(select&BTEXTUR)
         { ostart=pwad.dir[p].start; osize=pwad.dir[p].size;
           if(XTRbmpSave(&insrX,&insrY,&pdir[p],PFLAT,DataDir,"FLATS",&pwad,Picture,WSafe)!=TRUE)
           { if(strncmp(pwad.dir[p].name,"F_SKY1",6)!=0)
-            Warning("failed to write Flat %.8s",pwad.dir[p].name);
+            Warning("failed to write flat %.8s",pwad.dir[p].name);
           }
           else
             TXTaddEntry(TXT,pdir[p].name,NULL,INVALIDINT,INVALIDINT,FALSE,FALSE);
@@ -525,9 +544,9 @@ if(select&BTEXTUR)
 /*********** End Xtract Module ***************/
 
 
-void XTRgetEntry(char *doomwad,char *DataDir,char *wadin,char *entry,
-        IMGTYPE Picture,SNDTYPE Sound,Bool fullSND,
-        char trnR, char trnG, char trnB)
+void XTRgetEntry(const char *doomwad, const char *DataDir, const char *wadin,
+    const char *entry, IMGTYPE Picture,SNDTYPE Sound,Bool fullSND, char trnR,
+    char trnG, char trnB)
 { static struct WADINFO pwad;
   static struct WADINFO iwad;
   static char Name[8];

@@ -43,7 +43,7 @@ Place, Suite 330, Boston, MA 02111-1307, USA.
 */
 
 
-Int16 IDENTlevelPart(char *name)
+Int16 IDENTlevelPart(const char *name)
 { Int16 n;
   static char *Part[]={"name","THINGS","LINEDEFS","SIDEDEFS","VERTEXES",
   "SEGS","SSECTORS","NODES","SECTORS","REJECT","BLOCKMAP","BEHAVIOR",NULL};
@@ -54,7 +54,7 @@ Int16 IDENTlevelPart(char *name)
 }
 
 
-Int16 IDENTlevel(char *buffer)
+Int16 IDENTlevel(const char *buffer)
 {  switch(buffer[0])
 	{ case 'E':
 		  if(buffer[2]=='M')
@@ -175,7 +175,7 @@ ENTRY IDENTgraphic(struct WADINFO *info,Int16 n)
 ** set identity of an entry with known name
 ** set only the first entry that match this name
 */
-static void IDENTdirSet(ENTRY huge *ids,struct WADINFO *info,char *name,ENTRY ident)
+static void IDENTdirSet(ENTRY huge *ids,struct WADINFO *info,const char *name,ENTRY ident)
 { Int16 n;
   n=WADRfindEntry(info,name);
   if(n>=0)   /*found it?*/
@@ -313,8 +313,23 @@ static void IDENTdirPatches(ENTRY huge *ids,struct WADINFO *info, char huge *Pna
    /*
    **  find texture and pname entries
    */
-   IDENTdirSet(ids,info,"TEXTURE1",ETEXTUR+1);
-   IDENTdirSet(ids,info,"TEXTURE2",ETEXTUR+2);
+   if (texture_lump == TL_NORMAL)
+   {
+     IDENTdirSet(ids,info,"TEXTURE1",ETEXTUR+1);
+     IDENTdirSet(ids,info,"TEXTURE2",ETEXTUR+2);
+   }
+   else if (texture_lump == TL_TEXTURES)
+   {
+     IDENTdirSet(ids,info,"TEXTURES",ETEXTUR+1);
+   }
+   else if (texture_lump == TL_NONE)
+   {
+     ;  /* No texture lump. Do nothing */
+   }
+   else
+   {
+     Bug ("Bad tl %d", (int) texture_lump);
+   }
    IDENTdirSet(ids,info,"PNAMES",EPNAME);
    /*
    ** check if there are flats

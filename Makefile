@@ -6,9 +6,9 @@
 #   Unix    User targets should work on all Unices. Some _developer_
 #           targets, however, require lynx, GCC or GNU tar and gzip.
 #
-#   DOS     "make [all]" should work with any C compiler.
-#           "make install" will most likely not work. You'll have to
-#           install the executables by hand.
+#   DOS     "make [all]" should work with DJGPP and Cygwin. With other
+#           compilers, use the provided batch files. "make install"
+#           will most likely not work. Install the executables by hand.
 #
 #   Others  Don't know. Send feedback to the maintainer.
 #
@@ -28,27 +28,47 @@ DLDFLAGS = -g
 #DEFINES = -DDT_ALPHA
 
 ######### do not edit after this line #########
-DISTARC    = deutex-$$(cat VERSION).tar.gz	# "deutex-4.0.0.tar.gz"
-DISTARCDOS = dtex$$(tr -cd '[0-9]' <VERSION).zip  # "dtex400.zip"
-DISTDIR    = deutex-$$(cat VERSION)		# "deutex-4.0.0"
-DISTDIRDOS = dtex$$(tr -cd '[0-9]' <VERSION)	# "dtex400"
-DISTFILES  = $(DOC) $(DOC_SRC) $(HEADERS) $(MISCFILES) $(SCRIPTS) $(SRC)
-DOC_SRC = \
+VERSION       = $$(cat VERSION)
+DISTARC       = deutex-$(VERSION).tar.gz
+DISTARCDOS    = deutex-$(VERSION).zip
+DISTARCDOS8   = dtex$$(tr -cd '[0-9]' <VERSION).zip
+BINZIP        = deutex-$(VERSION).bin.dos.zip
+DISTDIR       = deutex-$(VERSION)		# "deutex-4.0.0"
+DISTDIRDOS    = dtex$$(tr -cd '[0-9]' <VERSION)	# "dtex400"
+DISTFILES     = $(DOC_SRC) $(HEADERS) $(MISCFILES) $(MISCSRC)\
+		$(SCRIPTS) $(SRC)
+DISTFILESBIN  = $(MISCFILES) deutex.exe deusf.exe
+
+DOC_SRC =\
 	docsrc/README\
 	docsrc/changes.html\
 	docsrc/deutex.6\
-	docsrc/dtexman6.txt\
 	docsrc/hackers_guide.html\
+	docsrc/readme.dos\
 	docsrc/todo.html\
 
-DOC = \
-	CHANGES\
-	README\
-	TODO\
-	deusf.6\
-	deutex.6\
+DDOCUNIX =\
+	unixtmp1/CHANGES\
+	unixtmp1/COPYING\
+	unixtmp1/COPYING.LIB\
+	unixtmp1/INSTALL\
+	unixtmp1/LICENSE\
+	unixtmp1/README\
+	unixtmp1/TODO\
+	unixtmp1/deutex.6\
+	unixtmp1/dtexman6.txt\
 
-HEADERS = \
+DDOCDOS =\
+	dostmp1/changes.txt\
+	dostmp1/copying\
+	dostmp1/copying.lib\
+	dostmp1/dtexman6.txt\
+	dostmp1/license\
+	dostmp1/manpage.txt\
+	dostmp1/readme.txt\
+	dostmp1/todo.txt\
+	
+HEADERS =\
 	src/color.h\
 	src/deutex.h\
 	src/endianio.h\
@@ -66,29 +86,27 @@ HEADERS = \
 	src/tools.h\
 	src/wadio.h\
 
-MISCFILES = \
-	COPYING\
-	COPYING.LIB\
-	INSTALL\
-	LICENSE\
-	Makefile\
+MISCFILES =\
 	VERSION\
+
+# Only in source distributions
+MISCSRC =\
+	Makefile\
 	dos/buildbc.bat\
 	dos/buildmsc.bat\
 	old/deusf.ide\
 	old/deutex.ide\
 	old/dos2unix.sh\
-	old/readme.txt\
 	old/save.bat\
 	src/deusf.def\
 	src/deusfos.def\
 	src/deutex.def\
 	src/deutexos.def\
 
-SCRIPTS = \
+SCRIPTS =\
 	scripts/process\
 
-SRC = \
+SRC =\
 	src/color.c\
 	src/compose.c\
 	src/deutex.c\
@@ -130,7 +148,7 @@ DOBJTEX = $(SRC:.c=.otd)
 .c.osd:
 	$(DCC) $(DCFLAGS) $(DEFINES) -DDeuSF  -o $@ -c $<
 
-all: deutex deusf doc
+all: deutex deusf
 
 deutex: $(OBJTEX) .deutex
 	$(CC) $(LDFLAGS) -o deutex $(OBJTEX) -lm
@@ -163,10 +181,10 @@ install:
 	install -p -m 0755 deutex   $(PREFIX)/bin
 	install -p -m 0755 deusf    $(PREFIX)/bin
 	install -p -m 0644 deutex.6 $(PREFIX)/man/man6
-	install -p -m 0644 deusf.6  $(PREFIX)/man/man6
+	ln -sf deutex.6             $(PREFIX)/man/man6/deusf.6
 
 src/version.c: VERSION
-	printf "const char deutex_version[] = \"%s\";\n" $$(cat VERSION) >$@
+	printf "const char deutex_version[] = \"%s\";\n" $(VERSION) >$@
 
 strip: deutex deusf
 	strip deutex
@@ -174,25 +192,67 @@ strip: deutex deusf
 
 doc: $(DOC)
 
-CHANGES: docsrc/changes.htm* VERSION
+unixtmp1/CHANGES: docsrc/changes.htm* VERSION
 	echo 'THIS IS A GENERATED FILE -- DO NOT EDIT !' >$@
 	echo 'Edit docsrc/changes.html instead.' >>$@
 	lynx -dump $< >>$@
 
-README: docsrc/README VERSION scripts/process
-	scripts/process $< $(SRC_NON_GEN) >$@
+unixtmp1/COPYING: docsrc/COPYING
+	cp -p $< $@
 
-TODO: docsrc/todo.htm* VERSION
+unixtmp1/COPYING.LIB: docsrc/COPYING.LIB
+	cp -p $< $@
+
+unixtmp1/INSTALL: docsrc/INSTALL VERSION scripts/process
+	scripts/process $< >$@
+
+unixtmp1/LICENSE: docsrc/LICENSE VERSION scripts/process
+	scripts/process $< >$@
+
+unixtmp1/README: docsrc/README VERSION scripts/process
+	scripts/process $< >$@
+
+unixtmp1/TODO: docsrc/todo.htm* VERSION
 	echo 'THIS IS A GENERATED FILE -- DO NOT EDIT !' >$@
 	echo 'Edit docsrc/todo.html instead.' >>$@
 	lynx -dump $< >>$@
 
-deutex.6: docsrc/deutex.6 VERSION scripts/process
-	scripts/process $< $(SRC_NON_GEN) >$@
+unixtmp1/deutex.6: docsrc/deutex.6 VERSION scripts/process
+	scripts/process $< >$@
 
-deusf.6: deutex.6
-	@if [ ! -e $@ ]; then ln -s $< $@; fi
-	@if [ ! -L $@ ]; then echo "Can't overwrite $@"; false; fi
+unixtmp1/dtexman6.txt: docsrc/dtexman6.txt
+	cp -p $< $@
+
+dostmp1/changes.txt: unixtmp1/CHANGES
+	todos <$< >$@
+	touch -r $< $@
+
+dostmp1/copying: unixtmp1/COPYING
+	todos <$< >$@;
+	touch -r $< $@
+
+dostmp1/copying.lib: unixtmp1/COPYING.LIB
+	todos <$< >$@
+	touch -r $< $@
+
+dostmp1/dtexman6.txt: unixtmp1/dtexman6.txt
+	todos <$< >$@
+	touch -r $< $@
+
+dostmp1/license: unixtmp1/LICENSE
+	todos <$< >$@
+	touch -r $< $@
+
+dostmp1/manpage.txt: unixtmp1/deutex.6
+	nroff -man -Tlatin1 $< | ul -t dumb | todos >$@
+	touch -r $< $@
+
+dostmp1/readme.txt: docsrc/readme.dos
+	scripts/process $< | todos >$@
+
+dostmp1/todo.txt: unixtmp1/TODO
+	todos <$< >$@
+	touch -r $< $@
 
 clean:
 	rm -f $(OBJTEX) $(OBJSF) $(DOBJTEX) $(DOBJSF) deutex deusf
@@ -200,27 +260,42 @@ clean:
 	if [ -f deusf.exe ]; then rm deusf.exe; fi
 
 # dist - make the distribution archive for Unix (.tar.gz)
-dist: $(DISTFILES)
+dist: $(DISTFILES) $(DDOCUNIX)
 	mkdir -p $(DISTDIR)
 	cp -dpP $(DISTFILES) $(DISTDIR)
+	cp -p $(DDOCUNIX) $(DISTDIR)
 	tar -zcf $(DISTARC) $(DISTDIR)
 	rm -rf $(DISTDIR)
 
 # distdos - make the distribution archive DOS (.zip, 8+3)
-distdos: $(DISTFILES)
+distdos: $(DISTFILES) $(DDOCDOS)
 	mkdir -p $(DISTDIRDOS)
 	cp -dpP $(DISTFILES) $(DISTDIRDOS)
+	cp -p $(DDOCDOS) $(DISTDIRDOS)
 	if [ -e $(DISTARCDOS) ]; then rm $(DISTARCDOS); fi
 	zip -D -X -9 -r $(DISTARCDOS) $(DISTDIRDOS)
 	rm -rf $(DISTDIRDOS)
 	printf 'DeuTex %s\nhttp://www.teaser.fr/~amajorel/deutex/'\
-	  "$$(cat VERSION)" | zip -z $(DISTARCDOS)
+	  "$(VERSION)" | zip -z $(DISTARCDOS)
+
+# distbindos - make the DOS binary distribution archive (.zip, 8+3)
+TMP=tmpd
+distbindos: $(DISTFILESBIN) $(DDOCDOS)
+	mkdir -p $(TMP)
+	cp -dpP $(DISTFILESBIN) $(TMP)
+	cp -p $(DDOCDOS) $(TMP)
+	if [ -e $(BINZIP) ]; then rm $(BINZIP); fi
+	export name=$$(pwd)/$(BINZIP); cd $(TMP); zip -D -X -9 -R $$name '*'
+	rm -rf $(TMP)
+	printf 'DeuTex %s\nhttp://www.teaser.fr/~amajorel/deutex/'\
+	  "$(VERSION)" | zip -z $(BINZIP)
 
 # save - your daily backup
 save:
 	tar -zcvf ../deutex-$$(date '+%Y%m%d').tar.gz\
 	  --exclude "*~" --exclude "*.o"\
-	  --exclude "*.os" --exclude "*.ot" .
+	  --exclude "*.os" --exclude "*.ot"\
+	  --exclude "*.osd" --exclude "*.otd" .
 
 help:
 	@echo "Targets for end users:"

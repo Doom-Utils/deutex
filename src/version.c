@@ -1,1 +1,1 @@
-const char deutex_version[] = "4.0.1";
+const char deutex_version[] = "4.0.2";

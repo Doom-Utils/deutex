@@ -137,7 +137,7 @@ static Int32 HDRinsertWad(struct WADINFO *rwad,struct WADINFO *ewad,Int32 *pesiz
 
 
 /******************* WAD restoration **********************/
-void HDRrestoreWAD(char *wadres)
+void HDRrestoreWAD(const char *wadres)
 { struct WADINFO rwad;
   Int32 dirpos,ntry,n;
   Int32 rwadstart=0,rwadsize=0;
@@ -234,7 +234,7 @@ void HDRrestoreWAD(char *wadres)
 
 static void HDRsetDir(struct WADINFO *rwad,Bool IsIwad,Bool Restore,
         Int32 time,Int32 dirpos,Int32 ntry,Int32 rsize,
-        Int32 estart,Int32 esize,char *wadext)
+        Int32 estart,Int32 esize,const char *wadext)
 { static char name[8];
   Int32 pos;
         /*Set the old references */
@@ -289,7 +289,7 @@ static void HDRsetDir(struct WADINFO *rwad,Bool IsIwad,Bool Restore,
 **
 */
 
-void PSTmergeWAD(char *doomwad,char *wadin,NTRYB select)
+void PSTmergeWAD(const char *doomwad,const char *wadin,NTRYB select)
 {
 		  static struct WADINFO iwad;
 		  static struct WADINFO pwad;
@@ -352,7 +352,7 @@ void PSTmergeWAD(char *doomwad,char *wadin,NTRYB select)
 ** -app complete a PWAD with DOOM entries
 **
 */
-void ADDappendSpriteFloor(char *doomwad,char *wadres,NTRYB select)
+void ADDappendSpriteFloor(const char *doomwad, const char *wadres,NTRYB select)
 {
         struct WADINFO iwad;
         struct WADINFO pwad;
@@ -399,7 +399,8 @@ void ADDappendSpriteFloor(char *doomwad,char *wadres,NTRYB select)
 ** join: complete a PWAD with another PWAD entries
 **
 */
-void ADDjoinWads(char *doomwad,char *wadres,char *wadext,NTRYB select)
+void ADDjoinWads(const char *doomwad, const char *wadres, const char
+    *wadext,NTRYB select)
 {  struct WADINFO iwad;  /*IWAD*/
         struct WADINFO ewad;  /*external Wad*/
         struct WADINFO rwad;
@@ -530,7 +531,8 @@ void ADDjoinWads(char *doomwad,char *wadres,char *wadext,NTRYB select)
 **
 */
 /************** merge PWAD IWAD directory module ****************/
-void ADDallSpriteFloor(char *wadout,char *doomwad,char *wadres,NTRYB select)
+void ADDallSpriteFloor(const char *wadout, const char *doomwad, const char
+    *wadres,NTRYB select)
 {
         struct WADINFO iwad;
         struct WADINFO pwad;

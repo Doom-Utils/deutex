@@ -3,6 +3,51 @@ Edit docsrc/changes.html instead.
 
                          History of changes for DeuTex
                                        
+   DeuTex 4.0.2 (AYM 1999-09-19)
+          
+          + CLI: new options
+               o -doom02 (implies -ipf alpha, -itf none and -itl none)
+               o -doom04 (implies -ipf alpha, -itf nameless and -itl
+                 textures)
+               o -doom05 (implies -ipf alpha and -itl textures)
+               o -doompr (implies -ipf pr)
+            Use those options where you would have used -doom and
+            friends. For example, to extract the contents of the Doom 0.4
+            iwad that is in c:\doom0_4, type "deutex -doom04 c:\doom0_4
+            -xtract".
+          + Code: replaced certain unjustified uses of Int32 by long.
+          + Doc: removed old/readme.txt. It's so out of date that it's
+            more confusing than useful.
+          + Game: Doom alpha and Doom PR: it's now possible to extract
+            graphics, patches, sprites and textures from those iwads.
+            Three new options :
+            
+              -ipf {normal|pr|alpha}
+                      Use alpha for Doom alpha 0.2, 0.4 and 0.5.
+                      Use pr for Doom PR (press release pre-beta).
+                      Use normal for everything else.
+                      
+              -itf {normal|nameless|none}
+                      Use none for Doom alpha 0.2.
+                      Use nameless for Doom alpha 0.4.
+                      Use normal for everything else, including Doom
+                      alpha 0.5.
+                      
+              -itl {normal|textures|none}
+                      Use none for Doom alpha 0.2.
+                      Use textures for Doom alpha 0.4 and 0.5.
+                      Use normal for everything else, including Doom
+                      alpha 0.5.
+                      
+            You shouldn't ever have to use those options directly. It's
+            better to use just -doom02, -doom04, -doom05 and -doompr,
+            which take care of setting ipf, itf and itl properly for you.
+            Note that extracting levels and some other lumps from the
+            Doom alpha iwads does not work yet.
+          + Platform: new target in the makefile to generate a binary DOS
+            distribution with the executables and the user documentation
+            in DOS format, with DOS-ish names.
+            
    DeuTex 4.0.1 (AYM 1999-09-10)
           
           + CLI: reworked the command line arguments parsing, with the
@@ -145,11 +190,11 @@ Edit docsrc/changes.html instead.
             F_END, you don't need DeuSF to get Doom to see your new
             flats. Should you need to, it's still possible to get FF_END
             by using -fend.
-          + Graphics: the default transparent colour is now rgb:00/2f/2f.
-            It used to be cyan (rgb:00/ff/ff) which was blindingly
-            bright, especially compared to the usually dark colours used
-            in Doom textures. It's no fun to tweak shades of dark brown
-            on a cyan background.
+          + Graphics: the default transparent colour is now a dark
+            blue-green (rgb:00/2f/2f). It used to be cyan (rgb:00/ff/ff)
+            which was blindingly bright, especially compared to the
+            usually dark colours used in Doom textures. It's no fun to
+            tweak shades of dark brown on a cyan background.
             To reuse images done with/for a previous version of DeuTex,
             you need to either invoke DeuTex with "-rgb 0 255 255" or
             convert your images by replacing all occurrences of colour

@@ -77,6 +77,7 @@ void WADRopenPipo(struct WADINFO *info,Int32 ntry)
    info->ntry=0;
    info->wposit=info->maxpos;
 }
+
 struct WADDIR huge *WADRclosePipo(struct WADINFO *info,Int32 huge *ntry)
 {  if((info->ok!=WADR_PIPO)) Bug("WadPpc");
    info->ok=FALSE;
@@ -86,7 +87,9 @@ struct WADDIR huge *WADRclosePipo(struct WADINFO *info,Int32 huge *ntry)
    *ntry=info->ntry;
    return info->dir;
 }
-Int32 WADRdirAddPipo(struct WADINFO *info,Int32 start,Int32 size,char *entry)
+
+Int32 WADRdirAddPipo(struct WADINFO *info,Int32 start,Int32 size, const char
+    *entry)
 { Int16 n;
   if(info->ok!=WADR_PIPO) Bug("WadDaP");
   n=(Int16)info->ntry; /*position of new entry*/
@@ -100,7 +103,7 @@ Int32 WADRdirAddPipo(struct WADINFO *info,Int32 start,Int32 size,char *entry)
   return n; /* nb entries */
 }
 
-void WADRopenR(struct WADINFO *info,char *wadin)
+void WADRopenR(struct WADINFO *info, const char *wadin)
 {  /*directory */
    Int32 ntry,dirpos;
    Int16 n;
@@ -145,7 +148,7 @@ void WADRopenR(struct WADINFO *info,char *wadin)
    Phase("Reading WAD %s:\t(%ld entries)\n",wadin,ntry);
 }
 static char signature[19 + 32];
-void WADRopenW(struct WADINFO *info,char *wadout,WADTYPE type)
+void WADRopenW(struct WADINFO *info, const char *wadout,WADTYPE type)
 {  Phase("Creating %cWAD %s\n",(type==IWAD)?'I':'P',wadout);
    if((info->ok&WADR_RDWR)) Bug("WadOpW");
 
@@ -177,7 +180,7 @@ void WADRopenW(struct WADINFO *info,char *wadout,WADTYPE type)
 ** OPEN READ-WRITE,not APPEND
 ** because APPEND can't FSEEK to start of file
 */
-void WADRopenA(struct WADINFO *info,char *wadinout)
+void WADRopenA(struct WADINFO *info, const char *wadinout)
 {  Phase("Modifying WAD %s\n",wadinout);
    if((info->ok&WADR_WRITE)) Bug("WadOpA");
    if(!(info->ok&WADR_READ))
@@ -200,7 +203,8 @@ void WADRopenA(struct WADINFO *info,char *wadinout)
 ** update maxdir and maxpos
 ** returns entry ref
 */
-Int32 WADRdirAddEntry(struct WADINFO *info,Int32 start,Int32 size,char *entry)
+Int32 WADRdirAddEntry(struct WADINFO *info,Int32 start,Int32 size, const char
+    *entry)
 { Int16 n;
   Int32 sz;
   if(!(info->ok&(WADR_RDWR))) Bug("WadDAE");
@@ -338,7 +342,7 @@ void  WADRclose(struct WADINFO *info)
    fclose(info->fd);
 }
 
-Int16 WADRfindEntry(struct WADINFO *info,char *entry)
+Int16 WADRfindEntry(struct WADINFO *info, const char *entry)
 { Int16 i;
   static char name[8];
   struct WADDIR huge *dir;
@@ -371,7 +375,7 @@ char huge *WADRreadEntry(struct WADINFO *info,Int16 n,Int32 *psize)
 /*
 **  copy data from WAD to file
 */
-void WADRsaveEntry(struct WADINFO *info,Int16 n, char *file)
+void WADRsaveEntry(struct WADINFO *info,Int16 n, const char *file)
 {  Int32 wsize,sz=0;
    char huge *buffer;
    Int32 start,size;
@@ -546,7 +550,7 @@ Int32 WADRwriteWADbytes(struct WADINFO *info,struct WADINFO *src,Int32 start,Int
 ** copy lump from file into WAD
 ** returns size
 */
-Int32 WADRwriteLump(struct WADINFO *info,char *file)
+Int32 WADRwriteLump(struct WADINFO *info, const char *file)
 {  Int32      size,sz=0;
    FILE      *fd;
    char huge *data;
@@ -592,7 +596,7 @@ void WADRwriteWADlevelParts(struct WADINFO *info,struct WADINFO *src,Int16 N)
 ** try to match level name (multi-level)
 ** if level name not found, then take the first level...
 */
-void WADRwriteWADlevel(struct WADINFO *info,char *file,char *level)
+void WADRwriteWADlevel(struct WADINFO *info, const char *file, const char *level)
 { Int16 N,l;
   Int32 pos;
   /*char Level[8];*/
@@ -623,7 +627,7 @@ void WADRwriteWADlevel(struct WADINFO *info,char *file,char *level)
 ** prepare to write at the end of rwad
 ** open for append
 */
-Int32 WADRprepareAppend(char *wadres,struct WADINFO *rwad,
+Int32 WADRprepareAppend(const char *wadres,struct WADINFO *rwad,
      struct WADDIR huge *NewDir,Int32 NewNtry,
      Int32 *dirpos,Int32 *ntry, Int32 *size)
 { Int32 ewadstart;
