@@ -5,7 +5,7 @@ DeuTex incorporates code derived from DEU 5.21 that was put in the public
 domain in 1994 by Raphaël Quinet and Brendon Wyber.
 
 DeuTex is Copyright © 1994-1995 Olivier Montanuy,
-          Copyright © 1999 André Majorel.
+          Copyright © 1999-2000 André Majorel.
 
 This program is free software; you can redistribute it and/or modify it under
 the terms of the GNU General Public License as published by the Free Software
@@ -244,19 +244,24 @@ void XTRextractWAD(const char *doomwad, const char *DataDir, const char
            EntryFound=TRUE;
         }
         /* entries to save in WAD, named from Level name*/
-        res=MakeFileName(file,DataDir,"LEVELS","",pdir[p].name,"WAD");
-        if((WSafe==TRUE)&&(res==TRUE))
-          Warning("will not overwrite file %s",file);
-        else
-        { WADRopenW(&lwad,file,PWAD, 0);
-          ostart=WADRposition(&lwad);/*BC++ 4.5 bug*/
-          WADRdirAddEntry(&lwad,ostart,0L,pdir[p].name);
-          WADRwriteWADlevelParts(&lwad,&pwad,p);
-          WADRwriteDir(&lwad, 0);
-          WADRclose(&lwad);
-        }
-        TXTaddEntry(TXT,pdir[p].name,NULL,INVALIDINT,INVALIDINT,FALSE,FALSE);
-        p+=11-1;
+	{
+	  int pmax;
+	  for (pmax = p; pmax < pnb && piden[pmax] == piden[p]; pmax++)
+	    ;
+	  res=MakeFileName(file,DataDir,"LEVELS","",pdir[p].name,"WAD");
+	  if((WSafe==TRUE)&&(res==TRUE))
+	    Warning("will not overwrite file %s",file);
+	  else
+	  { WADRopenW(&lwad,file,PWAD, 0);
+	    ostart=WADRposition(&lwad);/*BC++ 4.5 bug*/
+	    WADRdirAddEntry(&lwad,ostart,0L,pdir[p].name);
+	    WADRwriteWADlevelParts (&lwad, &pwad, p, pmax - p);
+	    WADRwriteDir(&lwad, 0);
+	    WADRclose(&lwad);
+	  }
+	  TXTaddEntry(TXT,pdir[p].name,NULL,INVALIDINT,INVALIDINT,FALSE,FALSE);
+	  p = pmax - 1;
+	}
       }
     }
   }

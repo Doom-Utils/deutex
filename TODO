@@ -44,42 +44,26 @@ Game support
           + create corresponding -sprites-like option
      * When extracting the Doom alpha 0.2 iwad, "Can't find PNAMES in
        wad".
-     * Doom Alpha: extracting levels not possible yet.
      * DeuTex should not look for doom.wad in the directory set by
        -heretic !
-     * Heretic: CREDIT, E2END, FINAL1, FINAL2, HELP1, HELP2 and TITLE are
-       correctly identified as graphics and extracted accordingly but
-       into lumps/ !
      * Heretic: E2END is extracted with the wrong palette.
-     * Hexen: CREDIT, FINALE1, FINALE2, FINALE3, HELP1, HELP2, INTERPIC
-       and TITLE are correctly identified as graphics and extracted
-       accordingly but into lumps/ !
-     * Hexen: WINNOWR and STALKR should be extracted into mus/ (begin
-       with MUS\x1a), not lumps/.
-     * Hexen: DeuTex does not handle the BEHAVIOR lumps correctly.
      * Hexen: does not extract graphics quite correctly (applies
        transparent colour translation to opaque images such as FINALE1
        and FINALE2. This is probably related to [1].
-     * Hexen: when trying to build back the hexen wad, got
-Color palette is unknown
-WARNING unknown palette. Using colour 0xff as transparentcolour.
-Some graphics may appear moth-eaten.
-Making lumps
-Bug: *** idinx ***
      * Make sure that support for Strife is complete.
        
 Graphics
 
      * Patches > 255 high
-     * Why does DeuTex sometimes include patches even if you don't
-       mention them explicitly and sometimes doesn't ?
      * The presence of the GIF routines might prevent DeuTex to be
        distributed in the main section of Debian. Would it be sufficient
        to #ifdef them out ?
-     * PPM to Doom graphics: the warning "quantisation is slow" should
-       either mention the name of the file or appear only once.
      * Determine why converting Doom graphics to PPM and back does not
        yield the same thing. This also happens with BMP but much less so.
+       Update 2000-01-04 : for example, with Heretic, patch WALL17 has
+       its (4Eh, 50h, 4Dh) pixels turned into (4Eh, 4Eh, 4Eh). It seems
+       DeuTex sometimes uses a close match even when an exact match
+       exists.
      * Bug: some flats seem to be extracted with certain pixels set to
        the transparent colour (Doom's CEIL4_1). DeuTex 3.6 for DOS
        exhibits the same problem [1].

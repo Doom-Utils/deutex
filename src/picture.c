@@ -5,7 +5,7 @@ DeuTex incorporates code derived from DEU 5.21 that was put in the public
 domain in 1994 by Raphaël Quinet and Brendon Wyber.
 
 DeuTex is Copyright © 1994-1995 Olivier Montanuy,
-          Copyright © 1999 André Majorel.
+          Copyright © 1999-2000 André Majorel.
 
 This program is free software; you can redistribute it and/or modify it under
 the terms of the GNU General Public License as published by the Free Software
@@ -344,15 +344,15 @@ Int32 PICsaveInWAD(struct WADINFO *info,char *file,PICTYPE type,Int16 Xinsr,Int1
       break;
     case PFLAT: /*flats*/
       if(rawX!=64)
-	ProgError("Width of FLAT %s is not 64",file);
-      if((rawY!=64)&&(rawY!=65))
-	ProgError("Height of FLAT %s is not 64 or 65",file);
+	Warning ("%s: weird width for a flat (not 64)", fname (file));
+      if(rawY!=64 && rawY!=65 && rawY != 128)
+	Warning ("%s: weird height for a flat (not 64, 65 or 128)", fname (file));
       break;
     case PLUMP: /*special heretic lumps*/
       if(rawX!=320)
-        ProgError("Width of LUMP %s is not 320",file);
+        Warning ("%s: weird width for a lump (not 320)", fname (file));
       if(rawY!=200)
-        ProgError("Height of LUMP %s is not 200",file);
+        Warning ("%s: weird height for a lump (not 200)", fname (file));
       break;
     default:
       Bug("picwt");
@@ -701,7 +701,7 @@ done_with_column:
    }
 
    /*return*/
-   LimitedEpilog (&nw);
+   LimitedEpilog (&nw, "Picture %s: ", lump_name (name));
    if (cusage != NULL)
      usedidx_end_lump (cusage);
    *pXinsr = h.xofs;
@@ -860,7 +860,15 @@ char  *BMPtoRAW(Int16 *prawX,Int16 *prawY,char *file)
    nbits = (Int16) ((peek_i32_le (&head->planebits)>>16)&0xFFFFL);
    switch(nbits)
    { case 24:
-       Info("Warning: Color quantisation is slow. Use 8 bit BMP.\n");
+       {
+	 static warned_once = 0;
+
+	 if (! warned_once)
+	 {
+	   Info("Warning: Color quantisation is slow. Use 8 bit BMP.\n");
+	   warned_once = 1;
+	 }
+       }
        linesz=((((Int32)szx)*sizeof(struct BMPPIXEL))+3L)&~3L; /*RGB, aligned mod 4*/
        break;
      case 8:
@@ -1046,7 +1054,7 @@ void RAWtoPPM(char *file, char *raw, Int16 rawX, Int16 rawY,
    fclose(fp);
 }
 
-char  *PPMtoRAW(Int16 *prawX,Int16 *prawY,char *file)
+char *PPMtoRAW(Int16 *prawX,Int16 *prawY,char *file)
 {
    Int32 rawpos, rawSz;
    Int16 rawX,rawY;
@@ -1055,6 +1063,8 @@ char  *PPMtoRAW(Int16 *prawX,Int16 *prawY,char *file)
    char buff[20];
    UInt8 c;Int16 n;
    FILE *fd;
+   static warned_once = 0;
+
    /*BMP 8 bits avec DOOM Palette*/
 
    fd=fopen(file,FOPEN_RB);
@@ -1084,7 +1094,11 @@ char  *PPMtoRAW(Int16 *prawX,Int16 *prawY,char *file)
    if(rawY<1) {fclose(fd);ProgError("%s: bad height", file);}
    rawSz=((Int32)rawX)*((Int32)rawY);
    raw=(char  *)Malloc(rawSz);
-   Info("Warning: Color quantisation is slow. use ppmquant.\n");
+   if (! warned_once)
+   {
+     Info("Warning: Color quantisation is slow. Use ppmquant.\n");
+     warned_once = 1;
+   }
    for(rawpos=0;rawpos<rawSz;rawpos++)
    { if(fread(&pix,sizeof(struct PIXEL),1,fd)!=1)
      {fclose(fd);ProgError("%s: unexpected EOF");}

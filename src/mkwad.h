@@ -5,7 +5,7 @@ DeuTex incorporates code derived from DEU 5.21 that was put in the public
 domain in 1994 by Raphaël Quinet and Brendon Wyber.
 
 DeuTex is Copyright © 1994-1995 Olivier Montanuy,
-          Copyright © 1999 André Majorel.
+          Copyright © 1999-2000 André Majorel.
 
 This program is free software; you can redistribute it and/or modify it under
 the terms of the GNU General Public License as published by the Free Software
@@ -71,8 +71,10 @@ Int32 WADRwriteBytes2(struct WADINFO *info,char *data,Int32 size);
 Int32 WADRwriteLump(struct WADINFO *info,const char *file);
 Int32 WADRwriteWADbytes(struct WADINFO *info,struct WADINFO *src,Int32 start,Int32 size);
 Int32 WADRwriteWADentry(struct WADINFO *info,struct WADINFO *src,Int16 n);
-void WADRwriteWADlevelParts(struct WADINFO *info,struct WADINFO *src,Int16 n);
-void WADRwriteWADlevel(struct WADINFO *info,const char *file,const char *level);
+void WADRwriteWADlevelParts(struct WADINFO *info,struct WADINFO *src,Int16 n,
+    size_t nlumps);
+void WADRwriteWADlevel(struct WADINFO *info,const char *file,const char
+    *level);
 
 /*read data*/
 void WADRseek(struct WADINFO *info,Int32 position);

@@ -63,41 +63,14 @@ version.
 <p><li>When extracting the Doom alpha 0.2 iwad, "<code>Can't find PNAMES in
 wad</code>".
 
-<p><li>Doom Alpha: extracting levels not possible yet.
-
 <p><li>DeuTex should not look for <code>doom.wad</code> in the directory set
 by <code>-heretic</code> !
 
-<p><li>Heretic: <code>CREDIT</code>, <code>E2END</code>, <code>FINAL1</code>,
-<code>FINAL2</code>, <code>HELP1</code>, <code>HELP2</code> and
-<code>TITLE</code> are correctly identified as graphics and extracted
-accordingly but into <code>lumps/</code>&nbsp;!
-
 <p><li>Heretic: <code>E2END</code> is extracted with the wrong palette.
-
-<p><li>Hexen: <code>CREDIT</code>, <code>FINALE1</code>, <code>FINALE2</code>,
-<code>FINALE3</code>, <code>HELP1</code>, <code>HELP2</code>,
-<code>INTERPIC</code> and <code>TITLE</code> are correctly identified as
-graphics and extracted accordingly but into <code>lumps/</code>&nbsp;!
-
-<p><li>Hexen: <code>WINNOWR</code> and <code>STALKR</code> should be extracted
-into <code>mus/</code> (begin with <code>MUS\x1a</code>), not
-<code>lumps/</code>.
-
-<p><li>Hexen: DeuTex does not handle the <code>BEHAVIOR</code> lumps correctly.
 
 <p><li>Hexen: does not extract graphics quite correctly (applies transparent
 colour translation to opaque images such as <code>FINALE1</code> and
 <code>FINALE2</code>. This is probably related to [1].
-
-<p><li>Hexen: when trying to build back the hexen wad, got
-<pre>
-Color palette is unknown
-WARNING unknown palette. Using colour 0xff as transparentcolour.
-Some graphics may appear moth-eaten.
-Making lumps
-Bug: *** idinx ***
-</pre>
 
 <p><li>Make sure that support for Strife is complete.
 
@@ -108,17 +81,15 @@ Bug: *** idinx ***
 <ul>
 <p><li>Patches &gt; 255 high
 
-<p><li>Why does DeuTex sometimes include patches even if you don't mention
-them explicitly and sometimes doesn't ?
-
 <p><li>The presence of the GIF routines might prevent DeuTex to be distributed
 in the main section of Debian. Would it be sufficient to #ifdef them out ?
 
-<p><li>PPM to Doom graphics: the warning "quantisation is slow" should either
-mention the name of the file or appear only once.
-
 <p><li>Determine why converting Doom graphics to PPM and back does not yield
 the same thing. This also happens with BMP but much less so.
+
+<p>Update 2000-01-04&nbsp;: for example, with Heretic, patch
+<code>WALL17</code> has its (4Eh, 50h, 4Dh) pixels turned into (4Eh, 4Eh, 4Eh).
+It seems DeuTex sometimes uses a close match even when an exact match exists.
 
 <p><li>Bug: some flats seem to be extracted with certain pixels set to the
 transparent colour (Doom's <code>CEIL4_1</code>). DeuTex 3.6 for DOS exhibits

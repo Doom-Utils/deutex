@@ -5,7 +5,7 @@ DeuTex incorporates code derived from DEU 5.21 that was put in the public
 domain in 1994 by Raphaël Quinet and Brendon Wyber.
 
 DeuTex is Copyright © 1994-1995 Olivier Montanuy,
-          Copyright © 1999 André Majorel.
+          Copyright © 1999-2000 André Majorel.
 
 This program is free software; you can redistribute it and/or modify it under
 the terms of the GNU General Public License as published by the Free Software
@@ -44,7 +44,7 @@ void ProgError (const char *, ...);    /*fatal error. halt.*/
 void Bug (const char *, ...);          /*fatal bug. halt*/
 void Warning (const char *str, ...);   /*I'm not happy*/
 void LimitedWarn (int *left, const char *fmt, ...);
-void LimitedEpilog (int *left);
+void LimitedEpilog (int *left, const char *fmt, ...);
 void Output (const char *str, ...); /*command text output*/
 void Info (const char *str, ...);   /*useful indications*/
 void Phase (const char *str, ...);  /*phase of executions*/

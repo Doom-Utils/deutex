@@ -6,6 +6,76 @@
 <h1>History of changes for DeuTex</h1>
 
 <dl>
+<p><dt>DeuTex 4.4.0 (AYM 2000-01-05)
+<dd>
+	<ul>
+	<p><li>Game: Hexen: musics are now identified and extracted properly.
+
+	<p>The old music identification code assumed that any lump whose name
+	does not begin with either "<code>D_</code>" or "<code>MUS_</code>"
+	can't be a music. It worked for Doom, Heretic and Strife but, for
+	Hexen, it caused all musics to be seen as plain lumps and extracted
+	accordingly into the <code>lumps/</code> directory. DeuTex even tried
+	to interprete <code>STALKR</code> and <code>WINNOWR</code> as pictures
+	and said silly things about them having a "width greater than 4096".
+
+	<p>The new code really checks whether the lump begins with
+	"<code>MUS\x1a</code>" instead of just looking at its name. A lump is
+	now deemed to be a music if and only if it begins with
+	"<code>MUS\x1a</code>".
+
+	<p>As a side-effect, certain operations (appending sprites and flats
+	and merging) must have become slower. Furthermore, since these used to
+	blindly assume that any lump whose name begins with either
+	"<code>D_</code>" or "<code>MUS_</code>" is a music, their semantics
+	might have changed. If you find they don't do what you want, try again
+	using the <code>-musid</code> option and let me know whether it
+	improves your condition.
+
+	<p><li>Game: Hexen, Doom alpha 0.4/0.5: levels are now properly
+	extracted and included.
+
+	<p>There have been changes in the undocumented details of DeuTex's
+	behaviour with respect to levels. The one that is most likely to be
+	noticed is that, when including a level, DeuTex now copies the entire
+	contents of the <code>levels/</code> pwad, starting from the level
+	label. Previously, it included at most the 11 following lumps, and only
+	if they had the expected names (<code>THINGS</code>,
+	<code>VERTEXES</code> and so on).
+
+	<p>But, basically, if the <code>levels/</code> pwads contain, as they
+	should, all the needed lumps and nothing else, there shouldn't be any
+	trouble.
+
+	<p><li>Game: Heretic and Hexen: does not abort anymore with
+	"<code>Bug: *** idinx (12) ***</code>" when trying to include the
+	graphic lumps (resp. <code>CREDIT</code>, <code>E2END</code>,
+	<code>FINAL1</code>, <code>FINAL2</code>, <code>HELP1</code>,
+	<code>HELP2</code>, <code>TITLE</code> and <code>CREDIT</code>,
+	<code>FINALE1</code>, <code>FINALE2</code>, <code>FINALE3</code>,
+	<code>HELP1</code>, <code>HELP2</code>, <code>INTERPIC</code>,
+	<code>TITLE</code>). More generally, DeuTex now accepts to compose wads
+	even when there are graphic files in <code>lumps/</code>.
+
+	<p><li>Game: Hexen: does not abort anymore with "<code>Height of FLAT
+	./flats/x_001.ppm is not 64 or 65</code>" when trying to include flats
+	<code>X_001</code> through <code>X_011</code>. In addition, DeuTex now
+	just emits a warning instead of aborting for other oddball heights
+	(i.e. not 64, 65 or 128). Have fun. <code>;-)</code> This is true for
+	all iwads, not only Hexen.
+
+	<p><li>Graphics: the annoying "<code>quantisation is slow</code>"
+	warnings now appear at most once.
+ 
+	<p><li>Misc: to disambiguate the "<code>&lt;count&gt; warnings
+	omitted</code>" message, added optional scope prefix and changed the
+	picture extraction function to use it.
+
+	<p><li>Misc: got rid of the "don't bother Olivier" banner. People must
+	have got the message by now.
+
+	</ul>
+
 <p><dt>DeuTex 4.3.0 (AYM 1999-12-24)
 <dd>
 	<ul>
@@ -31,6 +101,9 @@
 
 	<p><li>Misc: bumped version number and cleaned things up for public
 	release.
+
+	<p><li>Misc: decreased maximum number of warnings per picture from 10
+	to 5.
 
 	<p><li>Platform: fixed <code>ftruncate()</code> being undeclared when
 	compiling with DJGPP and updated the building-on-DOS section of the

@@ -5,7 +5,7 @@ DeuTex incorporates code derived from DEU 5.21 that was put in the public
 domain in 1994 by Raphaël Quinet and Brendon Wyber.
 
 DeuTex is Copyright © 1994-1995 Olivier Montanuy,
-          Copyright © 1999 André Majorel.
+          Copyright © 1999-2000 André Majorel.
 
 This program is free software; you can redistribute it and/or modify it under
 the terms of the GNU General Public License as published by the Free Software
@@ -638,25 +638,24 @@ Int32 WADRwriteWADentry(struct WADINFO *info,struct WADINFO *src,Int16 n)
 {  if(n>(src->ntry)) Bug("WadWW>");
    return WADRwriteWADbytes(info,src,src->dir[n].start,src->dir[n].size);
 }
+
 /*
 ** copy level parts
 */
-void WADRwriteWADlevelParts(struct WADINFO *info,struct WADINFO *src,Int16 N)
+void WADRwriteWADlevelParts(struct WADINFO *info,struct WADINFO *src,Int16 N,
+    size_t nlumps)
 { Int32 start,size;
-  Int16 n,top;
-  /*set level entries*/
-  for(n=N+1;n<src->ntry;n++)
-  { top=N+11;
-    if(n>top)break;
-    if(IDENTlevelPart(src->dir[n].name)<0) break;
-    WADRalign4(info);
-    start=WADRposition(info);
-    size=WADRwriteWADentry(info,src,n);
-    WADRdirAddEntry(info,start,size,src->dir[n].name);
+  Int16 n;
+
+  for (n = N + 1; n < src->ntry && n < N + nlumps; n++)
+  {
+    WADRalign4 (info);
+    start = WADRposition (info);
+    size = WADRwriteWADentry (info, src, n);
+    WADRdirAddEntry (info, start, size, src->dir[n].name);
   }
-  top=N+11;
-  if(n<top)Warning("Not enough entry in level");
 }
+
 /*
 ** copy level from WAD
 ** try to match level name (multi-level)
@@ -679,11 +678,28 @@ void WADRwriteWADlevel(struct WADINFO *info, const char *file, const char *level
       if(N>=src.ntry) ProgError("No level in WAD %s",file);
     }
   }
-/*set level name*/
+  /*set level name*/
   WADRalign4(info);
   pos=WADRposition(info); /*BC++ 4.5 bug!*/
   WADRdirAddEntry(info,pos,0L,level);
-  WADRwriteWADlevelParts(info,&src,N);
+  /* 9999 is a way of saying "copy all the lumps". The rationale
+     is "let's assume the user knows what he/she is doing. If
+     he/she wants us to include a 100-lump level, let's do it".
+
+     On the other hand, this stance is in contradiction with using
+     WADRfindEntry() (see above). This needs to be fixed.
+     
+     There are two choices :
+     - make this function discriminating and prevent
+       experimentation
+     - make it dumb but allow one to put multi-level wads in
+       levels/.
+
+     My real motivation for doing things the way I did was that I
+     didn't want to copy-paste from IDENTdirLevels() into
+     WADRwriteWADlevelParts() (these things should be at a single
+     place). */
+  WADRwriteWADlevelParts(info,&src,N, 9999);
   WADRclose(&src);
 }
 #endif  /*DeuTex*/

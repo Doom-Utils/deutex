@@ -29,7 +29,7 @@ DeuTex incorporates code derived from DEU 5.21 that was put in the public
 domain in 1994 by Raphaël Quinet and Brendon Wyber.
 
 DeuTex is Copyright © 1994-1995 Olivier Montanuy,
-          Copyright © 1999 André Majorel.
+          Copyright © 1999-2000 André Majorel.
 
 This program is free software; you can redistribute it and/or modify it under
 the terms of the GNU General Public License as published by the Free Software
@@ -91,8 +91,9 @@ picture_format_t picture_format        = PF_NORMAL;
 texture_format_t input_texture_format  = TF_NORMAL;
 texture_format_t output_texture_format = TF_NORMAL;
 texture_lump_t   texture_lump          = TL_NORMAL;
-const char *debug_ident = NULL;
-static char anon[1] = { '\0' };
+const char *debug_ident    = NULL;
+int old_music_ident_method = 0;
+static char anon[1]        = { '\0' };
 
 typedef void (*comfun_t) (int argc, const char *argv[]);
 static int is_prefix (const char *s1, const char *s2);
@@ -385,6 +386,14 @@ void COMdi (int argc, const char *argv[])
   Info ("Debugging identification of entry %s\n", lump_name (argv[1]));
   debug_ident = argv[1];
   (void) argc;
+}
+
+void COMmusid (int argc, const char *argv[])
+{
+  Info ("Using old music identification method.\n");
+  old_music_ident_method = 1;
+  (void) argc;
+  (void) argv;
 }
 
 void COMdeu(int argc, const char *argv[])
@@ -689,6 +698,7 @@ static comdef_t Com[]=
  {OPT,2,"wim",      COMwintxm, "<doom> <select>","WinTex shortcut"},
  {CMD,0,"debug",    COMdebug,  NULL,   "Debug mode"},
  {OPT,1,"di",       COMdi,     "<name>", "Debug identification of entry"},
+ {OPT,0,"musid",    COMmusid,  NULL,   "use old music identification method"},
  {OPT,0,"overwrite",COMstroy,  NULL,   "overwrite all"},
 #endif /*DeuTex*/
  {OPT,1,"wtx",      COMwintex, "<iwad>","WinTex shortcut"},
@@ -821,12 +831,14 @@ int main( int argc, const char *argv[])
      "\t|     DO NOT FURTHER DISTRIBUTE.     |\n"
      "\t+------------------------------------+\n\n");
 #endif
+#if 0
    printf (
      "+---------------------------------------------------+\n"
      "|  Send questions and bug reports to the current    |\n"
      "|  maintainer, André Majorel <amajorel@teaser.fr>,  |\n"
      "|  NOT to Olivier Montanuy !                        |\n"
      "+---------------------------------------------------+\n\n");
+#endif
 
    /* Sanity checks */
    check_types ();

@@ -1,4 +1,4 @@
-DeuTex 4.3.0
+DeuTex 4.4.0
 
 WHAT ARE DEUTEX AND DEUSF
 
@@ -22,10 +22,10 @@ BUILDING AND INSTALLING ON DOS
 LEGAL
 
   DeuTex is Copyright Olivier Montanuy 1994-1995 and Copyright André
-  Majorel 1999 and available under the terms of the GPL, except lzw.c
-  which is Copyright David Koblas and others and available under the
-  terms of the PBMPLUS license. See the LICENSE file.
-  All trademarks are the property of their owners.
+  Majorel 1999-2000 and available under the terms of the GPL, except
+  lzw.c which is Copyright David Koblas and others and available under
+  the terms of the PBMPLUS license. See the LICENSE file.  All
+  trademarks are the property of their owners.
 
 CONTACT
 
@@ -33,4 +33,4 @@ CONTACT
   General newbie questions : news:rec.games.computer.doom.editing
   Maintainer               : André Majorel <amajorel@teaser.fr>.
 
--- AYM 1999-11-21
+-- AYM 1999-12-30

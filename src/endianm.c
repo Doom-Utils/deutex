@@ -14,7 +14,7 @@
 
 
 /*
-This file is Copyright © 1999 André Majorel.
+This file is Copyright © 1999-2000 André Majorel.
 
 This file is free software; you can redistribute it and/or modify it under
 the terms of the GNU Library General Public License as published by the Free

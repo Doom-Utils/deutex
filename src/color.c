@@ -5,7 +5,7 @@ DeuTex incorporates code derived from DEU 5.21 that was put in the public
 domain in 1994 by Raphaël Quinet and Brendon Wyber.
 
 DeuTex is Copyright © 1994-1995 Olivier Montanuy,
-          Copyright © 1999 André Majorel.
+          Copyright © 1999-2000 André Majorel.
 
 This program is free software; you can redistribute it and/or modify it under
 the terms of the GNU General Public License as published by the Free Software
@@ -249,7 +249,7 @@ void COLinit( UInt8 invR, UInt8 invG, UInt8 invB,char  *Colors, Int16 Colsz)
    Info("Color palette is %s\n", name ? name : "unknown");
    if (name == NULL)
        Info ("WARNING unknown palette. Using colour 0xff as transparent"
-	     "colour.\nSome graphics may appear moth-eaten.\n");
+	     " colour.\nSome graphics may appear moth-eaten.\n");
    COLinv.R=COLpal[i].R=invR;
    COLinv.G=COLpal[i].G=invG;
    COLinv.B=COLpal[i].B=invB;

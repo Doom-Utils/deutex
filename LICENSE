@@ -3,7 +3,7 @@
 ------------------------------------------------------------------------
 
 DeuTex is Copyright © 1994-1995 Olivier Montanuy,
-      and Copyright © 1999 André Majorel.
+      and Copyright © 1999-2000 André Majorel.
 
 The parts of DeuTex that have been written by Olivier Montanuy,
 Kevin McGrail, André Majorel and other contributors are
@@ -71,4 +71,4 @@ written by other people or distributed under different licenses :
 4. The files endianio.c and endianm.c are Copyright © André Majorel 1999
    and available under the terms of the LGPL.
 
--- AYM 1999-09-09
+-- AYM 1999-12-30

@@ -5,7 +5,7 @@ DeuTex incorporates code derived from DEU 5.21 that was put in the public
 domain in 1994 by Raphaël Quinet and Brendon Wyber.
 
 DeuTex is Copyright © 1994-1995 Olivier Montanuy,
-          Copyright © 1999 André Majorel.
+          Copyright © 1999-2000 André Majorel.
 
 This program is free software; you can redistribute it and/or modify it under
 the terms of the GNU General Public License as published by the Free Software
@@ -29,7 +29,7 @@ ENTRY  *IDENTentriesIWAD(struct WADINFO *wad,char  *Pnam,Int32 Pnamsz,Bool Fast)
 ENTRY  *IDENTentriesPWAD(struct WADINFO *wad,char  *Pnam,Int32 Pnamsz);
 Int16 IDENTlevel(const char *buffer);
 /* Level Part Identification */
-Int16 IDENTlevelPart(const char *name);
+int   IDENTlevelPart(const char *name);
 /* Insertion point determination*/
 Int16 IDENTinsrY(PICTYPE type,Int16 insrY,Int16 szy);
 Int16 IDENTinsrX(PICTYPE type,Int16 insrX,Int16 szx);

@@ -40,7 +40,7 @@ ____________                   __________________________
 
                    wad composition tool for Doom
                 Copyright (c) Olivier Montanuy 1994/95
-                Copyright (c) André Majorel 1999
+                Copyright (c) André Majorel 1999-2000
 
                    Manual Edited by Kevin McGrail
 			 (hevkev@sfo.com)

@@ -5,7 +5,7 @@ DeuTex incorporates code derived from DEU 5.21 that was put in the public
 domain in 1994 by Raphaël Quinet and Brendon Wyber.
 
 DeuTex is Copyright © 1994-1995 Olivier Montanuy,
-          Copyright © 1999 André Majorel.
+          Copyright © 1999-2000 André Majorel.
 
 This program is free software; you can redistribute it and/or modify it under
 the terms of the GNU General Public License as published by the Free Software
@@ -299,4 +299,5 @@ extern texture_format_t input_texture_format;
 extern texture_format_t output_texture_format;
 extern texture_lump_t   texture_lump;
 extern const char *debug_ident;
+extern int old_music_ident_method;
 

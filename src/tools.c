@@ -5,7 +5,7 @@ DeuTex incorporates code derived from DEU 5.21 that was put in the public
 domain in 1994 by Raphaël Quinet and Brendon Wyber.
 
 DeuTex is Copyright © 1994-1995 Olivier Montanuy,
-          Copyright © 1999 André Majorel.
+          Copyright © 1999-2000 André Majorel.
 
 This program is free software; you can redistribute it and/or modify it under
 the terms of the GNU General Public License as published by the Free Software
@@ -402,7 +402,7 @@ void NoCommandGiven(void)
 
 void PrintCopyright(void)
 {
-  Legal("%s %s Copyright 1994,95 O.Montanuy, Copyright 1999 A.Majorel\n",
+  Legal("%s %s Copyright 1994,95 O.Montanuy, Copyright 1999-2000 A.Majorel\n",
       DEUTEXNAME,deutex_version);
   Legal("  Ported to DOS, Unix, OS/2, Linux, SGiX, DEC Alpha.\n");
   Legal("  Thanx to M.Mathews, P.Allansson, C.Rossi, J.Bonfield, U.Munk.\n");
@@ -478,16 +478,20 @@ char *fname (const char *name)
 /*
  *	lump_name - return string containing lump name
  *
- *	Not reentrant (returns pointer on static buffer).
- *	The string is guaranteed to have at most 32 characters
- *	and to contain only graphic characters.
+ *	Partially reentrant (returns pointer on one of two
+ *	static buffer). The string is guaranteed to have at most
+ *	32 characters and to contain only graphic characters.
  */
 char *lump_name (const char *name)
 {
+  static char buf1[9];
+  static char buf2[9];
+  static int  buf_toggle = 0;
   const char *const name_end = name + 8;
-  static char buf[9];
-  char *p = buf;
+  char *buf = buf_toggle ? buf2 : buf1;
+  char *p   = buf;
 
+  buf_toggle = ! buf_toggle;
   if (*name == '\0')
     strcpy (buf, "(empty)");
   else
@@ -646,12 +650,20 @@ void LimitedWarn (int *left, const char *fmt, ...)
      (*left)--;
 }
 
-void LimitedEpilog (int *left)
+void LimitedEpilog (int *left, const char *fmt, ...)
 {
   if (left != NULL && *left < 0)
   {
     fflush (Stdout);
-    fprintf (Stdwarn, "Warning: (%d warnings omitted)\n", - *left);
+    fputs ("Warning: ", Stdwarn);
+    if (fmt != NULL)
+    {
+      va_list args;
+      va_start (args, fmt);
+      vfprintf (Stdwarn, fmt, args);
+      va_end (args);
+    }
+    fprintf (Stdwarn, "%d warnings omitted\n", - *left);
   }
 }
 

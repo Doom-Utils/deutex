@@ -5,7 +5,7 @@ DeuTex incorporates code derived from DEU 5.21 that was put in the public
 domain in 1994 by Raphaël Quinet and Brendon Wyber.
 
 DeuTex is Copyright © 1994-1995 Olivier Montanuy,
-          Copyright © 1999 André Majorel.
+          Copyright © 1999-2000 André Majorel.
 
 This program is free software; you can redistribute it and/or modify it under
 the terms of the GNU General Public License as published by the Free Software
@@ -122,10 +122,11 @@ void XTRlistDir(const char *doomwad, const char *wadin, NTRYB select)
                   case EDATA:
                          typ="."; break;
                   case ELEVEL:
-								 sprintf(buffer,"Episod %c Map %c",'0'+((type&0xF0)>>4),'0'+(type&0xF));
-								 typ=buffer; break;
-						case EMAP:
-								 sprintf(buffer,"Level Map %d",(type&0xFF));
+			 sprintf(buffer, "Episod %c Map %c",
+			     '0'+((type&0xF0)>>4),'0'+(type&0xF));
+			 typ=buffer; break;
+		  case EMAP:
+			 sprintf(buffer,"Level Map %d",(type&0xFF));
                          typ=buffer; break;
                   case ETEXTUR:        typ="List of textures"; break;
                   case EPNAME:        typ="List of wall patches"; break;
@@ -147,11 +148,14 @@ void XTRlistDir(const char *doomwad, const char *wadin, NTRYB select)
                          }
                          else if(dir[n].name[6]!='\0')
                          { sprintf(buffer,"Sprite %4.4s\tph:%c %s\tph:%c %s inv.",
-                                dir[n].name,dir[n].name[4],IdentView(dir[n].name[5]),dir[n].name[6],IdentView(dir[n].name[7]));
+                                dir[n].name, dir[n].name[4],
+				IdentView(dir[n].name[5]), dir[n].name[6],
+				IdentView(dir[n].name[7]));
                          }
                          else
                          { sprintf(buffer,"Sprite %4.4s\tph:%c %s",
-                                dir[n].name,dir[n].name[4],IdentView(dir[n].name[5]));
+                                dir[n].name, dir[n].name[4],
+				IdentView(dir[n].name[5]));
                          }
                          typ = buffer; break;
                   case EPATCH:        typ="Wall patch"; break;
@@ -264,6 +268,7 @@ struct SIDEDEF
    char  Center[8]; /* texture name for the regular part */
 	Int16 Sector;    /* adjacent sector */
 };
+
 /*
 ** Check a level
 ** Assumes TEXTURES are already read somewhere.
@@ -308,6 +313,7 @@ void CheckSideDefs(struct WADINFO *pwad,Int32 start,Int32 size,Bool IsDef)
   }
   Free(sid);
 }
+
 void CheckLevels(struct WADINFO *pwad, Bool IsDef)
 { Int16 lev,lin,id,top;
   Int32 ntry=pwad->ntry;
@@ -326,6 +332,7 @@ void CheckLevels(struct WADINFO *pwad, Bool IsDef)
     }
   }
 }
+
 /*
 ** Test a PWAD
 ** 
