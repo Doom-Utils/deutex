@@ -26,7 +26,7 @@ Place, Suite 330, Boston, MA 02111-1307, USA.
 
 
 /** PNM module **/
-void  PNMinit(char huge *buffer,Int32 size);
+void  PNMinit(char  *buffer,Int32 size);
 Int16 PNMindexOfPatch(char  *patch);
 	/* check if patch exists. for ident.c*/
 Int32  PNMwritePNAMEtoWAD(struct WADINFO *info);
@@ -45,13 +45,13 @@ Bool TXUexist(char *Name);
 	/*does it exist?*/
 Int32 TXUwriteTEXTUREtoWAD(struct WADINFO *info);
 	/*write the TEXTURE entry in Wad*/
-void TXUreadTEXTURE(char huge *Data,Int32 DataSz,char huge *Patch,Int32 PatchSz,Bool Redefn);
+void TXUreadTEXTURE(char  *Data,Int32 DataSz,char  *Patch,Int32 PatchSz,Bool Redefn);
 	/*read texture from raw data = TEXTURE entry */
 void TXUwriteTexFile(const char *file);
 	/*write the TEXTURE entry to a file*/
 void TXUreadTexFile(const char *file,Bool Redefn);
 	/*checkif the composition of textues in okay*/
-Bool TXUcheckTex(Int16 npatch,Int16 huge *PszX);
+Bool TXUcheckTex(Int16 npatch,Int16  *PszX);
 	/*declare a fake texure. to list textures*/
 void TXUfakeTex(char Name[8]);
 	/*list all defined textures*/

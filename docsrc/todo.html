@@ -165,8 +165,7 @@ Bug: *** idinx ***
 <p><li>When extracting the Doom alpha 0.2 iwad, "<code>Can't find PNAMES in
 wad</code>".
 
-<p><li>Alpha: extracting levels not possible yet. Some graphics are extracted
-as lumps (<code>MSKUL*</code>, <code>TITLEPIC</code>...).
+<p><li>Alpha: extracting levels not possible yet.
 
 <p><li>Building seems to be slower than extracting. Perhaps
 <code>RAWtoPIC()</code> could use some optimization.
@@ -198,8 +197,6 @@ Possible ways to do that&nbsp;:
 <p><li>Look into importing sounds as .wav's. What are the highest supported
 sample rates and resolution&nbsp;? Seems to depend on the engine.
 
-<p><li>When saving a picture fails, tell why.
-
 <p><li><code>todo.html</code> grows faster than <code>changes.html</code>. Fix
 that. <code>;-)</code>
 
@@ -212,12 +209,54 @@ cyan.</code>") and the transparent colour for this image is set to cyan. This
 would make for a smooth transition from DeuTex 3 to DeuTex 4. There should be a
 command-line switch to disable that feature.
 
-<p><li>When extracting from the Doom alpha 0.4 iwad, why do I get
-"<code>;TITLEPIC¼-</code>" in <code>wadinfo.txt</code> after
-<code>TEXTURE1</code>&nbsp;?
-
 <p><li>There are too many warnings for a 25-line display. Keep a copy in
 <code>deutex.log</code>&nbsp;?
+
+<p><li>Heretic: <code>CREDIT</code>, <code>E2END</code>, <code>FINAL1</code>,
+<code>FINAL2</code>, <code>HELP1</code>, <code>HELP2</code> and
+<code>TITLE</code> are correctly identified as graphics and extracted
+accordingly but into <code>lumps/</code>&nbsp;!
+
+<p><li>Heretic: <code>E2END</code> is extracted with the wrong palette.
+
+<p><li>Hexen: <code>CREDIT</code>, <code>FINALE1</code>, <code>FINALE2</code>,
+<code>FINALE3</code>, <code>HELP1</code>, <code>HELP2</code>,
+<code>INTERPIC</code> and <code>TITLE</code> are correctly identified as
+graphics and extracted accordingly but into <code>lumps/</code>&nbsp;!
+
+<p><li>Hexen: <code>WINNOWR</code> and <code>STALKR</code> should be extracted
+into <code>mus/</code>, not <code>lumps/</code>.
+
+<p><li>Fix this&nbsp;:
+  <pre>atc4:/doom/dev/test/wav/16$ deutex -doom /doom/doom -xtract ../16bit44k.wad 
+DeuTex 4.0.3 Copyright 1994,95 O.Montanuy, Copyright 1999 A.Majorel
+  Ported to DOS, Unix, OS/2, Linux, SGiX, DEC Alpha.
+  Thanx to M.Mathews, P.Allansson, C.Rossi, J.Bonfield, U.Munk.
+  This program is freeware.
+Type "deutex -help" to get the list of commands.
+Main directory: /doom/doom.
+Extracting entries from WAD ../16bit44k.wad
+Reading WAD /doom/doom/doom.wad:        (2306 entries)
+Reading WAD ../16bit44k.wad:    (1 entries)
+PWAD entry identification...done
+Color palette is Doom
+Warning: ** Appending to file ./wadinfo.txt **
+Extracting Levels...
+Extracting Lumps...
+Extracting Sounds...
+
+Bug: *** not a WAVE ***
+Please report that bug.</pre>
+
+<p><li>For 4.2&nbsp;:
+  <ul>
+  <li>find name for 10x12, preferably ending in "p" (xxx),
+  <li>implement <code>IDENTxxx()</code>,
+  <li>add <code>[xxx]</code> section to <code>wadinfo.txt</code>,
+  <li>make list of lumps that used to go in <code>lumps/</code> and now go in
+  <code>xxx/</code> and put that in <code>changes.html</code>,
+  <li>create corresponding <code>-sprites</code>-like option
+  </ul>
 
 </ul>
 

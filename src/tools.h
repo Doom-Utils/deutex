@@ -37,6 +37,8 @@ void ProgErrorAction(void (*action)(void));
 void ProgError (const char *, ...);    /*fatal error. halt.*/
 void Bug (const char *, ...);          /*fatal bug. halt*/
 void Warning (const char *str, ...);   /*I'm not happy*/
+void LimitedWarn (int *left, const char *fmt, ...);
+void LimitedEpilog (int *left);
 void Output (const char *str, ...); /*command text output*/
 void Info (const char *str, ...);   /*useful indications*/
 void Phase (const char *str, ...);  /*phase of executions*/
@@ -60,11 +62,11 @@ Int16 Chsize(int handle,Int32 newsize);
 Int32 GetFileTime(const char *path);
 void SetFileTime(const char *path, Int32 time);
 void Unlink(const char *file);
-void Memcpy (void huge *dest,const void huge *src, long n);
-void Memset (void huge *dest,char car, long n);
-void huge *Malloc (long size);
-void huge *Realloc (void huge *old, long size);
-void Free( void huge *);
+void Memcpy (void  *dest,const void  *src, long n);
+void Memset (void  *dest,char car, long n);
+void  *Malloc (long size);
+void  *Realloc (void  *old, long size);
+void Free( void  *);
 
 
 void Normalise(char dest[8], const char *src);

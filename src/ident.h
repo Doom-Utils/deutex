@@ -25,11 +25,20 @@ Place, Suite 330, Boston, MA 02111-1307, USA.
 /* DOOM specifics*/
 
 /* Entry Identification */
-ENTRY huge *IDENTentriesIWAD(struct WADINFO *wad,char huge *Pnam,Int32 Pnamsz,Bool Fast);
-ENTRY huge *IDENTentriesPWAD(struct WADINFO *wad,char huge *Pnam,Int32 Pnamsz);
+ENTRY  *IDENTentriesIWAD(struct WADINFO *wad,char  *Pnam,Int32 Pnamsz,Bool Fast);
+ENTRY  *IDENTentriesPWAD(struct WADINFO *wad,char  *Pnam,Int32 Pnamsz);
 Int16 IDENTlevel(const char *buffer);
 /* Level Part Identification */
 Int16 IDENTlevelPart(const char *name);
 /* Insertion point determination*/
 Int16 IDENTinsrY(PICTYPE type,Int16 insrY,Int16 szy);
 Int16 IDENTinsrX(PICTYPE type,Int16 insrX,Int16 szx);
+ENTRY IDENTsneap (struct WADINFO *info, Int16 n);
+
+const char *entry_type_name    (ENTRY type);  /* For EFLATS, return "flat" */
+const char *entry_type_plural  (ENTRY type);  /* For EFLATS, return "flats" */
+const char *entry_type_dir     (ENTRY type);  /* For EFLATS, return "flats" */
+const char *entry_type_section (ENTRY type);  /* For EFLATS, return "flats" */
+PICTYPE     entry_type_pictype (ENTRY type);  /* For EFLATS, return PFLAT */
+
+

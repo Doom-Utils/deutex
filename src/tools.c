@@ -102,6 +102,7 @@ void check_types (void)
   const type_check_t *t;
   for (t = type_checks; t - type_checks < sizeof type_checks / sizeof *t; t++)
   {
+    /* FIXME Perhaps too strict. Wouldn't "<" suffice ? */
     if (t->actual_size != t->mandated_size)
       ProgError ("Type %s has size %d (should be %d)."
 	  " Fix deutex.h and recompile.",
@@ -168,26 +169,26 @@ void SetFileTime(const char *path, Int32 time)
 /*
 ** Copy memory
 */
-void Memcpy(void huge *dest,const void huge *src, long n)
+void Memcpy(void  *dest,const void  *src, long n)
 { if(n<0) Bug("MovInf"); /*move inf to zero*/
   if(n==0)return;
 #if DT_OS == 'd'
 #  if DT_CC == 'd'
-  memcpy((char huge *)dest,(char huge *)src,(size_t)n);
+  memcpy((char  *)dest,(char  *)src,(size_t)n);
 #  else
   if(n>0x10000L) Bug("MovSup"); /*DOS limit: not more than 0x10000*/
   _fmemcpy(dest,src,(size_t)n);
 #  endif
 #elif DT_OS == 'o'
-  memcpy((char huge *)dest,(char huge *)src,(size_t)n);
+  memcpy((char  *)dest,(char  *)src,(size_t)n);
 #else
-  memcpy((char huge *)dest,(char huge *)src,(size_t)n);
+  memcpy((char  *)dest,(char  *)src,(size_t)n);
 #endif
 }
 /*
 ** Set memory
 */
-void Memset(void huge *dest,char car, long n)
+void Memset(void  *dest,char car, long n)
 { if(n<0) Bug("MStInf"); /*set inf to zero*/
   if(n==0)return;
 #if DT_OS == 'd'
@@ -210,9 +211,9 @@ void Memset(void huge *dest,char car, long n)
 #define SIZE_THRESHOLD        0x400L
 #define SIZE_OF_BLOCK        0xFFFL
 /* actually, this is (size - 1) */
-void huge *Malloc (long size)
+void  *Malloc (long size)
 {
-   void huge *ret;
+   void  *ret;
    if(size<1)
    {  Warning("Attempt to allocate %ld bytes",size);
       size=1;
@@ -232,8 +233,8 @@ void huge *Malloc (long size)
 /*
 ** Reallocate memory
 */
-void huge *Realloc (void huge *old, long size)
-{  void huge *ret;
+void  *Realloc (void  *old, long size)
+{  void  *ret;
 
    if(size<1)
    {  Warning("Attempt to allocate %ld bytes",size);
@@ -254,12 +255,12 @@ void huge *Realloc (void huge *old, long size)
 /*
 ** Free
 */
-void Free( void huge *ptr)
+void Free( void  *ptr)
 {
 #if DT_OS == 'd' && DT_CC == 'b'
-   farfree( ptr);
+   farfree (ptr);
 #else
-   free( ptr );
+   free (ptr);
 #endif
 }
 /*****************************************************/
@@ -473,13 +474,16 @@ void PrintExit(void)
 
 void ActionDummy(void)
 { return; }
+
 static void (*Action)(void)=ActionDummy;
 void ProgErrorCancel(void)
 { Action = ActionDummy;
 }
+
 void ProgErrorAction(void (*action)(void))
 { Action = action;
 }
+
 void ProgError (const char *errstr, ...)
 {
    va_list args;va_start( args, errstr);
@@ -491,6 +495,7 @@ void ProgError (const char *errstr, ...)
    PrintExit();
    exit( -5);
 }
+
 void Bug (const char *errstr, ...)
 {  va_list args;va_start( args, errstr);
    fprintf(Stderr, "\nBug: *** ");
@@ -501,35 +506,61 @@ void Bug (const char *errstr, ...)
    PrintExit();
    exit( -10);
 }
+
 void Warning (const char *str, ...)
 {  va_list args;va_start( args, str);
-   fprintf(Stdwarn, "Warning: ** ");
+   fprintf(Stdwarn, "Warning: ");
    vfprintf(Stdwarn, str, args);
-   fprintf(Stdwarn, " **\n");
+   putc('\n', Stdwarn);
    va_end( args);
 }
+
+void LimitedWarn (int *left, const char *fmt, ...)
+{
+   if (left == NULL || (left != NULL && *left > 0))
+   {
+     va_list args;
+     fputs("Warning: ", Stdwarn);
+     va_start (args, fmt);
+     vfprintf (Stdwarn, fmt, args);
+     putc ('\n', Stdwarn);
+   }
+   if (left != NULL)
+     (*left)--;
+}
+
+void LimitedEpilog (int *left)
+{
+  if (left != NULL && *left < 0)
+    fprintf (Stdwarn, "Warning: (%d warnings omitted)\n", - *left);
+}
+
 void Legal(const char *str, ...)
 {  va_list args;va_start( args, str);
    vfprintf(stdout, str, args);
    va_end( args);
 }
+
 void Output (const char *str, ...)
 {  va_list args;va_start( args, str);
    vfprintf(Stdout, str, args);
    va_end( args);
 }
+
 void Info (const char *str, ...)
 {  va_list args;va_start( args, str);
    if(Verbosity>=1)
      vfprintf(Stdinfo, str, args);
    va_end( args);
 }
+
 void Phase (const char *str, ...)
 {  va_list args;va_start( args, str);
    if(Verbosity>=2)
      vfprintf(Stdinfo, str, args);
    va_end( args);
 }
+
 void Detail (const char *str, ...)
 {  va_list args;va_start( args, str);
    if(Verbosity>=3)

@@ -23,10 +23,10 @@ Place, Suite 330, Boston, MA 02111-1307, USA.
 
 
 /*function to merge two WAD directories (complex)*/
-struct WADDIR huge *LISmergeDir(Int32 *pNtry,
+struct WADDIR  *LISmergeDir(Int32 *pNtry,
     Bool OnlySF,
     Bool Complain,
     NTRYB select,
-    struct WADINFO *iwad, ENTRY huge *iiden, Int32 iwadflag,
-    struct WADINFO *pwad,ENTRY huge *piden,Int32 pwadflag);
+    struct WADINFO *iwad, ENTRY  *iiden, Int32 iwadflag,
+    struct WADINFO *pwad,ENTRY  *piden,Int32 pwadflag);
 

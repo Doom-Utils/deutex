@@ -122,7 +122,7 @@ Int16 ExitEncoder(void)
 /* Encodes one string of bytes and writes to the current file pointer */
 /* I will comment this part heavily to illustrate the process...      */
 
-Int16 Encode(UInt8 huge *buf, Int32 size)
+Int16 Encode(UInt8  *buf, Int32 size)
 {
    Int16 pos = 0, index;
 
@@ -350,7 +350,7 @@ Int16 push( Int16 s )
   return OVERFLOW;
 }
 
-Int16 Decode(UInt8 huge *buf, Int16 npxls )
+Int16 Decode(UInt8  *buf, Int16 npxls )
 { Int16 nb = 0;
   Int16 cond, code;
   /* empty stack into scan line buffer */
@@ -431,7 +431,7 @@ Int16 Decode(UInt8 huge *buf, Int16 npxls )
      }
   }
   /*! David
-    I use fmemcpy not memcpy, because data is FAR    (char huge *)
+    I use fmemcpy not memcpy, because data is FAR    (char  *)
   */
   _fmemcpy( buf, bytes, npxls );
   return cond;

@@ -39,15 +39,15 @@ Int16 const SHOWPRGRS = 0x4000;
 
 void EXE2list(FILE *out,char *doomexe,Int32 start,Int16 thres)
 { FILE *exe;
-  char huge *raw;	Int16   iraw,remains;
-  char huge *str;	Int16   istr,count;
+  char  *raw;	Int16   iraw,remains;
+  char  *str;	Int16   istr,count;
   Int16 c;
   Int32 lastpos,posit;
   Int32 found=0;
   count=0;
   lastpos = posit=start;
-  iraw=0;raw= (char huge *)Malloc(RAWSIZE*sizeof(char));
-  istr=0;str= (char huge *)Malloc((STRMAX+2)*sizeof(char));
+  iraw=0;raw= (char  *)Malloc(RAWSIZE*sizeof(char));
+  istr=0;str= (char  *)Malloc((STRMAX+2)*sizeof(char));
   exe=fopen(doomexe,FOPEN_RB);
   if(exe==NULL)ProgError("Can't open %s",doomexe);
   if(fseek(exe,posit,SEEK_SET))ProgError("Can't seek in %s",doomexe);
@@ -89,9 +89,9 @@ void EXE2list(FILE *out,char *doomexe,Int32 start,Int16 thres)
 
 void EXEsubstit(char *texin,char *doomexe,Int32 start,Int16 thres)
 { FILE *exe;
-  char huge *raw;	Int16   iraw,remains;
-  char huge *str;	Int16   strln,istr;
-  char huge *anew;      Int16   anewln;
+  char  *raw;	Int16   iraw,remains;
+  char  *str;	Int16   strln,istr;
+  char  *anew;      Int16   anewln;
   Int32 found;
   Int16 c; Int16 ref;
   Int32 lastpos,posit;
@@ -99,9 +99,9 @@ void EXEsubstit(char *texin,char *doomexe,Int32 start,Int16 thres)
   struct TXTFILE *TXT;
   TXT=TXTopen(texin);
 
-  iraw=0;raw= (char huge *)Malloc(RAWSIZE*sizeof(char));
-  istr=0;str= (char huge *)Malloc((STRMAX+2)*sizeof(char));
-  anew = (char huge *)Malloc((STRMAX+2)*sizeof(char));
+  iraw=0;raw= (char  *)Malloc(RAWSIZE*sizeof(char));
+  istr=0;str= (char  *)Malloc((STRMAX+2)*sizeof(char));
+  anew = (char  *)Malloc((STRMAX+2)*sizeof(char));
   exe=fopen(doomexe,FOPEN_RBP); 
   if(exe==NULL)
          ProgError("Can't open %s for writing",doomexe);

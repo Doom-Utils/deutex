@@ -162,8 +162,8 @@ void CMPOmakePWAD(const char *doomwad,WADTYPE type, const char *PWADname,
    /*result wad file*/
    static struct WADINFO rwad;
    /*for Pnames*/
-   Int16 entry;char huge *EntryP;Int32 EntrySz=0;
-   char huge *Colors;
+   Int16 entry;char  *EntryP;Int32 EntrySz=0;
+   char  *Colors;
    /* initialisation*/
 
    Info("Translating %s into a %cWAD %s\n",texin,(type==IWAD)?'I':'P',PWADname);
@@ -173,7 +173,7 @@ void CMPOmakePWAD(const char *doomwad,WADTYPE type, const char *PWADname,
    WADRopenR(&iwad,doomwad);
 
    TXT= TXTopenR(texin);
-   WADRopenW(&rwad,PWADname,type); 		/* fake IWAD or real PWAD */
+   WADRopenW(&rwad,PWADname,type, 1); 		/* fake IWAD or real PWAD */
    /*
    ** dirty: set error handler to delete the wad out file,
    ** if an error occurs.
@@ -611,7 +611,7 @@ void CMPOmakePWAD(const char *doomwad,WADTYPE type, const char *PWADname,
    ** the end
    */
    TXTcloseR(TXT);
-   WADRwriteDir(&rwad);  /* write the WAD directory */
+   WADRwriteDir(&rwad, 1);  /* write the WAD directory */
    ProgErrorCancel();
    WADRclose(&rwad);
    /*add some junk at end of wad file, for DEU 5.21*/

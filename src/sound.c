@@ -59,7 +59,7 @@ static struct WAVEDATA /*data*/
    Int32 datasize;
 }headw;
 
-static void SNDsaveWave(char *file,char huge *buffer,Int32 size,Int32 speed)
+static void SNDsaveWave(char *file,char  *buffer,Int32 size,Int32 speed)
 {
   FILE *fp;
   Int32 wsize,sz=0;
@@ -91,11 +91,11 @@ static void SNDsaveWave(char *file,char huge *buffer,Int32 size,Int32 speed)
   fclose(fp);
 }
 
-char huge *SNDloadWaveFile(char *file, Int32 *psize, Int32 *pspeed)
+char  *SNDloadWaveFile(char *file, Int32 *psize, Int32 *pspeed)
 { FILE *fp;
   Int32 wsize,sz=0,smplrate,datasize;
   Int32 chunk;
-  char huge *data;
+  char  *data;
   fp=fopen(file,FOPEN_RB);
   if(fp==NULL)				ProgError("WAV: can't read file %s",file);
   /*read RIFF HEADER*/
@@ -135,7 +135,7 @@ char huge *SNDloadWaveFile(char *file, Int32 *psize, Int32 *pspeed)
   /*check WAVE header*/
   if(datasize>0x100000L)           	ProgError("WAV: sample too long!");
   /*read data*/
-  data=(char huge *)Malloc(datasize);
+  data=(char  *)Malloc(datasize);
   for(wsize=0;wsize<datasize;wsize+=sz)
   { sz = (datasize-wsize>MEMORYCACHE)? MEMORYCACHE:(datasize-wsize);
     if(fread((data+(wsize)),(size_t)sz,1,fp)!=1)    	ProgError("WAV: can't read data of%s",file);
@@ -160,7 +160,7 @@ struct AUHEAD
 static struct AUHEAD heada;
 /*char data[datasize] as signed char*/
 
-static void SNDsaveAu(char *file,char huge *buffer,Int32 size,Int32 speed)
+static void SNDsaveAu(char *file,char  *buffer,Int32 size,Int32 speed)
 { FILE *fp;
   Int32 i,wsize,sz=0;
   fp=fopen(file,FOPEN_WB);
@@ -183,10 +183,10 @@ static void SNDsaveAu(char *file,char huge *buffer,Int32 size,Int32 speed)
   }
     fclose(fp);
 }
-char huge *SNDloadAuFile(char *file, Int32 *psize, Int32 *pspeed)
+char  *SNDloadAuFile(char *file, Int32 *psize, Int32 *pspeed)
 { FILE *fp;
   Int32 wsize,sz=0,i,smplrate,datasize;
-  char huge *data;
+  char  *data;
   fp=fopen(file,FOPEN_RB);
   if(fp==NULL)				ProgError("AU: can't read file %s",file);
   /*read AU HEADER*/
@@ -207,7 +207,7 @@ char huge *SNDloadAuFile(char *file, Int32 *psize, Int32 *pspeed)
   if(datasize>0x100000L)
 	ProgError("AU: sample too long!");
   /*read data*/
-  data=(char huge *)Malloc(datasize);
+  data=(char  *)Malloc(datasize);
   for(wsize=0;wsize<datasize;wsize+=sz)
   { sz = (datasize-wsize>MEMORYCACHE)? MEMORYCACHE:(datasize-wsize);
     if(fread((data+(wsize)),(size_t)sz,1,fp)!=1) ProgError("WAV: can't read data of%s",file);
@@ -241,7 +241,7 @@ static struct VOCBLOCK1
   char  cmprs;  /*0=no compression*/
 }blockv;
 
-static void SNDsaveVoc(char *file,char huge *buffer,Int32 size,Int32 speed)
+static void SNDsaveVoc(char *file,char  *buffer,Int32 size,Int32 speed)
 { FILE *fp;
   Int32 wsize,sz=0;
   fp=fopen(file,FOPEN_WB);
@@ -272,10 +272,10 @@ static void SNDsaveVoc(char *file,char huge *buffer,Int32 size,Int32 speed)
   fclose(fp);
 }
 
-char huge *SNDloadVocFile(char *file, Int32 *psize, Int32 *pspeed)
+char  *SNDloadVocFile(char *file, Int32 *psize, Int32 *pspeed)
 { FILE *fp;
   Int32 wsize,sz=0,smplrate,datasize;
-  char huge *data;
+  char  *data;
   fp=fopen(file,FOPEN_RB);
   if(fp==NULL)				ProgError("VOC: can't read file %s",file);
   /*read VOC HEADER*/
@@ -293,7 +293,7 @@ char huge *SNDloadVocFile(char *file, Int32 *psize, Int32 *pspeed)
   if(blockv.cmprs!=0) ProgError("VOC: compression not supported.");
   smplrate= (1000000L)/(256-(((int)blockv.rate)&0xFF));
   /*read data*/
-  data=(char huge *)Malloc(datasize);
+  data=(char  *)Malloc(datasize);
   for(wsize=0;wsize<datasize;wsize+=sz)
   { sz = (datasize-wsize>MEMORYCACHE)? MEMORYCACHE:(datasize-wsize);
     if(fread((data+(wsize)),(size_t)sz,1,fp)!=1)    	ProgError("VOC: can't read sound");
@@ -309,8 +309,8 @@ char huge *SNDloadVocFile(char *file, Int32 *psize, Int32 *pspeed)
 
 
 /**************** generic sound *******************/
-void SNDsaveSound(char *file,char huge *buffer,Int32 size,SNDTYPE Sound,Bool fullSND)
-{ char huge *data;
+void SNDsaveSound(char *file,char  *buffer,Int32 size,SNDTYPE Sound,Bool fullSND)
+{ char  *data;
   Int32 datasize;
   Int16 type,headsize;
   UInt16 speed;
@@ -340,7 +340,7 @@ void SNDsaveSound(char *file,char huge *buffer,Int32 size,SNDTYPE Sound,Bool ful
 
 Int32 SNDcopyInWAD(struct WADINFO *info,char *file,SNDTYPE Sound)
 { Int32 size=0,d,s,soundsize,datasize,speed;
-  char huge *data=NULL;
+  char  *data=NULL;
   long rate;
   switch(Sound)
   { case SNDWAV: data=SNDloadWaveFile(file,&datasize,&speed);break;
@@ -357,11 +357,11 @@ Int32 SNDcopyInWAD(struct WADINFO *info,char *file,SNDTYPE Sound)
     { d= (s*rate)>>8;  /* (s*((Int32)speed))/11025;*/
       data[s]= data[d];
     }
-    data=(char huge *)Realloc(data,soundsize);
+    data=(char  *)Realloc(data,soundsize);
   }
   else if(speed < 11025)
   { Warning("expanding %ld to 11025 sample/s",speed);
-    data=(char huge *)Realloc(data,soundsize);
+    data=(char  *)Realloc(data,soundsize);
     for(s=soundsize-1;s>=0;s--)
     { d= (s*rate)>>8;
       data[s]= data[d];
@@ -387,9 +387,9 @@ Int32 SNDcopyInWAD(struct WADINFO *info,char *file,SNDTYPE Sound)
 /*********** PC speaker sound effect ***********/
 
 
-void SNDsavePCSound(char *file,char huge *buffer,Int32 size)
+void SNDsavePCSound(char *file,char  *buffer,Int32 size)
 { FILE *fp;
-  char huge *data;
+  char  *data;
   Int16 datasize,type,headsize;
   Int16 i;
   headsize = sizeof(Int16)+sizeof(Int16);

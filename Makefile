@@ -7,8 +7,9 @@
 #           targets, however, require lynx, GCC or GNU tar and gzip.
 #
 #   DOS     "make [all]" should work with DJGPP and Cygwin. With other
-#           compilers, use the provided batch files. "make install"
-#           will most likely not work. Install the executables by hand.
+#           compilers, use the batch files in dos\ instead.
+#           "make install" will most likely not work ; install the
+#           executables by hand.
 #
 #   Others  Don't know. Send feedback to the maintainer.
 #
@@ -21,9 +22,9 @@ CC       = cc
 LDFLAGS  =
 
 # Compiled by developers
-DCFLAGS  = -g -Wall
+DCFLAGS  = -g -Wall -Wpointer-arith -Wstrict-prototypes
 DCC      = gcc
-DLDFLAGS = -g
+DLDFLAGS = -g -lefence
 
 #DEFINES = -DDT_ALPHA
 
@@ -47,7 +48,7 @@ DOC_SRC =\
 	docsrc/readme.dos\
 	docsrc/todo.html\
 
-DDOCUNIX =\
+DDOCUNIXFILES =\
 	unixtmp1/CHANGES\
 	unixtmp1/COPYING\
 	unixtmp1/COPYING.LIB\
@@ -58,7 +59,9 @@ DDOCUNIX =\
 	unixtmp1/deutex.6\
 	unixtmp1/dtexman6.txt\
 
-DDOCDOS =\
+DDOCUNIX = unixtmp1 $(DDOCUNIXFILES)
+
+DDOCDOSFILES =\
 	dostmp1/changes.txt\
 	dostmp1/copying\
 	dostmp1/copying.lib\
@@ -68,6 +71,8 @@ DDOCDOS =\
 	dostmp1/readme.txt\
 	dostmp1/todo.txt\
 	
+DDOCDOS = dostmp1 $(DDOCDOSFILES)
+
 HEADERS =\
 	src/color.h\
 	src/deutex.h\
@@ -164,13 +169,13 @@ dds: ddeusf
 
 
 ddeutex: $(DOBJTEX)
-	$(DCC) $(DLDFLAGS) -o deutex $(DOBJTEX) -lm
-	# Force next "make deutex" to relink
+	$(DCC) $(DLDFLAGS) -lm -o deutex $(DOBJTEX) 
+	@# Force next "make deutex" to relink
 	(sleep 1; mkdir -p tmp; touch tmp/_deutex) &
 
 ddeusf: $(DOBJSF)
-	$(DCC) $(DLDFLAGS) -o deusf $(DOBJSF) -lm
-	# Force next "make deusf" to relink
+	$(DCC) $(DLDFLAGS) -lm -o deusf $(DOBJSF) 
+	@# Force next "make deusf" to relink
 	(sleep 1; mkdir -p tmp; touch tmp/_deusf) &
 
 tmp/_deutex:
@@ -194,7 +199,10 @@ strip: deutex deusf
 	strip deutex
 	strip deusf
 
-doc: $(DOC)
+doc: $(DDOCUNIX)
+
+unixtmp1:
+	mkdir -p $@
 
 unixtmp1/CHANGES: docsrc/changes.htm* VERSION
 	echo 'THIS IS A GENERATED FILE -- DO NOT EDIT !' >$@
@@ -226,6 +234,9 @@ unixtmp1/deutex.6: docsrc/deutex.6 VERSION scripts/process
 
 unixtmp1/dtexman6.txt: docsrc/dtexman6.txt
 	cp -p $< $@
+
+dostmp1:
+	mkdir -p $@
 
 dostmp1/changes.txt: unixtmp1/CHANGES
 	todos <$< >$@
@@ -267,7 +278,7 @@ clean:
 dist: $(DISTFILES) $(DDOCUNIX)
 	mkdir -p $(DISTDIR)
 	cp -dpP $(DISTFILES) $(DISTDIR)
-	cp -p $(DDOCUNIX) $(DISTDIR)
+	cp -p $(DDOCUNIXFILES) $(DISTDIR)
 	tar -zcf $(DISTARC) $(DISTDIR)
 	rm -rf $(DISTDIR)
 
@@ -275,7 +286,7 @@ dist: $(DISTFILES) $(DDOCUNIX)
 distdos: $(DISTFILES) $(DDOCDOS)
 	mkdir -p $(DISTDIRDOS)
 	cp -dpP $(DISTFILES) $(DISTDIRDOS)
-	cp -p $(DDOCDOS) $(DISTDIRDOS)
+	cp -p $(DDOCDOSFILES) $(DISTDIRDOS)
 	if [ -e $(DISTARCDOS) ]; then rm $(DISTARCDOS); fi
 	zip -D -X -9 -r $(DISTARCDOS) $(DISTDIRDOS)
 	rm -rf $(DISTDIRDOS)
@@ -287,7 +298,7 @@ TMP=tmpd
 distbindos: $(DISTFILESBIN) $(DDOCDOS)
 	mkdir -p $(TMP)
 	cp -dpP $(DISTFILESBIN) $(TMP)
-	cp -p $(DDOCDOS) $(TMP)
+	cp -p $(DDOCDOSFILES) $(TMP)
 	if [ -e $(BINZIP) ]; then rm $(BINZIP); fi
 	export name=$$(pwd)/$(BINZIP); cd $(TMP); zip -D -X -9 -R $$name '*'
 	rm -rf $(TMP)
@@ -300,7 +311,8 @@ save:
 	  --exclude dostmp1 --exclude unixtmp1\
 	  --exclude "*~" --exclude "*.o"\
 	  --exclude "*.os" --exclude "*.ot"\
-	  --exclude "*.osd" --exclude "*.otd" .
+	  --exclude "*.osd" --exclude "*.otd"\
+	  --exclude "*.obj" .
 
 help:
 	@echo "Targets for end users:"

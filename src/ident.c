@@ -26,6 +26,7 @@ Place, Suite 330, Boston, MA 02111-1307, USA.
 #include "tools.h"
 #include "endianm.h"
 #include "mkwad.h"
+#include "picture.h"
 #include "texture.h"
 #include "ident.h"
 
@@ -34,6 +35,8 @@ Place, Suite 330, Boston, MA 02111-1307, USA.
 ** entries and structures. Fear the bugs!
 */
 
+
+static const char *ident_func = NULL;
 
 
 /****************IDENT module ***********************/
@@ -55,7 +58,8 @@ Int16 IDENTlevelPart(const char *name)
 
 
 Int16 IDENTlevel(const char *buffer)
-{  switch(buffer[0])
+{
+   switch(buffer[0])
 	{ case 'E':
 		  if(buffer[2]=='M')
 			 if(buffer[4]=='\0')
@@ -127,63 +131,164 @@ Int16 IDENTinsrY(PICTYPE type,Int16 insrY,Int16 szy)
   }
   return 0;
 }
-/*
-** identify a graphic entry
-** from a read WAD
-*/
 
-struct PICHEAD {
-Int16 Xsz;               /*nb of columns*/
-Int16 Ysz;               /*nb of rows*/
-Int16 Xinsr;             /*insertion point*/
-Int16 Yinsr;             /*insertion point*/
-};
-ENTRY IDENTgraphic(struct WADINFO *info,Int16 n)
+
+/*
+ *	IDENTgraphic
+ *	Look at the contents of lump number <n> from wad <info>
+ *	and return the probability that it contained a picture,
+ *	from 0 to 100.
+ */
+int IDENTgraphic(struct WADINFO *info,Int16 n)
 {
    Int32 start=info->dir[n].start;
    Int32 size=info->dir[n].size;
-   Int16 x,insrX,insrY,Xsize,Ysize;
-   Int32 huge *ofscol;
-   static struct PICHEAD head;
-   /*check X,Y size and insertion point*/
-   if(size<8) return ELUMP;
+   unsigned char *buf;
+   pic_head_t h;
+   int x;
+   int bad_order = 0;
+   Int32 ofs_prev;
+
+   /* Slurp the whole lump. */
+   buf = Malloc (size);
    WADRseek(info,start);
-   WADRreadBytes(info,(char huge *)&head,sizeof(struct PICHEAD));
-   Xsize = peek_i16_le (&head.Xsz);
-   if((Xsize<1)||(Xsize>320))return ELUMP;
-   Ysize = peek_i16_le (&head.Ysz);
-   if((Ysize<1)||(Ysize>200))return ELUMP;
-   insrX = peek_i16_le (&head.Xinsr);  /*insertion point*/
-   if((insrX<-4000)||(insrX>4000))return ELUMP;
-   insrY = peek_i16_le (&head.Yinsr);   /*insertion point*/
-   if((insrY<-4000)||(insrY>4000))return ELUMP;
-   /*check picture size*/
-   if(size<8+4*Xsize+1*Xsize) return ELUMP;
-   /*check validity of columns*/
-   ofscol=(Int32 huge *)Malloc(Xsize*sizeof(Int32));
-   WADRreadBytes(info,(char huge *)ofscol,Xsize*sizeof(Int32));
-   for(x=0;x<Xsize;x++)
-   { if(peek_i32_le (ofscol + x) > size) /*check against size*/
-     { Free(ofscol);return ELUMP;}
+   WADRreadBytes (info, buf, size);
+
+   /* If parse_pic_header() chokes, it must not be a valid picture */
+   if (parse_pic_header (buf, size, &h, NULL))
+   {
+      Free (buf);
+      return 0;
    }
-   Free(ofscol);
+
+   /* Be even more paranoid than parse_pic_header(): check column offsets */
+   bad_order = 0;
+   for (x = 0; x < h.width; x++)
+   {
+      Int32 ofs;
+      
+      /* Cut and pasted from picture.c. Bleagh. */
+      if (h.colofs_size == 4)
+      {
+         Int32 o;
+         read_i32_le (((const Int32 *) h.colofs) + x, &o);
+	 ofs = o;
+      }
+      else if (h.colofs_size == 2)
+      {
+         /* In principle, the offset is signed. However, considering it
+            unsigned helps extracting patches larger than 32 kB, like
+            W18_1 (alpha) or SKY* (PR). Interestingly, Doom alpha and
+            Doom PR treat the offset as signed, which is why some
+            textures appear with tutti-frutti on the right. -- AYM
+            1999-09-18 */
+         UInt16 o;
+         read_i16_le (((const Int16 *) h.colofs) + x, (Int16 *) &o);
+	 ofs = o;
+      }
+      else
+      {
+         Bug ("Bad colofs_size %d", (int) h.colofs_size);  /* Can't happen */
+      }
+
+      if (buf + ofs < h.data || ofs >= size)
+      {
+         Free (buf);
+         return 0;
+      }
+
+      /* In a picture lump, columns appear in increasing X
+         order. This is not mandated but, in practice, I think
+	 it's always true. If they're not, the lump is somewhat
+	 suspicious and therefore, this function returns only
+	 50. This additional checking allows us not to mistake
+	 Doom alpha 0.4 WORLD1 for a picture. It's really a snea
+	 but it passes all the other tests of picturehood. */
+      if (x > 0)
+      {
+	Int32 delta_ofs = ofs - ofs_prev;
+	if (delta_ofs < 1)
+	  bad_order++;
+      }
+      ofs_prev = ofs;
+   }
+
    /*valid...graphic...maybe...*/
-   return EGRAPHIC;
+   Free (buf);
+   if (bad_order)
+     return 50;
+   else
+     return 100;
 }
+
+
+/*
+ *	IDENTsnea
+ *	Look at the contents of lump number <n> from wad <info>
+ *	and return the probability that it contained a snea,
+ *	from 0 to 100.
+ *	
+ *	The snea format was used for certain graphics in Doom
+ *	alpha 0.4 and 0.5. It consists in a 2-byte header
+ *	followed by an interleaved bitmap. The first byte, W, is
+ *	the quarter of the width. The second byte, H is the
+ *	height. The bitmap is made of 4xWxH bytes. The first WxH
+ *	bytes contain the bitmap for columns 0, 4, 8, etc. The
+ *	next WxH bytes contain the bitmap for columns 1, 5, 9,
+ *	etc., and so on. No transparency.
+ */
+int IDENTsnea (struct WADINFO *info, Int16 n)
+{
+   unsigned char width;
+   unsigned char height;
+
+   if (info->dir[n].size < 2)
+      return 0;
+   WADRseek (info, info->dir[n].start);
+   WADRreadBytes (info, &width, 1);
+   WADRreadBytes (info, &height, 1);
+   if (info->dir[n].size - 2 != 4l * width * height)
+      return 0;
+   return 100;
+}
+
 
 /*
 ** set identity of an entry with known name
 ** set only the first entry that match this name
 */
-static void IDENTdirSet(ENTRY huge *ids,struct WADINFO *info,const char *name,ENTRY ident)
+static void IDENTdirSet(ENTRY  *ids,struct WADINFO *info,const char *name,ENTRY ident)
 { Int16 n;
   n=WADRfindEntry(info,name);
   if(n>=0)   /*found it?*/
     if(n<(info->ntry))
       if(ids[n]==EZZZZ)
-      { ids[n]=ident;
+      {
+	if (debug_ident != NULL
+	    && ((debug_ident[0] == '*' && debug_ident[1] == '\0')
+		|| ! strncmp (debug_ident, name, 8)))
+	  Info ("Ident: %-8.8s as %-8.32s by %.32s\n",
+	      name, entry_type_name (ident), ident_func);
+      ids[n]=ident;
       }
 }
+
+/*
+ *	IDENTsetType
+ *	Set the type of an entry
+ */
+static void IDENTsetType (ENTRY  *ids, struct WADINFO *info, int n,
+    ENTRY type)
+{
+  if (debug_ident != NULL
+      && ((debug_ident[0] == '*' && debug_ident[1] == '\0')
+	  || ! strncmp (debug_ident, info->dir[n].name, 8)))
+    Info ("Ident: %-8.8s as %-8.32s by %.32s\n",
+	info->dir[n].name, entry_type_name (type), ident_func);
+  ids[n] = type;
+}
+
+
 /*
 ** identifies sprites from:
 **  S_START SS_START S_END SS_END delimiters if exist
@@ -191,16 +296,18 @@ static void IDENTdirSet(ENTRY huge *ids,struct WADINFO *info,const char *name,EN
 **
 ** Precond: ids contains EZZZZ for unidentified entries
 */
-static void IDENTdirSprites(ENTRY huge *ids,struct WADINFO *info,Bool Check)
+static void IDENTdirSprites(ENTRY  *ids,struct WADINFO *info,Bool Check)
 {  Int16 s_end,s_start;
-   Int16 n,s;
+   Int16 n;
+
+   ident_func = "IDENTdirSprites";
    /*
    ** check if there are sprites
    */
    s_end=WADRfindEntry(info,"S_END");
    if(s_end<0) s_end=WADRfindEntry(info,"SS_END");
    if(s_end<0) return;
-   ids[s_end]=EVOID;
+   IDENTsetType (ids, info, s_end, EVOID);
    /*
    ** check if there is a sprites begining
    */
@@ -214,20 +321,21 @@ static void IDENTdirSprites(ENTRY huge *ids,struct WADINFO *info,Bool Check)
      { if(ids[n]!=EZZZZ) break; /*last sprite*/
        if(info->dir[n].size<8) break; /*last sprite*/
        if(Check==TRUE)
-       {  s=IDENTgraphic(info,n);
-          if(s==ELUMP) break;
+       {  
+	 if (IDENTgraphic(info,n) == 0)
+           break;
        }
-       ids[n]=ESPRITE;
+       IDENTsetType (ids, info, n, ESPRITE);
      }
    }
    /*
    ** declare sprites
    */
    else
-   { ids[s_start]=EVOID;
+   { IDENTsetType (ids, info, s_start, EVOID);
      for(n=s_end-1;n>s_start;n--)
      { if(info->dir[n].size>8)
-       { ids[n]=ESPRITE;
+       { IDENTsetType (ids, info, n, ESPRITE);
        }
      }
    }
@@ -240,16 +348,18 @@ static void IDENTdirSprites(ENTRY huge *ids,struct WADINFO *info,Bool Check)
 **
 ** Precond: ids contains EZZZZ for unidentified entries
 */
-static void IDENTdirFlats(ENTRY huge *ids,struct WADINFO *info)
+static void IDENTdirFlats(ENTRY  *ids,struct WADINFO *info)
 {  Int16 f_end,f_start;
    Int16 n;
+
+   ident_func = "IDENTdirFlats";
    /*
    ** check if there are flats
    */
    f_end=WADRfindEntry(info,"F_END");
    if(f_end<0) f_end=WADRfindEntry(info,"FF_END");
    if(f_end<0) return;
-   ids[f_end]=EVOID;
+   IDENTsetType (ids, info,f_end, EVOID);
 
    IDENTdirSet(ids,info,"F1_START",EVOID);
    IDENTdirSet(ids,info,"F1_END",EVOID);
@@ -274,7 +384,7 @@ static void IDENTdirFlats(ENTRY huge *ids,struct WADINFO *info)
           if(ids[n]!=EFLAT)
             break; /*last flat*/
        if((info->dir[n].size==0x1000)||(info->dir[n].size==0x2000)||(info->dir[n].size==0x1040))
-       { ids[n]=EFLAT;
+       { IDENTsetType (ids, info, n, EFLAT);
        }
      }
    }
@@ -282,18 +392,23 @@ static void IDENTdirFlats(ENTRY huge *ids,struct WADINFO *info)
    ** declare flats
    */
    else
-   { ids[f_start]=EVOID;
+   { IDENTsetType (ids, info, f_start, EVOID);
      for(n=f_end-1;n>f_start;n--)
      { if((info->dir[n].size==0x1000)||(info->dir[n].size==0x2000)||(info->dir[n].size==0x1040))
-       { ids[n]=EFLAT;
+       { IDENTsetType (ids, info, n, EFLAT);
        }
      }
    }
 }
 
 
-static void IDENTdirLumps(ENTRY huge *ids,struct WADINFO *info)
-{ IDENTdirSet(ids,info,"PLAYPAL",ELUMP);
+/* Is it a good idea to decide a lump is a lump without even
+   looking at it ? Has a potential for breaking when used with
+   different iwads. -- AYM 1999-10-18 */
+static void IDENTdirLumps(ENTRY  *ids,struct WADINFO *info)
+{
+  ident_func = "IDENTdirLumps";
+  IDENTdirSet(ids,info,"PLAYPAL",ELUMP);
   IDENTdirSet(ids,info,"COLORMAP",ELUMP);
   IDENTdirSet(ids,info,"ENDOOM",ELUMP);
   IDENTdirSet(ids,info,"ENDTEXT",ELUMP);
@@ -306,10 +421,12 @@ static void IDENTdirLumps(ENTRY huge *ids,struct WADINFO *info)
   IDENTdirSet(ids,info,"TINTTAB",ELUMP);
 }
 
-static void IDENTdirPatches(ENTRY huge *ids,struct WADINFO *info, char huge *Pnam, Int32 Pnamsz,Bool Check)
+static void IDENTdirPatches(ENTRY  *ids,struct WADINFO *info, char  *Pnam, Int32 Pnamsz,Bool Check)
 {  Int16 p_end,p_start;
    Int16 n,p;
-   char huge *Pnames;
+   char  *Pnames;
+
+   ident_func = "IDENTdirPatches";
    /*
    **  find texture and pname entries
    */
@@ -337,7 +454,7 @@ static void IDENTdirPatches(ENTRY huge *ids,struct WADINFO *info, char huge *Pna
    p_end=WADRfindEntry(info,"P_END");
    if(p_end<0) p_end=WADRfindEntry(info,"PP_END");
    if(p_end>=0)
-   { ids[p_end]=EVOID;
+   { IDENTsetType (ids, info, p_end, EVOID);
      /*
      ** check if there is a patch begining
      */
@@ -353,10 +470,10 @@ static void IDENTdirPatches(ENTRY huge *ids,struct WADINFO *info, char huge *Pna
      ** declare patches
      */
      if(p_start>=0)
-     { ids[p_start]=EVOID;
+     { IDENTsetType (ids, info, p_start, EVOID);
        for(n=p_end-1;n>p_start;n--)
        { if(info->dir[n].size>8)
-           ids[n]=EPATCH;
+           IDENTsetType (ids, info, n, EPATCH);
        }
      }
    }
@@ -368,7 +485,7 @@ static void IDENTdirPatches(ENTRY huge *ids,struct WADINFO *info, char huge *Pna
    { /*checkif PNAMES is redefined*/
      n=WADRfindEntry(info,"PNAMES");
      if(n>=0)
-     { Pnames=(char huge *)Malloc(info->dir[n].size);
+     { Pnames=(char  *)Malloc(info->dir[n].size);
        WADRseek(info,info->dir[n].start);
        WADRreadBytes(info,Pnames,info->dir[n].size);
        PNMinit(Pnames,info->dir[n].size);
@@ -383,8 +500,8 @@ static void IDENTdirPatches(ENTRY huge *ids,struct WADINFO *info, char huge *Pna
          if(info->dir[n].size>8)
          {  p=PNMindexOfPatch(info->dir[n].name); /*Gcc*/
             if(p>=0)
-            { p=IDENTgraphic(info,n);
-              if(p!=ELUMP) ids[n]=EPATCH;
+            { if (IDENTgraphic(info,n) != 0)
+		IDENTsetType (ids, info, n, EPATCH);
             }
          }
      }
@@ -396,10 +513,12 @@ static void IDENTdirPatches(ENTRY huge *ids,struct WADINFO *info, char huge *Pna
 /*
 ** Ident unreferenced graphics
 */
-static void IDENTdirGraphics(ENTRY huge *ids,struct WADINFO *info)
+static void IDENTdirGraphics(ENTRY  *ids,struct WADINFO *info)
 {  Int16 n;
-   IDENTdirSet(ids,info,"TITLEPIC",EGRAPHIC);
+   ident_func = "IDENTdirGraphics";
 #if 0
+   /* Not true for Doom alpha */
+   IDENTdirSet(ids,info,"TITLEPIC",EGRAPHIC);
    /* not true for heretic*/
    IDENTdirSet(ids,info,"HELP1",EGRAPHIC);
    IDENTdirSet(ids,info,"HELP2",EGRAPHIC);
@@ -416,41 +535,70 @@ static void IDENTdirGraphics(ENTRY huge *ids,struct WADINFO *info)
    { if(ids[n]==EZZZZ)
      { if(info->dir[n].size>8)
        { if(strncmp(info->dir[n].name,"FONT",4)==0)
-         { ids[n]=EGRAPHIC;
+         { IDENTsetType (ids, info, n, EGRAPHIC);
          }
          else if(strncmp(info->dir[n].name,"M_",2)==0)
-         { ids[n]=EGRAPHIC;
+         { IDENTsetType (ids, info, n, EGRAPHIC);
          }
        }
      }
    }
 }
-static void IDENTdirGraphics2(ENTRY huge *ids,struct WADINFO *info,Bool Check)
+
+static void IDENTdirGraphics2(ENTRY  *ids,struct WADINFO *info,Bool Check)
 {  Int16 n;
+   ident_func = "IDENTdirGraphics2";
    for(n=0;n<info->ntry;n++)
    { if(ids[n]==EZZZZ)
      { if(info->dir[n].size>8)
-       { if(strncmp(info->dir[n].name,"WI",2)==0)
-         { ids[n]=EGRAPHIC;
+       { /* It's not quite clear to me why the following 6 lines
+	    are here and not in IDENTdirGraphics(), since those
+	    are name-based idents. -- AYM 1999-10-16 */
+	 if(strncmp(info->dir[n].name,"WI",2)==0)
+         { IDENTsetType (ids, info, n, EGRAPHIC);
          }
          else if(strncmp(info->dir[n].name,"ST",2)==0)
-         { ids[n]=EGRAPHIC;
+         { IDENTsetType (ids, info, n, EGRAPHIC);
          }
          else if(Check==TRUE)
-         { ids[n]=IDENTgraphic(info,n);
+         {
+	   int is_picture = IDENTgraphic (info, n);
+	   int is_snea    = IDENTsnea    (info, n);
+	   /* Looks more like a picture */
+	   if (is_picture > 0 && is_picture > is_snea)
+	     IDENTsetType (ids, info, n, EGRAPHIC);
+	   /* Looks more like a snea */
+	   else if (is_snea > 0 && is_snea > is_picture)
+	   {
+	     if (! strncmp (info->dir[n].name, "TITLEPIC", 8))
+	       IDENTsetType (ids, info, n, ESNEAT);  /* Snea, TITLEPAL */
+	     else
+	       IDENTsetType (ids, info, n, ESNEAP);  /* Snea, PLAYPAL */
+	   }
+	   /* Looks like something that the cat brought in :-) */
+	   else
+	   {
+	     if (is_snea > 0 && is_picture > 0 && is_snea == is_picture)
+	       Warning ("Ambiguous type for %.8s (picture or snea ?)",
+		   info->dir[n].name);
+	     IDENTsetType (ids, info, n, ELUMP);
+	   }
          }
-         else
-         {  ids[n]=EGRAPHIC;
+         else  /* Never used. Too dangerous, if you want my opinion. */
+         {
+	   IDENTsetType (ids, info, n, EGRAPHIC);
          }
        }
      }
    }
 }
+
 /*
 ** Ident PC sounds
 */
-static void IDENTdirPCSounds(ENTRY huge *ids,struct WADINFO *info,Bool Check)
+static void IDENTdirPCSounds(ENTRY  *ids,struct WADINFO *info,Bool Check)
 {  Int16 n;
+   ident_func = "IDENTdirPCSounds";
    for(n=0;n<info->ntry;n++)
    { if(ids[n]==EZZZZ)
      { if(info->dir[n].size>4) /*works only for DOOM, not HERETIC*/
@@ -458,7 +606,7 @@ static void IDENTdirPCSounds(ENTRY huge *ids,struct WADINFO *info,Bool Check)
          { if(Check==TRUE)
            { WADRseek(info,info->dir[n].start);
              if(WADRreadShort(info)==0x0)
-               ids[n]=ESNDPC;
+               IDENTsetType (ids, info, n, ESNDPC);
            }
          }
      }
@@ -468,8 +616,9 @@ static void IDENTdirPCSounds(ENTRY huge *ids,struct WADINFO *info,Bool Check)
 /*
 ** Ident musics
 */
-static void IDENTdirMusics(ENTRY huge *ids,struct WADINFO *info,Bool Check)
+static void IDENTdirMusics(ENTRY  *ids,struct WADINFO *info,Bool Check)
 {  Int16 n;
+   ident_func = "IDENTdirMusics";
    for(n=0;n<info->ntry;n++)
    { if(ids[n]==EZZZZ)
      { if(info->dir[n].size>8)
@@ -482,41 +631,48 @@ static void IDENTdirMusics(ENTRY huge *ids,struct WADINFO *info,Bool Check)
            WADRseek(info,info->dir[n].start);
            if(WADRreadShort(info)==0x554D)
              if(WADRreadShort(info)==0x1A53)
-                ids[n]=EMUSIC;
+                IDENTsetType (ids, info, n, EMUSIC);
          }
          else
-           ids[n]=EMUSIC;
+           IDENTsetType (ids, info, n, EMUSIC);
        }
      }
    }
 }
+
 /*
 ** Ident sounds
 */
-static void IDENTdirSounds(ENTRY huge *ids,struct WADINFO *info, Bool Doom)
+static void IDENTdirSounds(ENTRY  *ids,struct WADINFO *info, Bool Doom)
 {  Int16 n;
+
+   ident_func = "IDENTdirSounds";
    for(n=0;n<info->ntry;n++)
    { if(ids[n]==EZZZZ)
      { if(info->dir[n].size>8)
-       /*works only for DOOM, not HERETIC*/
-       if(strncmp(info->dir[n].name,"DS",2)==0)
-       { ids[n]=ESNDWAV;
-       }
-       else if(Doom==FALSE)
-       { WADRseek(info,info->dir[n].start);
-           if(WADRreadShort(info)==0x3)
-             if(WADRreadShort(info)==0x2B11)
-               ids[n]=ESNDWAV;
+       {
+	 /*works only for DOOM, not HERETIC*/
+	 if(strncmp(info->dir[n].name,"DS",2)==0)
+	 { IDENTsetType (ids, info, n, ESNDWAV);
+	 }
+	 else if(Doom==FALSE)
+	 { WADRseek(info,info->dir[n].start);
+	     if(WADRreadShort(info)==0x3)
+	       if(WADRreadShort(info)==0x2B11)
+		 IDENTsetType (ids, info, n, ESNDWAV);
+	 }
        }
      }
    }
 }
 
 
-static void IDENTdirLevels(ENTRY huge *ids,struct WADINFO *info)
+static void IDENTdirLevels(ENTRY  *ids,struct WADINFO *info)
 { Int16 n,l;Int16 inlvl;
   char name[8];
   ENTRY level=EVOID;
+  
+  ident_func = "IDENTdirLevels";
   for(inlvl=0,n=0;n<info->ntry;n++)
   { if(ids[n]==EZZZZ)
     { Normalise(name,info->dir[n].name);
@@ -525,12 +681,12 @@ static void IDENTdirLevels(ENTRY huge *ids,struct WADINFO *info)
       { level=(name[0]=='M')? EMAP:ELEVEL;
         level|=l;
         inlvl=10;
-        ids[n]=level;
+        IDENTsetType (ids, info, n, level);
       }
       else if(inlvl>0)
       { l=IDENTlevelPart(name);
         if(l>=0) /*level continues*/
-        { ids[n]=level;inlvl--;
+        { IDENTsetType (ids, info, n, level);inlvl--;
         }
         else     /*level ends*/
          inlvl=0;
@@ -547,13 +703,15 @@ static void IDENTdirLevels(ENTRY huge *ids,struct WADINFO *info)
 ** if Fast = TRUE then sounds and most graphics are reported as lumps
 ** (this is for merge. no problem. bad identification only to be feared in PWAD)
 */
-ENTRY huge *IDENTentriesIWAD(struct WADINFO *info,char huge *Pnam, Int32 Pnamsz,Bool Fast)
+ENTRY  *IDENTentriesIWAD(struct WADINFO *info,char  *Pnam, Int32 Pnamsz,Bool Fast)
 {   Int16 n;
     Bool Doom=FALSE;
-    ENTRY huge *ids;
+    ENTRY  *ids;
     Phase("IWAD entry identification...");
+    if (debug_ident != NULL)
+      Phase("\n");
     if(info->ok!=TRUE)Bug("IdnOeI");
-    ids=(ENTRY huge *)Malloc((info->ntry)*sizeof(ENTRY));
+    ids=(ENTRY  *)Malloc((info->ntry)*sizeof(ENTRY));
     if(WADRfindEntry(info,"ENDTEXT")<0)              /*Not Heretic*/
       if(WADRfindEntry(info,"ENDOOM")>=0) Doom=TRUE;
     /*
@@ -571,17 +729,18 @@ ENTRY huge *IDENTentriesIWAD(struct WADINFO *info,char huge *Pnam, Int32 Pnamsz,
     IDENTdirGraphics(ids,info);      /*fast*/
     if(Fast!=TRUE)
     { IDENTdirSounds(ids,info,Doom);   /*slow!*/
-		IDENTdirGraphics2(ids,info,TRUE);/*slow!*/
+      IDENTdirGraphics2(ids,info,TRUE);/*slow!*/
     }
     /* unidentified entries are considered LUMPs*/
+    ident_func = "IDENTentriesIWAD";
     for(n=0;n<info->ntry;n++)
     { 
       if(ids[n]==EZZZZ)
       {
 	if(info->dir[n].size>=6)
-	  ids[n]=ELUMP;
+	  IDENTsetType (ids, info, n, ELUMP);
 	else
-	  ids[n]=EDATA;
+	  IDENTsetType (ids, info, n, EDATA);
       }
     }
     Phase("done\n");
@@ -602,12 +761,14 @@ ENTRY huge *IDENTentriesIWAD(struct WADINFO *info,char huge *Pnam, Int32 Pnamsz,
 
 
 
-ENTRY huge *IDENTentriesPWAD(struct WADINFO *info,char huge *Pnam, Int32 Pnamsz)
+ENTRY  *IDENTentriesPWAD(struct WADINFO *info,char  *Pnam, Int32 Pnamsz)
 {   Int16 n;
-    ENTRY huge *ids;
+    ENTRY  *ids;
     Phase("PWAD entry identification...");
+    if (debug_ident != NULL)
+      Phase("\n");
     if(info->ok!=TRUE)Bug("IdnOeP");
-    ids=(ENTRY huge *)Malloc((info->ntry)*sizeof(ENTRY));
+    ids=(ENTRY  *)Malloc((info->ntry)*sizeof(ENTRY));
     /*
     ** identify for PWAD
     */
@@ -653,13 +814,14 @@ ENTRY huge *IDENTentriesPWAD(struct WADINFO *info,char huge *Pnam, Int32 Pnamsz)
     Phase("\nGraph2...");
 #endif
     IDENTdirGraphics2(ids,info,TRUE);
+    ident_func = "IDENTentriesPWAD";
     for(n=0;n<info->ntry;n++)
     {  if(ids[n]==EZZZZ)
        {
 	  if(info->dir[n].size>16)
-	     ids[n]=ELUMP;
+	     IDENTsetType (ids, info, n, ELUMP);
 	  else
-	     ids[n]=EDATA;
+	     IDENTsetType (ids, info, n, EDATA);
        }
     }
     /*
@@ -669,5 +831,101 @@ ENTRY huge *IDENTentriesPWAD(struct WADINFO *info,char huge *Pnam, Int32 Pnamsz)
     /*the end. WADR is still opened*/
     return ids;
 }
-/***************end IDENT module *******************/
 
+
+/*
+ *	entry_type_name
+ *	Return human-readable string for numeric entry type
+ */
+typedef struct
+{
+  ENTRY type;
+  const char *name;
+  const char *plural;
+  PICTYPE pictype;
+} entry_type_def_t;
+
+static const entry_type_def_t entry_type_def[] =
+{
+  { EVOID,    "label",    "labels",   -1     },
+  { ELEVEL,   "level",    "levels",   -1     },
+  { EMAP,     "level",    "levels",   -1     },
+  { ELUMP,    "lump",     "lumps",    PLUMP  },
+  { ETEXTUR,  "texture",  "textures", -1     },
+  { EPNAME,   "pname",    "pnames",   -1     },
+  { ESOUND,   "sound",    "sounds",   -1     },
+  { EGRAPHIC, "graphics", "graphics", PGRAPH },
+  { ESPRITE,  "sprite",   "sprites",  PSPRIT },
+  { EPATCH,   "patch",    "patches",  PPATCH },
+  { EFLAT,    "flat",     "flats",    PFLAT  },
+  { EMUSIC,   "music",    "musics",   -1     },
+  { EDATA,    "data",     "datas",    -1     },  /* "datas". How literate. */
+  { ESNEA,    "snea",     "sneas",    -1     },
+  { ESNEAP,   "sneap",    "sneaps",   PSNEAP },
+  { ESNEAT,   "sneat",    "sneats",   PSNEAT },
+  { 0,        NULL,       NULL,       -1     }
+};
+
+static ENTRY last_type = -1;
+static const entry_type_def_t *last_def = NULL;
+
+static const entry_type_def_t *get_entry_type_def (ENTRY type)
+{
+  const entry_type_def_t *p;
+  if (type == last_type)
+    return last_def;
+  for (p = entry_type_def; p->name != NULL; p++)
+    if (p->type == type)
+    {
+      last_type = type;
+      last_def  = p;
+      return p;
+    }
+  for (p = entry_type_def; p->name != NULL; p++)
+    if (p->type == (type & EMASK))
+    {
+      last_type = type;
+      last_def  = p;
+      return p;
+    }
+  return NULL;
+}
+
+const char *entry_type_name (ENTRY type)
+{
+  const entry_type_def_t *def = get_entry_type_def (type);
+  if (def == NULL)
+    return "(unknown)";
+  else
+    return def->name;
+}
+
+const char *entry_type_plural (ENTRY type)
+{
+  const entry_type_def_t *def = get_entry_type_def (type);
+  if (def == NULL)
+    return "(unknown)";
+  else
+    return def->plural;
+}
+
+const char *entry_type_dir (ENTRY type)
+{
+  return entry_type_plural (type);
+}
+
+const char *entry_type_section (ENTRY type)
+{
+  return entry_type_plural (type);
+}
+
+PICTYPE entry_type_pictype (ENTRY type)
+{
+  const entry_type_def_t *def = get_entry_type_def (type);
+  if (def == NULL)
+    return -1;
+  else
+    return def->pictype;
+}
+
+/***************end IDENT module *******************/

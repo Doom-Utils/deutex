@@ -45,7 +45,8 @@ UInt8 COLindex( UInt8 R, UInt8 G, UInt8 B,UInt8 index);
 UInt8 COLpalMatch( UInt8 R, UInt8 G, UInt8 B);
 
 
-static struct PIXEL huge *COLpal;  /* The game palette (comes from PLAYPAL) */
+static struct PIXEL *COLpal;  /* The game palette (comes from PLAYPAL) */
+static struct PIXEL *COLpalAlt = NULL;  /* Alternate palette (TITLEPAL) */
 static struct PIXEL COLinv;
 static  UInt8 COLinvisib;
 static Bool COLok=FALSE;
@@ -72,7 +73,7 @@ static int pixel_cmp (const void *pixel1, const void *pixel2)
 const int COLsame = 3;
 Int16 COLdiff( UInt8 R,  UInt8 G,  UInt8 B, UInt8 idx)
 {
-   register struct PIXEL huge *pixel = &COLpal[(Int16)(idx&0xFF)];
+   register struct PIXEL  *pixel = &COLpal[(Int16)(idx&0xFF)];
    register Int16 d; /*signed*/
    register Int16 e=0;
    d= (((Int16)R)&0xFF) - (((Int16) pixel->R) &0xFF);
@@ -87,6 +88,7 @@ Int16 COLdiff( UInt8 R,  UInt8 G,  UInt8 B, UInt8 idx)
    if(e<0) return 0x7FFF;
    return e;
 }
+
 UInt8 COLpalMatch( UInt8 R, UInt8 G, UInt8 B)
 {  Int16 i,test,min=0x7FFF;
    UInt8 idxmin='\0';
@@ -111,8 +113,8 @@ const Int16 HashP2 = POWER;                   /* 10=1024*/
 const Int16 HashSz = 1<<POWER;		/* 1<< HashP2	*/
 const Int16 HashMask = (1<<POWER)-1;		/* HashSz-1	*/
 /*const Int16 HashStop = -1;*/
-static UInt8 huge *COLhash;              /*hash table*/
-/*static Int16 huge *COLnext;*/
+static UInt8  *COLhash;              /*hash table*/
+/*static Int16  *COLnext;*/
 
 
 Int16 Hash(UInt8 r,UInt8 g,UInt8 b)
@@ -125,6 +127,7 @@ Int16 Hash(UInt8 r,UInt8 g,UInt8 b)
   res &= HashMask;
   return  (Int16) res;
 }
+
 /*
 void COLhashPrint(void)
 { Int16 idx,i;
@@ -146,6 +149,7 @@ void COLhashPrint(void)
    fprintf(COLfp,"\nHash used %d out of %d\n",count,HashSz);
 }
 */
+
 /*original colors*/
 void COLputColHash(Int16 index,UInt8 R,UInt8 G,UInt8 B)
 { Int16 count,idx,nextidx;
@@ -159,6 +163,7 @@ void COLputColHash(Int16 index,UInt8 R,UInt8 G,UInt8 B)
   }
   Bug("Can't hash Doom pal ");
 }
+
 /*new colors, with matching*/
 UInt8 COLgetIndexHash(UInt8 R,UInt8 G,UInt8 B)
 { Int16 idx,nextidx,count;
@@ -191,21 +196,22 @@ UInt8 COLgetIndexHash(UInt8 R,UInt8 G,UInt8 B)
 
 
 
-
-
-
-void COLinit( UInt8 invR, UInt8 invG, UInt8 invB,char huge *Colors, Int16 Colsz)
+/*
+ *	Normal palette (PLAYPAL)
+ */
+void COLinit( UInt8 invR, UInt8 invG, UInt8 invB,char  *Colors, Int16 Colsz)
 {  Int16 i;
    const char *name = NULL;
    /*Int16 R,G,B;*/
    if(COLok!=FALSE) Bug("COLok");
    if(Colsz< 256*sizeof(struct PIXEL)) Bug("Color entry too small");
    COLok=TRUE;
-   COLpal= (struct PIXEL huge *)Malloc(256*sizeof(struct PIXEL));
-   for(i=0;i<256;i++)
-   { COLpal[i].R=Colors[i*3+0];
-	 COLpal[i].G=Colors[i*3+1];
-	 COLpal[i].B=Colors[i*3+2];
+   COLpal= (struct PIXEL  *)Malloc(256*sizeof(struct PIXEL));
+   for(i=0;i< NCOLOURS;i++)
+   {
+     COLpal[i].R=Colors[i*3+0];
+     COLpal[i].G=Colors[i*3+1];
+     COLpal[i].B=Colors[i*3+2];
    }
 #if 1  /*supposedly exact...*/
    if (COLpal[0].R == 0 && COLpal[0].G == 0 && COLpal[0].B == 0
@@ -255,14 +261,13 @@ void COLinit( UInt8 invR, UInt8 invG, UInt8 invB,char huge *Colors, Int16 Colsz)
       that contains many duplicates that would fill the hash
       table with useless data. -- AYM 1999-09-18 */
    {
-     const int COLOURS = 256;
-     struct PIXEL *unique = Malloc (COLOURS * sizeof *unique);
-     for (i = 0; i < COLOURS; i++)
+     struct PIXEL *unique = Malloc (NCOLOURS * sizeof *unique);
+     for (i = 0; i < NCOLOURS; i++)
        unique[i] = COLpal[i];
-     qsort (unique, COLOURS, sizeof *unique, pixel_cmp);
-     COLhash=(UInt8 huge *)Malloc(HashSz);
+     qsort (unique, NCOLOURS, sizeof *unique, pixel_cmp);
+     COLhash=(UInt8  *)Malloc(HashSz);
      Memset(COLhash,COLinvisib,HashSz); /*clear hash table*/
-     for (i=0; i<COLOURS; i++)
+     for (i = 0; i< NCOLOURS; i++)
      { if ((UInt8)i!=COLinvisib
 	 && (i == 0 || pixel_cmp (unique + i, unique + i - 1) != 0))
 	     COLputColHash (i, unique[i].R, unique[i].G, unique[i].B);
@@ -270,21 +275,26 @@ void COLinit( UInt8 invR, UInt8 invG, UInt8 invB,char huge *Colors, Int16 Colsz)
      Free (unique);
    }
 }
+
 void COLfree(void)
 { if(COLok!=TRUE) Bug("COLok");
   COLok=FALSE;
   Free(COLpal);
   Free(COLhash);
+  if (COLpalAlt != NULL)
+    Free (COLpalAlt);
 }
+
  UInt8 COLinvisible(void)
 { if(COLok!=TRUE) Bug("COLok");
   return COLinvisib;
 }
 
-struct PIXEL huge *COLdoomPalet(void)
+struct PIXEL  *COLdoomPalet(void)
 { if(COLok!=TRUE) Bug("COLok");
   return COLpal;
 }
+
 UInt8 COLindex( UInt8 R, UInt8 G, UInt8 B, UInt8 index)
 {  Int16 i;
    if(COLok!=TRUE) Bug("COLok");
@@ -306,126 +316,165 @@ UInt8 COLindex( UInt8 R, UInt8 G, UInt8 B, UInt8 index)
 
 
 
+/*
+ *	Alternate palette (TITLEPAL)
+ */
+static char *titlepal_data  = NULL;
+static size_t titlepal_size = 0;
 
+void COLinitAlt (char *_titlepal_data, Int32 _titlepal_size)
+{
+  titlepal_data = _titlepal_data;
+  titlepal_size = _titlepal_size;
+}
 
+struct PIXEL *COLaltPalet(void)
+{
+  if (COLpalAlt != NULL)
+    return COLpalAlt;
 
+  /* What follows is done only once : */
+  if (titlepal_data == NULL)
+  {
+    int n;
 
+    Warning ("TITLEPAL not found. Using PLAYPAL instead.");
+    COLpalAlt = (struct PIXEL *) Malloc (NCOLOURS * sizeof *COLpalAlt);
+    for (n = 0; n < NCOLOURS; n++)
+      COLpalAlt[n] = COLpal[n];
+  }
+  else
+  {
+    struct PIXEL *p;
+    struct PIXEL *pmax;
+    const unsigned char *d    = (const unsigned char *) titlepal_data;
+    const unsigned char *dmax = d + titlepal_size;
 
+    if (titlepal_size < 3 * NCOLOURS)
+      Warning ("TITLEPAL too short (%ld). Filling with black.",
+	  (long) titlepal_size);
+    COLpalAlt = (struct PIXEL *) Malloc (NCOLOURS * sizeof *COLpalAlt);
+    /* Copy the contents of TITLEPAL into COLpalAlt */
+    for (p = COLpalAlt, pmax = p + NCOLOURS; p < pmax; p++)
+    {
+      p->R = d < dmax ? *d++ : 0;
+      p->G = d < dmax ? *d++ : 0;
+      p->B = d < dmax ? *d++ : 0;
+    }
+    Free (titlepal_data);
+    titlepal_data = NULL;  /* Paranoia */
+  }
 
-
-
-
-
-
-
+  return COLpalAlt;
+}
 
 
 #ifdef QUANTSLOW
-/*************** COL module: quantisation ************/
-/*
-** implemented as the most stupid  color quantisation
-** ever to be seen on this sector of the galaxy
-**
-*/
-
-
-static struct PIXEL huge *COLpal;
-static struct PIXEL COLinv;
-static  UInt8 COLinvisib;
-static Bool COLok=FALSE;
-
-
-
-void COLinit( UInt8 invR, UInt8 invG, UInt8 invB,UInt8 huge *Colors, Int16 Colsz)
-{  Int16 i;
-   UInt8 r,g,b;
-
-   if(COLok!=FALSE) Bug("COLok");
-   if(Colsz< 256*sizeof(struct PIXEL)) Bug("Color entry too small");
-   COLok=TRUE;
-   COLpal= (struct PIXEL huge *)Malloc(256*sizeof(struct PIXEL));
-   /*
-   ** possible bug: the color corresponding to the
-   ** CYAN is assumed to be the second one with 0 0 0
-   ** this is because CYAN is supressed.
-   */
-   for(i=0;i<256;i++)
-   { r=Colors[i*3+0];
-     g=Colors[i*3+1];
-     b=Colors[i*3+2];
-     COLpal[i].R=r;
-     COLpal[i].G=g;
-     COLpal[i].B=b;
-     if(r==0)if(g==0)if(b==0)
-       COLinvisib=( UInt8)(i&0xFF);
-   }
-   if(COLinvisib!=(UInt8)0xF7)Warning("Strange PLAYPAL invisible color");
-   if(COLinvisib==0)ProgError("PLAYPAL is not correct");
-   /*
-   ** correction to doom palette
-   */
-   i=((Int16)COLinvisib)&0xFF;
-   COLinv.R=COLpal[i].R=invR;
-   COLinv.G=COLpal[i].G=invG;
-   COLinv.B=COLpal[i].B=invB;
-}
- UInt8 COLinvisible(void)
-{ if(COLok!=TRUE) Bug("COLok");
-  return COLinvisib;
-}
-
-struct PIXEL huge *COLdoomPalet(void)
-{ if(COLok!=TRUE) Bug("COLok");
-  return COLpal;
-}
-
-
-
-Int16 COLdiff( UInt8 r, UInt8 g, UInt8 b, UInt8 idx);
-UInt8 COLindex( UInt8 R, UInt8 G, UInt8 B,UInt8 index)
-{  Int16 i;
-   Int16 test,min=0x7FFF;
-   UInt8  idx,idxmin;
-   if(COLok!=TRUE) Bug("COLok");
-
-   if(R==COLinv.R)if(G==COLinv.G)if(B==COLinv.B) return COLinvisib;
-   /*check for DOOM palette*/
-   i= ((Int16)index)&0xFF;
-   if(R==COLpal[i].R)
-	if(G==COLpal[i].G)
-		if(B==COLpal[i].B)
-                	return index;
-   /*Best color match: slow*/
-   idx=(UInt8)0;
-   for(i=0;i<256;i++)
-   {  if(idx!=COLinvisib)
-      { test=COLdiff(R,G,B,idx);
-        if(test<min) {min=test;idxmin=idx;}
-      }
-      if(min==0)  break;
-      idx ++;
-   }
-   return idxmin;
-}
-void COLfree(void)
-{ if(COLok!=TRUE) Bug("COLok");
-  COLok=FALSE;
-  Free(COLpal);
-}
-
-
- Int16 COLdiff( UInt8 r,  UInt8 g,  UInt8 b, UInt8  idx)
-{  Int16 d;
-   Int16 e=0;
-   Int16 index = (Int16)(idx&0xFF);
-   d= ((Int16)r) - ((Int16) COLpal[index].R);
-   e+= (d>0)? d:-d;
-   d= ((Int16)g) - ((Int16) COLpal[index].G);
-   e+= (d>0)? d:-d;
-   d= ((Int16)b) - ((Int16) COLpal[index].B);
-   e+= (d>0)? d:-d;
-   return e;
-}
+/*unused!*//*************** COL module: quantisation ************/
+           /*
+           ** implemented as the most stupid  color quantisation
+           ** ever to be seen on this sector of the galaxy
+           **
+           */
+/*unused!*/
+/*unused!*/
+/*unused!*/static struct PIXEL  *COLpal;
+/*unused!*/static struct PIXEL COLinv;
+/*unused!*/static  UInt8 COLinvisib;
+/*unused!*/static Bool COLok=FALSE;
+/*unused!*/
+/*unused!*/
+/*unused!*/
+/*unused!*/void COLinit( UInt8 invR, UInt8 invG, UInt8 invB,UInt8  *Colors, Int16 Colsz)
+/*unused!*/{  Int16 i;
+/*unused!*/   UInt8 r,g,b;
+/*unused!*/
+/*unused!*/   if(COLok!=FALSE) Bug("COLok");
+/*unused!*/   if(Colsz< 256*sizeof(struct PIXEL)) Bug("Color entry too small");
+/*unused!*/   COLok=TRUE;
+/*unused!*/   COLpal= (struct PIXEL  *)Malloc(256*sizeof(struct PIXEL));
+              /*
+              ** possible bug: the color corresponding to the
+              ** CYAN is assumed to be the second one with 0 0 0
+              ** this is because CYAN is supressed.
+              */
+/*unused!*/   for(i=0;i<256;i++)
+/*unused!*/   { r=Colors[i*3+0];
+/*unused!*/     g=Colors[i*3+1];
+/*unused!*/     b=Colors[i*3+2];
+/*unused!*/     COLpal[i].R=r;
+/*unused!*/     COLpal[i].G=g;
+/*unused!*/     COLpal[i].B=b;
+/*unused!*/     if(r==0)if(g==0)if(b==0)
+/*unused!*/       COLinvisib=( UInt8)(i&0xFF);
+/*unused!*/   }
+/*unused!*/   if(COLinvisib!=(UInt8)0xF7)Warning("Strange PLAYPAL invisible color");
+/*unused!*/   if(COLinvisib==0)ProgError("PLAYPAL is not correct");
+	      /*
+	      ** correction to doom palette
+	      */
+/*unused!*/   i=((Int16)COLinvisib)&0xFF;
+/*unused!*/   COLinv.R=COLpal[i].R=invR;
+/*unused!*/   COLinv.G=COLpal[i].G=invG;
+/*unused!*/   COLinv.B=COLpal[i].B=invB;
+/*unused!*/}
+/*unused!*/ UInt8 COLinvisible(void)
+/*unused!*/{ if(COLok!=TRUE) Bug("COLok");
+/*unused!*/  return COLinvisib;
+/*unused!*/}
+/*unused!*/
+/*unused!*/struct PIXEL  *COLdoomPalet(void)
+/*unused!*/{ if(COLok!=TRUE) Bug("COLok");
+/*unused!*/  return COLpal;
+/*unused!*/}
+/*unused!*/
+/*unused!*/
+/*unused!*/
+/*unused!*/Int16 COLdiff( UInt8 r, UInt8 g, UInt8 b, UInt8 idx);
+/*unused!*/UInt8 COLindex( UInt8 R, UInt8 G, UInt8 B,UInt8 index)
+/*unused!*/{  Int16 i;
+/*unused!*/   Int16 test,min=0x7FFF;
+/*unused!*/   UInt8  idx,idxmin;
+/*unused!*/   if(COLok!=TRUE) Bug("COLok");
+/*unused!*/
+/*unused!*/   if(R==COLinv.R)if(G==COLinv.G)if(B==COLinv.B) return COLinvisib;
+/*unused!*/   /*check for DOOM palette*/
+/*unused!*/   i= ((Int16)index)&0xFF;
+/*unused!*/   if(R==COLpal[i].R)
+/*unused!*/	if(G==COLpal[i].G)
+/*unused!*/		if(B==COLpal[i].B)
+/*unused!*/                	return index;
+/*unused!*/   /*Best color match: slow*/
+/*unused!*/   idx=(UInt8)0;
+/*unused!*/   for(i=0;i<256;i++)
+/*unused!*/   {  if(idx!=COLinvisib)
+/*unused!*/      { test=COLdiff(R,G,B,idx);
+/*unused!*/        if(test<min) {min=test;idxmin=idx;}
+/*unused!*/      }
+/*unused!*/      if(min==0)  break;
+/*unused!*/      idx ++;
+/*unused!*/   }
+/*unused!*/   return idxmin;
+/*unused!*/}
+/*unused!*/void COLfree(void)
+/*unused!*/{ if(COLok!=TRUE) Bug("COLok");
+/*unused!*/  COLok=FALSE;
+/*unused!*/  Free(COLpal);
+/*unused!*/}
+/*unused!*/
+/*unused!*/
+/*unused!*/ Int16 COLdiff( UInt8 r,  UInt8 g,  UInt8 b, UInt8  idx)
+/*unused!*/{  Int16 d;
+/*unused!*/   Int16 e=0;
+/*unused!*/   Int16 index = (Int16)(idx&0xFF);
+/*unused!*/   d= ((Int16)r) - ((Int16) COLpal[index].R);
+/*unused!*/   e+= (d>0)? d:-d;
+/*unused!*/   d= ((Int16)g) - ((Int16) COLpal[index].G);
+/*unused!*/   e+= (d>0)? d:-d;
+/*unused!*/   d= ((Int16)b) - ((Int16) COLpal[index].B);
+/*unused!*/   e+= (d>0)? d:-d;
+/*unused!*/   return e;
+/*unused!*/}
 #endif /*QUANTSLOW*/
 
 #endif /*DeuTex*/

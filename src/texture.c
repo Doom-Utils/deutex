@@ -50,7 +50,7 @@ PNM
 */
 
 /***************Begin PNAME module*****************/
-static struct   PNMP{char name[8];} huge *PNMpatchs;
+static struct   PNMP{char name[8];}  *PNMpatchs;
 static Int16    PNMtop;
 static Int16        PNMmax;
 static Int16    PNMknown;
@@ -58,7 +58,7 @@ static Bool        PNMok = FALSE;
 
 
 
-void PNMinit(char huge *buffer,Int32 size)
+void PNMinit(char  *buffer,Int32 size)
 {  Int16 n,i;
    char picname[8];
    Int32 pnames;
@@ -71,7 +71,7 @@ void PNMinit(char huge *buffer,Int32 size)
    }
    /*initialise*/
    PNMmax=(Int16)(pnames+NEWPATCHS);
-   PNMpatchs=(struct PNMP huge *)Malloc(PNMmax*sizeof(struct PNMP));
+   PNMpatchs=(struct PNMP  *)Malloc(PNMmax*sizeof(struct PNMP));
    PNMtop=(Int16)pnames;
    PNMknown=0;
    /*Read patches*/
@@ -112,7 +112,7 @@ static Int16 PNMgetPatchIndex(char  *patch)
      PNMtop++;  /* Increase top of patches*/
      if(PNMtop>=PNMmax)
      { PNMmax+=NEWPATCHS;
-       PNMpatchs=(struct PNMP huge *)Realloc(PNMpatchs,PNMmax*sizeof(struct PNMP));
+       PNMpatchs=(struct PNMP  *)Realloc(PNMpatchs,PNMmax*sizeof(struct PNMP));
      }
   }
   return idx;
@@ -318,7 +318,7 @@ Int32 TXUwriteTEXTUREtoWAD(struct WADINFO *info)
        write_i16_le (&texdef.dummy0d, 0);
        write_i16_le (&texdef.numpat,  TXUtex[t].Npatches);
        /*write the begining of texture definition*/
-       size+=WADRwriteBytes(info,(char huge *)&texdef,sizeof(struct TEXDEF));
+       size+=WADRwriteBytes(info,(char  *)&texdef,sizeof(struct TEXDEF));
        for(p=0; p<(TXUtex[t].Npatches); p++)
        { if(pat+p>=TXUpatTop) Bug("TxuP>D");/*number of patches exceeds definitions*/
          /*write patch definition*/
@@ -327,7 +327,7 @@ Int32 TXUwriteTEXTUREtoWAD(struct WADINFO *info)
          write_i16_le (&patdef.yofs,   TXUpat[pat+p].ofsY);
          write_i16_le (&patdef.dummy1, 1);
          write_i16_le (&patdef.dummy0, 0);
-         size+=WADRwriteBytes(info,(char huge *)&patdef,sizeof(struct PATDEF));
+         size+=WADRwriteBytes(info,(char  *)&patdef,sizeof(struct PATDEF));
        }
      }
      pat+=TXUtex[t].Npatches;
@@ -340,7 +340,7 @@ Int32 TXUwriteTEXTUREtoWAD(struct WADINFO *info)
 ** Data= texture entry
 ** if PatchSz>0, Patch defines the patch list
 */
-void TXUreadTEXTURE(char huge *Data,Int32 DataSz,char huge *Patch, Int32 PatchSz,Bool Redefn)
+void TXUreadTEXTURE(char  *Data,Int32 DataSz,char  *Patch, Int32 PatchSz,Bool Redefn)
 { Int32 Pos,  Numtex, Numpat, dummy;
   /* texture data*/
   Int16 t,p,i, Xsize, Ysize; /* size x and y  */
@@ -351,8 +351,8 @@ void TXUreadTEXTURE(char huge *Data,Int32 DataSz,char huge *Patch, Int32 PatchSz
   Int32  MaxPindex;
   static char  tname[8];     /*texture name*/
   static char  pname[8];     /*patch name*/
-  struct TEXDEF huge *texdef;
-  struct PATDEF huge *patdef;
+  struct TEXDEF  *texdef;
+  struct PATDEF  *patdef;
   /*si Patch==NULL alors utiliser Pname list*/
 
   /*get number of patches*/
@@ -377,7 +377,7 @@ void TXUreadTEXTURE(char huge *Data,Int32 DataSz,char huge *Patch, Int32 PatchSz
       Pos -= 8;
     dummy=Pos+sizeof(struct TEXDEF); /*would BUG GCC else!*/
     if(dummy>DataSz) ProgError("TEXTURE entry too small");
-    texdef = (struct TEXDEF huge *) (Data + Pos);
+    texdef = (struct TEXDEF  *) (Data + Pos);
     if (texture_format == TF_NAMELESS)  /* No name. Make one up (TEXnnnn) */
     {
       if (t > 9999)
@@ -408,7 +408,7 @@ void TXUreadTEXTURE(char huge *Data,Int32 DataSz,char huge *Patch, Int32 PatchSz
     dummy=Pos+(Numpat*sizeof(struct PATDEF));
     if(dummy>DataSz)              ProgError("TEXTURE entry too small");
     for (p = 0; p < Numpat; p++, Pos+=sizeof(struct PATDEF))
-    {  patdef=(struct PATDEF huge *)(&Data[Pos]);
+    {  patdef=(struct PATDEF  *)(&Data[Pos]);
        Xofs = peek_i16_le (&patdef->xofs);
        if((Xofs<-4096)||(Xofs>4096))ProgError("Bad Patch X offset");
        Yofs = peek_i16_le (&patdef->yofs);
@@ -427,7 +427,7 @@ void TXUreadTEXTURE(char huge *Data,Int32 DataSz,char huge *Patch, Int32 PatchSz
   }
 }
 
-Bool TXUcheckTex(Int16 npatch,Int16 huge *PszX)
+Bool TXUcheckTex(Int16 npatch,Int16  *PszX)
 {  Int16 t,tt,p,pat,col,top,found;
    Int16 bit,C,b;        /*bit test*/
    Int16 Meduza;

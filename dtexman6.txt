@@ -94,13 +94,13 @@ important features.
 
 3. Doom alpha 0.4 and Doom alpha 0.5 are now supported. To extract
    the contents of the iwads,
- 
+
      deutex -doom04 c:\doom0_4 -xtract
      deutex -doom05 c:\doom0_5 -xtract
 
-   Some graphics are mistakenly put in the lumps directory
-   (TITLEPIC, MSKUL*, ...). Levels are not extracted properly yet.
-   You will see at lot of warnings like
+   Some graphics are extracted as lumps (GNUM[0-9]). Levels are
+   not extracted properly yet. You will see at lot of warnings
+   like
 
      Warning: ** Not enough entry in level **
      Warning: ** will not overwrite file ./lumps/flatname.lmp **
@@ -144,7 +144,7 @@ important features.
 
 11. Assorted bug fixes.
 
--- AYM 1999-10-02
+-- AYM 1999-11-01
 
 ==================================================================
 

@@ -69,4 +69,5 @@ void TXTaddSection(struct TXTFILE *TXT,const char *def);
 void TXTaddEntry(struct TXTFILE *TXT,const char *name,const char
     *filenam,Int16 x,Int16 y,Bool repeat, Bool XY);
 void TXTaddComment(struct TXTFILE *TXT,const char *text);
+void TXTaddEmptyLine (struct TXTFILE *TXT);
 

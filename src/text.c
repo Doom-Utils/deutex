@@ -432,6 +432,7 @@ void TXTaddSection(struct TXTFILE *TXT,const char *def)
 { if(TXTok!=TRUE) Bug("TxtAdS");
   fprintf(TXT->fp,"[%.8s]\n",def);
 }
+
 void TXTaddEntry(struct TXTFILE *TXT,const char *name,const char *filenam,Int16 x,Int16 y,Bool repeat, Bool XY)
 { if(TXTok!=TRUE) Bug("TxtAdE");
   fprintf(TXT->fp,"%.8s",name);
@@ -444,9 +445,17 @@ void TXTaddEntry(struct TXTFILE *TXT,const char *name,const char *filenam,Int16 
     fprintf(TXT->fp,"\t*");
   fprintf(TXT->fp,"\n");
 }
+
 void TXTaddComment(struct TXTFILE *TXT,const char *text)
 { if(TXTok!=TRUE) Bug("TxtAdC");
-  fprintf(TXT->fp,";%.256s\n",text);
+  fprintf(TXT->fp,"# %.256s\n",text);
+}
+
+void TXTaddEmptyLine (struct TXTFILE *TXT)
+{
+  if (TXTok != TRUE)
+    Bug ("TxtAdL");
+  putc ('\n', TXT->fp);
 }
 
 #endif /*DeuTex*/

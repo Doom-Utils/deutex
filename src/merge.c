@@ -46,7 +46,7 @@ static struct WADDIR HDRdir[6];
 **  Take some entries from a WAD
 */
 static void HDRplunderWad(struct WADINFO *rwad,struct WADINFO *ewad)
-{ char huge *data;
+{ char  *data;
   Int32 wsize,sz=0;
   Int32 ostart,osize;
   Int16 n;
@@ -59,7 +59,7 @@ static void HDRplunderWad(struct WADINFO *rwad,struct WADINFO *ewad)
   ** copy entries from WAD
   */
   Phase("Copying entries from Wad (Please wait).\n");
-  data = (char huge *)Malloc(MEMORYCACHE);
+  data = (char  *)Malloc(MEMORYCACHE);
   for(n=0;n<(rwad->ntry);n++)
   {
 	 if((n&0x7F)==0) Phase(".");
@@ -94,7 +94,7 @@ static void HDRplunderWad(struct WADINFO *rwad,struct WADINFO *ewad)
 ** Copy a WAD, and link to it's entries
 */
 static Int32 HDRinsertWad(struct WADINFO *rwad,struct WADINFO *ewad,Int32 *pesize)
-{ char huge *data;
+{ char  *data;
   Int32 wsize,sz=0;
   Int32 estart,esize;
   Int16 n;
@@ -108,7 +108,7 @@ static Int32 HDRinsertWad(struct WADINFO *rwad,struct WADINFO *ewad,Int32 *pesiz
   WADRseek(ewad,0);
   esize=ewad->maxpos;
   Phase("Inserting Wad file into Wad.\n");
-  data = (char huge *)Malloc(MEMORYCACHE);
+  data = (char  *)Malloc(MEMORYCACHE);
   for(wsize=0;wsize<esize;wsize+=sz)
   { sz=(esize-wsize>MEMORYCACHE)? MEMORYCACHE:esize-wsize;
 	 WADRreadBytes(ewad,data,sz);
@@ -144,7 +144,7 @@ void HDRrestoreWAD(const char *wadres)
   Int32 ewadstart=0,ewadsize=0;
   static char ewadname[8];
   static char ewadfile[40];
-  char huge *data;
+  char  *data;
   Int32      size=0,wsize=0,sz=0;
   Int32 time;
   FILE *fp;
@@ -157,7 +157,7 @@ void HDRrestoreWAD(const char *wadres)
   /*get position of fake directory entry, reference to old dir*/
   dirpos = rwad.dirpos - HDRdirSz;
   WADRseek(&rwad,dirpos);
-  WADRreadBytes(&rwad,(char huge *)HDRdir,HDRdirSz);
+  WADRreadBytes(&rwad,(char  *)HDRdir,HDRdirSz);
   Fail=FALSE;
   if(peek_i32_le (&HDRdir[0].start) != 0x24061968L)  Fail=TRUE;
   if(peek_i32_le (&HDRdir[0].size)  != 666L)         Fail=TRUE;
@@ -167,7 +167,7 @@ void HDRrestoreWAD(const char *wadres)
                 if(rwad.dir[n].size>=HDRdirSz)
                 { dirpos=rwad.dir[n].start;
                   WADRseek(&rwad,dirpos);
-                  WADRreadBytes(&rwad,(char huge *)HDRdir,HDRdirSz);
+                  WADRreadBytes(&rwad,(char  *)HDRdir,HDRdirSz);
                   Fail=FALSE;
         if(peek_i32_le (&HDRdir[0].start) != 0x24061968L)  Fail=TRUE;
         if(peek_i32_le (&HDRdir[0].size)  != 666L)         Fail=TRUE;
@@ -202,7 +202,7 @@ void HDRrestoreWAD(const char *wadres)
          else
          { Phase("Restoring internal WAD %s\n",ewadfile);
                 if((fp=fopen(ewadfile,FOPEN_WB))!=NULL)
-                { data = (char huge *)Malloc( MEMORYCACHE);
+                { data = (char  *)Malloc( MEMORYCACHE);
                   size = ewadsize;
                   WADRseek(&rwad,ewadstart);
                   fseek(fp,0,SEEK_SET);
@@ -267,10 +267,10 @@ static void HDRsetDir(struct WADINFO *rwad,Bool IsIwad,Bool Restore,
          WADRdirAddEntry(rwad,pos,HDRdirSz,"_DEUTEX_");
   }
   /*write old refs*/
-  WADRwriteBytes(rwad,(char huge *)HDRdir,HDRdirSz);
+  WADRwriteBytes(rwad,(char  *)HDRdir,HDRdirSz);
   /*write the directory*/
   rwad->dirpos = WADRposition(rwad);
-  WADRwriteDir(rwad);
+  WADRwriteDir(rwad, 1);
 }
 /************ General services ******************/
 
@@ -293,11 +293,11 @@ void PSTmergeWAD(const char *doomwad,const char *wadin,NTRYB select)
 {
 		  static struct WADINFO iwad;
 		  static struct WADINFO pwad;
-		  ENTRY huge *iiden;      /*identify entry in IWAD*/
-		  ENTRY huge *piden;      /*identify entry in PWAD*/
-		  Int16 pnm;char huge *Pnam;Int32 Pnamsz=0;
+		  ENTRY  *iiden;      /*identify entry in IWAD*/
+		  ENTRY  *piden;      /*identify entry in PWAD*/
+		  Int16 pnm;char  *Pnam;Int32 Pnamsz=0;
 		  Int32 dirpos,ntry,isize,pstart,psize,time;
-		  struct WADDIR huge *NewDir;Int32 NewNtry;
+		  struct WADDIR  *NewDir;Int32 NewNtry;
 		  Phase("Attempting to merge IWAD %s and PWAD %s\n",doomwad,wadin);
 		  /*open iwad,get iwad directory*/
 		  iwad.ok=0;
@@ -356,11 +356,11 @@ void ADDappendSpriteFloor(const char *doomwad, const char *wadres,NTRYB select)
 {
         struct WADINFO iwad;
         struct WADINFO pwad;
-        ENTRY huge *iiden;      /*identify entry in IWAD*/
-        ENTRY huge *piden;      /*identify entry in PWAD*/
-        Int16 pnm;char huge *Pnam;Int32 Pnamsz;
+        ENTRY  *iiden;      /*identify entry in IWAD*/
+        ENTRY  *piden;      /*identify entry in PWAD*/
+        Int16 pnm;char  *Pnam;Int32 Pnamsz;
         Int32 dirpos,ntry,psize,time;
-        struct WADDIR huge *NewDir;Int32 NewNtry;
+        struct WADDIR  *NewDir;Int32 NewNtry;
         Phase("Appending ");
         if(select&BSPRITE) Phase("Sprites ");
         if(select&BFLAT)   Phase("Flats ");
@@ -404,13 +404,13 @@ void ADDjoinWads(const char *doomwad, const char *wadres, const char
 {  struct WADINFO iwad;  /*IWAD*/
         struct WADINFO ewad;  /*external Wad*/
         struct WADINFO rwad;
-        ENTRY huge *eiden;      /*identify entry in IWAD*/
-        ENTRY huge *riden;      /*identify entry in PWAD*/
-        Int16 entry;char huge *Entry;Int32 EntrySz;
-        Int16 pnm;char huge *Patch;Int32 PatchSz;
+        ENTRY  *eiden;      /*identify entry in IWAD*/
+        ENTRY  *riden;      /*identify entry in PWAD*/
+        Int16 entry;char  *Entry;Int32 EntrySz;
+        Int16 pnm;char  *Patch;Int32 PatchSz;
         Int32 start,size;
         Int16 etexu,rtexu;
-        struct WADDIR huge *NewDir;Int32 NewNtry;
+        struct WADDIR  *NewDir;Int32 NewNtry;
         Bool TexuMrg = FALSE;
         Int32 dirpos,ntry,rsize,estart,esize,time;
         Phase("Merging PWAD %s into PWAD %s\n",wadext,wadres);
@@ -538,11 +538,11 @@ void ADDallSpriteFloor(const char *wadout, const char *doomwad, const char
         struct WADINFO pwad;
         struct WADINFO rwad;
         Int16 n;
-        ENTRY huge *iiden;      /*identify entry in IWAD*/
-        ENTRY huge *piden;      /*identify entry in PWAD*/
+        ENTRY  *iiden;      /*identify entry in IWAD*/
+        ENTRY  *piden;      /*identify entry in PWAD*/
         Int32 start,size,ostart,osize;
-        Int16 pnm;char huge *Pnam;Int32 Pnamsz;
-        struct WADDIR huge *NewDir;Int32 NewNtry;
+        Int16 pnm;char  *Pnam;Int32 Pnamsz;
+        struct WADDIR  *NewDir;Int32 NewNtry;
 
         Phase("Copying ");
         if(select&BSPRITE) Phase("Sprites ");
@@ -570,7 +570,7 @@ void ADDallSpriteFloor(const char *wadout, const char *doomwad, const char
         NewDir=LISmergeDir(&NewNtry,TRUE,TRUE,select,&iwad,iiden,EXTERNAL,&pwad,piden,0);
         /* create a new PWAD*/
         rwad.ok=0;
-        WADRopenW(&rwad,wadout,PWAD);
+        WADRopenW(&rwad,wadout,PWAD, 1);
         for(n=0;n<NewNtry;n++)
         { ostart=NewDir[n].start;
           osize=NewDir[n].size;
@@ -586,7 +586,7 @@ void ADDallSpriteFloor(const char *wadout, const char *doomwad, const char
    /*close files memory*/
    WADRclose(&iwad);
    WADRclose(&pwad);
-   WADRwriteDir(&rwad);
+   WADRwriteDir(&rwad, 1);
    WADRclose(&rwad);
    Output("Addition of Sprites and Floors is complete\n");
 }

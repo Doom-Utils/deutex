@@ -86,8 +86,10 @@ static Bool WSafe;
 static Bool George;
 #endif /*DeuTex*/
 char trnR,trnG,trnB;
+picture_format_t picture_format = PF_NORMAL;
 texture_format_t texture_format = TF_NORMAL;
 texture_lump_t   texture_lump   = TL_NORMAL;
+const char *debug_ident = NULL;
 
 typedef void (*comfun_t) (int argc, const char *argv[]);
 static int is_prefix (const char *s1, const char *s2);
@@ -203,36 +205,44 @@ void COMmain(int argc, const char *argv[])
    Info("Main IWAD file: %s.\n",MainWAD);
    (void)argc;
 }
+
 void COMwadir(int argc, const char *argv[])
 { XTRlistDir(MainWAD,((argc<2)? NULL: argv[1]),Select);
 }
+
 void COMadd(int argc, const char *argv[])
 { ADDallSpriteFloor(argv[2],MainWAD,argv[1],Select);
   (void)argc;
 }
+
 void COMapp(int argc, const char *argv[])
 { ADDappendSpriteFloor(MainWAD,argv[1],Select);
   (void)argc;
 }
+
 void COMapps(int argc, const char *argv[])
 { Select= (BALL) & (~BFLAT); /*no flats*/
   ADDappendSpriteFloor(MainWAD,argv[1],Select);
   (void)argc;
 }
+
 void COMappf(int argc, const char *argv[])
 { Select= (BALL) & (~BSPRITE); /*no sprites*/
   ADDappendSpriteFloor(MainWAD,argv[1],Select);
   (void)argc;
 }
+
 void COMjoin(int argc, const char *argv[])
 { ADDjoinWads(MainWAD,argv[1],argv[2],Select);
   (void)argc;
 }
+
 void COMmerge(int argc, const char *argv[])
 { Select     = BALL;
   PSTmergeWAD(MainWAD,argv[1],Select);
   (void)argc;
 }
+
 void COMrestor(int argc, const char *argv[])
 { HDRrestoreWAD((argc>=2)? argv[1]:MainWAD);
 }
@@ -247,61 +257,90 @@ void COMsprit(int argc, const char *argv[])
   Info("Select SPRITES\n");
   (void)argc;(void)argv;
 }
+
 void COMflat(int argc, const char *argv[])
 { Select&= ~BSPRITE;
   Info("Select FLATS\n");
   (void)argc;(void)argv;
 }
 #endif /*DeuSF*/
+
 #if defined DeuTex
 /*
 ** Selections
 */
 void COMsprit(int argc, const char *argv[])
 { Select|=BSPRITE;
-  Info("Select SPRITES\n");
+  Info("Select sprites\n");
   (void)argc;(void)argv;
 }
+
 void COMflat(int argc, const char *argv[])
 { Select|=BFLAT;
-  Info("Select FLATS\n");
+  Info("Select flats\n");
   (void)argc;(void)argv;
 }
+
 void COMlevel(int argc, const char *argv[])
 { Select|=BLEVEL;
-  Info("Select LEVELS\n");
+  Info("Select levels\n");
   (void)argc;(void)argv;
 }
+
 void COMlump(int argc, const char *argv[])
 { Select|=BLUMP;
-  Info("Select LUMPS\n");
+  Info("Select lumps\n");
   (void)argc;(void)argv;
 }
+
 void COMtextur(int argc, const char *argv[])
 { Select|=BTEXTUR;
-  Info("Select TEXTURES\n");
+  Info("Select textures\n");
   (void)argc;(void)argv;
 }
+
 void COMsound(int argc, const char *argv[])
 { Select|=BSOUND;
-  Info("Select SOUNDS\n");
+  Info("Select sounds\n");
   (void)argc;(void)argv;
 }
+
 void COMmusic(int argc, const char *argv[])
 { Select|=BMUSIC;
-  Info("Select MUSICS\n");
+  Info("Select musics\n");
   (void)argc;(void)argv;
 }
+
 void COMgraphic(int argc, const char *argv[])
 { Select|=BGRAPHIC;
-  Info("Select GRAPHICS\n");
+  Info("Select graphics\n");
   (void)argc;(void)argv;
 }
+
+void COMsneas(int argc, const char *argv[])
+{ Select|=BSNEA;
+  Info("Select sneas\n");
+  (void)argc;(void)argv;
+}
+
+void COMsneaps(int argc, const char *argv[])
+{ Select|=BSNEAP;
+  Info("Select sneaps\n");
+  (void)argc;(void)argv;
+}
+
+void COMsneats(int argc, const char *argv[])
+{ Select|=BSNEAT;
+  Info("Select sneats\n");
+  (void)argc;(void)argv;
+}
+
 void COMpatch(int argc, const char *argv[])
 { Select|=BPATCH;
-  Info("Select PATCHES\n");
+  Info("Select patches\n");
   (void)argc;(void)argv;
 }
+
 void COMgeorge(int argc, const char *argv[])
 { George=TRUE;
   Info("Use S_END for sprites.\n");
@@ -318,7 +357,7 @@ void COMdebug(int argc, const char *argv[])
 #include "color.h"
   static struct WADINFO iwad;
   Int16 pnm;
-  char huge *Colors; Int32 Pnamsz=0;
+  char  *Colors; Int32 Pnamsz=0;
   iwad.ok=0;
   WADRopenR(&iwad,MainWAD);
   pnm=WADRfindEntry(&iwad,"PLAYPAL");
@@ -332,6 +371,14 @@ void COMdebug(int argc, const char *argv[])
 #endif
   (void)argc;(void)argv;
 }
+
+void COMdi (int argc, const char *argv[])
+{
+  Info ("Debugging identification of entry \"%.8s\"\n", argv[1]);
+  debug_ident = argv[1];
+  (void) argc;
+}
+
 void COMdeu(int argc, const char *argv[])
 { HowMuchJunk=MAXJUNK64;
   Info("Some junk will be added at end of WAD, for DEU 5.21.\n");
@@ -560,6 +607,7 @@ static comdef_t Com[]=
  {OPT,5,"win",      COMwintxn, "<doom> <data> <info> <select> <colour>","WinTex shortcut"},
  {OPT,2,"wim",      COMwintxm, "<doom> <select>","WinTex shortcut"},
  {CMD,0,"debug",    COMdebug,  NULL,   "Debug mode"},
+ {OPT,1,"di",       COMdi,     "<name>", "Debug identification of entry"},
  {OPT,0,"overwrite",COMstroy,  NULL,   "overwrite all"},
 #endif /*DeuTex*/
  {OPT,1,"wtx",      COMwintex, "<iwad>","WinTex shortcut"},
@@ -593,6 +641,9 @@ static comdef_t Com[]=
  {OPT,0,"musics",   COMmusic,  NULL,   "select musics"},
  {OPT,0,"textures", COMtextur, NULL,   "select textures"},
  {OPT,0,"graphics", COMgraphic,NULL,   "select graphics"},
+ {OPT,0,"sneas",    COMsneas,  NULL,   "select sneas (sneaps and sneats)"},
+ {OPT,0,"sneaps",   COMsneaps, NULL,   "select sneaps"},
+ {OPT,0,"sneats",   COMsneats, NULL,   "select sneats"},
  /*by request from George Hamlin*/
  {OPT,0,"s_end",    COMgeorge, NULL,   "use S_END for sprites, not SS_END"},
  {OPT,0,"george",   COMgeorge, NULL,   NULL},

@@ -42,7 +42,7 @@ Place, Suite 330, Boston, MA 02111-1307, USA.
 struct ELIST
 { Int16 Top;     /*num of entries allocated for list*/
   Int16 Pos;     /*current top position*/
-  struct WADDIR huge *Lst;
+  struct WADDIR  *Lst;
 };
 static struct ELIST LISlmp;
 static struct ELIST LISspr;
@@ -62,7 +62,7 @@ static void LISinitLists(void)
 /*
 ** count the number of entry types
 */
-static void LIScountTypes(ENTRY huge *ids,Int16 nb)
+static void LIScountTypes(ENTRY  *ids,Int16 nb)
 {  Int16 i;
 	for(i=0;i<nb;i++)
 	{  switch(ids[i]&EMASK)
@@ -86,10 +86,10 @@ static void LIScountTypes(ENTRY huge *ids,Int16 nb)
 }
 static void LISallocLists(void)
 {  /*allocate memory for the lists*/
-	LISlmp.Lst =(struct WADDIR huge *)Malloc(LISlmp.Top*sizeof(struct WADDIR));
-	LISspr.Lst =(struct WADDIR huge *)Malloc(LISspr.Top*sizeof(struct WADDIR));
-	LISpat.Lst =(struct WADDIR huge *)Malloc(LISpat.Top*sizeof(struct WADDIR));
-	LISflt.Lst =(struct WADDIR huge *)Malloc(LISflt.Top*sizeof(struct WADDIR));
+	LISlmp.Lst =(struct WADDIR  *)Malloc(LISlmp.Top*sizeof(struct WADDIR));
+	LISspr.Lst =(struct WADDIR  *)Malloc(LISspr.Top*sizeof(struct WADDIR));
+	LISpat.Lst =(struct WADDIR  *)Malloc(LISpat.Top*sizeof(struct WADDIR));
+	LISflt.Lst =(struct WADDIR  *)Malloc(LISflt.Top*sizeof(struct WADDIR));
 }
 static void LISfreeLists(void)
 {  Free(LISflt.Lst);
@@ -163,7 +163,7 @@ static Bool LISdeleteSprite(char root[8],char phase,char view)
 /*
 ** list management. very basic. no hash table.
 */
-static void LISaddMission(struct WADDIR huge *dir, Int16 found)
+static void LISaddMission(struct WADDIR  *dir, Int16 found)
 {
 	Int16 l=0,dummy=0;
 	/*check*/
@@ -180,7 +180,7 @@ static void LISaddMission(struct WADDIR huge *dir, Int16 found)
 	Memcpy((&(LISlmp.Lst[l])),(dir),found*sizeof(struct WADDIR));
 }
 
-static void LISadd(struct ELIST *L,struct WADDIR huge *dir)
+static void LISadd(struct ELIST *L,struct WADDIR  *dir)
 {   /*check current position*/
 	 if((L->Pos)>=L->Top) Bug("LisSml"); /*list count too small*/
 	 /* ADD in List */
@@ -192,7 +192,7 @@ static void LISadd(struct ELIST *L,struct WADDIR huge *dir)
 ** Find in list, and replace if exist
 **
 */
-static Bool LISfindRplc(struct ELIST *L,struct WADDIR huge *dir)
+static Bool LISfindRplc(struct ELIST *L,struct WADDIR  *dir)
 { Int16 l;
   for(l=0;l<(L->Pos);l++)
 	 if(strncmp(L->Lst[l].name,dir[0].name,8)==0)
@@ -206,7 +206,7 @@ static Bool LISfindRplc(struct ELIST *L,struct WADDIR huge *dir)
 ** suitable for LUMPS and SPRITES
 ** but generally those shall not be added: they may not be recognized
 */
-static void LISsubstit(struct ELIST *L,struct WADDIR huge *dir)
+static void LISsubstit(struct ELIST *L,struct WADDIR  *dir)
 { /* SUBSTIT in List */
   if(LISfindRplc(L,dir)==TRUE) return;
   Warning("entry %.8s might be ignored by DOOM.",dir[0].name);
@@ -216,7 +216,7 @@ static void LISsubstit(struct ELIST *L,struct WADDIR huge *dir)
 ** if entry already exist, destroy it, and put at the end
 ** suitable for PATCH and FLATS  (to define new animations)
 */
-static void LISmove(struct ELIST *L,struct WADDIR huge *dir)
+static void LISmove(struct ELIST *L,struct WADDIR  *dir)
 { Int16 l,sz;
   for(l=0;l<(L->Pos);l++)
 	 if(strncmp(L->Lst[l].name,dir[0].name,8)==0)
@@ -233,7 +233,7 @@ static void LISmove(struct ELIST *L,struct WADDIR huge *dir)
 	 ** an IWAD sprite entry
 	 ** suitable for SPRITES only
 	 */ /***/
-static void LISaddSprite(struct WADDIR huge *dir,Bool Warn)
+static void LISaddSprite(struct WADDIR  *dir,Bool Warn)
 { Bool Okay=FALSE;
   /*warn:  FALSE= no warning. TRUE = warn.*/
   /* If entry already exists, replace it*/
@@ -257,7 +257,7 @@ static void LISaddSprite(struct WADDIR huge *dir,Bool Warn)
 */
 static void LISmakeNewDir(struct WADINFO *nwad,Int16 S_END,Int16 P_END,Int16 F_END,Int16 Pn,Int16 Fn)
 {  Int16 n;
-	struct WADDIR huge *dir;
+	struct WADDIR  *dir;
 	/*levels,lumps, graphics into new dir*/
 	if(LISlmp.Pos>0)
 	{ for(n=0;n<LISlmp.Pos;n++)
@@ -331,12 +331,12 @@ static void LISmakeNewDir(struct WADINFO *nwad,Int16 S_END,Int16 P_END,Int16 F_E
 **
 **
 */
-struct WADDIR huge *LISmergeDir(Int32 *pNtry,Bool Append,Bool Complain,NTRYB select,
-		  struct WADINFO *iwad,ENTRY huge *iiden,Int32 iwadflag,
-		  struct WADINFO *pwad,ENTRY huge *piden,Int32 pwadflag)
+struct WADDIR  *LISmergeDir(Int32 *pNtry,Bool Append,Bool Complain,NTRYB select,
+		  struct WADINFO *iwad,ENTRY  *iiden,Int32 iwadflag,
+		  struct WADINFO *pwad,ENTRY  *piden,Int32 pwadflag)
 {
-	struct WADDIR huge *idir;
-	struct WADDIR huge *pdir;
+	struct WADDIR  *idir;
+	struct WADDIR  *pdir;
 	struct WADINFO nwad;
 	Int16  inb,  pnb;
 	Int16  i,p,found;

@@ -72,17 +72,17 @@ void WADRopenPipo(struct WADINFO *info,Int32 ntry)
    info->ok=WADR_PIPO;
    if(ntry<=0)             Bug("WadPpo");
    info->maxdir=ntry;
-   info->dir=(struct WADDIR huge *)Malloc((info->maxdir)*sizeof(struct WADDIR));
+   info->dir=(struct WADDIR  *)Malloc((info->maxdir)*sizeof(struct WADDIR));
    info->maxpos=ntry*sizeof(struct WADDIR);
    info->ntry=0;
    info->wposit=info->maxpos;
 }
 
-struct WADDIR huge *WADRclosePipo(struct WADINFO *info,Int32 huge *ntry)
+struct WADDIR  *WADRclosePipo(struct WADINFO *info,Int32  *ntry)
 {  if((info->ok!=WADR_PIPO)) Bug("WadPpc");
    info->ok=FALSE;
    if(info->ntry<0)info->ntry=0;
-   info->dir=(struct WADDIR huge *)
+   info->dir=(struct WADDIR  *)
              Realloc(info->dir,(info->ntry)*sizeof(struct WADDIR));
    *ntry=info->ntry;
    return info->dir;
@@ -130,7 +130,7 @@ void WADRopenR(struct WADINFO *info, const char *wadin)
      ProgError("WAD dir references are incorrect");
    /*allocate directory*/
    info->maxdir=ntry;
-   info->dir=(struct WADDIR huge *)Malloc((info->maxdir)*sizeof(struct WADDIR));
+   info->dir=(struct WADDIR  *)Malloc((info->maxdir)*sizeof(struct WADDIR));
    /*read directory, calculate further byte in wad*/
    info->maxpos=dirpos+(ntry*sizeof(struct WADDIR));
    WADRseek(info,dirpos);
@@ -148,8 +148,11 @@ void WADRopenR(struct WADINFO *info, const char *wadin)
    Phase("Reading WAD %s:\t(%ld entries)\n",wadin,ntry);
 }
 static char signature[19 + 32];
-void WADRopenW(struct WADINFO *info, const char *wadout,WADTYPE type)
-{  Phase("Creating %cWAD %s\n",(type==IWAD)?'I':'P',wadout);
+void WADRopenW(struct WADINFO *info, const char *wadout,WADTYPE type,
+    int verbose)
+{  
+   if (verbose)
+     Phase("Creating %cWAD %s\n",(type==IWAD)?'I':'P',wadout);
    if((info->ok&WADR_RDWR)) Bug("WadOpW");
 
    /*check file*/
@@ -162,7 +165,7 @@ void WADRopenW(struct WADINFO *info, const char *wadout,WADTYPE type)
    info->wposit=0;
    info->ntry  =0;
    info->maxdir=MAXPWADDIR;
-   info->dir   =(struct WADDIR huge *)Malloc((info->maxdir)*sizeof(struct WADDIR));
+   info->dir   =(struct WADDIR  *)Malloc((info->maxdir)*sizeof(struct WADDIR));
    WADRwriteShort(info,type);   /* WAD type: PW or IW*/
    WADRwriteShort(info,WADMAGIC); /* WAD type: AD*/
    /* will be fixed when closing the WAD*/
@@ -174,6 +177,7 @@ void WADRopenW(struct WADINFO *info, const char *wadout,WADTYPE type)
    WADRwriteBytes(info,signature,strlen(signature));
    WADRalign4(info);
 }
+
 /*
 ** Assumes file already opened write
 ** if not, open it first
@@ -211,7 +215,7 @@ Int32 WADRdirAddEntry(struct WADINFO *info,Int32 start,Int32 size, const char
   n=(Int16)info->ntry; /*position of new entry*/
   if(n>=info->maxdir) /*shall we move the dir?*/
   { info->maxdir+=MAXPWADDIR;
-    info->dir=(struct WADDIR huge *)Realloc((char huge *)info->dir,(info->maxdir)*sizeof(struct WADDIR));
+    info->dir=(struct WADDIR  *)Realloc((char  *)info->dir,(info->maxdir)*sizeof(struct WADDIR));
   }
   info->ntry++; /*new dir size*/
   info->dir[n].size=size;
@@ -226,7 +230,7 @@ Int32 WADRdirAddEntry(struct WADINFO *info,Int32 start,Int32 size, const char
 ** write the directory (names, counts, lengths)
 ** then update the number of  entries and dir pointer
 */
-void WADRwriteDir(struct WADINFO *info)
+void WADRwriteDir(struct WADINFO *info, int verbose)
 {  Int16 n;
    if(!(info->ok&WADR_WRITE)) Bug("WadWD");
    WADRalign4(info);      /*align entry on Int32 word*/
@@ -243,7 +247,8 @@ void WADRwriteDir(struct WADINFO *info)
    WADRsetDirRef(info,info->ntry,info->dirpos);
    n=(Int16)( info->dirpos+(sizeof(struct WADDIR)*info->ntry));
    if(n>info->maxpos) info->maxpos=n;
-   Phase("WAD is complete: size %ld bytes.\n",info->wposit);
+   if (verbose)
+     Phase("WAD is complete: size %ld bytes.\n",info->wposit);
 }
 
 /***************** Wad structure *******************/
@@ -300,15 +305,44 @@ void WADRseek(struct WADINFO *info,Int32 position)
                 ProgError("Can't seek in WAD");
 }
 
-Int32 WADRreadBytes(struct WADINFO *info,char huge *buffer,Int32 nb)
-{  Int32 rsize,sz=0;
-   if(!(info->ok&WADR_READ)) Bug("WadRdB");
-   if(nb<=0) Bug("WadRd<");
-   for(rsize=0;rsize<nb;rsize+=sz)
-   { sz=(nb-rsize>MEMORYCACHE)? MEMORYCACHE:nb-rsize;
-     if(fread((buffer+(rsize)),(size_t)sz,1,info->fd)!=1)ProgError("Can't read WAD");
-   }
-   return nb;
+/*
+ *	WADRreadBytes2
+ *	Attempt to read up to <nbytes> bytes from wad <info>.
+ *	Return the actual number of bytes read.
+ */
+iolen_t WADRreadBytes2 (struct WADINFO *info, char *buffer, iolen_t nbytes)
+{
+  iolen_t attempt    = MEMORYCACHE;
+  iolen_t bytes_read = 0;
+
+  if (!(info->ok&WADR_READ))
+    Bug("WadRdB");
+  while (nbytes > 0)
+  {
+    size_t result;
+    if (attempt > nbytes)
+      attempt = nbytes;
+    result = fread (buffer, 1, nbytes, info->fd);
+    bytes_read += result;
+    if (result == 0)  /* Hit EOF */
+      break;
+    buffer += result;
+    nbytes -= result;
+  }
+  return bytes_read;
+}
+
+/*
+ *	WADRreadBytes
+ *	Attempt to read <nbytes> bytes from wad <info>. If EOF
+ *	is hit too soon, trigger a fatal error. Else, return
+ *	<nbytes>.
+ */
+iolen_t WADRreadBytes (struct WADINFO *info, char *buffer, iolen_t nbytes)
+{
+  if (WADRreadBytes2 (info, buffer, nbytes) != nbytes)
+    ProgError ("Can't read wad");
+  return nbytes;
 }
 
 Int16 WADRreadShort(struct WADINFO *info)
@@ -317,10 +351,6 @@ Int16 WADRreadShort(struct WADINFO *info)
    if (wad_read_i16 (info->fd, &res))
      ProgError ("Can't read wad");
    return res;
-#if 0
-   if(fread(&res,sizeof(Int16),1,info->fd)!=1)ProgError("Can't read WAD");
-   return BE_Int16(res);
-#endif
 }
 
 Int32 WADRreadLong(struct WADINFO *info)
@@ -329,10 +359,6 @@ Int32 WADRreadLong(struct WADINFO *info)
    if (wad_read_i32 (info->fd, &res))
      ProgError ("Can't read wad");
    return res;
-#if 0
-   if(fread(&res,sizeof(Int32),1,info->fd)!=1)ProgError("Can't read WAD");
-   return BE_Int32(res);
-#endif
 }
 
 void  WADRclose(struct WADINFO *info)
@@ -345,7 +371,7 @@ void  WADRclose(struct WADINFO *info)
 Int16 WADRfindEntry(struct WADINFO *info, const char *entry)
 { Int16 i;
   static char name[8];
-  struct WADDIR huge *dir;
+  struct WADDIR  *dir;
   if(!(info->ok&WADR_RDWR)) Bug("WadFE");
   for(i=0,dir=info->dir;i<info->ntry;i++,dir+=1)
   { Normalise(name,dir->name);
@@ -358,26 +384,56 @@ Int16 WADRfindEntry(struct WADINFO *info, const char *entry)
 /*
 ** load data in buffer
 */
-char huge *WADRreadEntry(struct WADINFO *info,Int16 n,Int32 *psize)
-{ char huge *buffer;
+char  *WADRreadEntry(struct WADINFO *info,Int16 n,Int32 *psize)
+{ char  *buffer;
   Int32 start,size;
   if(!(info->ok&WADR_READ)) Bug("WadRE");
   if(n>=(info->ntry))Bug("WadRE>");
   start = info->dir[n].start;
   size  = info->dir[n].size;
-  buffer=(char huge *)Malloc(size);
+  buffer=(char  *)Malloc(size);
   WADRseek(info,start);
   WADRreadBytes(info,buffer,size);
   *psize=size;
   return buffer;
 }
+
+/*
+ *	WADRreadEntry2
+ *	Read at most the *psize first bytes of a lump.
+ *	If the lump is shorter than *psize, it's _not_ an error.
+ *	Return the actual number of bytes read in *psize.
+ */
+char *WADRreadEntry2 (struct WADINFO *info, Int16 n, Int32 *psize)
+{
+  char *buffer;
+  long   start;
+  iolen_t size;
+  iolen_t actual_size;
+
+  if (! (info->ok & WADR_READ))
+    Bug ("WadRE");
+  if (n >= info->ntry)
+    Bug ("WadRE>");
+  start = info->dir[n].start;
+  size  = *psize < info->dir[n].size ? *psize : info->dir[n].size;
+  buffer = Malloc (size);
+  WADRseek (info, start);
+  actual_size = WADRreadBytes2 (info, buffer, size);
+  if (actual_size < size)
+    ProgError ("Lump %.8s: unexpected EOF at byte %ld",
+	info->dir[n].name, (long) actual_size);
+  *psize = actual_size;
+  return buffer;
+}
+
 #if defined DeuTex
 /*
 **  copy data from WAD to file
 */
 void WADRsaveEntry(struct WADINFO *info,Int16 n, const char *file)
 {  Int32 wsize,sz=0;
-   char huge *buffer;
+   char  *buffer;
    Int32 start,size;
    FILE *fd;
    if(!(info->ok&WADR_READ)) Bug("WadSE");
@@ -386,7 +442,7 @@ void WADRsaveEntry(struct WADINFO *info,Int16 n, const char *file)
    size  = info->dir[n].size;
    fd=fopen(file,FOPEN_WB);
    if(fd==NULL) ProgError("Can't open file %s",file);
-   buffer = (char huge *)Malloc( MEMORYCACHE);
+   buffer = (char  *)Malloc( MEMORYCACHE);
    WADRseek(info,start);
    for(wsize=0; wsize<size ;wsize+=sz)
    {  sz= (size-wsize>MEMORYCACHE)? MEMORYCACHE : size-wsize;
@@ -409,23 +465,14 @@ void WADRsetLong(struct WADINFO *info,Int32 pos,Int32 val)
   if(pos>(info->maxpos))		Bug("WadSL>");
   if(fseek(info->fd, pos, SEEK_SET))	ProgError("Can't seek in wad");
   if(wad_write_i32 (info->fd, val))	ProgError("Can't write in wad");
-#if 0
-if(fwrite(&v,sizeof(Int32),1,info->fd)!=1)  ProgError( "Can't write in wad");
-#endif
 }
 
 void WADRsetShort(struct WADINFO *info,Int32 pos,Int16 val)
 {
-#if 0
-  Int32 v=BE_Int16(val);
-#endif
   if(!(info->ok&WADR_WRITE))		Bug("WadStS");
   if(pos>(info->maxpos))		Bug("WadSS>");
   if(fseek(info->fd, pos, SEEK_SET))	ProgError("Can't seek in wad");
   if(wad_write_i16 (info->fd, val))	ProgError("Can't write in wad");
-#if 0
-  if(fwrite(&v,sizeof(Int16),1,info->fd)!=1)  ProgError( "Can't write in wad");
-#endif
 }
 
 /*
@@ -437,7 +484,7 @@ static void WADRcheckWritePos(struct WADINFO *info)
   if (fseek( info->fd, info->wposit, SEEK_SET)) ProgError( "Can't seek in wad");
 }
 
-static Int32 WADRwriteBlock(struct WADINFO *info,char huge *data,Int32 sz)
+static Int32 WADRwriteBlock(struct WADINFO *info,char  *data,Int32 sz)
 { if(fwrite(data,(size_t)sz,1,info->fd) != 1)  ProgError( "Wad write failed");
   info->wposit += sz;
   if(info->maxpos<info->wposit)info->maxpos=info->wposit;
@@ -459,18 +506,13 @@ Int32 WADRposition(struct WADINFO *info)
 { WADRcheckWritePos(info);
   return info->wposit;
 }
+
 /*
 ** write
 */
 Int32 WADRwriteLong(struct WADINFO *info,Int32 val)
 {
-#if 0
-  Int32 v=BE_Int32(val);
-#endif
   WADRcheckWritePos(info);
-#if 0
-  return WADRwriteBlock(info,(char huge *)&v,sizeof(Int32));
-#endif
   if (wad_write_i32 (info->fd, val))
     ProgError ("Wad write failed");
   info->wposit += sizeof val;
@@ -481,13 +523,7 @@ Int32 WADRwriteLong(struct WADINFO *info,Int32 val)
 
 Int32 WADRwriteShort(struct WADINFO *info,Int16 val)
 {
-#if 0
-  Int16 v=BE_Int16(val);
-#endif
   WADRcheckWritePos(info);
-#if 0
-  return WADRwriteBlock(info,(char huge *)&v,sizeof(Int16));
-#endif
   if (wad_write_i16 (info->fd, val))
     ProgError ("Wad write failed");
   info->wposit += sizeof val;
@@ -496,7 +532,7 @@ Int32 WADRwriteShort(struct WADINFO *info,Int16 val)
   return sizeof val;
 }
 
-Int32 WADRwriteBytes(struct WADINFO *info,char huge *data,Int32 size)
+Int32 WADRwriteBytes(struct WADINFO *info,char  *data,Int32 size)
 { Int32 wsize,sz=0;
   WADRcheckWritePos(info);
   if(size<=0) Bug("WadWb<");
@@ -507,13 +543,14 @@ Int32 WADRwriteBytes(struct WADINFO *info,char huge *data,Int32 size)
   return wsize;
 }
 
-static Int32 WADRwriteBlock2(struct WADINFO *info,char huge *data,Int32 sz)
+static Int32 WADRwriteBlock2(struct WADINFO *info,char  *data,Int32 sz)
 { if(fwrite(data,(size_t)sz,1,info->fd) != 1)return -1;
   info->wposit += sz;
   if(info->maxpos<info->wposit)info->maxpos=info->wposit;
   return sz;
 }
-Int32 WADRwriteBytes2(struct WADINFO *info,char huge *data,Int32 size)
+
+Int32 WADRwriteBytes2(struct WADINFO *info,char  *data,Int32 size)
 { Int32 wsize,sz=0;
   WADRcheckWritePos(info);
   if(size<=0) Bug("WadWb<");
@@ -525,13 +562,14 @@ Int32 WADRwriteBytes2(struct WADINFO *info,char huge *data,Int32 size)
   }
   return wsize;
 }
+
 /*
 **  copy data from SOURCE WAD to WAD
 */
 Int32 WADRwriteWADbytes(struct WADINFO *info,struct WADINFO *src,Int32 start,Int32 size)
 {  Int32 wsize,sz=0;
-   char huge *data;
-   data = (char huge *)Malloc( MEMORYCACHE);
+   char  *data;
+   data = (char  *)Malloc( MEMORYCACHE);
    WADRseek(src,start);
    WADRcheckWritePos(info);
    for(wsize=0; wsize<size;)
@@ -553,12 +591,12 @@ Int32 WADRwriteWADbytes(struct WADINFO *info,struct WADINFO *src,Int32 start,Int
 Int32 WADRwriteLump(struct WADINFO *info, const char *file)
 {  Int32      size,sz=0;
    FILE      *fd;
-   char huge *data;
+   char  *data;
    WADRcheckWritePos(info);
    /*Look for entry in master directory */
    fd=fopen(file,FOPEN_RB);
    if(fd==NULL) ProgError("Can't read file %s",file);
-   data = (char huge *)Malloc( MEMORYCACHE);
+   data = (char  *)Malloc( MEMORYCACHE);
    for(size=0;;)
    { sz = fread(data,1,(size_t)MEMORYCACHE,fd);
      if(sz<=0)break;
@@ -628,7 +666,7 @@ void WADRwriteWADlevel(struct WADINFO *info, const char *file, const char *level
 ** open for append
 */
 Int32 WADRprepareAppend(const char *wadres,struct WADINFO *rwad,
-     struct WADDIR huge *NewDir,Int32 NewNtry,
+     struct WADDIR  *NewDir,Int32 NewNtry,
      Int32 *dirpos,Int32 *ntry, Int32 *size)
 { Int32 ewadstart;
   Int32 rwadsize;

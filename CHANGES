@@ -3,6 +3,40 @@ Edit docsrc/changes.html instead.
 
                          History of changes for DeuTex
                                        
+   DeuTex 4.1.0 (AYM 1999-11-01)
+          
+          + CLI: new options -sneas, -sneaps and -sneats.
+          + Code: removed all occurrences of "huge" on the theory that,
+            on platforms where it's meaningful, we always use the huge
+            memory model anyway.
+          + Code: replaced certain occurrences of "Int32" by "iolen_t".
+          + Code: replaced certain occurrences of "256" by "NCOLOURS".
+          + Doom alpha 0.4: AMENA0 and MSKUL* are now correctly
+            recognized as graphics and not as lumps anymore. The 21
+            graphic lumps that ended up in lumps/ are now properly
+            extracted (into sneaps/ and sneats/). (The first item
+            involved propagating to IDENTgraphic() the changes made to
+            PICtoRAW() in v. 4.0.2. The second item needed heavy hacking,
+            creating a new image type (christened "snea") and managing an
+            alternate palette for TITLEPAL.) Still extracted as lumps :
+            GNUM[0-9] and HUFONT.
+          + Doom alpha 0.5: the 86 graphic lumps that ended up in lumps/
+            are now properly extracted (into sneaps/ and sneats/). Still
+            extracted as lump : HUFONT.
+          + Graphics: errors that used to cause DeuTex to give up on
+            extracting a picture now just make it skip the rest of
+            column. It also prints detailed messages about what it didn't
+            like and in which picture it occurred instead of bailing out
+            silently.
+          + Misc: new option -di to debug entry identification. Useful
+            mainly to hackers.
+          + Misc: cosmetic changes in the generated wadinfo.txt and in
+            the phase messages.
+          + Misc: no more messages "Creating PWAD" and "WAD is
+            complete..." during level extraction.
+          + Misc: set a limit of 10 warnings per picture, to prevent
+            invalid pictures from uselessly flooding the output.
+            
    DeuTex 4.0.3 (AYM 1999-10-02)
           
           + CLI: new option -doom2 as suggested by Matthew Miller.
@@ -12,6 +46,8 @@ Edit docsrc/changes.html instead.
             and PSYBB0 from strain.wad. Thanks to Matthew miller for
             reporting the bug.
           + Misc: added a useful URL to the GIF warning.
+          + Platform: now builds without errors on FAT filesystems
+            (replaced .deutex and .deusf by tmp/_deutex and tmp/_deusf).
           + Sound: fixed a bug that caused DeuTex to extract sounds with
             unlikely sample rates like 4 GHz whenever the sample rate in
             the lump was higher than 32767 Hz (for example DSVILACT and

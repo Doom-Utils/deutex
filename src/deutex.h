@@ -98,20 +98,17 @@ extern const char deutex_version[];
 #endif
 
 /* For real-mode 16-bit compilers, the huge memory model is
-   required. For all other compilers, the "huge" qualifier
-   is meaningless and must be hidden. */
+   required. */
 #if DT_OS == 'd' && DT_CC == 'b'
 #  if ! defined __HUGE__
-#    error Please compile in huge memory model (-mh)
+#    error Please compile in  memory model (-mh)
 #  endif
 #elif DT_OS == 'd' && DT_CC == 'm'
 #  if ! defined M_I86HM
-#    error Please compile in huge memory model (-AH)
+#    error Please compile in  memory model (-AH)
 #  endif
 #elif DT_OS == 'o' && DT_CC == 'i'  /* Not sure about this one */
    /* Do nothing */
-#else
-#  define huge
 #endif
 
 #include <stdlib.h>
@@ -126,6 +123,9 @@ extern const char deutex_version[];
 #define FOPEN_WT	"w"
 #define FOPEN_AT	"a"
 #define FOPEN_AB        "a"
+
+/* Number of bytes to read from or write to a file */
+typedef unsigned long iolen_t;
 
 #define MEMORYCACHE  (0x8000L)
 /* steps to increase size of WAD directory*/
@@ -143,15 +143,17 @@ typedef Int16 Bool;
 
 
 /* Wad magic numbers */
-#define IWADMAGIC     	0x5749
-#define PWADMAGIC       0x5750
-#define WADMAGIC	0x4441
+#define IWADMAGIC     	0x5749  /* little-endian 16-bit int for "IW" */
+#define PWADMAGIC       0x5750  /* little-endian 16-bit int for "PW" */
+#define WADMAGIC	0x4441  /* little-endian 16-bit int for "AD" */
 
 /*type of WAD files. correspond to 1st half of name*/
 typedef Int16 WADTYPE;
 #define IWAD (IWADMAGIC)
 #define PWAD (PWADMAGIC)
 
+/* Number of entries in the game palette */
+#define NCOLOURS 256
 
 /************ deutex.c ************/
 /* Entry selection Bits*/
@@ -165,7 +167,10 @@ typedef Int16 NTRYB;
 #define BPATCH		(0x40)
 #define BFLAT		(0x80)
 #define BMUSIC		(0x100)
-#define BALL		(0x1FF)
+#define BSNEAP          (0x200)
+#define BSNEAT          (0x400)
+#define BSNEA           (BSNEAP|BSNEAT)
+#define BALL		(0x7FF)
 
 typedef Int16 SNDTYPE;
 #define SNDNONE		(0)
@@ -196,7 +201,7 @@ struct WADDIR           /*same as in doom*/
 struct WADINFO
 { Int32 ntry;            /*entries in dir*/
   Int32 dirpos;          /*position of dir*/
-  struct WADDIR huge *dir;   /*directory */
+  struct WADDIR  *dir;   /*directory */
   Int32 maxdir;		/*max nb of entry in dir*/
   Int32 wposit;		/*position for write*/
   Int32 maxpos;		/*farther referenced byte in WAD*/
@@ -214,6 +219,8 @@ typedef Int16 PICTYPE;
 #define	PPATCH	(8)
 #define	PFLAT	(0xA)
 #define	PLUMP	(0xC)
+#define PSNEAP  (0xd)
+#define PSNEAT  (0xe)
 
 typedef Int16 ENTRY;
 #define EMASK	(0xFF00)
@@ -238,8 +245,10 @@ typedef Int16 ENTRY;
 #define 	EFLAT3	(0xA03)
 #define EMUSIC	(0xB00)
 #define EDATA	(0x1000)
+#define ESNEA	(0x2000)
+#define		ESNEAP   (0x2001)  /* Snea using PLAYPAL */
+#define		ESNEAT   (0x2002)  /* Snea using TITLEPAL */
 #define EZZZZ	(0x7F00)   /*unidentified entries*/
-
 
 
 
@@ -267,9 +276,14 @@ void XTRstructureTest(const char *doomwad, const char *wadin);
 void XTRtextureUsed(const char *wadin);
 
 
+/*
+ *	Misc globals, set by command line arguments
+ */
+typedef enum { PF_NORMAL, PF_ALPHA,    PF_PR   } picture_format_t;
 typedef enum { TF_NORMAL, TF_NAMELESS, TF_NONE } texture_format_t;
 typedef enum { TL_NORMAL, TL_TEXTURES, TL_NONE } texture_lump_t;
+extern picture_format_t picture_format;
 extern texture_format_t texture_format;
 extern texture_lump_t   texture_lump;
-
+extern const char *debug_ident;
 

@@ -4,7 +4,7 @@
 
         by Olivier Montanuy <Olivier.Montanuy@wanadoo.fr>
 	Revised AYM 1999-08-12
-	Last update 1999-09-09
+	Last update 1999-10-31
 
 
 
@@ -94,11 +94,6 @@ DJGPP 2.*
     Unix mkdir but those are maintainer targets and you probably don't
     need them.
 
-    If you build on a 8.3 filesystem (plain old FAT), make is going to
-    choke when trying to "touch .deutex" and "touch .deusf". Replace
-    all occurrences of ".deutex" and ".deusf" by "_deutex" and
-    "_deusf" in the makefile and start again.
-
     To compile, type
 
 	make
@@ -119,11 +114,6 @@ Cygwin
     targets also require cp, GNU find, lynx, rm, tar, tr zip and a
     Unix mkdir but those are maintainer targets and you probably don't
     need them.
-
-    If you build on a 8.3 filesystem (plain old FAT), make is going to
-    choke when trying to "touch .deutex" and "touch .deusf". Replace
-    all occurrences of ".deutex" and ".deusf" by "_deutex" and
-    "_deusf" in the makefile and start again.
 
     To compile, type
 

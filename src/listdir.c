@@ -1,4 +1,4 @@
-  /*
+/*
 This file is part of DeuTex.
 
 DeuTex incorporates code derived from DEU 5.21 that was put in the public
@@ -51,12 +51,12 @@ void XTRlistDir(const char *doomwad, const char *wadin, NTRYB select)
    static struct WADINFO pwad;
    static struct WADINFO iwad;
    static char buffer[128];
-   ENTRY huge *iden;
+   ENTRY  *iden;
    ENTRY type;
    Int32 ntry;
-   struct WADDIR huge *dir;
+   struct WADDIR  *dir;
    char *typ;
-   Int16 pnm;char huge *Pnam;Int32 Pnamsz=0;
+   Int16 pnm;char  *Pnam;Int32 Pnamsz=0;
 
    /*open iwad,get iwad directory*/
    iwad.ok=0;
@@ -207,7 +207,7 @@ void XTRvoidSpacesInWAD(const char *wadin)
 {  Int16 n;
 	static struct WADINFO pwad;
 	Int32 ntry;
-	struct WADDIR huge *dir;
+	struct WADDIR  *dir;
 	Int32 startpos,lastpos,ll,diff,wtotal;
 	Int32 w3,w20,w100,w1000,w10000,w100000;
 	wtotal=w3=w20=w100=w1000=w10000=w100000=0;
@@ -267,7 +267,7 @@ struct SIDEDEF
 ** Check a level
 ** Assumes TEXTURES are already read somewhere.
 */                            
-void CheckTexture(char huge *tex,Bool IsDef)
+void CheckTexture(char  *tex,Bool IsDef)
 { int n;
   char Name[8];
   for(n=0;n<8;n++)
@@ -293,12 +293,12 @@ void CheckTexture(char huge *tex,Bool IsDef)
 ** IsDef=TRUE if we just wish to declare textures
 */
 void CheckSideDefs(struct WADINFO *pwad,Int32 start,Int32 size,Bool IsDef)
-{ struct SIDEDEF huge *sid;
-  struct SIDEDEF huge *side;
+{ struct SIDEDEF  *sid;
+  struct SIDEDEF  *side;
   Int32 s;
-  sid = (struct SIDEDEF huge *)Malloc(size);
+  sid = (struct SIDEDEF  *)Malloc(size);
   WADRseek(pwad,start);
-  WADRreadBytes(pwad,(char huge *)sid,size);
+  WADRreadBytes(pwad,(char  *)sid,size);
   for(s=0;(s*sizeof(struct SIDEDEF))<size;s+=1)
   { side=sid+s;
     CheckTexture(side->Above,IsDef);
@@ -310,7 +310,7 @@ void CheckSideDefs(struct WADINFO *pwad,Int32 start,Int32 size,Bool IsDef)
 void CheckLevels(struct WADINFO *pwad, Bool IsDef)
 { Int16 lev,lin,id,top;
   Int32 ntry=pwad->ntry;
-  struct WADDIR huge *pdir=pwad->dir;
+  struct WADDIR  *pdir=pwad->dir;
   for(lev=0;lev<ntry;lev++)
   { id=IDENTlevel(pdir[lev].name);
 	 if(id>=0)
@@ -332,13 +332,13 @@ void CheckLevels(struct WADINFO *pwad, Bool IsDef)
 */
 void XTRstructureTest(const char *doomwad,const char *wadin)
 { static struct WADINFO pwad,iwad;
-  char huge *Pnames;
+  char  *Pnames;
   Int16 p,pnm,nbPatchs;
   Int32 size;
   static struct PICH{Int16 Xsz;Int16 Ysz;} pich;
-  Int16 huge *PszX;
+  Int16  *PszX;
   static char name[8];
-  char huge *buffer;
+  char  *buffer;
   Int16 cs,ce;
 
   /*read PNAME in wad, if defined*/
@@ -351,7 +351,7 @@ void XTRstructureTest(const char *doomwad,const char *wadin)
   pnm=WADRfindEntry(&pwad,"PNAMES");
   if(pnm>=0)
   { size=pwad.dir[pnm].size;
-    Pnames=(char huge *)Malloc(size);
+    Pnames=(char  *)Malloc(size);
 	 WADRseek(&pwad,pwad.dir[pnm].start);
     WADRreadBytes(&pwad,Pnames,size);
   }
@@ -359,7 +359,7 @@ void XTRstructureTest(const char *doomwad,const char *wadin)
   { pnm=WADRfindEntry(&iwad,"PNAMES");
     if(pnm<0)ProgError("PNAMES not found");
     size=iwad.dir[pnm].size;
-    Pnames=(char huge *)Malloc(size);
+    Pnames=(char  *)Malloc(size);
     WADRseek(&iwad,iwad.dir[pnm].start);
     WADRreadBytes(&iwad,Pnames,size);
   }
@@ -370,13 +370,13 @@ void XTRstructureTest(const char *doomwad,const char *wadin)
   */
   Phase("Checking Patches\n");
   nbPatchs=PNMgetNbOfPatch();
-  PszX=(Int16 huge *)Malloc(nbPatchs*sizeof(Int16));
+  PszX=(Int16  *)Malloc(nbPatchs*sizeof(Int16));
   for(p=0;p<nbPatchs;p++)                /*for all patches*/
   { PNMgetPatchName(name,p);
     pnm=WADRfindEntry(&pwad,name);
     if(pnm>=0)
     {  WADRseek(&pwad,pwad.dir[pnm].start);
-       WADRreadBytes(&pwad,(char huge *)&pich,sizeof(struct PICH));
+       WADRreadBytes(&pwad,(char  *)&pich,sizeof(struct PICH));
     }
 	 else
     { pnm=WADRfindEntry(&iwad,name);
@@ -385,7 +385,7 @@ void XTRstructureTest(const char *doomwad,const char *wadin)
         Output("Warning: Patch %.8s not found\n",name);
       else
       { WADRseek(&iwad,iwad.dir[pnm].start);
-        WADRreadBytes(&iwad,(char huge *)&pich,sizeof(struct PICH));
+        WADRreadBytes(&iwad,(char  *)&pich,sizeof(struct PICH));
       }
     }
     PszX[p] = peek_i16_le (&pich.Xsz);
@@ -397,7 +397,7 @@ void XTRstructureTest(const char *doomwad,const char *wadin)
   pnm=WADRfindEntry(&pwad,"TEXTURE1");
   if(pnm>=0)
   { /* read texture */
-    buffer=(char huge *)Malloc(pwad.dir[pnm].size);
+    buffer=(char  *)Malloc(pwad.dir[pnm].size);
     WADRseek(&pwad,pwad.dir[pnm].start);
     WADRreadBytes(&pwad,buffer,pwad.dir[pnm].size);
     TXUinit();
@@ -411,7 +411,7 @@ void XTRstructureTest(const char *doomwad,const char *wadin)
   pnm=WADRfindEntry(&pwad,"TEXTURE2");
   if(pnm>=0)
   { /* read texture */
-    buffer=(char huge *)Malloc(pwad.dir[pnm].size);
+    buffer=(char  *)Malloc(pwad.dir[pnm].size);
     WADRseek(&pwad,pwad.dir[pnm].start);
     WADRreadBytes(&pwad,buffer,pwad.dir[pnm].size);
     TXUinit();
@@ -431,7 +431,7 @@ void XTRstructureTest(const char *doomwad,const char *wadin)
   TXUinit();
   pnm=WADRfindEntry(&pwad,"TEXTURE1");
   if(pnm>=0)
-  {  buffer=(char huge *)Malloc(pwad.dir[pnm].size);
+  {  buffer=(char  *)Malloc(pwad.dir[pnm].size);
      WADRseek(&pwad,pwad.dir[pnm].start);
      WADRreadBytes(&pwad,buffer,pwad.dir[pnm].size);
          TXUreadTEXTURE(buffer,pwad.dir[pnm].size,NULL,0,TRUE);
@@ -440,7 +440,7 @@ void XTRstructureTest(const char *doomwad,const char *wadin)
   else
   {  pnm = WADRfindEntry(&iwad,"TEXTURE1");
      if(pnm>=0)
-     { buffer=(char huge *)Malloc(iwad.dir[pnm].size);
+     { buffer=(char  *)Malloc(iwad.dir[pnm].size);
        WADRseek(&iwad,iwad.dir[pnm].start);
        WADRreadBytes(&iwad,buffer,iwad.dir[pnm].size);
 			  TXUreadTEXTURE(buffer,iwad.dir[pnm].size,NULL,0,TRUE);
@@ -449,7 +449,7 @@ void XTRstructureTest(const char *doomwad,const char *wadin)
   }
   pnm=WADRfindEntry(&pwad,"TEXTURE2");
   if(pnm>=0)
-  {  buffer=(char huge *)Malloc(pwad.dir[pnm].size);
+  {  buffer=(char  *)Malloc(pwad.dir[pnm].size);
      WADRseek(&pwad,pwad.dir[pnm].start);
      WADRreadBytes(&pwad,buffer,pwad.dir[pnm].size);
          TXUreadTEXTURE(buffer,pwad.dir[pnm].size,NULL,0,TRUE);
@@ -458,7 +458,7 @@ void XTRstructureTest(const char *doomwad,const char *wadin)
   else
   {  pnm = WADRfindEntry(&iwad,"TEXTURE2");
      if(pnm>=0)
-     { buffer=(char huge *)Malloc(iwad.dir[pnm].size);
+     { buffer=(char  *)Malloc(iwad.dir[pnm].size);
        WADRseek(&iwad,iwad.dir[pnm].start);
        WADRreadBytes(&iwad,buffer,iwad.dir[pnm].size);
        TXUreadTEXTURE(buffer,iwad.dir[pnm].size,NULL,0,TRUE);
@@ -547,20 +547,20 @@ void XTRtextureUsed(const char *wadin)
 */
 void XTRcompakWAD(const char *DataDir,const char *wadin, const char *texout,Bool ShowIdx)
 {  static struct WADINFO pwad;
-   struct WADDIR huge *pdir;
+   struct WADDIR  *pdir;
    Int16 pnb;
    Int16 p,bas,tst,ofsx,ofsy;
    Int32 size,rsize,sz;
-   Bool huge *psame;
+   Bool  *psame;
    FILE *out;
-   char huge *bbas;
-   char huge *btst;
+   char  *bbas;
+   char  *btst;
    Phase("Detecting duplicate entries in WAD %s\n",wadin);
    pwad.ok=0;
    WADRopenR(&pwad,wadin);
    pnb=(Int16)pwad.ntry;
    pdir=pwad.dir;
-   psame=(Bool huge *)Malloc(pnb*sizeof(Bool));
+   psame=(Bool  *)Malloc(pnb*sizeof(Bool));
    for(p=0;p<pnb;p++)
    { psame[p]=FALSE;}
    if(texout==NULL)
@@ -569,8 +569,8 @@ void XTRcompakWAD(const char *DataDir,const char *wadin, const char *texout,Bool
      sprintf(file,"%.120s",texout);
    out=fopen(file,FOPEN_WT);
    fprintf(out,"; Indication of similar entries\n\n");
-   bbas=(char huge *)Malloc(MEMORYCACHE);
-   btst=(char huge *)Malloc(MEMORYCACHE);
+   bbas=(char  *)Malloc(MEMORYCACHE);
+   btst=(char  *)Malloc(MEMORYCACHE);
    for(bas=0;bas<pnb;bas++)
      if(psame[bas]==FALSE) /*skip already treated*/
        { size=pdir[bas].size;
