@@ -1,0 +1,19 @@
+#!/bin/sh
+#
+#	process - expand certain macro expressions in text files
+#	Usage: process <file> [<reffile> ...]
+#	AYM 1999-08-13
+#
+
+# In <file>, replace occurrences of
+# - "$DATE"        by the YYYY-MM-DD current time,
+# - "$SELF_DATE"   by the YYYY-MM-DD mtime of <file>,
+# - "$SOURCE_DATE" by the YYYY-MM-DD mtime of the most recent reffile,
+# - "$VERSION"     by the contents of the file ./VERSION.
+# Output is written on stdout.
+
+file=$1
+shift
+sed -e "s/\$DATE/$(date +%Y-%m-%d)/;
+	s/\$SELF_DATE/$(find $file -printf '%TY-%Tm-%Td')/;
+	s/\$VERSION/$(cat VERSION)/" $file

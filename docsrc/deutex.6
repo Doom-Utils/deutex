@@ -1,0 +1,346 @@
+.\" This file is part of DeuTex.
+.\" 
+.\" DeuTex incorporates code derived from DEU 5.21 that was put in the
+.\" public domain in 1994 by Raphaël Quinet and Brendon Wyber.
+.\" 
+.\" DeuTex is Copyright © 1994-1995 Olivier Montanuy,
+.\"           Copyright © 1999 André Majorel.
+.\" 
+.\" This program is free software; you can redistribute it and/or modify it
+.\" under the terms of the GNU General Public License as published by the
+.\" Free Software Foundation; either version 2 of the License, or (at your
+.\" option) any later version.
+.\" 
+.\" This program is distributed in the hope that it will be useful, but
+.\" WITHOUT ANY WARRANTY; without even the implied warranty of
+.\" MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE. See the GNU General
+.\" Public License for more details.
+.\" 
+.\" You should have received a copy of the GNU General Public License along
+.\" with this library; if not, write to the Free Software Foundation, Inc.,
+.\" 59 Temple Place, Suite 330, Boston, MA 02111-1307, USA.
+.\" 
+.TH DEUTEX 6 $DATE "DeuTex $VERSION"
+.SH NAME
+deutex, deusf \- do things with wad files
+.SH SYNOPSIS
+.BR "deutex \-?" | \-h | \-help | \-\-help
+.br
+.B  deutex \-\-version
+.br
+.B  deutex \-man
+.br
+\fBdeutex\fP [\fIoptions\fP]
+.B \-make \fP\fR[\fP\fIdirctivs.txt\fP\fR] \fP\fIout.wad\fP
+.br
+\fBdeutex\fP [\fIoptions\fP]
+.B \-wadir \fP\fIin.wad\fP
+.br
+\fBdeutex\fP [\fIoptions\fP]
+.B \-check \fP\fIin.wad\fP
+.br
+\fBdeutex\fP [\fIoptions\fP]
+.B \-usedtex \fP\fIin.wad\fP
+.br
+\fBdeutex\fP [\fIoptions\fP]
+.B \-unused \fP\fIin.wad\fP
+.br
+\fBdeutex\fP [\fIoptions\fP]
+.B \-xtract \fP\fIin.wad \fP\fR[\fP\fIdirctivs.txt\fP\fR]\fP
+.br
+\fBdeutex\fP [\fIoptions\fP]
+.B \-get \fP\fIentry \fP\fR[\fP\fIin.wad\fP\fR]\fP
+.br
+\fBdeutex\fP [\fIoptions\fP]
+.B \-pknormal \fP\fIin.wad \fP\fR[\fP\fIout.txt\fP\fR]\fP
+.br
+\fBdeutex\fP [\fIoptions\fP]
+.B \-pkgrahix \fP\fIin.wad \fP\fR[\fP\fIout.txt\fP\fR]\fP
+.br
+\fBdeutex\fP [\fIoptions\fP]
+.B \-add \fP\fIincomplete.wad out.wad\fP
+.br
+\fBdeutex\fP [\fIoptions\fP]
+.B \-append \fP\fIincomplete.wad\fP
+.br
+\fBdeutex\fP [\fIoptions\fP]
+.B \-join \fP\fIincomplete.wad in.wad\fP
+.br
+\fBdeutex\fP [\fIoptions\fP]
+.B \-merge \fP\fIin.wad\fP
+.br
+\fBdeutex\fP [\fIoptions\fP]
+.B \-restor\fP
+.br
+\fBdeutex\fP [\fIoptions\fP]
+.B \-as \fP\fIsprite.wad\fP
+.br
+\fBdeutex\fP [\fIoptions\fP]
+.B \-af \fP\fIflats.wad\fP
+
+.BR "deusf \-?" | \-h | \-help | \-\-help
+.br
+.B  deusf \-\-version
+.br
+.BI "deusf " options
+.br
+.SH DESCRIPTION
+DeuTex is a wad composer for Doom, Heretic, Hexen and Strife. It can be used
+to extract the lumps of a wad and save them as individual files or the
+reverse, and much more.
+
+When extracting a lump to a file, it does not just copy the raw data, it
+converts it to an appropriate format (such as PPM for graphics, Sun audio for
+samples, etc.). Conversely, when it reads files for inclusion in pwads, it
+does the necessary conversions (for example, from PPM to Doom picture format).
+
+DeuSF is a trimmed version of DeuTex that is used to merge sprites and flats
+from a pwad into an iwad, which is sometimes necessary because Doom and its
+breed do not handle sprites in pwads well.
+
+See \fBdocsrc/dtexman6.txt\fP for more information on DeuTex and DeuSF.
+.SH OPTIONS
+.TP 14
+\fB\-?\fP
+Print list of options.
+.TP 14
+\fB\-h\fP
+Same as above.
+.TP 14
+\fB\-help\fP
+Same as above.
+.TP 14
+\fB\--help\fP
+Same as above.
+.TP 14
+\fB\-man\fP
+Print list of options in troff -man format.
+.TP 14
+\fB\--version\fP
+Print version number.
+.TP 14
+\fB\-syntax\fP
+Print the syntax of wad creation directives.
+.TP 14
+\fB\-win \fP\fIdoom data info select colour\fP
+(opt.) WinTex shortcut.
+.TP 14
+\fB\-wim \fP\fIdoom select\fP
+(opt.) WinTex shortcut.
+.TP 14
+\fB\-debug\fP
+Debug mode.
+.TP 14
+\fB\-overwrite\fP
+(opt.) Overwrite all.
+.TP 14
+\fB\-wtx \fP\fIiwad\fP
+(opt.) WinTex shortcut.
+.TP 14
+\fB\-doom \fP\fIdir\fP
+(opt.) Indicate the directory of Doom/Doom II.
+.TP 14
+\fB\-heretic \fP\fIdir\fP
+(opt.) Indicate the directory of Heretic.
+.TP 14
+\fB\-hexen \fP\fIdir\fP
+(opt.) Indicate the directory of Hexen.
+.TP 14
+\fB\-strife \fP\fIdir\fP
+(opt.) Indicate the directory of Strife.
+.TP 14
+\fB\-dir \fP\fIdir\fP
+(opt.) Indicate the working directory.
+.TP 14
+\fB\-deu\fP
+(opt.) Add 64k of junk to workaround a bug of DEU 5.21.
+.TP 14
+\fB\-rgb \fP\fIr g b\fP
+(opt.) Specify the transparent colour (default 0/47/47).
+.TP 14
+\fB\-gif\fP
+(opt.) Save pictures as GIF (.gif).
+.TP 14
+\fB\-bmp\fP
+(opt.) Save pictures as BMP (.bmp).
+.TP 14
+\fB\-ppm\fP
+(opt.) Save pictures as rawbits (P6) PPM (.ppm).
+.TP 14
+\fB\-au\fP
+(opt.) Save sound as Sun audio (.au).
+.TP 14
+\fB\-wav\fP
+(opt.) Save sound as wave (.wav).
+.TP 14
+\fB\-voc\fP
+(opt.) Save sound as voc (.voc).
+.TP 14
+\fB\-fullsnd\fP
+(opt.) Save sound lumps beyond declared length.
+.TP 14
+\fB\-levels\fP
+(opt.) Select levels.
+.TP 14
+\fB\-lumps\fP
+(opt.) Select lumps.
+.TP 14
+\fB\-sounds\fP
+(opt.) Select sounds.
+.TP 14
+\fB\-musics\fP
+(opt.) Select musics.
+.TP 14
+\fB\-textures\fP
+(opt.) Select textures.
+.TP 14
+\fB\-graphics\fP
+(opt.) Select graphics.
+.TP 14
+\fB\-s_end\fP
+(opt.) Use S_END for sprites, not SS_END.
+.TP 14
+\fB\-george\fP
+Same as above.
+.TP 14
+\fB\-sprites\fP
+(opt.) Select sprites.
+.TP 14
+\fB\-patches\fP
+(opt.) Select patches.
+.TP 14
+\fB\-flats\fP
+(opt.) Select flats.
+.TP 14
+\fB\-v0\fP
+(opt.) Set verbosity level to 0.
+.TP 14
+\fB\-v1\fP
+(opt.) Set verbosity level to 1.
+.TP 14
+\fB\-v2\fP
+(opt.) Set verbosity level to 2.
+.TP 14
+\fB\-v3\fP
+(opt.) Set verbosity level to 3.
+.TP 14
+\fB\-v4\fP
+(opt.) Set verbosity level to 4.
+.TP 14
+\fB\-v5\fP
+(opt.) Set verbosity level to 5.
+.TP 14
+\fB\-be\fP
+(opt.) Assume all wads are big endian (default LE).
+.TP 14
+\fB\-le\fP
+(opt.) Assume all wads are little endian (default).
+.TP 14
+\fB\-ibe\fP
+(opt.) Input wads are big endian (default LE).
+.TP 14
+\fB\-ile\fP
+(opt.) Input wads are little endian (default).
+.TP 14
+\fB\-obe\fP
+(opt.) Create big endian wads (default LE).
+.TP 14
+\fB\-ole\fP
+(opt.) Create little endian wads (default).
+.TP 14
+\fB\-pf \fP\fR{\fP\fBnormal\fP\fR|\fP\fBalpha\fP\fR}\fP
+(opt.) Picture format (default is "normal").
+.TP 14
+\fB\-iwad\fP
+(opt.) Compose iwad, not pwad.
+.TP 14
+\fB\-make \fP\fR[\fP\fIdirctivs.txt\fP\fR] \fP\fIout.wad\fP
+Make a pwad, from the creation directives.
+.TP 14
+\fB\-build \fP\fR[\fP\fIdirctivs.txt\fP\fR] \fP\fIout.wad\fP
+Same as above.
+.TP 14
+\fB\-create \fP\fR[\fP\fIdirctivs.txt\fP\fR] \fP\fIout.wad\fP
+Same as above.
+.TP 14
+\fB\-wadir \fP\fIin.wad\fP
+List and identify entries in a wad.
+.TP 14
+\fB\-check \fP\fIin.wad\fP
+Check the textures.
+.TP 14
+\fB\-test \fP\fIin.wad\fP
+Same as above.
+.TP 14
+\fB\-usedtex \fP\fIin.wad\fP
+List textures used in all levels.
+.TP 14
+\fB\-unused \fP\fIin.wad\fP
+Find unused spaces in a wad.
+.TP 14
+\fB\-xtract \fP\fIin.wad \fP\fR[\fP\fIdirctivs.txt\fP\fR]\fP
+Extract some/all entries from a wad.
+.TP 14
+\fB\-extract \fP\fIin.wad \fP\fR[\fP\fIdirctivs.txt\fP\fR]\fP
+Same as above.
+.TP 14
+\fB\-get \fP\fIentry \fP\fR[\fP\fIin.wad\fP\fR]\fP
+Get a wad entry from main wad or in.wad.
+.TP 14
+\fB\-pknormal \fP\fIin.wad \fP\fR[\fP\fIout.txt\fP\fR]\fP
+Detect identical normal.
+.TP 14
+\fB\-pkgfx \fP\fIin.wad \fP\fR[\fP\fIout.txt\fP\fR]\fP
+Detect identical graphics.
+.TP 14
+\fB\-add \fP\fIincomplete.wad out.wad\fP
+Add sprites & flats of a pwad to those of Doom.
+.TP 14
+\fB\-append \fP\fIincomplete.wad\fP
+Append sprites & flats of Doom to a pwad.
+.TP 14
+\fB\-join \fP\fIincomplete.wad in.wad\fP
+Append sprites & flats of Doom to a pwad.
+.TP 14
+\fB\-merge \fP\fIin.wad\fP
+Merge doom.wad and a pwad.
+.TP 14
+\fB\-restore\fP
+Restore doom.wad and the pwad.
+.TP 14
+\fB\-as \fP\fIsprite.wad\fP
+Append all sprites to the wad.
+.TP 14
+\fB\-af \fP\fIflats.wad\fP
+Append all floors/ceilings to the wad.
+.SH ENVIRONMENT
+.TP
+.B DOOMWADDIR
+The directory where the iwad resides. The value of this
+environment variable is overridden by \fB\-main\fP, \fB\-doom\fP
+and friends.
+.SH BUGS
+See \fBTODO\fP.
+.SH LEGAL
+Most of this program is GPL'd but some of it is available under
+other licenses. This program is distributed in the hope that it
+will be useful, but WITHOUT ANY WARRANTY; without even the implied
+warranty of MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.
+See LICENSE for specific information and copyright notices. All
+trademarks are the property of their owners.
+.SH AUTHOR
+The original author of DeuTex is Olivier Montanuy.
+
+From 1994 to 1996, DeuTex was maintained by Olivier Montanuy
+<Olivier.Montanuy@wanadoo.fr> with help from Per Allansson
+<c91peral@und.ida.liu.se>, James Bonfield
+<jkb@mrc-molecular-biology.cambridge.ac.uk>, Sharon Bowles, Mark
+Mathews <mark.mathews@channel1.com> and Chuck Rossi. The
+original manual was written by Kevin McGrail <hevkev@sfo.com>.
+
+The current maintainer is André Majorel <amajorel@teaser.fr>.
+
+Questions and bug reports should be sent to the current
+maintainer, \fInot\fP to the original authors.
+.SH SEE ALSO
+.B man \-k doom wad

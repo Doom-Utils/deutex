@@ -1,0 +1,1 @@
+pkzip -ex ..\dtexsf.zip *.c *.h *.def *.prj *.ide *.bat *.txt *.cmd *.mak *.sh makefile

@@ -1,0 +1,121 @@
+THIS IS A GENERATED FILE -- DO NOT EDIT !
+Edit docsrc/todo.html instead.
+
+                             To-do list for DeuTex
+                                       
+     * In the directives file and textures files, "include" directive to
+       include the rest of another block/file.
+     * In the directives file and textures files, allow references to
+       environment variables (E.G. $E(name))
+     * In the directives file and textures files, allow user variables
+       (E.G. $(name))
+     * Make it easier to let a texture have a description identical to
+       another texture
+     * In the directives file, add a mean to import all/only named/all
+       except named flats as patches.
+     * In the directives file, add a mean to import all/only named/all
+       except named patches as flats. This implies 1) accepting flats
+       larger than 64×64 (by clipping) 2) converting transparent pixels
+       to a certain colour (which one ?).
+     * In the directives file, add a mean to automatically generate a
+       texture for all/only named/all except named patches. The height of
+       the automatic texture is 128, its width is the least power of two
+       wide enough to contain the patch. The automatic texture is filled
+       with the patch by tiling, starting from the top left corner. The
+       name of the automatic texture is the name of the patch.
+     * Patches > 255 high
+     * Make sure that support for Strife is complete.
+     * When doing -xtract/-make of strife0.wad, creates .au sound files
+       but is not able to read them back ("WAV: Can't read dsswish.au" or
+       something like that).
+     * Instead of allowing any and all characters in the script file,
+       require them to be quoted. And, when doing -xtract, produce the
+       script file with the appropriate quotes... Since, under Unix, the
+       only characters that are not allowed in a file name are NUL and
+       "/", I don't see why DeuTex should prevent users from extracting
+       lumps with weird characters in their names. However, that might
+       cause compatilibity problems with the DOS version.
+     * The presence of the GIF routines might prevent DeuTex to be
+       distributed in the "free" section of Debian. Would it be
+       sufficient to #ifdef them out ?
+     * Finish -pf
+     * RAWtoPPM() forgets to replace occurrences of the transparent
+       colour by its nearest colour. Thus, CEIL4_1 is extracted with a
+       cyan background.
+     * The command line interface is not always intuitive and fussy about
+       the position of certain options.
+     * Regarding audio support, Matthew W. Miller <mattm@infinet.com>
+       offered the following comment on 1999-07-04 :
+       
+     Audio handling in deutex (I'm referring to the irix 5.3 version's
+     included source code) is, I believe, based on dmgraph, but is
+     pretty dire in any case.
+     Imported sounds are all resampled to 11025 Hz, even though that
+     hasn't been necessary since some time between v1.2 and v1.666
+     (basically, any version that uses the item-respawn sound has the
+     improved sound engine). Exasperatingly, lxdoom (or maybe sndserv?)
+     takes several steps back by expecting sounds to be *raw* 11025 Hz
+     data. You may be able to set new options to reflect this.
+     Also, one would hope that eventually one or more of the source
+     ports will start to support bitrates other than 8 bit, and (maybe?)
+     stereo samples. You may want to start leaning on various source
+     ports' programmers to get their acts together and start coming to
+     some sort of agreement. ;)
+     Importation of .wav files is pretty crufty. Like dmgraph before it,
+     the deutex 5.3 source expects there to be just one big 'data'
+     chunk, and doesn't notice the 'info' chunks that certain stupid
+     Windows programs (*cough*cough*CoolEdit*GoldWave*cough*) insist on
+     putting in (usually with copyright messages for the program itself,
+     which in a just world would be illegal). Greater explanation of all
+     this whacky chunk business can be found at:
+     [1]http://www.compsoc.man.ac.uk/~maniac/resource_web/wav_file_forma
+     t/ (wav1.htm, wav2.htm, wav3.htm, 4.htm, 5.htm)
+     Essentially, you want to clip out the first 'data' chunk and ignore
+     crap like 'info', 'inam', 'list', or whatever.
+     * TBD: New options -fstart and -fend to control the start-of-flats
+       and end-of-flats markers used in pwads. Default to FF_START and
+       F_END respectively. Warning: here again, don't use those options
+       just because they're here. The default markers are perfectly fine,
+       and they conform to the de-facto standard. If you deviate from
+       them, you're asking for trouble.
+     * -f_end
+     * In the doc, mention that negative patch Y-offsets are forced to 0
+       by the engine.
+     * Why does DeuTex sometimes includes patches even if you don't
+       mention them explicitly and sometimes doesn't ?
+     * Make a DOS binary distribution with all filenames 8.3, all
+       documentation in CRLF & CP437 format, no sources, no makefile,
+       only DOS executables.
+     * Options shouldn't care whether there is space between them and
+       their argument.
+     * Man page: mention that some options are DeuTex-only, not DeuSF.
+     * Man page: insert `deutex -man` automatically.
+     * Alpha port: look into 64-bit longs.
+     * -check shouldn't require an argument. It should use the iwad by
+       default.
+     * -main should be implemented for DeuTex as well.
+     * DeuTex should not look for doom.wad in the directory set by
+       -heretic !
+     * WAV to Doom sound: the warning "shrinking ... to 11025" should
+       mention the name of the file or appear only once.
+     * PPM to Doom graphics: the warning "quantisation is slow" should
+       either mention the name of the file or appear only once.
+     * Determine why converting Doom graphics to PPM and back does not
+       yield the same thing. This also happens with BMP but much less so.
+     * Bug: certain flats seem to be extracted with certain pixels set to
+       the transparent colour (Doom's CEIL4_1). DeuTex 3.6 for DOS
+       exhibits the same problem [1].
+     * Hexen: DeuTex does not handle the BEHAVIOR lumps correctly.
+     * Hexen: does not extract graphics quite correctly (applies
+       transparent colour translation to opaque images such as FINALE1
+       and FINALE2. This is probably related to [1].
+     * Hexen: when trying to build back the hexen wad, got
+Color palette is unknown
+WARNING unknown palette. Using colour 0xff as transparentcolour.
+Some graphics may appear moth-eaten.
+Making lumps
+Bug: *** idinx ***
+
+References
+
+   1. http://www.compsoc.man.ac.uk/~maniac/resource_web/wav_file_format/

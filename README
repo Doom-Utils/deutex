@@ -1,0 +1,38 @@
+DeuTex 4.0.1
+
+WHAT ARE DEUTEX AND DEUSF
+
+  DeuTex and DeuSF are programs than can do many things with Doom,
+  Heretic, Hexen and Strife wad files such as extracting and inserting
+  graphics, sounds, levels and other resources. See the manual for
+  details (docsrc/dtexman6.txt).
+
+BUILDING AND INSTALLING ON UNIX
+
+  You need a reasonably standard Unix environment with a C compiler,
+  such as Linux.
+  1) Type "make"
+  2) As root, type "make install"
+  See INSTALL for details.
+
+BUILDING AND INSTALLING ON DOS
+
+  You need a C compiler, such as DJGPP, Cygwin or Borland C. See
+  INSTALL.
+
+LEGAL
+
+  Most of this program is GPL'd but some of it is available under
+  other licenses. This program is distributed in the hope that it
+  will be useful, but WITHOUT ANY WARRANTY; without even the implied
+  warranty of MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.
+  See LICENSE for specific information and copyright notices. All
+  trademarks are the property of their owners.
+
+CONTACT
+
+  Home page                 http://www.teaser.fr/~amajorel/deutex/
+  General newbie questions  news:rec.games.computer.doom.editing
+  Maintainer                André Majorel <amajorel@teaser.fr>.
+
+-- AYM 1999-09-09

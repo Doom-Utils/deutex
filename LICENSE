@@ -1,0 +1,73 @@
+                         License terms for DeuTex
+
+------------------------------------------------------------------------
+
+DeuTex is Copyright © 1994-1995 Olivier Montanuy,
+      and Copyright © 1999 André Majorel.
+
+The parts of DeuTex that have been written by Olivier Montanuy,
+Kevin McGrail, André Majorel and other contributors are
+distributed under the terms of version 2 of the GNU general
+public license (GPL).
+
+This program is free software; you can redistribute it and/or modify
+it under the terms of the GNU General Public License as published by
+the Free Software Foundation; either version 2 of the License, or
+(at your option) any later version.
+
+This program is distributed in the hope that it will be useful,
+but WITHOUT ANY WARRANTY; without even the implied warranty of
+MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+GNU General Public License for more details.
+
+You should have received a copy of the GNU Library General Public
+License along with this library; if not, write to the Free
+Software Foundation, Inc., 59 Temple Place, Suite 330, Boston, MA
+02111-1307, USA.
+
+------------------------------------------------------------------------
+
+However, the DeuTex distribution includes material that was
+written by other people or distributed under different licenses :
+
+1. DeuTex incorporates code derived from DEU 5.21. DEU 5.21 was
+   put in the public domain in 1994 by Raphaël Quinet and Brendon
+   Wyber. No part of DeuTex is public-domain, however.
+
+2. The file gifcodec.c is Copyright © 1995 David Kaplan.
+
+3. The file lzw.c contains the following notes :
+
+   > Copyright 1993, David Koblas (koblas@netcom.com)
+   >
+   > Permission to use, copy, modify, and to distribute this software
+   > and its documentation for any purpose is hereby granted without
+   > fee, provided that the above copyright notice appear in all
+   > copies and that both that copyright notice and this permission
+   > notice appear in supporting documentation.  There is no
+   > representations about the suitability of this software for
+   > any purpose.  this software is provided "as is" without express
+   > or implied warranty.
+
+   > This file is derived from ppmtogif.c and giftoppm.c
+   > only the compression/decompression routines were kept.
+   >
+   > Based on GIFENCOD by David Rowley <mgardi@watdscu.waterloo.edu>.
+   > A Lempel-Zim compression based on "compress".
+   >
+   > Copyright (C) 1989 by Jef Poskanzer.
+   >
+   > Permission to use, copy, modify, and distribute this software and
+   > its documentation for any purpose and without fee is hereby
+   > granted, provided that the above copyright notice appear in all
+   > copies and that both that copyright notice and this permission
+   > notice appear in supporting documentation.  This software is
+   > provided "as is" without express or implied warranty.
+   >
+   > The Graphics Interchange Format(c) is the Copyright property of
+   > CompuServe Incorporated.  GIF(sm) is a Service Mark property of
+   > CompuServe Incorporated.
+
+4. The files endianio.c and endianm.c are Copyright © André Majorel 1999
+   and available under the terms of the LGPL.
+

@@ -1,0 +1,253 @@
+
+
+        DeuTex/DeuSf compilation
+
+        by Olivier Montanuy <Olivier.Montanuy@wanadoo.fr>
+	Revised AYM 1999-08-12
+
+
+
+        ****************************
+        * Structure of the sources *
+        ****************************
+
+DeuTex and DeuSF share the same sources.
+When compiling, you must include all sources and define one of
+those flags so that the C pre-processor knows which part to select:
+
+- DeuSF                   to compile DeuSF
+- DeuTex                  to compile DeuTex
+For a windows DLL
+- LDeuTex                 to compile DeuTex.DLL for Windoze
+
+
+        ***********************
+        *  Generic Unix-like  *
+        ***********************
+
+Type
+
+    make
+    make install   <- as root
+
+See near the end of the file for any OS-specific details.
+
+
+        ***************
+        *  DOS        *
+	*  Windows 95 *
+	*  Windows 98 *
+	*  Windows NT *
+        ***************
+
+Borland C++
+Turbo C++
+
+    DeuTex can be built with Borland C++ 4.0. Other versions of the
+    Borland compilers might work too but they've not been tried. To
+    compile, type
+
+	dos\buildbc dir
+
+    where dir is the directory where the compiler is installed,
+    followed by a backslash (E.G. "dos\buildbc c:\bc4\"). Once
+    deusf.exe and deutex.exe are built, copy them manually to a
+    directory in your path.
+
+    Don't try to use the makefile; due to idiosyncrasies in the CLI of
+    bcc, limitations of Borland make and of the FAT filesystem, it
+    won't work. There are old project files lying around in old but
+    they've not been updated since 1995 so don't use them either.
+
+    The compiler can be configured so that "{rw}" opens files in
+    binary mode. Don't do that ! If you have problems with text files
+    on DOS, make sure the compiler is configured so that "{rw}" opens
+    files in _text_ mode (that's the default).
+
+Microsoft C
+
+    As of version 4, DeuTex can be built with MSC 6.0. Other versions
+    of MSC might work too, but have not been tried. To compile with
+    MSC 5.1, you would have to remove the #error directives, since
+    these are not supported in that version.
+    
+    To compile, type
+
+	dos\buildmsc
+
+    (that script assumes INCLUDE, LIB and PATH are properly set up).
+    Once deusf.exe and deutex.exe are built, copy them manually to a
+    directory in your path.
+
+    The compiler can be configured so that "{rw}" opens files in
+    binary mode. Don't do that ! If you have problems with text files
+    on DOS, make sure the compiler is configured so that "{rw}" opens
+    files in _text_ mode (that's the default).
+
+DJGPP 2.*
+
+    Thanks to Udo Munk, DeuTex can now be built with DJGPP.
+
+    You need a Unix toolset comprising ln, sh and touch. Certain
+    targets also require cp, GNU find, lynx, rm, tar, tr zip and a
+    Unix mkdir but those are maintainer targets and you probably don't
+    need them.
+
+    If you build on a 8.3 filesystem (plain old FAT), make is going to
+    choke when trying to "touch .deutex" and "touch .deusf". Replace
+    all occurrences of ".deutex" and ".deusf" by "_deutex" and
+    "_deusf" in the makefile and start again.
+
+    To compile, type
+
+	make
+
+    If it doesn't work, tell me about it. You will get a warning about
+    ftruncate() being undeclared. ftruncate() is supposed to be a Unix
+    function. If you have a unistd.h header, try to insert a "#include
+    <unistd.h>" in tools.c. Else, I don't know what to do.
+
+    After deusf.exe and deutex.exe are created, copy them to a
+    directory in your path.
+
+Cygwin
+
+    Thanks to Udo Munk, DeuTex can now be built with Cygwin.
+
+    You need a Unix toolset comprising ln, sh and touch. Certain
+    targets also require cp, GNU find, lynx, rm, tar, tr zip and a
+    Unix mkdir but those are maintainer targets and you probably don't
+    need them.
+
+    If you build on a 8.3 filesystem (plain old FAT), make is going to
+    choke when trying to "touch .deutex" and "touch .deusf". Replace
+    all occurrences of ".deutex" and ".deusf" by "_deutex" and
+    "_deusf" in the makefile and start again.
+
+    To compile, type
+
+	make
+	     
+    and then copy deusf.exe and deutex.exe to a directory in your
+    path. If it doesn't work, tell me about it.
+
+
+        ***************
+        * Windoze 3.1 *
+        ***************
+        by Olivier Montanuy
+
+Use the DOS deutex version under windows, with a suitable deutex.pif
+
+.DLL
+DeuTex itself can't be compiled as a 16-bit windoze DLL (too big).
+the lbdeutex is for the visual basic shell.
+
+
+        ****************
+        * Unix SUN O/S *
+        ****************
+        by Olivier Montanuy
+
+Unix:   Sun Sparc 1, 10, 20, IPX
+gcc:    2.5.8
+The makefile provided for Unix and Linux does not compile .o
+objects. it compiles .ot for DeuTex and .os for DeuSF.
+That little trick is useful to avoid linker problems.
+type:   make
+	make install (as root)
+
+
+        ********************
+        * Silicon Graphics *
+        ********************
+        by Chuck Rossi
+
+type:   make
+	make install (as root)
+
+
+        **********************
+        * Linux              *
+        **********************
+        by Per Allansson <c91peral@und.ida.liu.se>
+	and André Majorel <amajorel@teaser.fr>
+
+Linux:  kernel 1.1.52, 2.0.34; libc 4.5.26, glibc 2.0.7
+gcc:    2.5.8, 2.7.2.3
+type:   make
+	make install (as root)
+
+
+        ******************************
+        * DEC Alpha 64 bit processor *
+        ******************************
+        by James Bonfield
+        jkb@mrc-molecular-biology.cambridge.ac.uk
+
+
+        **************
+        * OS/2 2 2.1 *
+        **************
+
+Borland C++
+Turbo C++
+
+    Might work. See the corresponding paragraphs in the DOS section.
+
+Microsoft C
+
+    Might work. See the corresponding paragraphs in the DOS section.
+
+IBM C Set++ 2.1 (by mark.mathews@channel1.com)
+
+    For DEUTEXOS.EXE you need deutexos.mak and deutexos.def
+    To make DEUTEXOS.EXE type:  nmake -f deutexos.mak
+
+    For DEUSFOS.EXE you need deusfos.mak and deusfos.def
+    To make DEUSFOS.EXE type :  nmake -f deusfos.mak
+
+    AYM 1999-08-12: Where are deutexos.mak and deusfos.mak ? Better use
+    the main makefile anyway...
+
+
+        ************************
+        * Porting DeuTex/DeuSF *
+        ************************
+
+The name of the OS DeuTex is being compiled for is in DT_OS, defined in
+deutex.h :
+
+  #define DT_OS 'd'  /* MS-DOS */
+  #define DT_OS 'o'  /* OS/2 */
+  #define DT_OS 'u'  /* Unix (in fact, anything else) */
+
+The name of the compiler is in DT_CC, defined in deutex.h :
+
+  #define DT_CC 'b'  /* Borland C */
+  #define DT_CC 'c'  /* GCC/EGCS with Cygwin */
+  #define DT_CC 'd'  /* DJGPP */
+  #define DT_CC 'g'  /* GCC/EGCS */
+  #define DT_CC 'i'  /* IBM C Set++ */
+  #define DT_CC 'm'  /* Microsoft C */
+  #define DT_CC '?'  /* Unknown compiler */
+
+Testing the existence of other macros, such as __MSDOS__, __GNUC__ etc.
+is discouraged. Use DT_OS and DT_CC instead.
+
+DeuTex uses specified size types Int16, Int32, UInt32, etc. Those are
+defined in deutex.h. The definitions are believed to be correct for all
+16-bit and 32-bit platforms. 64-bit platforms might require some
+tweaking there. There is an alternate set of #define directives under
+#ifdef __alpha but a clever use of limits.h and/or inttypes.h might be a
+better idea. If you're the lucky owner of a 64-bit machine, send me your
+diffs. Note that DeuTex and DeuSF check that the specified size types
+are correctly defined and warn you if they aren't.
+
+Some structures related to pictures or to DOOM assumes that no word or
+long word alignement occur.  if the entries are not put contiguously,
+DeuTex/DeuSF will not work, but there will be no warning.
+
+Most of the O/S related functions are in tools.c.
+
+
