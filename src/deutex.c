@@ -58,6 +58,7 @@ Place, Suite 330, Boston, MA 02111-1307, USA.
 #include "extract.h"
 #include "wadio.h"
 #include "picture.h"
+#include "usedidx.h"
 
 
 /*compile only for DeuTex*/
@@ -102,6 +103,7 @@ static void call_opt (comfun_t func, ...);
 ** commands
 */
 void COMhelp (int argc, const char *argv[]);
+void COMvers (int argc, const char *argv[]);
 void COMmanopt (int argc, const char *argv[]);
 void COMformat (int argc, const char *argv[]);
 void COMipf (int argc, const char *argv[]);
@@ -380,7 +382,7 @@ void COMdebug(int argc, const char *argv[])
 
 void COMdi (int argc, const char *argv[])
 {
-  Info ("Debugging identification of entry \"%.8s\"\n", argv[1]);
+  Info ("Debugging identification of entry %s\n", lump_name (argv[1]));
   debug_ident = argv[1];
   (void) argc;
 }
@@ -593,6 +595,7 @@ void COMmake(int argc, const char *argv[])
   CMPOmakePWAD(MainWAD,Type,wadout,DataDir,wadinf,Select,trnR,trnG,trnB,George);
   (void)argc;
 }
+
 void COMxtra(int argc, const char *argv[])
 { const char *wadinf, *wadin;
   if(WadInfOk==FALSE)
@@ -600,24 +603,54 @@ void COMxtra(int argc, const char *argv[])
   }
   if(argc<=1){wadin=MainWAD;}else{wadin=argv[1];}
   if(argc<=2){wadinf=WadInf;}else{wadinf=argv[2];}
-  XTRextractWAD(MainWAD,DataDir,wadin,wadinf,Picture,Sound,fullSND,Select,trnR,trnG,trnB,WSafe);
+  XTRextractWAD (MainWAD, DataDir, wadin, wadinf, Picture, Sound, fullSND,
+      Select, trnR, trnG, trnB, WSafe, NULL);
 }
+
 void COMget(int argc, const char *argv[])
 { XTRgetEntry(MainWAD,DataDir,((argc<3)? MainWAD: argv[2]),argv[1],Picture,Sound,fullSND,trnR,trnG,trnB);
 }
+
 void COMpackNorm(int argc, const char *argv[])
 { XTRcompakWAD(DataDir,(argc>1)? argv[1]: MainWAD,(argc>2)? argv[2]:NULL,FALSE);
 }
+
 void COMpackGfx(int argc, const char *argv[])
 { XTRcompakWAD(DataDir,(argc>1)? argv[1]: MainWAD,(argc>2)? argv[2]:NULL,TRUE);
 }
+
 void COMvoid(int argc, const char *argv[])
 {  XTRvoidSpacesInWAD(argv[1]);
 	(void)argc;
 }
+
 void COMusedtex(int argc, const char *argv[])
 { XTRtextureUsed((argc>1)? argv[1]: MainWAD);
 }
+
+void COMusedidx(int argc, const char *argv[])
+{ const char *wadinf, *wadin;
+  cusage_t *cusage = NULL;
+  if(WadInfOk==FALSE)
+  { MakeFileName(WadInf,DataDir,"","","WADINFO","TXT");  /* Not used anyway */
+  }
+  if(argc<=1){wadin=MainWAD;}else{wadin=argv[1];}
+  if(argc<=2){wadinf=WadInf;}else{wadinf=argv[2];}
+  cusage = Malloc (sizeof *cusage);
+  {
+    int n;
+    for (n = 0; n < NCOLOURS; n++)
+    {
+      cusage->uses[n] = 0;
+      cusage->nlumps[n] = 0;
+      cusage->where_first[n][0] = '\0';
+    }
+  }
+  XTRextractWAD (MainWAD, DataDir, wadin, wadinf, Picture, Sound, fullSND,
+      Select, trnR, trnG, trnB, WSafe, cusage);
+  Free (cusage);
+}
+
 #endif /*DeuTex*/
 
 void COMcheck(int argc, const char *argv[])
@@ -649,7 +682,7 @@ static comdef_t Com[]=
 #ifdef DeuTex
  {NIL,0,"man",      COMmanopt, NULL,   "print list of options in troff -man format"},
 #endif
- {NIL,0,"-version", NULL,      NULL,   "print version number"},
+ {NIL,0,"-version", COMvers,   NULL,   "print version number and exit successfully"},
  {NIL,0,"syntax",   COMformat, NULL,   "print the syntax of wad creation directives"},
 #if defined DeuTex
  {OPT,5,"win",      COMwintxn, "<doom> <data> <info> <select> <colour>","WinTex shortcut"},
@@ -738,6 +771,7 @@ static comdef_t Com[]=
  {CMD,1,"test",     COMcheck,  "<in.wad>",NULL},
 #if defined DeuTex
  {CMD,0,"usedtex",  COMusedtex,"[<in.wad>]","list textures used in all levels"},
+ {CMD,0,"usedidx",  COMusedidx,"[<in.wad>]","colour index usage statistics"},
  {NIL,1,"unused",   COMvoid,   "<in.wad>","find unused spaces in a wad"},
  {CMD,0,"xtract",   COMxtra,   "[<in.wad> [<dirctivs.txt>]]","extract some/all entries from a wad"},
  {CMD,0,"extract",  COMxtra,   "[<in.wad> [<dirctivs.txt>]]",NULL},
@@ -761,10 +795,7 @@ int main( int argc, const char *argv[])
 
    /* Options for which you don't want the banners */
    if (argc == 2 && ! strcmp (argv[1], "--version"))
-   {
-     printf ("%s %s\n", DEUTEXNAME, deutex_version);
-     return 0;
-   }
+     COMvers (argc, argv);
 #ifdef DeuTex
    if (argc == 2 && ! strcmp (argv[1], "-man"))  /* Sorry for the ugliness */
    {
@@ -772,6 +803,7 @@ int main( int argc, const char *argv[])
      return 0;
    }
 #endif
+
 #ifdef DT_ALPHA
    printf (
      "+-----------------------------------------------------------+\n"
@@ -780,6 +812,14 @@ int main( int argc, const char *argv[])
      "|  ACCURATE OR UP TO DATE. THERE MIGHT BE SERIOUS BUGS.     |\n"
      "|  MAKE BACKUP COPIES OF YOUR DATA.                         |\n"
      "+-----------------------------------------------------------+\n\n");
+#endif
+#ifdef DT_PRIVATE
+   printf (
+     "\t+------------------------------------+\n"
+     "\t|   THIS RELEASE OF DEUTEX IS NOT    |\n"
+     "\t|  INTENDED FOR PUBLIC CONSUMPTION.  |\n"
+     "\t|     DO NOT FURTHER DISTRIBUTE.     |\n"
+     "\t+------------------------------------+\n\n");
 #endif
    printf (
      "+---------------------------------------------------+\n"
@@ -982,13 +1022,26 @@ void COMhelp(int argc, const char *argv[])
   (void)argc;(void)argv;
 }
 
+/*
+ *	Print version and exit successfully.
+ *	All --version does.
+ */
+void COMvers (int argc, const char *argv[])
+{
+  (void) argc;
+  (void) argv;
+  print_version ();
+  exit (0);
+}
+
+
 #if defined DeuTex
 static char *Format[] =
 { "* Format of PWAD creation directives *",
   "This format is conform to MS-Windows .INI Files.",
   "Sections are named [LEVELS] [LUMPS] [SOUNDS]",
   "[MUSICS] [TEXTURE1] [TEXTURE2] [GRAPHICS]",
-  "[SPRITES] [PATCHES] and [FLATS]",
+  "[SPRITES] [PATCHES] [FLATS] [SNEAPS] [SNEATS]",
   "Entries have format:",
   "{name}= {filename} {offsetX} {offsetY}",
   "A '*' at the end of the definition means that the",

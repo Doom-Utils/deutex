@@ -103,6 +103,8 @@ extern const char deutex_version[];
 #  if ! defined __HUGE__
 #    error Please compile in  memory model (-mh)
 #  endif
+#  error Sorry, BC has no way to make pointers huge by default.\
+ Try compiling with DJGPP instead.
 #elif DT_OS == 'd' && DT_CC == 'm'
 #  if ! defined M_I86HM
 #    error Please compile in  memory model (-AH)
@@ -205,7 +207,10 @@ struct WADINFO
   Int32 maxdir;		/*max nb of entry in dir*/
   Int32 wposit;		/*position for write*/
   Int32 maxpos;		/*farther referenced byte in WAD*/
-  FILE *fd;	        /*file */
+  FILE *fd;	        /* File pointer */
+  char *filename;	/* Pointer on block malloc'd by WADRopen*() and
+			   free'd by WADRclose() and containing the name
+			   of the file. */
   Bool ok;		/*security ok&1=read ok&2=write*/
 };
 
@@ -275,6 +280,13 @@ void XTRcompakWAD(const char *DataDir, const char *wadin, const char
 void XTRstructureTest(const char *doomwad, const char *wadin);
 void XTRtextureUsed(const char *wadin);
 
+
+/*
+ *	Types defined elsewhere
+ */
+struct cusage_s;
+typedef struct cusage_s cusage_t;
+ 
 
 /*
  *	Misc globals, set by command line arguments

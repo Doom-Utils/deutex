@@ -34,6 +34,7 @@ Place, Suite 330, Boston, MA 02111-1307, USA.
 #if DT_OS == 'd'
 #  define SEPARATOR "\\"
 #  if DT_CC == 'd'		/* DJGPP for DOS */
+#    include <unistd.h>
 #    include <malloc.h>
 #    include <dos.h>
 #    include <dir.h>
@@ -73,6 +74,9 @@ Place, Suite 330, Boston, MA 02111-1307, USA.
 #include <ctype.h>
 #include <sys/types.h>
 #include <sys/stat.h>
+
+
+static const char hex_digit[16] = "0123456789ABCDEF";
 
 
 /*
@@ -309,6 +313,7 @@ void MakeDir(char file[128], const char *path, const char *dir, const char
    mkdir(file,(mode_t)S_IRWXU); /*read write exec owner*/
 #endif
 }
+
 /*
 ** Create a file name, by concatenation
 ** returns TRUE if file exists FALSE otherwise
@@ -407,6 +412,16 @@ void PrintCopyright(void)
 }
 
 
+/*
+ *	print_version
+ *	This is what --version calls
+ */
+void print_version (void)
+{
+  printf ("%s %.32s\n", DEUTEXNAME, deutex_version);
+}
+
+
 /*****************************************************/
 
 /* convert 8 byte string to upper case, 0 padded*/
@@ -423,6 +438,101 @@ void Normalise(char dest[8], const char *src)  /*strupr*/
 
 
 
+/*
+** Output auxilliary functions
+*/
+
+/*
+ *	fnameofs - return string containing file name and offset
+ *
+ *	Not reentrant (returns pointer on static buffer).
+ *	FIXME: should encode non-printable characters.
+ *	FIXME: should have shortening heuristic (E.G. print only basename).
+ */
+char *fnameofs (const char *name, long ofs)
+{
+  static char buf[81];
+  *buf = '\0';
+  strncat (buf, name, sizeof buf - 12);
+  sprintf (buf + strlen (buf), "(%06lXh)", ofs);
+  return buf;
+}
+
+
+/*
+ *	fname - return string containing file name
+ *
+ *	Not reentrant (returns pointer on static buffer).
+ *	FIXME: should encode non-printable characters.
+ *	FIXME: should have shortening heuristic (E.G. print only basename).
+ */
+char *fname (const char *name)
+{
+  static char buf[81];
+  *buf = '\0';
+  strncat (buf, name, sizeof buf - 1);
+  return buf;
+}
+
+
+/*
+ *	lump_name - return string containing lump name
+ *
+ *	Not reentrant (returns pointer on static buffer).
+ *	The string is guaranteed to have at most 32 characters
+ *	and to contain only graphic characters.
+ */
+char *lump_name (const char *name)
+{
+  const char *const name_end = name + 8;
+  static char buf[9];
+  char *p = buf;
+
+  if (*name == '\0')
+    strcpy (buf, "(empty)");
+  else
+  {
+    for (; *name != '\0' && name < name_end; name++)
+    {
+      if (isgraph ((unsigned char) *name))
+	*p++ = toupper ((unsigned char) *name);
+      else
+      {
+	*p++ = '\\';
+	*p++ = 'x';
+	*p++ = ((unsigned char) *name) >> 4;
+	*p++ = *name & 0x0f;
+      }
+    }
+    *p = '\0';
+  }
+  return buf;
+}
+
+
+/*
+ *	short_dump - return string containing hex dump of buffer
+ *
+ *	Not reentrant (returns pointer on static buffer). Length
+ *	is silently limited to 16 bytes.
+ */
+char *short_dump (const char *data, size_t size)
+{
+#define MAX_BYTES 16
+  static char buf[3 * MAX_BYTES];
+  char *b = buf;
+  size_t n;
+
+  for (n = 0; n < size && n < MAX_BYTES; n++)
+  {
+    if (n > 0)
+      *b++ = ' ';
+    *b++ = hex_digit[((unsigned char) data[n]) >> 4];
+    *b++ = hex_digit[((unsigned char) data[n]) & 0x0f];
+  }
+  *b++ = '\0';
+  return buf;
+}
 
 
 /*
@@ -486,10 +596,12 @@ void ProgErrorAction(void (*action)(void))
 
 void ProgError (const char *errstr, ...)
 {
-   va_list args;va_start( args, errstr);
-   fprintf(Stderr, "\nError: *** ");
+   va_list args;
+   fflush (Stdout);
+   va_start( args, errstr);
+   fprintf(Stderr, "\nError: ");
    vfprintf(Stderr, errstr, args);
-   fprintf(Stderr, " ***\n");
+   fprintf(Stderr, "\n");
    va_end( args);
    (*Action)();  /* execute error handler*/
    PrintExit();
@@ -497,10 +609,12 @@ void ProgError (const char *errstr, ...)
 }
 
 void Bug (const char *errstr, ...)
-{  va_list args;va_start( args, errstr);
-   fprintf(Stderr, "\nBug: *** ");
+{  va_list args;
+   fflush (Stdout);
+   va_start( args, errstr);
+   fprintf(Stderr, "\nBug: ");
    vfprintf(Stderr, errstr, args);
-   fprintf(Stderr, " ***\n");
+   fprintf(Stderr, "\n");
    fprintf(Stderr, "Please report that bug.\n");
    va_end( args);  /* CloseWadFiles();*/
    PrintExit();
@@ -508,7 +622,9 @@ void Bug (const char *errstr, ...)
 }
 
 void Warning (const char *str, ...)
-{  va_list args;va_start( args, str);
+{  va_list args;
+   fflush (Stdout);
+   va_start( args, str);
    fprintf(Stdwarn, "Warning: ");
    vfprintf(Stdwarn, str, args);
    putc('\n', Stdwarn);
@@ -520,6 +636,7 @@ void LimitedWarn (int *left, const char *fmt, ...)
    if (left == NULL || (left != NULL && *left > 0))
    {
      va_list args;
+     fflush (Stdout);
      fputs("Warning: ", Stdwarn);
      va_start (args, fmt);
      vfprintf (Stdwarn, fmt, args);
@@ -532,7 +649,10 @@ void LimitedWarn (int *left, const char *fmt, ...)
 void LimitedEpilog (int *left)
 {
   if (left != NULL && *left < 0)
+  {
+    fflush (Stdout);
     fprintf (Stdwarn, "Warning: (%d warnings omitted)\n", - *left);
+  }
 }
 
 void Legal(const char *str, ...)

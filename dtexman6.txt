@@ -132,20 +132,22 @@ important features.
 
 7. New command-line switch -doom2.
 
-8. Easier to build on Unix systems, especially Linux. On DOS and
+8. New command -usedidx.
+
+9. Easier to build on Unix systems, especially Linux. On DOS and
    Windows, now builds with DJGPP, Cygwin and MSC 6.0. There
    shouldn't be any endianness problems now.
 
-9. DeuTex is now libre (GPL + LGPL + PBMPLUS license).
+10. DeuTex is now libre (GPL + LGPL + PBMPLUS license).
 
-10. The GIF format is deprecated. It will be removed. See
+11. The GIF format is deprecated. It will be removed. See
     http://lpf.ai.mit.edu/Patents/Gif/Gif.html to know why. Move
     to BMP or PPM. The default graphics format for Unix is now
     PPM.
 
-11. Assorted bug fixes.
+12. Assorted bug fixes.
 
--- AYM 1999-11-14
+-- AYM 1999-11-16
 
 ==================================================================
 

@@ -38,10 +38,10 @@ patch.
 
 <p><li>Instead of allowing any and all characters in the script file, require
 them to be quoted. And, when doing <code>-xtract</code>, produce the script
-file with the appropriate quotes...  Since, under Unix, the only characters
+file with the appropriate quotes... Since, under Unix, the only characters
 that are not allowed in a file name are NUL and "<code>/</code>", I don't see
 why DeuTex should prevent users from extracting lumps with weird characters in
-their names.  However, that might cause compatilibity problems with the DOS
+their names. However, that might cause compatilibity problems with the DOS
 version.
 
 </ul>
@@ -81,7 +81,8 @@ accordingly but into <code>lumps/</code>&nbsp;!
 graphics and extracted accordingly but into <code>lumps/</code>&nbsp;!
 
 <p><li>Hexen: <code>WINNOWR</code> and <code>STALKR</code> should be extracted
-into <code>mus/</code>, not <code>lumps/</code>.
+into <code>mus/</code> (begin with <code>MUS\x1a</code>), not
+<code>lumps/</code>.
 
 <p><li>Hexen: DeuTex does not handle the <code>BEHAVIOR</code> lumps correctly.
 
@@ -137,6 +138,11 @@ cyan.</code>") and the transparent colour for this image is set to cyan. This
 would make for a smooth transition from DeuTex 3 to DeuTex 4. There should be a
 command-line switch to disable that feature.
 
+<p><li>Sneas are supported when doing <code>-xtract</code> but not when doing
+<code>-build</code> (they're ignored). Fix that, or at least mention it
+somewhere. Though I don't see many people wanting to <em>make</em> wads for
+Doom alpha anyway...
+
 </ul>
 
 		<h2>Sound</h2>
@@ -155,17 +161,17 @@ is pretty dire in any case.
 <p>Imported sounds are all resampled to 11025 Hz, even though that
 hasn't been necessary since some time between v1.2 and v1.666 (basically,
 any version that uses the item-respawn sound has the improved sound
-engine).  Exasperatingly, lxdoom (or maybe sndserv?) takes several steps
-back by expecting sounds to be *raw* 11025 Hz data.  You may be able to
+engine). Exasperatingly, lxdoom (or maybe sndserv?) takes several steps
+back by expecting sounds to be *raw* 11025 Hz data. You may be able to
 set new options to reflect this.
 
 <p>Also, one would hope that eventually one or more of the source
 ports will start to support bitrates other than 8 bit, and (maybe?) stereo
-samples.  You may want to start leaning on various source ports'
+samples. You may want to start leaning on various source ports'
 programmers to get their acts together and start coming to some sort of
-agreement.  ;)
+agreement. ;)
 
-<p>Importation of .wav files is pretty crufty.  Like dmgraph before
+<p>Importation of .wav files is pretty crufty. Like dmgraph before
 it, the deutex 5.3 source expects there to be just one big 'data' chunk,
 and doesn't notice the 'info' chunks that certain stupid Windows programs
 (*cough*cough*CoolEdit*GoldWave*cough*) insist on putting in (usually with
@@ -212,13 +218,13 @@ sample rates and resolution&nbsp;? Seems to depend on the engine.
 		<h2>Command line</h2>
 
 <ul>
-<p><li>The command line interface is not always intuitive and fussy about the
-position of certain options.
+<p><li>The command line interface is not always intuitive and it's fussy about
+the position of certain options. <code>-iwad</code> seems to be ineffective if
+placed last. <code>-xtract</code> and friends must be placed last if they don't
+have all their arguments.
 
 <p><li>Options shouldn't care whether there is space between them and their
-argument.
-
-<p><li><code>deutex --vers</code> segfaults.
+argument. Hmm... or should they&nbsp;?
 
 <p><li><code>-check</code> shouldn't require an argument. It should use the
 iwad by default.
@@ -235,7 +241,7 @@ Possible ways to do that&nbsp;:
 
   <li>Look for a different basename in the iwad directory, depending on the
   option through which the directory was specified. E.G. if it was set with
-  <code>-doom2</code>, look for <code>doom2.wad</code> first.  And if
+  <code>-doom2</code>, look for <code>doom2.wad</code> first. And if
   <code>doom2.wad</code> was not found, emit a warning. <code>-doom</code> and
   <code>-heretic</code> should look for all basenames because that's what
   previous versions of DeuTex did.
@@ -252,7 +258,27 @@ Possible ways to do that&nbsp;:
 		<h2>Documentation</h2>
 
 <ul>
-<li>It's in shambles.
+<p><li>It's in shambles.
+
+<p><li>Mention that negative patch Y-offsets are forced to 0 by
+the engine.
+
+<p><li>Mention that sneaps are extracted but not built.
+
+<p><li>Man page: mention that some options are DeuTex-only, not DeuSF.
+
+<p><li>Man page: insert <code>`deutex -man`</code> automatically.
+
+</ul>
+
+		<h2>Platform</h2>
+
+<ul>
+<p><li>Alpha port: look into 64-bit longs.
+
+<p><li>Borland C: to revive the port, must find a way to make all pointers
+implicitly huge.
+
 </ul>
 
 		<h2>Misc.</h2>
@@ -268,19 +294,6 @@ de-facto standard. If you deviate from them, you're asking for trouble.
 
 <p><li><code>-f_end</code>
 
-<p><li>In the doc, mention that negative patch Y-offsets are forced to 0 by
-the engine.
-
-<p><li>Make a DOS binary distribution with all filenames 8.3, all
-documentation in CRLF &amp; CP437 format, no sources, no makefile, only DOS
-executables.
-
-<p><li>Man page: mention that some options are DeuTex-only, not DeuSF.
-
-<p><li>Man page: insert <code>`deutex -man`</code> automatically.
-
-<p><li>Alpha port: look into 64-bit longs.
-
 <p><li>Why does "<code>deutex -ipf alpha -doom .. -sprites -graphics -patches
 -xtract</code>" trigger <code>"Error: *** Can't open file ./lumps/titlepic.lmp
 ***</code>"&nbsp;?
@@ -290,6 +303,8 @@ that. <code>;-)</code>
 
 <p><li>There are too many warnings for a 25-line display. Keep a copy in
 <code>deutex.log</code>&nbsp;?
+
+<p><li><code>-usedidx</code>: don't count sneats (<code>-nosneats</code> ?). 
 
 </ul>
 

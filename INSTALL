@@ -4,7 +4,7 @@
 
         by Olivier Montanuy <Olivier.Montanuy@wanadoo.fr>
 	Revised AYM 1999-08-12
-	Last update 1999-10-31
+	Last update 1999-11-21
 
 
 
@@ -44,9 +44,21 @@ See near the end of the file for any OS-specific details.
 Borland C++
 Turbo C++
 
-    DeuTex can be built with Borland C++ 4.0. Other versions of the
-    Borland compilers might work too but they've not been tried. To
-    compile, type
+    Versions of DeuTex prior to 4.1.0 work fine when compiled with
+    Borland C++ 4.0. DeuTex 4.1.0 and later can still be compiled with
+    BC4 but the resulting executable is partially broken (does not
+    handle correctly lumps larger than 64 kB). I believe it's the same
+    for Borland/Turbo C 3.x and 2.x.
+
+    The reason why it's broken is that, in v4.1.0, I've removed all
+    "huge" qualifiers from the code, thinking that pointers were huge
+    by default since DeuTex uses the huge memory model. I was wrong.
+    I've been told that there is a version of Borland C for which, in
+    the huge memory model, all data pointers are huge by default. If
+    your version of BC has this feature, you should be able to use it
+    to compile DeuTex.
+
+    To compile, type
 
 	dos\buildbc dir
 
@@ -57,7 +69,7 @@ Turbo C++
 
     Don't try to use the makefile; due to idiosyncrasies in the CLI of
     bcc, limitations of Borland make and of the FAT filesystem, it
-    won't work. There are old project files lying around in old but
+    won't work. There are old project files lying around in old/ but
     they've not been updated since 1995 so don't use them either.
 
     The compiler can be configured so that "{rw}" opens files in
@@ -71,7 +83,11 @@ Microsoft C
     of MSC might work too, but have not been tried. To compile with
     MSC 5.1, you would have to remove the #error directives, since
     these are not supported in that version.
-    
+
+    Even though DeuTex compiles fine, the resulting executable is
+    partially broken because it can't allocate blocks larger than
+    64 kB.
+
     To compile, type
 
 	dos\buildmsc
@@ -89,19 +105,18 @@ DJGPP 2.*
 
     Thanks to Udo Munk, DeuTex can now be built with DJGPP.
 
-    You need a Unix toolset comprising ln, sh and touch. Certain
-    targets also require cp, GNU find, lynx, rm, tar, tr zip and a
-    Unix mkdir but those are maintainer targets and you probably don't
-    need them.
+    You need a "touch" command (there's one in v2gnu/fil316b.zip) and
+    a command named "cc" in your path, that points to "gcc.exe" (just
+    type "copy c:\djgpp\bin\gcc.exe c:\djgpp\bin\cc.exe"),
+
+    Certain developer targets (including "make clean") also require
+    cp, GNU find, ln, lynx, rm, tar, tr, zip and a Unix mkdir and/or
+    that the SHELL be sh (Bash, that is), but you don't need them if
+    all you want is to compile DeuTex.
 
     To compile, type
 
 	make
-
-    If it doesn't work, tell me about it. You will get a warning about
-    ftruncate() being undeclared. ftruncate() is supposed to be a Unix
-    function. If you have a unistd.h header, try to insert a "#include
-    <unistd.h>" in tools.c. Else, I don't know what to do.
 
     After deusf.exe and deutex.exe are created, copy them to a
     directory in your path.
@@ -110,17 +125,21 @@ Cygwin
 
     Thanks to Udo Munk, DeuTex can now be built with Cygwin.
 
-    You need a Unix toolset comprising ln, sh and touch. Certain
-    targets also require cp, GNU find, lynx, rm, tar, tr zip and a
-    Unix mkdir but those are maintainer targets and you probably don't
-    need them.
+    You need a "touch" command (there's one in v2gnu/fil316b.zip) and
+    one must be able to invoke your compiler by calling "cc" (I
+    achieved that simply by typing "copy gcc.exe cc.exe").
+
+    Certain developer targets (including "make clean") also require
+    cp, GNU find, ln, lynx, rm, tar, tr, zip and a Unix mkdir and/or
+    that the SHELL be sh (Bash, that is), but you don't need them if
+    all you want is to compile DeuTex.
 
     To compile, type
 
 	make
 	     
-    and then copy deusf.exe and deutex.exe to a directory in your
-    path. If it doesn't work, tell me about it.
+    After deusf.exe and deutex.exe are created, copy them to a
+    directory in your path.
 
 
         ***************

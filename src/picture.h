@@ -23,8 +23,11 @@ Place, Suite 330, Boston, MA 02111-1307, USA.
 
 
 /* first call COLinit();*/
-Bool PICsaveInFile(char *file,PICTYPE type,char  *pic,Int32 picsz,Int16 *pXinsr,Int16 *pYinsr,IMGTYPE Picture, const char *name);
-Int32 PICsaveInWAD(struct WADINFO *info,char *file,PICTYPE type,Int16 Xinsr,Int16 Yinsr,IMGTYPE Picture);
+Bool PICsaveInFile (char *file, PICTYPE type, char *pic, Int32 picsz,
+    Int16 *pXinsr, Int16 *pYinsr, IMGTYPE Picture, const char *name,
+    cusage_t *cusage);
+Int32 PICsaveInWAD(struct WADINFO *info,char *file,PICTYPE type,Int16
+    Xinsr,Int16 Yinsr,IMGTYPE Picture);
 /* last call COLfree();*/
 
 

@@ -209,7 +209,7 @@ static Bool LISfindRplc(struct ELIST *L,struct WADDIR  *dir)
 static void LISsubstit(struct ELIST *L,struct WADDIR  *dir)
 { /* SUBSTIT in List */
   if(LISfindRplc(L,dir)==TRUE) return;
-  Warning("entry %.8s might be ignored by DOOM.",dir[0].name);
+  Warning("entry %s might be ignored by DOOM.", lump_name (dir[0].name));
   LISadd(L,dir);
 }
 /* Move In List
@@ -247,7 +247,7 @@ static void LISaddSprite(struct WADDIR  *dir,Bool Warn)
 	 Okay|=LISdeleteSprite(dir[0].name,dir[0].name[6],dir[0].name[7]);
   }
   if((Okay==FALSE)&&(Warn==TRUE))
-  { Warning("entry %.8s might be ignored by DOOM.",dir[0].name);
+  { Warning("entry %s might be ignored by DOOM.", lump_name (dir[0].name));
   }
   LISadd(&LISspr,dir);
 }

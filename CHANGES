@@ -3,6 +3,86 @@ Edit docsrc/changes.html instead.
 
                          History of changes for DeuTex
                                        
+   DeuTex 4.3.0 (AYM 1999-12-24)
+          
+          + Graphics: fixed ancient bug where DeuTex sometimes failed to
+            include custom patches if they were not explicitly listed in
+            the [patches] section. If the first patch used in
+            texture1.txt was a custom patch, it had to be listed in
+            [patches] or DeuTex would forget to include it. This is the
+            same bug Olivier mentioned in the home page : 
+            
+     The support for wall patches in DeuTex has been modified. You must
+     now explicitely declare all your patches in a [PATCHE] section.
+     
+     If you don't do this, DeuTex will attempt to work as usual, but
+     there seems to ba a bug in this part of the code, so sometime some
+     needed patches are not loaded.
+            After some summary testing, looks like it's fixed.
+          + Misc: more error handling improvements.
+          + Misc: bumped version number and cleaned things up for public
+            release.
+          + Platform: fixed ftruncate() being undeclared when compiling
+            with DJGPP and updated the building-on-DOS section of the
+            doc.
+            
+   DeuTex 4.2.2 (AYM 1999-11-20) (not for public consumption)
+          
+          + Misc: made certain failure messages more informative.
+          + Platform: fixed several bugs that showed in the DOS
+            precompiled executables for 4.1.0 and 4.2.0 (most common
+            symptom : DeuTex aborting with a "Can't read WAD" error
+            message).
+            Lengthy technical explanation : in 4.1.0, I removed the
+            "huge" pointer qualifiers that were scattered throughout the
+            source not unlike nitrates in groundwater. The reasoning was
+            that, since DeuTex is always compiled in the "huge" memory
+            model anyway, those qualifiers were redundant. As I found out
+            at the end of a long and painful debugging session, they
+            weren't.
+            Had I read the doc of the compiler, I would have known that,
+            even when in the huge memory model, pointers are "far" by
+            default, not "huge". Far pointers wrap around at 64 kB ; this
+            is not what you want when you're trying to work with lumps
+            larger than that. And, apparently, there is no way to specify
+            that pointers should be huge by default.
+            On top of that, there was a genuine bug in WADRreadBytes2()
+            that would have prevented the DOS port from working, even if
+            all pointers had been huge. But this one was fixed in 4.2.1.
+            I switched to DJGPP, with which you can get working
+            executables without having to contaminate your code with
+            carcinogenic keywords. The bad news : firstly, the
+            executables are somewhat larger. Secondly, since DJGPP
+            executables use protected mode, they tend to be more fussy.
+            Thanks to Kim Parrott for reporting the bug and alpha testing
+            my fixes.
+            All the above applies only to the DOS precompiled
+            executables. Other platforms did not have these problems.
+            
+   DeuTex 4.2.1 (AYM 1999-11-16) (not for public consumption)
+          
+          + CLI: fixed segfault on "deutex --vers".
+          + Graphics: new option -usedidx. When called with this option,
+            DeuTex scans all the graphics in the wad and prints
+            statistics about which palette indices they use. (By
+            "graphics" is meant "any data that is converted into an RGB
+            triplet by looking up PLAYPAL or TITLEPAL". That includes
+            flats, graphics, patches, sneaps, sneats and sprites.) I've
+            added this command for my own use, to help me decide which
+            index should be used to store the transparent colour for
+            Hexen.
+          + Misc: made certain failure messages more informative.
+          + Misc: made printing of lump names garbage-proof.
+          + Platform: fixed a huge DOS bug that made DeuTex fail with a
+            "Can't read WAD" error whenever it had to read more than
+            65535 bytes from a wad at once.
+          + Platform: flushing stdout before writing to stderr so that
+            messages come out in the right order when both outputs are
+            redirected.
+          + Sound: all conditions that used to be fatal errors when
+            extracting sound lumps now just elicit a warning message,
+            indicating which lump it was and what action was taken.
+            
    DeuTex 4.2.0 (AYM 1999-11-14)
           
           + Doc: fixed error in documentation of -pkgfx, -pknormal and
@@ -20,7 +100,7 @@ Edit docsrc/changes.html instead.
                  "-tf normal"),
                o if you have Strife 1.1 or above, use "-strife" (or "-tf
                  strife11").
-            Thanks to Kim Parrot for reporting the bug and Len Pitre for
+            Thanks to Kim Parrott for reporting the bug and Len Pitre for
             pointing me in the right direction.
           + Sound: fixed two bugs in reading Sun audio (.au) files. Fixes
             error "WAV: can't read data of./sounds/foo.au" (sic) when

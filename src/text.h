@@ -33,6 +33,12 @@ struct TXTFILE
   Int16 SectionEnd;
   char Section[8];
 };
+/* A special instance of struct TXTFILE that is treated by the
+   TXT*() output functions as the equivalent of /dev/null.
+   Writing into it is a no-op. This convention is _not_
+   supported by the input functions ! */
+extern struct TXTFILE TXTdummy;
+
 /*
 ** For any Reading of TEXT files
 */

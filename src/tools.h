@@ -24,9 +24,15 @@ Place, Suite 330, Boston, MA 02111-1307, USA.
 
 void check_types (void);
 
-void PrintCopyright(void);
-void NoCommandGiven(void);
+void PrintCopyright (void);
+void print_version (void);
+void NoCommandGiven (void);
 
+
+char *fnameofs (const char *name, long ofs);
+char *fname (const char *name);
+char *lump_name (const char *name);
+char *short_dump (const char *data, size_t size);
 
 void PrintInit(Bool asFile);
 void PrintVerbosity(Int16 level);

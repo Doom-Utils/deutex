@@ -40,6 +40,7 @@ Place, Suite 330, Boston, MA 02111-1307, USA.
 #include <sys/types.h>
 #include <sys/stat.h>
 #include <time.h>
+#include <errno.h>
 
 #include "tools.h"
 #include "mkwad.h"
@@ -111,6 +112,8 @@ void WADRopenR(struct WADINFO *info, const char *wadin)
    if((info->ok&WADR_RDWR)) Bug("WadOpr");
    info->fd=fopen(wadin,FOPEN_RB);
    if((info->fd)==NULL)ProgError("Can't open WAD %s for reading",wadin);
+   info->filename = Malloc (strlen (wadin) + 1);
+   strcpy (info->filename, wadin);
    info->ok=WADR_READ;
    /*signature*/
    switch(WADRreadShort(info))
@@ -160,7 +163,10 @@ void WADRopenW(struct WADINFO *info, const char *wadout,WADTYPE type,
    if(info->fd!=NULL) ProgError("Won't overwrite existing file %s", wadout);
    /*open file*/
    info->fd = fopen( wadout, FOPEN_WB);
-   if(info->fd==NULL)ProgError( "Can't create file %s", wadout);
+   if(info->fd==NULL)
+     ProgError( "Can't create file %s (%s)", wadout, strerror (errno));
+   info->filename = Malloc (strlen (wadout) + 1);
+   strcpy (info->filename, wadout);
    info->ok=WADR_WRITE;
    info->wposit=0;
    info->ntry  =0;
@@ -194,6 +200,8 @@ void WADRopenA(struct WADINFO *info, const char *wadinout)
    fclose(info->fd);
    info->fd = fopen( wadinout, FOPEN_RBP); /*rb+ = read/write binary*/
    if(info->fd==NULL)ProgError( "Can't append to file %s", wadinout);
+   info->filename = Malloc (strlen (wadinout) + 1);
+   strcpy (info->filename, wadinout);
    info->ok = WADR_RDWR;
    WADRseek(info,info->wposit);
 }
@@ -299,10 +307,14 @@ Bool WADRchsize2(struct WADINFO *info,Int32 fsize)
 
 
 void WADRseek(struct WADINFO *info,Int32 position)
-{  if(!(info->ok&WADR_RDWR)) Bug("WadSk");
+{
+   long ofs;
+   if(!(info->ok&WADR_RDWR)) Bug("WadSk");
+   ofs = ftell (info->fd);
    if(position>info->maxpos) Bug("WadSk>");
    if(fseek(info->fd,position,SEEK_SET))
-                ProgError("Can't seek in WAD");
+     ProgError("%s: Can't seek to %06lXh",
+	   fnameofs (info->filename, ofs), (unsigned long) position);
 }
 
 /*
@@ -312,23 +324,25 @@ void WADRseek(struct WADINFO *info,Int32 position)
  */
 iolen_t WADRreadBytes2 (struct WADINFO *info, char *buffer, iolen_t nbytes)
 {
-  iolen_t attempt    = MEMORYCACHE;
+  size_t attempt = MEMORYCACHE;
   iolen_t bytes_read = 0;
 
   if (!(info->ok&WADR_READ))
     Bug("WadRdB");
+
   while (nbytes > 0)
   {
     size_t result;
     if (attempt > nbytes)
       attempt = nbytes;
-    result = fread (buffer, 1, nbytes, info->fd);
+    result = fread (buffer, 1, attempt, info->fd);
     bytes_read += result;
     if (result == 0)  /* Hit EOF */
       break;
     buffer += result;
     nbytes -= result;
   }
+
   return bytes_read;
 }
 
@@ -340,32 +354,40 @@ iolen_t WADRreadBytes2 (struct WADINFO *info, char *buffer, iolen_t nbytes)
  */
 iolen_t WADRreadBytes (struct WADINFO *info, char *buffer, iolen_t nbytes)
 {
-  if (WADRreadBytes2 (info, buffer, nbytes) != nbytes)
-    ProgError ("Can't read wad");
+  long    ofs    = ftell (info->fd);
+  iolen_t result = WADRreadBytes2 (info, buffer, nbytes);
+  if (result != nbytes)
+    ProgError ("%s: Can't read %lu bytes (%lu)",
+	fnameofs (info->filename, ofs),
+	(unsigned long) nbytes,
+	(unsigned long) result);
   return nbytes;
 }
 
 Int16 WADRreadShort(struct WADINFO *info)
-{  Int16 res;
-   if(!(info->ok&WADR_READ)) Bug("WadRdS");
-   if (wad_read_i16 (info->fd, &res))
-     ProgError ("Can't read wad");
+{ Int16 res;
+  long ofs = ftell (info->fd);
+  if (!(info->ok&WADR_READ)) Bug("WadRdS");
+  if (wad_read_i16 (info->fd, &res))
+    ProgError ("%s: Can't read a short", fnameofs (info->filename, ofs));
    return res;
 }
 
 Int32 WADRreadLong(struct WADINFO *info)
-{  Int32 res;
-   if(!(info->ok&WADR_READ)) Bug("WadRdL");
-   if (wad_read_i32 (info->fd, &res))
-     ProgError ("Can't read wad");
-   return res;
+{ Int32 res;
+  long ofs = ftell (info->fd);
+  if (!(info->ok&WADR_READ)) Bug("WadRdL");
+  if (wad_read_i32 (info->fd, &res))
+    ProgError ("%s: Can't read a long", fnameofs (info->filename, ofs));
+  return res;
 }
 
 void  WADRclose(struct WADINFO *info)
 {  if(!(info->ok&WADR_RDWR)) Bug("WadClo");
    info->ok=FALSE;
-   Free(info->dir);
-   fclose(info->fd);
+   Free (info->filename);
+   Free (info->dir);
+   fclose (info->fd);
 }
 
 Int16 WADRfindEntry(struct WADINFO *info, const char *entry)
@@ -421,8 +443,8 @@ char *WADRreadEntry2 (struct WADINFO *info, Int16 n, Int32 *psize)
   WADRseek (info, start);
   actual_size = WADRreadBytes2 (info, buffer, size);
   if (actual_size < size)
-    ProgError ("Lump %.8s: unexpected EOF at byte %ld",
-	info->dir[n].name, (long) actual_size);
+    ProgError ("Lump %s: unexpected EOF at byte %ld",
+	lump_name (info->dir[n].name), (long) actual_size);
   *psize = actual_size;
   return buffer;
 }
@@ -463,16 +485,20 @@ void WADRsetLong(struct WADINFO *info,Int32 pos,Int32 val)
 {
   if(!(info->ok&WADR_WRITE))		Bug("WadStL");
   if(pos>(info->maxpos))		Bug("WadSL>");
-  if(fseek(info->fd, pos, SEEK_SET))	ProgError("Can't seek in wad");
-  if(wad_write_i32 (info->fd, val))	ProgError("Can't write in wad");
+  if(fseek(info->fd, pos, SEEK_SET))
+    ProgError ("%s: Can't seek to %06lXh", fname (info->filename));
+  if(wad_write_i32 (info->fd, val))
+    ProgError ("%s: Can't write a long", fnameofs (info->filename, pos));
 }
 
 void WADRsetShort(struct WADINFO *info,Int32 pos,Int16 val)
 {
   if(!(info->ok&WADR_WRITE))		Bug("WadStS");
   if(pos>(info->maxpos))		Bug("WadSS>");
-  if(fseek(info->fd, pos, SEEK_SET))	ProgError("Can't seek in wad");
-  if(wad_write_i16 (info->fd, val))	ProgError("Can't write in wad");
+  if(fseek(info->fd, pos, SEEK_SET))
+    ProgError ("%s: Can't seek to %06lXh", fname (info->filename));
+  if(wad_write_i16 (info->fd, val))
+    ProgError ("%s: Can't write a short", fnameofs (info->filename, pos));
 }
 
 /*
@@ -481,7 +507,9 @@ void WADRsetShort(struct WADINFO *info,Int32 pos,Int16 val)
 */
 static void WADRcheckWritePos(struct WADINFO *info)
 { if(!(info->ok&WADR_WRITE)) Bug("WadCkW");
-  if (fseek( info->fd, info->wposit, SEEK_SET)) ProgError( "Can't seek in wad");
+  if (fseek( info->fd, info->wposit, SEEK_SET))
+    ProgError ("%s: Can't seek to %06lXh",
+	fnameofs (info->filename, ftell (info->fd)), info->wposit);
 }
 
 static Int32 WADRwriteBlock(struct WADINFO *info,char  *data,Int32 sz)

@@ -138,7 +138,7 @@ Bool PNMisNew(Int16 idx)
 {  if(PNMok!=TRUE)Bug("PNMok");
    if(idx>=PNMtop)Bug("PnmIN>");
    /*check if patch was added after initial definition*/
-   if(idx>PNMknown) return TRUE;
+   if(idx>=PNMknown) return TRUE;
    return FALSE;
 }
 void PNMfree(void)
@@ -211,11 +211,11 @@ static void TXUdefineCurTex(char name[8],Int16 X,Int16 Y,Bool Redefn)
    { if(strncmp(TXUtex[t].Name,name,8)==0)
          { if(Redefn==TRUE)
            { TXUtex[t].Name[0]='\0';
-                 Detail("Warning: Texture %.8s is redefined\n",name);
+             Detail("Warning: Texture %s is redefined\n", lump_name (name));
            }
            else /*don't redefine textures*/
            { TXUtex[TXUtexCur].Name[0]='\0';
-                 break;
+             break;
            }
          }
    }
@@ -261,7 +261,7 @@ static Int32 TXUrealTexture(void)
   Int32 NbOfTex=0; /*real top of texs*/
   for(t=0; t<TXUtexTop; t++)
   { if(TXUtex[t].Npatches<1)
-    { Warning("Ignored empty texture %.8s",TXUtex[t].Name);
+    { Warning("Ignored empty texture %s", lump_name (TXUtex[t].Name));
       TXUtex[t].Name[0]='\0';
     }
     if(TXUtex[t].Name[0]!='\0') NbOfTex++;
@@ -419,14 +419,14 @@ void TXUreadTEXTURE(char  *Data,Int32 DataSz,char  *Patch, Int32 PatchSz,Bool Re
     Xsize = peek_i16_le (Data + Pos);
     Pos += 2;
     if((Xsize<0)||(Xsize>4096))
-      ProgError ("Texture \"%.8s\": width out of bound (%d)",
-	  tname, (int) Xsize);
+      ProgError ("Texture %s: width out of bound (%d)",
+	  lump_name (tname), (int) Xsize);
 
     Ysize = peek_i16_le (Data + Pos);
     Pos += 2;
     if((Ysize<0)||(Ysize>4096))
-      ProgError ("Texture \"%.8s\": height out of bound (%d)",
-	  tname, (int) Ysize);
+      ProgError ("Texture %s: height out of bound (%d)",
+	  lump_name (tname), (int) Ysize);
 
     if (have_header_dummies)
       Pos += 4;  /* Skip 2 dummy unused fields */
@@ -434,8 +434,8 @@ void TXUreadTEXTURE(char  *Data,Int32 DataSz,char  *Patch, Int32 PatchSz,Bool Re
     Numpat = peek_i16_le (Data + Pos)&0xFFFF;
     Pos += 2;
     if((Numpat<0)||(Numpat>MAXPATCHPERTEX))
-      ProgError("Texture \"%.8s\": too many patches (%d)",
-	  tname, (int) Numpat);
+      ProgError("Texture %s: too many patches (%d)",
+	  lump_name (tname), (int) Numpat);
 
     /* declare texture */
     TXUdefineCurTex(tname,Xsize,Ysize,Redefn);
@@ -445,16 +445,16 @@ void TXUreadTEXTURE(char  *Data,Int32 DataSz,char  *Patch, Int32 PatchSz,Bool Re
     {
       Xofs = peek_i16_le (Data + Pos);
       if((Xofs<-4096)||(Xofs>4096))
-	ProgError("Texture \"%.8s\"(%d/%d): bad patch X-offset %d",
-	    tname, (int) p, (int) Numpat, (int) Xofs);
+	ProgError("Texture %s(%d/%d): bad patch X-offset %d",
+	    lump_name (tname), (int) p, (int) Numpat, (int) Xofs);
       Yofs = peek_i16_le (Data + Pos + 2);
       if((Yofs<-4096)||(Yofs>4096))
-	ProgError("Texture \"%.8s\"(%d/%d): bad patch Y-offset %d",
-	    tname, (int) p, (int) Numpat, (int) Yofs);
+	ProgError("Texture %s(%d/%d): bad patch Y-offset %d",
+	    lump_name (tname), (int) p, (int) Numpat, (int) Yofs);
       Pindex = peek_i16_le (Data + Pos + 4);
       if((Pindex<0)||(Pindex>MaxPindex))
-	ProgError("Texture \"%.8s\"(%d/%d): bad patch index %d",
-	    tname, (int) p, (int) Numpat, (int) Pindex);
+	ProgError("Texture %s(%d/%d): bad patch index %d",
+	    lump_name (tname), (int) p, (int) Numpat, (int) Pindex);
       /*if new patch list, recalculate Pindex*/
       if(PatchSz>0)
       { for(dummy=(4L+(Pindex*8L)),i=0;i<8;i++)
@@ -478,7 +478,7 @@ Bool TXUcheckTex(Int16 npatch,Int16  *PszX)
    if(TXUtexTop<100) Output("Warning: Some textures could be missing! (less than 100 defined)\n");
    for(pat=0, t=0; t<TXUtexTop; t++)
    { if(TXUtex[t].Npatches<1)
-     { Output("Warning: Texture %.8s is empty\n",TXUtex[t].Name);
+     { Output("Warning: Texture %s is empty\n", lump_name (TXUtex[t].Name));
        Res=FALSE;
      }
      top=pat+TXUtex[t].Npatches;
@@ -488,14 +488,16 @@ Bool TXUcheckTex(Int16 npatch,Int16  *PszX)
      */
      for(bit=1,C=0,b=0;b<16;b++,bit<<=1) if((TXUtex[t].szX)&bit) C++;
      if(C>1)
-     { Output("Warning: Width of %.8s is not a power of 2\n",TXUtex[t].Name);
+     { Output("Warning: Width of %s is not a power of 2\n",
+	 lump_name (TXUtex[t].Name));
        Res=FALSE;
      }
      /*
      ** check height
      */
      if(TXUtex[t].szY>128)
-     { Output("Warning: Height of %.8s is more than 128\n",TXUtex[t].Name);
+     { Output("Warning: Height of %s is more than 128\n",
+	 lump_name (TXUtex[t].Name));
        Res=FALSE;
      }
      /*
@@ -522,12 +524,14 @@ Bool TXUcheckTex(Int16 npatch,Int16  *PszX)
          }
        }
        if(found==FALSE)
-       { Output("Warning: Empty column %d in texture %.8s\n",col,TXUtex[t].Name);
+       { Output("Warning: Empty column %d in texture %s\n",
+	   col, lump_name (TXUtex[t].Name));
          Res=FALSE;
        }
      }
      if(Meduza>=2)  /*there is a colum with two patches*/
-     { Output("Warning: Texture %.8s should not be used on a two sided wall.\n",TXUtex[t].Name);
+     { Output("Warning: Texture %s should not be used on a two sided wall.\n",
+	 lump_name (TXUtex[t].Name));
      }
      pat+=TXUtex[t].Npatches;
    }
@@ -537,7 +541,8 @@ Bool TXUcheckTex(Int16 npatch,Int16  *PszX)
    for(t=0; t<TXUtexTop; t++)
    { for(tt=t+1;tt<TXUtexTop;tt++)
        if(strncmp(TXUtex[t].Name,TXUtex[tt].Name,8)==0)
-       { Output("Warning: texture %.8s is duplicated\n",TXUtex[t].Name);
+       { Output("Warning: texture %s is duplicated\n",
+	   lump_name (TXUtex[t].Name));
          Res=FALSE;
        }
    }
@@ -573,7 +578,7 @@ void TXUlistTex(void)
    if(TXUok!=TRUE) Bug("TXUok");
    for (t= 0; t <TXUtexTop; t++)
    { if(TXUtex[t].Name[0]!='\0') 
-       Output("%.8s\n",TXUtex[t].Name); 
+       Output("%s\n", lump_name (TXUtex[t].Name)); 
    }                                                
 }
 
@@ -629,13 +634,19 @@ void TXUreadTexFile(const char *file,Bool Redefn)
    for(t=0;t<MAXTEXTURES;t++)
    { if(TXTreadTexDef(TXT,tname,&xsize,&ysize)==FALSE) break;
      /* check X size */
-     if((xsize<0)||(xsize>4096))        ProgError("texture width out of bound");
+     if((xsize<0)||(xsize>4096))
+       ProgError("texture width out of bound");
      for(bit=1,C=0,b=0;b<16;b++,bit<<=1) if(xsize&bit) C++;
-     if(C>1)             Warning("Bogus texture %.8s. Width should be a power of 2",tname);
+     if(C>1)
+       Warning("Bogus texture %s. Width should be a power of 2",
+	   lump_name (tname));
      /* check Y size */
-     if((ysize<0)||(ysize>4096))        ProgError("texture height out of bound");
+     if((ysize<0)||(ysize>4096))
+       ProgError("texture height out of bound");
      // AYM 1999-05-17
-     if(ysize>509)        Warning("Bogus texture %.8s. Heights above 509 are ignored",tname);
+     if(ysize>509)
+       Warning("Bogus texture %s. Heights above 509 are ignored",
+	   lump_name (tname));
      /* declare texture */
      TXUdefineCurTex(tname,xsize,ysize, Redefn);
      for(p=0;p<MAXPATCHPERTEX;p++)

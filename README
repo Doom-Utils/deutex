@@ -1,11 +1,11 @@
-DeuTex 4.2.0
+DeuTex 4.3.0
 
 WHAT ARE DEUTEX AND DEUSF
 
   DeuTex and DeuSF are programs than can do many things with Doom,
   Heretic, Hexen and Strife wad files such as extracting and inserting
   graphics, sounds, levels and other resources. See the manual for
-  details (docsrc/dtexman6.txt).
+  details (dtexman6.txt).
 
 BUILDING AND INSTALLING ON UNIX
 
@@ -33,4 +33,4 @@ CONTACT
   General newbie questions : news:rec.games.computer.doom.editing
   Maintainer               : André Majorel <amajorel@teaser.fr>.
 
--- AYM 1999-09-19
+-- AYM 1999-11-21

@@ -32,6 +32,7 @@ Place, Suite 330, Boston, MA 02111-1307, USA.
 #include "color.h"
 #include "picture.h"
 #include "sound.h"
+#include "usedidx.h"
 
 /*compile only for DeuTex*/
 #if defined DeuTex
@@ -56,7 +57,7 @@ static void stop (void)
 */
 static Bool XTRbmpSave(Int16 *pinsrX,Int16 *pinsrY,struct WADDIR  *entry,
 		 PICTYPE type,const char *DataDir,const char *dir,struct
-		 WADINFO *info,IMGTYPE Picture,Bool WSafe)
+		 WADINFO *info,IMGTYPE Picture,Bool WSafe, cusage_t *cusage)
 {  Bool res;
    Int32 start=entry->start;
    Int32 size =entry->size;
@@ -80,7 +81,8 @@ static Bool XTRbmpSave(Int16 *pinsrX,Int16 *pinsrY,struct WADDIR  *entry,
    buffer=(char  *)Malloc(size);
    WADRseek(info,start);
    WADRreadBytes(info,buffer,size);
-   res = PICsaveInFile(file,type,buffer,size,pinsrX,pinsrY,Picture, name);
+   res = PICsaveInFile(file,type,buffer,size,pinsrX,pinsrY,Picture, name,
+       cusage);
    if(res==TRUE)Detail("Saved picture as %s\n",file);
    Free(buffer);
    return res;
@@ -88,10 +90,18 @@ static Bool XTRbmpSave(Int16 *pinsrX,Int16 *pinsrY,struct WADDIR  *entry,
 
 /*
 ** extract entries from a WAD
+**
+** Called with cusage == NULL, (-xtract) this function extracts
+** everything in the wad to separate files.
+**
+** Called with cusage != NULL, (-usedidx) this function creates
+** no files but print statistics about which colours are used
+** in the wad.
 */
 void XTRextractWAD(const char *doomwad, const char *DataDir, const char
     *wadin, const char *wadinfo, IMGTYPE Picture,SNDTYPE Sound,Bool
-    fullSND,NTRYB select, char trnR, char trnG, char trnB,Bool WSafe)
+    fullSND,NTRYB select, char trnR, char trnG, char trnB,Bool WSafe,
+    cusage_t *cusage)
 { static struct WADINFO pwad;
   static struct WADINFO iwad;
   static struct WADINFO lwad;
@@ -108,11 +118,15 @@ void XTRextractWAD(const char *doomwad, const char *DataDir, const char
   Int16 pnm;char  *Pnam;Int32 Pnamsz;
   char *extens=NULL;
   /*text file to write*/
-  static struct TXTFILE *TXT;
+  static struct TXTFILE *TXT = NULL;
   Phase("Extracting entries from WAD %s\n",wadin);
   /*open iwad,get iwad directory*/
   iwad.ok=0;
   WADRopenR(&iwad,doomwad);
+
+  /* If -usedidx, we're only interested in graphics. */
+  if (cusage != NULL)
+     select &= (BGRAPHIC | BSPRITE | BPATCH | BFLAT | BSNEAP | BSNEAT);
 
   /*find PNAMES*/
   pnm=WADRfindEntry(&iwad,"PNAMES");
@@ -194,19 +208,25 @@ void XTRextractWAD(const char *doomwad, const char *DataDir, const char
   ** iwad not needed anymore
   */
   WADRclose(&iwad);
+
   /*
   ** output WAD creation directives
-  ** and save entries depending on their type
+  ** and save entries depending on their type.
+  ** If -usedidx, do _not_ create a directives file.
   */
-
-  /*check if file exists*/
-  TXT=TXTopenW(wadinfo);
+  if (cusage != NULL)
+     TXT = &TXTdummy;  /* Notional >/dev/null */ 
+  else
   {
-    char comment[81];
-    sprintf (comment, "DeuTex %.32s by Olivier Montanuy", deutex_version);
-    TXTaddComment (TXT, comment);
+     /*check if file exists*/
+     TXT=TXTopenW(wadinfo);
+     {
+       char comment[81];
+       sprintf (comment, "DeuTex %.32s by Olivier Montanuy", deutex_version);
+       TXTaddComment (TXT, comment);
+     }
+     TXTaddComment(TXT,"PWAD creation directives");
   }
-  TXTaddComment(TXT,"PWAD creation directives");
 
   /*
   ** LEVELS
@@ -265,7 +285,7 @@ void XTRextractWAD(const char *doomwad, const char *DataDir, const char
           res=FALSE;
           if(osize==64000L)/*lumps that are pics*/
           { res=XTRbmpSave(&insrX,&insrY,&pdir[p],PLUMP,DataDir,"LUMPS",&pwad,
-	      Picture,WSafe);
+	      Picture,WSafe, cusage);
           }
           if(res!=TRUE)   /*normal lumps*/
           { res=MakeFileName(file,DataDir,"LUMPS","",pdir[p].name,"LMP");
@@ -404,7 +424,8 @@ if(select&BTEXTUR)
               { buffer=(char  *)Malloc(pdir[p].size);
                 WADRseek(&pwad,pdir[p].start);
                 WADRreadBytes(&pwad,buffer,pdir[p].size);
-                SNDsaveSound(file,buffer,pdir[p].size,Sound,fullSND);
+                SNDsaveSound(file,buffer,pdir[p].size,Sound,fullSND,
+		    pdir[p].name);
                 Detail("Saved Sound as   %s\n",file);
                 Free(buffer);
               }
@@ -461,7 +482,7 @@ if(select&BTEXTUR)
     ostart=0x80000000L;osize=0;
     for(EntryFound=FALSE,p=0;p<pnb;p++)
     { if((piden[p]&EMASK)==EGRAPHIC)
-      { if(EntryFound!=TRUE)
+      { if(EntryFound!=TRUE && cusage == NULL)
         { MakeDir(file,DataDir,"GRAPHICS","");
         }
         if((ostart==pwad.dir[p].start)&&(osize==pwad.dir[p].size))
@@ -470,7 +491,7 @@ if(select&BTEXTUR)
         else
         { ostart=pwad.dir[p].start; osize=pwad.dir[p].size;
           if(XTRbmpSave(&insrX,&insrY,&pdir[p],PGRAPH,DataDir,"GRAPHICS",&pwad,
-	      Picture,WSafe)==TRUE)
+	      Picture,WSafe, cusage)==TRUE)
           { if(EntryFound!=TRUE)
             { 
               TXTaddEmptyLine (TXT);
@@ -481,7 +502,7 @@ if(select&BTEXTUR)
             TXTaddEntry(TXT,pdir[p].name,NULL,insrX,insrY,FALSE,TRUE);
           }
           else if(XTRbmpSave(&insrX,&insrY,&pdir[p],PFLAT,DataDir,"LUMPS",&pwad,
-	      Picture,WSafe)==TRUE)
+	      Picture,WSafe, cusage)==TRUE)
           { /*Was saved as graphic lump*/
             TXTaddComment(TXT,pdir[p].name);
           }
@@ -509,7 +530,8 @@ if(select&BTEXTUR)
     for(EntryFound=FALSE,p=0;p<pnb;p++)
     { if((piden[p]&EMASK)==ESPRITE)
       { if(EntryFound!=TRUE)
-        {  MakeDir(file,DataDir,"SPRITES","");
+        {  if (cusage == NULL)
+	      MakeDir(file,DataDir,"SPRITES","");
            TXTaddEmptyLine (TXT);
            TXTaddComment(TXT,"List of Sprites");
            TXTaddSection(TXT,"sprites");
@@ -521,8 +543,8 @@ if(select&BTEXTUR)
         else
         { ostart=pwad.dir[p].start; osize=pwad.dir[p].size;
           if(XTRbmpSave(&insrX,&insrY,&pdir[p],PSPRIT,DataDir,"SPRITES",&pwad,
-	      Picture,WSafe)!=TRUE)
-          { Warning("failed to write sprite %.8s",pwad.dir[p].name);
+	      Picture,WSafe, cusage)!=TRUE)
+          { Warning("failed to write sprite %s", lump_name (pwad.dir[p].name));
           }
           else
           { TXTaddEntry(TXT,pdir[p].name,NULL,insrX,insrY,FALSE,TRUE);
@@ -540,18 +562,20 @@ if(select&BTEXTUR)
     for(EntryFound=FALSE,p=0;p<pnb;p++)
      { if((piden[p] & EMASK)==EPATCH)
        { if(EntryFound!=TRUE)
-         { MakeDir(file,DataDir,"PATCHES","");
+         { 
+	   if (cusage == NULL)
+	      MakeDir(file,DataDir,"PATCHES","");
            TXTaddEmptyLine (TXT);
            TXTaddComment(TXT,"List of wall patches");
            TXTaddSection(TXT,"patches");
            EntryFound=TRUE;
          }
          if(XTRbmpSave(&insrX,&insrY,&pdir[p],PPATCH,DataDir,"PATCHES",&pwad,
-	     Picture,WSafe)==TRUE)
+	     Picture,WSafe,cusage)==TRUE)
          { TXTaddEntry(TXT,pdir[p].name,NULL,INVALIDINT,INVALIDINT,FALSE,FALSE);
          }
          else
-         { Warning("failed to write patch %.8s",pwad.dir[p].name);
+         { Warning("failed to write patch %s", lump_name (pwad.dir[p].name));
          }
        }
      }
@@ -571,7 +595,8 @@ if(select&BTEXTUR)
     for(EntryFound=FALSE,p=0;p<pnb;p++)
     { if((piden[p]&EMASK)==EFLAT)
       { if(EntryFound!=TRUE)
-        {  MakeDir(file,DataDir,"FLATS","");
+        {  if (cusage == NULL)
+	      MakeDir(file,DataDir,"FLATS","");
            TXTaddEmptyLine (TXT);
            TXTaddComment(TXT,"List of Floors and Ceilings");
            TXTaddSection(TXT,"flats");
@@ -583,9 +608,9 @@ if(select&BTEXTUR)
         else
         { ostart=pwad.dir[p].start; osize=pwad.dir[p].size;
           if(XTRbmpSave(&insrX,&insrY,&pdir[p],PFLAT,DataDir,"FLATS",&pwad,
-	      Picture,WSafe)!=TRUE)
+	      Picture,WSafe,cusage)!=TRUE)
           { if(strncmp(pwad.dir[p].name,"F_SKY1",6)!=0)
-            Warning("failed to write flat %.8s",pwad.dir[p].name);
+            Warning("failed to write flat %s", lump_name (pwad.dir[p].name));
           }
           else
             TXTaddEntry(TXT,pdir[p].name,NULL,INVALIDINT,INVALIDINT,FALSE,FALSE);
@@ -607,7 +632,8 @@ if(select&BTEXTUR)
       { if(EntryFound!=TRUE)
 	{
 	   char comment[40];
-	   MakeDir(file,DataDir,entry_type_dir(type),"");
+	   if (cusage == NULL)
+	      MakeDir(file,DataDir,entry_type_dir(type),"");
            TXTaddEmptyLine (TXT);
 	   sprintf (comment, "List of %.20s", entry_type_plural (type));
 	   TXTaddComment (TXT, comment);
@@ -621,10 +647,11 @@ if(select&BTEXTUR)
 	else
 	{ ostart=pwad.dir[p].start; osize=pwad.dir[p].size;
 	  if(XTRbmpSave(&insrX,&insrY,&pdir[p],entry_type_pictype (type),
-	      DataDir, entry_type_dir (type),&pwad, Picture,WSafe) != TRUE)
+	      DataDir, entry_type_dir (type),&pwad, Picture, WSafe,
+	      cusage) != TRUE)
 	  {
-	    Warning("failed to write %.20s %.8s",
-		entry_type_name (type), pwad.dir[p].name);
+	    Warning("failed to write %.20s %s",
+		entry_type_name (type), lump_name (pwad.dir[p].name));
 	  }
 	  else
 	  {
@@ -649,7 +676,8 @@ if(select&BTEXTUR)
       { if(EntryFound!=TRUE)
 	{
 	   char comment[40];
-	   MakeDir(file,DataDir,entry_type_dir(type),"");
+	   if (cusage == NULL)
+	      MakeDir(file,DataDir,entry_type_dir(type),"");
            TXTaddEmptyLine (TXT);
 	   sprintf (comment, "List of %.20s", entry_type_plural (type));
 	   TXTaddComment (TXT, comment);
@@ -663,10 +691,11 @@ if(select&BTEXTUR)
 	else
 	{ ostart=pwad.dir[p].start; osize=pwad.dir[p].size;
 	  if(XTRbmpSave(&insrX,&insrY,&pdir[p],entry_type_pictype (type),
-	      DataDir, entry_type_dir (type),&pwad, Picture,WSafe) != TRUE)
+	      DataDir, entry_type_dir (type),&pwad, Picture, WSafe,
+	      cusage) != TRUE)
 	  {
-	    Warning("failed to write %.20s %.8s",
-		entry_type_name (type), pwad.dir[p].name);
+	    Warning("failed to write %.20s %s",
+		entry_type_name (type), lump_name (pwad.dir[p].name));
 	  }
 	  else
 	  {
@@ -676,6 +705,22 @@ if(select&BTEXTUR)
 	}
       }
     }
+  }
+
+  /* If -usedidx, print statistics */
+  if (cusage != NULL)
+  {
+    int n;
+
+    printf ("Npixels    Idx  Nlumps  First lump\n");
+    printf ("---------  ---  ------  ----------\n");
+    for (n = 0; n < NCOLOURS; n++)
+      printf ("%9lu  %3d  %5lu   %s\n",
+	  cusage->uses[n],
+	  n,
+	  cusage->nlumps[n],
+	  (cusage->uses[n] == 0) ? "" : lump_name (cusage->where_first[n]));
+    putchar ('\n');
   }
 
   /*
@@ -724,8 +769,8 @@ void XTRgetEntry(const char *doomwad, const char *DataDir, const char *wadin,
   COLinit(trnR,trnG,trnB,Colors,(Int16)Entrysz);
   Free(Colors);
   e=WADRfindEntry(&pwad,Name);
-  if(e<0) ProgError("Can't find entry %.8s in WAD",Name);
-  Phase("Extracting entry %.8s from WAD %s\n",entry,wadin);
+  if(e<0) ProgError("Can't find entry %s in WAD", lump_name (Name));
+  Phase("Extracting entry %s from WAD %s\n", lump_name (entry), wadin);
   Entry=WADRreadEntry(&pwad,e,&Entrysz);
   /*try graphic*/
   if(Found!=TRUE)
@@ -738,20 +783,20 @@ void XTRgetEntry(const char *doomwad, const char *DataDir, const char *wadin,
         default: Bug("img type");
       }
       MakeFileName(file,DataDir,"","",Name,extens);
-      if(PICsaveInFile(file,PGRAPH,Entry,Entrysz,&insrX,&insrY,Picture, Name)
-	  ==TRUE)
+      if(PICsaveInFile(file,PGRAPH,Entry,Entrysz,&insrX,&insrY,Picture, Name,
+	  NULL) ==TRUE)
       { Info("Picture insertion point is (%d,%d)",insrX,insrY);
         Found=TRUE;
       }
       else if((Entrysz==0x1000)||(Entrysz==0x1040))
-      { if(PICsaveInFile(file,PFLAT,Entry,Entrysz,&insrX,&insrY,Picture, Name)
-	  ==TRUE)
+      { if(PICsaveInFile(file,PFLAT,Entry,Entrysz,&insrX,&insrY,Picture, Name,
+	  NULL) ==TRUE)
         { Found=TRUE;
         }
       }
       else if(Entrysz==64000L)
-      { if(PICsaveInFile(file,PLUMP,Entry,Entrysz,&insrX,&insrY,Picture, Name)
-	  ==TRUE)
+      { if(PICsaveInFile(file,PLUMP,Entry,Entrysz,&insrX,&insrY,Picture, Name,
+	  NULL) ==TRUE)
         { Found=TRUE;
         }
       }
@@ -767,7 +812,7 @@ void XTRgetEntry(const char *doomwad, const char *DataDir, const char *wadin,
           default: Bug("snd type");
         }
         MakeFileName(file,DataDir,"","",Name,extens);
-        SNDsaveSound(file,Entry,Entrysz,Sound,fullSND);
+        SNDsaveSound(file,Entry,Entrysz,Sound,fullSND, Name);
         Found=TRUE;
       }
   if(Found!=TRUE)

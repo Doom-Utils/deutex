@@ -169,7 +169,8 @@ void XTRlistDir(const char *doomwad, const char *wadin, NTRYB select)
                   case ESNDPC:    typ = "PC sound"; break;
                   case ESNDWAV:   typ = "WAV sound"; break;
                 }
-                Output("%-8.8s  %8ld\t%s\n",dir[n].name,dir[n].size,typ);
+                Output("%-8s  %8ld\t%s\n",
+		    lump_name (dir[n].name), dir[n].size, typ);
         }
         if(wadin!=NULL)
           WADRclose(&pwad);
@@ -283,7 +284,7 @@ void CheckTexture(char  *tex,Bool IsDef)
     }
     else
     { if(TXUexist(Name)==FALSE)
-        Output("Warning: Undefined Sidedef %.8s\n",Name);
+        Output("Warning: undefined sidedef %s\n", lump_name (Name));
     }
   }
 }
@@ -318,7 +319,7 @@ void CheckLevels(struct WADINFO *pwad, Bool IsDef)
       { top=lev+11;
         if(lin>top) break;
         if(strncmp(pdir[lin].name,"SIDEDEFS",8)==0)
-        { Output("\nChecking LEVEL %.8s\n\n",pdir[lev].name);
+        { Output("\nChecking LEVEL %s\n\n", lump_name (pdir[lev].name));
           CheckSideDefs(pwad,pdir[lin].start,pdir[lin].size,IsDef);
         }
       }
@@ -381,8 +382,7 @@ void XTRstructureTest(const char *doomwad,const char *wadin)
 	 else
     { pnm=WADRfindEntry(&iwad,name);
       if(pnm<0)
-        /*ProgError("Patch %.8s not found",name);*/
-        Output("Warning: Patch %.8s not found\n",name);
+        Output("Warning: Patch %s not found\n", lump_name (name));
       else
       { WADRseek(&iwad,iwad.dir[pnm].start);
         WADRreadBytes(&iwad,(char  *)&pich,sizeof(struct PICH));

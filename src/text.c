@@ -35,6 +35,12 @@ Place, Suite 330, Boston, MA 02111-1307, USA.
 /*compile only for DeuTex*/
 #if defined DeuTex
 
+/* A special instance of struct TXTFILE that is treated by the
+   TXT*() output functions as the equivalent of /dev/null.
+   Writing into it is a no-op. This convention is _not_
+   supported by the input functions ! */
+struct TXTFILE TXTdummy;
+
 /*****************************************************/
 
 const Int16 SPACE    = 0x2;
@@ -95,10 +101,12 @@ void TXTinit(void)
   TXTok=TRUE;
 }
 void TXTcloseR(struct TXTFILE *TXT)
-{ if(TXTok!=TRUE) Bug("TxtClo");
+{ 
+  if(TXTok!=TRUE) Bug("TxtClo");
   fclose(TXT->fp);
   Free(TXT);
 }
+
 struct TXTFILE *TXTopenR(const char *file)
 { struct TXTFILE *TXT;
   /*characters*/
@@ -419,8 +427,12 @@ struct TXTFILE *TXTopenW(const char *file) /*open, and init if needed*/
   if(TXT->fp==NULL)  ProgError("Could not write file %s",file);
   return TXT;
 }
-void   TXTcloseW(struct TXTFILE *TXT)
-{ if(TXTok!=TRUE) Bug("TxtClo");
+
+void TXTcloseW(struct TXTFILE *TXT)
+{
+  if (TXT == &TXTdummy)
+     return;
+  if(TXTok!=TRUE) Bug("TxtClo");
   fclose(TXT->fp);
   Free(TXT);
 }
@@ -429,12 +441,18 @@ void   TXTcloseW(struct TXTFILE *TXT)
 ** To write entries
 */
 void TXTaddSection(struct TXTFILE *TXT,const char *def)
-{ if(TXTok!=TRUE) Bug("TxtAdS");
+{ 
+  if (TXT == &TXTdummy)
+     return;
+  if(TXTok!=TRUE) Bug("TxtAdS");
   fprintf(TXT->fp,"[%.8s]\n",def);
 }
 
 void TXTaddEntry(struct TXTFILE *TXT,const char *name,const char *filenam,Int16 x,Int16 y,Bool repeat, Bool XY)
-{ if(TXTok!=TRUE) Bug("TxtAdE");
+{ 
+  if (TXT == &TXTdummy)
+     return;
+  if(TXTok!=TRUE) Bug("TxtAdE");
   fprintf(TXT->fp,"%.8s",name);
 /* fprintf(TXT->fp,"%.8s=",name);*/
   if(filenam!=NULL)
@@ -447,12 +465,17 @@ void TXTaddEntry(struct TXTFILE *TXT,const char *name,const char *filenam,Int16 
 }
 
 void TXTaddComment(struct TXTFILE *TXT,const char *text)
-{ if(TXTok!=TRUE) Bug("TxtAdC");
+{ 
+  if (TXT == &TXTdummy)
+     return;
+   if(TXTok!=TRUE) Bug("TxtAdC");
   fprintf(TXT->fp,"# %.256s\n",text);
 }
 
 void TXTaddEmptyLine (struct TXTFILE *TXT)
 {
+  if (TXT == &TXTdummy)
+     return;
   if (TXTok != TRUE)
     Bug ("TxtAdL");
   putc ('\n', TXT->fp);

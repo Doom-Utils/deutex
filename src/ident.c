@@ -267,11 +267,12 @@ static void IDENTdirSet(ENTRY  *ids,struct WADINFO *info,const char *name,ENTRY 
 	if (debug_ident != NULL
 	    && ((debug_ident[0] == '*' && debug_ident[1] == '\0')
 		|| ! strncmp (debug_ident, name, 8)))
-	  Info ("Ident: %-8.8s as %-8.32s by %.32s\n",
-	      name, entry_type_name (ident), ident_func);
+	  Info ("Ident: %-8s as %-8.32s by %.32s\n",
+	      lump_name (name), entry_type_name (ident), ident_func);
       ids[n]=ident;
       }
 }
+
 
 /*
  *	IDENTsetType
@@ -283,8 +284,8 @@ static void IDENTsetType (ENTRY  *ids, struct WADINFO *info, int n,
   if (debug_ident != NULL
       && ((debug_ident[0] == '*' && debug_ident[1] == '\0')
 	  || ! strncmp (debug_ident, info->dir[n].name, 8)))
-    Info ("Ident: %-8.8s as %-8.32s by %.32s\n",
-	info->dir[n].name, entry_type_name (type), ident_func);
+    Info ("Ident: %-8s as %-8.32s by %.32s\n",
+	lump_name (info->dir[n].name), entry_type_name (type), ident_func);
   ids[n] = type;
 }
 
@@ -579,8 +580,8 @@ static void IDENTdirGraphics2(ENTRY  *ids,struct WADINFO *info,Bool Check)
 	   else
 	   {
 	     if (is_snea > 0 && is_picture > 0 && is_snea == is_picture)
-	       Warning ("Ambiguous type for %.8s (picture or snea ?)",
-		   info->dir[n].name);
+	       Warning ("Ambiguous type for %s (picture or snea ?)",
+		   lump_name (info->dir[n].name));
 	     IDENTsetType (ids, info, n, ELUMP);
 	   }
          }

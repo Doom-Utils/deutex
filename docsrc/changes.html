@@ -6,6 +6,111 @@
 <h1>History of changes for DeuTex</h1>
 
 <dl>
+<p><dt>DeuTex 4.3.0 (AYM 1999-12-24)
+<dd>
+	<ul>
+	<p><li>Graphics: fixed ancient bug where DeuTex sometimes failed to
+	include custom patches if they were not explicitly listed in the
+	<code>[patches]</code> section. If the first patch used in
+	<code>texture1.txt</code> was a custom patch, it <em>had</em> to be
+	listed in <code>[patches]</code> or DeuTex would forget to include it.
+	This is the same bug Olivier mentioned in the home page&nbsp;:
+
+	<i><blockquote>
+	  The support for wall patches in DeuTex has been modified. You must
+	  now explicitely declare all your patches in a [PATCHE] section.
+
+	  <p>If you don't do this, DeuTex will attempt to work as usual, but
+	  there seems to ba a bug in this part of the code, so sometime some
+	  needed patches are not loaded.
+	</blockquote></i>
+
+	After some summary testing, looks like it's fixed.
+
+	<p><li>Misc: more error handling improvements.
+
+	<p><li>Misc: bumped version number and cleaned things up for public
+	release.
+
+	<p><li>Platform: fixed <code>ftruncate()</code> being undeclared when
+	compiling with DJGPP and updated the building-on-DOS section of the
+	doc.
+
+	</ul>
+
+<p><dt>DeuTex 4.2.2 (AYM 1999-11-20) (not for public consumption)
+<dd>
+	<ul>
+	<p><li>Misc: made certain failure messages more informative.
+	
+	<p><li>Platform: fixed several bugs that showed in the DOS precompiled
+	executables for 4.1.0 and 4.2.0 (most common symptom : DeuTex aborting
+	    with a "<code>Can't read WAD</code>" error message).
+
+	<p>Lengthy technical explanation&nbsp;: in 4.1.0, I removed the
+	"<code>huge</code>" pointer qualifiers that were scattered throughout
+	the source not unlike nitrates in groundwater. The reasoning was that,
+	since DeuTex is always compiled in the "huge" memory model anyway,
+	those qualifiers were redundant. As I found out at the end of a long
+	and painful debugging session, they weren't.
+
+	<p>Had I read the doc of the compiler, I would have known that, even
+	when in the huge memory model, pointers are "<code>far</code>" by
+	default, not "<code>huge</code>". Far pointers wrap around at
+	64&nbsp;kB&nbsp;; this is not what you want when you're trying to work
+	with lumps larger than that. And, apparently, there is no way to
+	specify that pointers should be huge by default.
+
+	<p>On top of that, there was a genuine bug in
+	<code>WADRreadBytes2()</code> that would have prevented the DOS port
+	from working, even if all pointers had been huge. But this one was
+	fixed in 4.2.1.
+
+	<p>I switched to DJGPP, with which you can get working executables
+	without having to contaminate your code with carcinogenic keywords. The
+	bad news&nbsp;: firstly, the executables are somewhat larger. Secondly,
+	since DJGPP executables use protected mode, they tend to be more fussy.
+
+	<p>Thanks to Kim Parrott for reporting the bug and alpha testing my
+	fixes.
+
+	<p>All the above applies only to the DOS precompiled executables. Other
+	platforms did not have these problems.
+
+	</ul>
+
+<p><dt>DeuTex 4.2.1 (AYM 1999-11-16) (not for public consumption)
+<dd>
+	<ul>
+	<p><li>CLI: fixed segfault on "<code>deutex --vers</code>".
+
+	<p><li>Graphics: new option <code>-usedidx</code>. When called with
+	this option, DeuTex scans all the graphics in the wad and prints
+	statistics about which palette indices they use. (By "graphics" is meant
+	"any data that is converted into an RGB triplet by looking up
+	<code>PLAYPAL</code> or <code>TITLEPAL</code>". That includes flats,
+	graphics, patches, sneaps, sneats and sprites.) I've added this command
+	for my own use, to help me decide which index should be used to store
+	the transparent colour for Hexen.
+
+	<p><li>Misc: made certain failure messages more informative.
+	
+	<p><li>Misc: made printing of lump names garbage-proof.
+
+	<p><li>Platform: fixed a huge DOS bug that made DeuTex fail with
+	a "<code>Can't read WAD</code>" error whenever it had to read more
+	than 65535 bytes from a wad at once.
+
+	<p><li>Platform: flushing <code>stdout</code> before writing to
+	<code>stderr</code> so that messages come out in the right order when
+	both outputs are redirected.
+
+	<p><li>Sound: all conditions that used to be fatal errors when
+	extracting sound lumps now just elicit a warning message, indicating
+	which lump it was and what action was taken.
+
+	</ul>
+
 <p><dt>DeuTex 4.2.0 (AYM 1999-11-14)
 <dd>
 	<ul>
@@ -32,7 +137,7 @@
 	(or "<code>-tf strife11</code>").
 	</ul>
 
-	<p>Thanks to Kim Parrot for reporting the bug and Len Pitre for
+	<p>Thanks to Kim Parrott for reporting the bug and Len Pitre for
 	pointing me in the right direction.
 
 	<p><li>Sound: fixed two bugs in reading Sun audio (<code>.au</code>)

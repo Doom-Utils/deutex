@@ -189,7 +189,7 @@ void CMPOmakePWAD(const char *doomwad,WADTYPE type, const char *PWADname,
    {  if(TXTseekSection(TXT,"LEVELS"))
       { while(TXTentryParse(name,filenam,&X,&Y,&Repeat,TXT,FALSE)==TRUE)
 	{ p=IDENTlevel(name);
-	  if(p<0) ProgError("Illegal level name %.8s",name);
+	  if(p<0) ProgError("Illegal level name %s", lump_name (name));
 	  if(MakeFileName(file,DataDir,"LEVELS","",filenam,"WAD")!=TRUE)
 		ProgError("Can't find Level WAD %s",file);
 	  Detail("Reading level WAD file %s\n",file);
@@ -225,9 +225,11 @@ void CMPOmakePWAD(const char *doomwad,WADTYPE type, const char *PWADname,
 	     { size=WADRwriteLump(&rwad,file);
 	     }
 	     else
-	     { Picture=CMPOloadPic(&size,&rwad,file,DataDir,"LUMPS",name,filenam,PLUMP,X,Y);
+	     { Picture=CMPOloadPic(&size,&rwad,file,DataDir,"LUMPS",name,
+		 filenam,PLUMP,X,Y);
 	       if(Picture==PICNONE)
-		 if(CMPOcopyFromWAD(&size,&rwad,DataDir,"LUMPS",name,filenam)!=TRUE)
+		 if(CMPOcopyFromWAD(&size,&rwad,DataDir,"LUMPS",name,filenam)
+		     !=TRUE)
 		   ProgError("Can't find Lump or picture file %s.",file);
 	     }
 	   }
@@ -383,7 +385,8 @@ void CMPOmakePWAD(const char *doomwad,WADTYPE type, const char *PWADname,
 	      else if(MakeFileName(file,DataDir,"SOUNDS","",filenam,"VOC")==TRUE)
 	      { size=SNDcopyInWAD(&rwad,file,SNDVOC);
 	      }
-	      else if(CMPOcopyFromWAD(&size,&rwad,DataDir,"SOUNDS",name,filenam)!=TRUE)
+	      else if(CMPOcopyFromWAD(&size,&rwad,DataDir,"SOUNDS",name,
+		    filenam)!=TRUE)
 		ProgError("Can't find Sound %s, AU or WAV or WAD",file);
 	      Detail("Read Sound in file %s\n",file);
 	    }
@@ -409,7 +412,8 @@ void CMPOmakePWAD(const char *doomwad,WADTYPE type, const char *PWADname,
 	    { size=WADRwriteLump(&rwad,file);
 	      Detail("Read Music as MUS file %s\n",file);
 	    }
-	    else if(CMPOcopyFromWAD(&size,&rwad,DataDir,"MUSICS",name,filenam)!=TRUE)
+	    else if(CMPOcopyFromWAD(&size,&rwad,DataDir,"MUSICS",name,
+		  filenam)!=TRUE)
 	      ProgError("Can't find Music %s",file);
 	  }
 	  WADRdirAddEntry(&rwad,start,size,name);
@@ -427,7 +431,8 @@ void CMPOmakePWAD(const char *doomwad,WADTYPE type, const char *PWADname,
 	{ if(Repeat!=TRUE)
 	  { WADRalign4(&rwad);     /*align entry on Int32 word*/
 	    start=WADRposition(&rwad);
-	    Picture=CMPOloadPic(&size,&rwad,file,DataDir,"GRAPHICS",name,filenam,PGRAPH,X,Y);
+	    Picture=CMPOloadPic(&size,&rwad,file,DataDir,"GRAPHICS",name,
+		filenam,PGRAPH,X,Y);
 	  }
 	  WADRdirAddEntry(&rwad,start,size,name);
 	}
@@ -455,7 +460,8 @@ void CMPOmakePWAD(const char *doomwad,WADTYPE type, const char *PWADname,
 		WADRdirAddEntry(&rwad,start,0L,"SS_START");
 	    }
 	    FoundOne=TRUE;
-	    CMPOloadPic(&size,&rwad,file,DataDir,"SPRITES",name,filenam,PSPRIT,X,Y);
+	    CMPOloadPic(&size,&rwad,file,DataDir,"SPRITES",name,
+		filenam,PSPRIT,X,Y);
 	  }
 	  WADRdirAddEntry(&rwad,start,size,name);
 	}
@@ -491,14 +497,18 @@ void CMPOmakePWAD(const char *doomwad,WADTYPE type, const char *PWADname,
 	    start=WADRposition(&rwad);
 	    if(FoundOne==FALSE)
 	    { if(type==IWAD)
-	      { WADRdirAddEntry(&rwad,start,0L,"P_START");
+	      {
+		WADRdirAddEntry(&rwad,start,0L,"P_START");
 		WADRdirAddEntry(&rwad,start,0L,"P1_START");
 	      }
 	      else
+	      {
 		WADRdirAddEntry(&rwad,start,0L,"PP_START");
+	      }
 	    }
 	    FoundOne=TRUE;
-	    CMPOloadPic(&size,&rwad,file,DataDir,"PATCHES",name,filenam,PPATCH,X,Y);
+	    CMPOloadPic(&size,&rwad,file,DataDir,"PATCHES",name,
+		filenam,PPATCH,X,Y);
 	  }
 	  WADRdirAddEntry(&rwad,start,size,name);
 	}
@@ -508,12 +518,16 @@ void CMPOmakePWAD(const char *doomwad,WADTYPE type, const char *PWADname,
       */
       nbPatchs=PNMgetNbOfPatch();
       for(p=0;p<nbPatchs;p++)
-      { if(PNMisNew(p)!=TRUE) continue;/*if old patch, forget it*/
+      {
+	if(PNMisNew(p)!=TRUE)
+	{
+	  continue;/*if old patch, forget it*/
+	}
 	PNMgetPatchName(name,p);
         Normalise(filenam,name);
 	/*search in main IWAD directory*/
 	if(WADRfindEntry(&iwad,name)>=0)
-	{ Output("Reusing DOOM entry %.8s as patch\n",name);
+	{ Output("Reusing DOOM entry %s as patch\n", lump_name (name));
 	}
 	/*search in current PWAD*/
 	else if(WADRfindEntry(&rwad,name)<0)
@@ -522,7 +536,8 @@ void CMPOmakePWAD(const char *doomwad,WADTYPE type, const char *PWADname,
 	  */
 	  WADRalign4(&rwad);     /*align entry on Int32 word*/
 	  start=WADRposition(&rwad);
-	  Picture=CMPOloadPic(&size,&rwad,file,DataDir,"PATCHES",name,filenam,PPATCH,INVALIDINT,INVALIDINT);
+	  Picture=CMPOloadPic(&size,&rwad,file,DataDir,"PATCHES",name,
+	      filenam,PPATCH,INVALIDINT,INVALIDINT);
 	  if(Picture!=PICNONE)
 	  { if(FoundOne==FALSE)
 	    { Phase("Making Wall Patches\n");
@@ -580,7 +595,8 @@ void CMPOmakePWAD(const char *doomwad,WADTYPE type, const char *PWADname,
 		WADRdirAddEntry(&rwad,start,0L,"FF_START");
 	    }
 	    FoundOne=TRUE;
-	    CMPOloadPic(&size,&rwad,file,DataDir,"FLATS",name,filenam,PFLAT,INVALIDINT,INVALIDINT);
+	    CMPOloadPic(&size,&rwad,file,DataDir,"FLATS",name,
+		filenam,PFLAT,INVALIDINT,INVALIDINT);
 	  }
 	  WADRdirAddEntry(&rwad,start,size,name);
 	}
@@ -628,7 +644,8 @@ void CMPOmakePWAD(const char *doomwad,WADTYPE type, const char *PWADname,
 
 /***************** Hack the IWAD *********************/
 extern Int16 HowMuchJunk;
-static char Junk[]="*** This junk is here for DEU 5.21. I am repeating myself anyway.... ********";
+static char Junk[]
+  ="This junk is here for DEU 5.21. I am repeating myself anyway... ";
 static void AddSomeJunk(const char *file)
 {  FILE *out;Int16 n;
    out=fopen(file,FOPEN_AB); /*open R/W at the end*/

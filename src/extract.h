@@ -25,7 +25,8 @@ Place, Suite 330, Boston, MA 02111-1307, USA.
 /*extract.c: list dir and extract entries*/
 void XTRextractWAD(const char *doomwad, const char *DataDir, const char
     *wadin, const char *texout, IMGTYPE Picture,SNDTYPE Sound,Bool
-    fullSND,NTRYB select, char trnR, char trnG, char trnB,Bool WSafe);
+    fullSND,NTRYB select, char trnR, char trnG, char trnB,Bool WSafe,
+    cusage_t *cusage);
 
 /*extract.c: get a single entry*/
 void XTRgetEntry(const char *doomwad, const char *DataDir, const char *wadin,

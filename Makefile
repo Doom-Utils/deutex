@@ -24,9 +24,10 @@ LDFLAGS  =
 # Compiled by developers
 DCFLAGS  = -g -Wall -Wpointer-arith -Wstrict-prototypes
 DCC      = gcc
-DLDFLAGS = -g -lefence
+DLDFLAGS = -g
+#-lefence
 
-#DEFINES = -DDT_ALPHA
+#DEFINES = -DDT_ALPHA -DDT_PRIVATE
 
 ######### do not edit after this line #########
 VERSION       = $$(cat VERSION)
@@ -34,8 +35,8 @@ DISTARC       = deutex-$(VERSION).tar.gz
 DISTARCDOS    = deutex-$(VERSION).zip
 DISTARCDOS8   = dtex$$(tr -cd '[0-9]' <VERSION).zip
 BINZIP        = deutex-$(VERSION).bin.dos.zip
-DISTDIR       = deutex-$(VERSION)		# "deutex-4.0.0"
-DISTDIRDOS    = dtex$$(tr -cd '[0-9]' <VERSION)	# "dtex400"
+DISTDIR       = deutex-$(VERSION)
+DISTDIRDOS    = dtex$$(tr -cd '[0-9]' <VERSION)
 DISTFILES     = $(DOC_SRC) $(HEADERS) $(MISCFILES) $(MISCSRC)\
 		$(SCRIPTS) $(SRC)
 DISTFILESBIN  = $(MISCFILES) deutex.exe deusf.exe
@@ -89,6 +90,7 @@ HEADERS =\
 	src/text.h\
 	src/texture.h\
 	src/tools.h\
+	src/usedidx.h\
 	src/wadio.h\
 
 MISCFILES =\
@@ -131,6 +133,7 @@ SRC =\
 	src/text.c\
 	src/texture.c\
 	src/tools.c\
+	src/usedidx.c\
 	src/version.c\
 	src/wadio.c\
 
@@ -141,16 +144,16 @@ DOBJTEX = $(SRC:.c=.otd)
 
 .SUFFIXES: .os .os~ .ot .ot~ .osd .osd~ .otd .otd~ $(SUFFIXES)
 
-.c.ot:
+.c.ot: src/deutex.h
 	$(CC) $(CFLAGS) $(DEFINES) -DDeuTex -o $@ -c $<
 
-.c.os:
+.c.os: src/deutex.h
 	$(CC) $(CFLAGS) $(DEFINES) -DDeuSF  -o $@ -c $<
 
-.c.otd:
+.c.otd: src/deutex.h
 	$(DCC) $(DCFLAGS) $(DEFINES) -DDeuTex -o $@ -c $<
 
-.c.osd:
+.c.osd: src/deutex.h
 	$(DCC) $(DCFLAGS) $(DEFINES) -DDeuSF  -o $@ -c $<
 
 all: deutex deusf
@@ -314,22 +317,25 @@ save:
 	  --exclude "*.osd" --exclude "*.otd"\
 	  --exclude "*.obj" .
 
+# help - display list of interesting targets
 help:
 	@echo "Targets for end users:"
-	@echo "  make [all]    Build DeuTex, DeuSF and the doc"
-	@echo "  make install  Install DeuTex, DeuSF and the doc"
+	@echo "  [all]       Build DeuTex and DeuSF"
+	@echo "  install     Install DeuTex, DeuSF and the doc"
 	@echo
 	@echo "Targets for developers:"
-	@echo "  make doc      Just the doc"
-	@echo "  make dall     Same as ddeutex + ddeusf"
-	@echo "  make ddt      Same as ddeutex"
-	@echo "  make dds      Same as ddeusf"
-	@echo "  make ddeutex  Debug version of DeuTex -> ./deutex"
-	@echo "  make ddeusf   Debug version of DeuSF  -> ./deusf"
-	@echo "  make dist     Distribution archive    -> ./deutex-VERSION.tar.gz"
-	@echo "  make distdos  Distribution archive    -> ./dtexVERSION.zip"
-	@echo "  make save     Backup archive          -> ../deutex-YYYYMMDD.tar.gz"
-	@echo "  make strip    Strip ./deutex and ./deusf"
-	@echo "  make clean    Remove executables and object files"
+	@echo "  doc         Just the doc"
+	@echo "  dall        Alias for ddeutex + ddeusf"
+	@echo "  ddt         Alias for ddeutex"
+	@echo "  dds         Alias for ddeusf"
+	@echo "  ddeutex     Debug version of DeuTex -> ./deutex"
+	@echo "  ddeusf      Debug version of DeuSF  -> ./deusf"
+	@echo "  dist        Source dist. (Unix)     -> ./deutex-VERSION.tar.gz"
+	@echo "  distdos     Source dist. (DOS)      -> ./dtexVERSION.zip"
+	@echo "  distbindos  Binary-only dist. (DOS) -> ./deutex-VERSION.bin.dos.zip"
+	@echo "  save        Backup archive          -> ../deutex-YYYYMMDD.tar.gz"
+	@echo "  strip       Strip ./deutex and ./deusf"
+	@echo "  test        Run all tests (long)"
+	@echo "  clean       Remove executables and object files"
 
 

@@ -54,8 +54,8 @@ Game support
      * Hexen: CREDIT, FINALE1, FINALE2, FINALE3, HELP1, HELP2, INTERPIC
        and TITLE are correctly identified as graphics and extracted
        accordingly but into lumps/ !
-     * Hexen: WINNOWR and STALKR should be extracted into mus/, not
-       lumps/.
+     * Hexen: WINNOWR and STALKR should be extracted into mus/ (begin
+       with MUS\x1a), not lumps/.
      * Hexen: DeuTex does not handle the BEHAVIOR lumps correctly.
      * Hexen: does not extract graphics quite correctly (applies
        transparent colour translation to opaque images such as FINALE1
@@ -95,6 +95,10 @@ Graphics
        colour for this image is set to cyan. This would make for a smooth
        transition from DeuTex 3 to DeuTex 4. There should be a
        command-line switch to disable that feature.
+     * Sneas are supported when doing -xtract but not when doing -build
+       (they're ignored). Fix that, or at least mention it somewhere.
+       Though I don't see many people wanting to make wads for Doom alpha
+       anyway...
        
 Sound
 
@@ -154,11 +158,12 @@ Please report that bug.
        
 Command line
 
-     * The command line interface is not always intuitive and fussy about
-       the position of certain options.
+     * The command line interface is not always intuitive and it's fussy
+       about the position of certain options. -iwad seems to be
+       ineffective if placed last. -xtract and friends must be placed
+       last if they don't have all their arguments.
      * Options shouldn't care whether there is space between them and
-       their argument.
-     * deutex --vers segfaults.
+       their argument. Hmm... or should they ?
      * -check shouldn't require an argument. It should use the iwad by
        default.
      * -main should be implemented for DeuTex as well.
@@ -181,6 +186,17 @@ Command line
 Documentation
 
      * It's in shambles.
+     * Mention that negative patch Y-offsets are forced to 0 by the
+       engine.
+     * Mention that sneaps are extracted but not built.
+     * Man page: mention that some options are DeuTex-only, not DeuSF.
+     * Man page: insert `deutex -man` automatically.
+       
+Platform
+
+     * Alpha port: look into 64-bit longs.
+     * Borland C: to revive the port, must find a way to make all
+       pointers implicitly huge.
        
 Misc.
 
@@ -191,20 +207,13 @@ Misc.
        and they conform to the de-facto standard. If you deviate from
        them, you're asking for trouble.
      * -f_end
-     * In the doc, mention that negative patch Y-offsets are forced to 0
-       by the engine.
-     * Make a DOS binary distribution with all filenames 8.3, all
-       documentation in CRLF & CP437 format, no sources, no makefile,
-       only DOS executables.
-     * Man page: mention that some options are DeuTex-only, not DeuSF.
-     * Man page: insert `deutex -man` automatically.
-     * Alpha port: look into 64-bit longs.
      * Why does "deutex -ipf alpha -doom .. -sprites -graphics -patches
        -xtract" trigger "Error: *** Can't open file ./lumps/titlepic.lmp
        ***" ?
      * todo.html grows faster than changes.html. Fix that. ;-)
      * There are too many warnings for a 25-line display. Keep a copy in
        deutex.log ?
+     * -usedidx: don't count sneats (-nosneats ?).
 
 References
 
