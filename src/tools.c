@@ -402,7 +402,7 @@ void PrintCopyright(void)
   Legal("  Ported to DOS, Unix, OS/2, Linux, SGiX, DEC Alpha.\n");
   Legal("  Thanx to M.Mathews, P.Allansson, C.Rossi, J.Bonfield, U.Munk.\n");
   Legal("  This program is freeware.\n");
-  Legal("Type \"%s -help\" to get the list of commands.\n",COMMANDNAME);
+  Legal("Type \"%s --help\" to get the list of commands.\n",COMMANDNAME);
   return;
 }
 

@@ -124,10 +124,11 @@ important features.
      deutex -hexen c:\hexen -xtract
 
 6. Strife is now fairly well supported (some remaining glitches).
-   New command-line switch -strife. To extract the contents of the
-   iwad,
+   New command-line switches -strife and -strife10. To extract the
+   contents of the iwad,
 
-     deutex -strife c:\strife -xtract
+     deutex -strife10 c:\strife -xtract   (Strife 1.0)
+     deutex -strife   c:\strife -xtract   (Strife 1.1 and above)
 
 7. New command-line switch -doom2.
 
@@ -144,7 +145,7 @@ important features.
 
 11. Assorted bug fixes.
 
--- AYM 1999-11-01
+-- AYM 1999-11-14
 
 ==================================================================
 

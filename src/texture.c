@@ -28,6 +28,7 @@ Place, Suite 330, Boston, MA 02111-1307, USA.
 #include "text.h"
 #include "mkwad.h"
 #include "texture.h"
+#include "wadio.h"
 
 /* add new patchs by cluster of 64 */
 #define NEWPATCHS                0x40
@@ -251,6 +252,7 @@ Bool TXUexist(char *Name)
    }
    return FALSE;
 }
+
 /*
 ** find the number of real textures
 */
@@ -266,34 +268,13 @@ static Int32 TXUrealTexture(void)
   }
   return NbOfTex;
 }
-/*
-**  structures from DOOM TEXTURE entries
-**
-*/
-struct TEXDEF  /*size=22L*/
-{        char name[8];        /*+0   = texture name        */
-        Int16 dummy0a;        /*+8   = 4 bytes unused */
-        Int16 dummy0b;
-        Int16 xsize;        /*+12  = X size (Int16) */
-        Int16 ysize;        /*+14  = Y size (Int16) */
-        Int16 dummy0c;        /*+16  = 4 bytes unused */
-        Int16 dummy0d;
-        Int16 numpat;        /*+20  = nb of wall patches*/
-};
-struct PATDEF /*size =10L*/
-{       Int16 xofs;        /*+0 = X offset (Int16)*/
-        Int16 yofs;        /*+2 = Y offset (Int16)*/
-        Int16 pindex;        /*+4 = index        (Int16)*/
-        Int16 dummy1;        /*+6 = 1        (Int16)*/
-        Int16 dummy0;        /*+8 = 0        (Int16)*/
-};
+
 /********** TEXTURE entry in WAD ********/
 Int32 TXUwriteTEXTUREtoWAD(struct WADINFO *info)
 {  Int16 t,tt,p,pat;
    Int32 size,ofsTble;
-   static struct TEXDEF texdef;
-   static struct PATDEF patdef;
    Int32 NbOfTex;
+
    if(TXUok!=TRUE) Bug("TXUok");
    if(TXUtexTop<1) Bug("TxuNTx");
    /*count real textures*/
@@ -305,35 +286,45 @@ Int32 TXUwriteTEXTUREtoWAD(struct WADINFO *info)
    }
    for(pat=0,tt=0,t=0; t<TXUtexTop; t++)
    { if(TXUtex[t].Name[0]!='\0')
-     { /*set texture direct pointer*/
+     {
+       /*set texture direct pointer*/
        if(tt>=NbOfTex)Bug("TxuRT");
-       WADRsetLong(info,ofsTble+tt*4,size);tt++;
-       /*write texture*/
-       Normalise(texdef.name,TXUtex[t].Name);
-       write_i16_le (&texdef.dummy0a, 0);
-       write_i16_le (&texdef.dummy0b, 0);
-       write_i16_le (&texdef.xsize,   TXUtex[t].szX);
-       write_i16_le (&texdef.ysize,   TXUtex[t].szY);
-       write_i16_le (&texdef.dummy0c, 0);
-       write_i16_le (&texdef.dummy0d, 0);
-       write_i16_le (&texdef.numpat,  TXUtex[t].Npatches);
+       WADRsetLong(info,ofsTble+tt*4,size);
+       tt++;
        /*write the begining of texture definition*/
-       size+=WADRwriteBytes(info,(char  *)&texdef,sizeof(struct TEXDEF));
-       for(p=0; p<(TXUtex[t].Npatches); p++)
-       { if(pat+p>=TXUpatTop) Bug("TxuP>D");/*number of patches exceeds definitions*/
-         /*write patch definition*/
-         write_i16_le (&patdef.pindex, TXUpat[pat+p].Pindex);
-         write_i16_le (&patdef.xofs,   TXUpat[pat+p].ofsX);
-         write_i16_le (&patdef.yofs,   TXUpat[pat+p].ofsY);
-         write_i16_le (&patdef.dummy1, 1);
-         write_i16_le (&patdef.dummy0, 0);
-         size+=WADRwriteBytes(info,(char  *)&patdef,sizeof(struct PATDEF));
+       fseek (info->fd, info->wposit, SEEK_SET);  /* Ugly */
+       if (output_texture_format != TF_NAMELESS)
+         wad_write_name (info->fd, TXUtex[t].Name); size += 8;
+       wad_write_i16  (info->fd, 0);              size += 2;
+       wad_write_i16  (info->fd, 0);              size += 2;
+       wad_write_i16  (info->fd, TXUtex[t].szX);  size += 2;
+       wad_write_i16  (info->fd, TXUtex[t].szY);  size += 2;
+       if (output_texture_format != TF_STRIFE11)
+       {
+	 wad_write_i16 (info->fd, 0); size += 2;
+	 wad_write_i16 (info->fd, 0); size += 2;
        }
+       wad_write_i16  (info->fd, TXUtex[t].Npatches); size += 2;
+       for(p=0; p<(TXUtex[t].Npatches); p++)
+       { if(pat+p>=TXUpatTop)
+	   Bug("TxuP>D");/*number of patches exceeds definitions*/
+	 wad_write_i16 (info->fd, TXUpat[pat+p].ofsX);   size += 2;
+	 wad_write_i16 (info->fd, TXUpat[pat+p].ofsY);   size += 2;
+	 wad_write_i16 (info->fd, TXUpat[pat+p].Pindex); size += 2;
+	 if (output_texture_format != TF_STRIFE11)
+	 {
+	   wad_write_i16 (info->fd, 0); size += 2;
+	   wad_write_i16 (info->fd, 0); size += 2;
+	 }
+       }
+       info->wposit = ftell (info->fd);  /* Ugly */
      }
      pat+=TXUtex[t].Npatches;
    }
    return size;
 }
+
+
 /*
 **
 ** convert raw data (as read from wad) into Textures
@@ -349,11 +340,43 @@ void TXUreadTEXTURE(char  *Data,Int32 DataSz,char  *Patch, Int32 PatchSz,Bool Re
   Int16 Xofs, Yofs,Pindex;         /* x,y coordinate in texture space*/
   /* patch name index in PNAMES table */
   Int32  MaxPindex;
-  static char  tname[8];     /*texture name*/
-  static char  pname[8];     /*patch name*/
-  struct TEXDEF  *texdef;
-  struct PATDEF  *patdef;
-  /*si Patch==NULL alors utiliser Pname list*/
+  static char tname[8];     /*texture name*/
+  static char pname[8];     /*patch name*/
+  size_t header_size;
+  size_t item_size;
+  int    have_texture_name;
+  int    have_header_dummies;
+
+  if (input_texture_format == TF_NAMELESS)
+  {
+    header_size         = 14;
+    item_size           = 10;
+    have_texture_name   = 0;
+    have_header_dummies = 1;
+  }
+  else if (input_texture_format == TF_NONE)
+  {
+    Warning ("No texture definitions to read.");
+    return;  /* FIXME is it OK to do that ? */
+  }
+  else if (input_texture_format == TF_NORMAL)
+  {
+    header_size         = 22;
+    item_size           = 10;
+    have_texture_name   = 1;
+    have_header_dummies = 1;
+  }
+  else if (input_texture_format == TF_STRIFE11)
+  {
+    header_size         = 18;
+    item_size           = 6;
+    have_texture_name   = 1;
+    have_header_dummies = 0;
+  }
+  else
+  {
+    Bug ("TXUreadTEXTURE: bad itf %d", (int) input_texture_format);
+  }
 
   /*get number of patches*/
   if(PatchSz>0)
@@ -369,61 +392,78 @@ void TXUreadTEXTURE(char  *Data,Int32 DataSz,char  *Patch, Int32 PatchSz,Bool Re
   Numtex = peek_i32_le (Data);
   if(Numtex<0) ProgError("Bad TEXTURE entry");
   if(Numtex>MAXTEXTURES) ProgError("Too many TEXTUREs");
+
   /*read textures*/
   for (t = 0; t <Numtex; t++)
-  { Pos= peek_i32_le (&Data[4L+t*4L]);
-    /* Kludge: -8 because there is no name field */
-    if (texture_format == TF_NAMELESS)
-      Pos -= 8;
-    dummy=Pos+sizeof(struct TEXDEF); /*would BUG GCC else!*/
-    if(dummy>DataSz) ProgError("TEXTURE entry too small");
-    texdef = (struct TEXDEF  *) (Data + Pos);
-    if (texture_format == TF_NAMELESS)  /* No name. Make one up (TEXnnnn) */
+  { Pos = peek_i32_le (Data + 4L + t * 4L);
+    if (Pos + header_size > DataSz)
+      ProgError("TEXTURE entry too small");
+
+    if (have_texture_name)
+    {
+      Normalise (tname, Data + Pos);
+      Pos += 8;
+    }
+    else  /* No name. Make one up (TEXnnnn)*/
     {
       if (t > 9999)
       {
-	Warning ("More than 10000 textures!");
+	Warning ("More than 10000 textures. Ignoring excess.");
         break;
       }
       sprintf (tname, "TEX%04d", (int) t);
     }
-    else if (texture_format == TF_NORMAL)
-    {
-      Normalise(tname,texdef->name);
-    }
-    else
-      Bug ("Bad tf %d", (int) texture_format);
-    Xsize = peek_i16_le (&texdef->xsize);
-    if((Xsize<0)||(Xsize>4096))        ProgError("texture width out of bound");
-    Ysize = peek_i16_le (&texdef->ysize);
-    if((Ysize<0)||(Ysize>4096))        ProgError("texture height out of bound");
-    Numpat = peek_i16_le (&texdef->numpat)&0xFFFF;
+
+    Pos += 4;  /* Skip 2 dummy unused fields */
+
+    Xsize = peek_i16_le (Data + Pos);
+    Pos += 2;
+    if((Xsize<0)||(Xsize>4096))
+      ProgError ("Texture \"%.8s\": width out of bound (%d)",
+	  tname, (int) Xsize);
+
+    Ysize = peek_i16_le (Data + Pos);
+    Pos += 2;
+    if((Ysize<0)||(Ysize>4096))
+      ProgError ("Texture \"%.8s\": height out of bound (%d)",
+	  tname, (int) Ysize);
+
+    if (have_header_dummies)
+      Pos += 4;  /* Skip 2 dummy unused fields */
+
+    Numpat = peek_i16_le (Data + Pos)&0xFFFF;
+    Pos += 2;
     if((Numpat<0)||(Numpat>MAXPATCHPERTEX))
-                                    ProgError("Too many patches in texture");
+      ProgError("Texture \"%.8s\": too many patches (%d)",
+	  tname, (int) Numpat);
 
     /* declare texture */
     TXUdefineCurTex(tname,Xsize,Ysize,Redefn);
-    /* set Position to start of patches defs*/
-    Pos += sizeof(struct TEXDEF);
-    dummy=Pos+(Numpat*sizeof(struct PATDEF));
-    if(dummy>DataSz)              ProgError("TEXTURE entry too small");
-    for (p = 0; p < Numpat; p++, Pos+=sizeof(struct PATDEF))
-    {  patdef=(struct PATDEF  *)(&Data[Pos]);
-       Xofs = peek_i16_le (&patdef->xofs);
-       if((Xofs<-4096)||(Xofs>4096))ProgError("Bad Patch X offset");
-       Yofs = peek_i16_le (&patdef->yofs);
-       if((Yofs<-4096)||(Yofs>4096))ProgError("Bad Patch Y offset");
-       Pindex = peek_i16_le (&patdef->pindex);
-       if((Pindex<0)||(Pindex>MaxPindex))ProgError("Bad Patch index");
-       /*if new patch list, recalculate Pindex*/
-       if(PatchSz>0)
-       { for(dummy=(4L+(Pindex*8L)),i=0;i<8;i++)
-           pname[i]=Patch[dummy+i];
-         Pindex=PNMgetPatchIndex(pname);
-       }
-       /*declare patch*/
-       TXUaddPatchToCurTex(Pindex,Xofs,Yofs);
-     }
+    if (Pos + (long) Numpat * item_size > DataSz)
+      ProgError("TEXTURE entry too small");
+    for (p = 0; p < Numpat; p++, Pos += item_size)
+    {
+      Xofs = peek_i16_le (Data + Pos);
+      if((Xofs<-4096)||(Xofs>4096))
+	ProgError("Texture \"%.8s\"(%d/%d): bad patch X-offset %d",
+	    tname, (int) p, (int) Numpat, (int) Xofs);
+      Yofs = peek_i16_le (Data + Pos + 2);
+      if((Yofs<-4096)||(Yofs>4096))
+	ProgError("Texture \"%.8s\"(%d/%d): bad patch Y-offset %d",
+	    tname, (int) p, (int) Numpat, (int) Yofs);
+      Pindex = peek_i16_le (Data + Pos + 4);
+      if((Pindex<0)||(Pindex>MaxPindex))
+	ProgError("Texture \"%.8s\"(%d/%d): bad patch index %d",
+	    tname, (int) p, (int) Numpat, (int) Pindex);
+      /*if new patch list, recalculate Pindex*/
+      if(PatchSz>0)
+      { for(dummy=(4L+(Pindex*8L)),i=0;i<8;i++)
+          pname[i]=Patch[dummy+i];
+        Pindex=PNMgetPatchIndex(pname);
+      }
+      /*declare patch*/
+      TXUaddPatchToCurTex(Pindex,Xofs,Yofs);
+    }
   }
 }
 

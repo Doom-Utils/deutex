@@ -262,7 +262,7 @@ dostmp1/manpage.txt: unixtmp1/deutex.6
 	nroff -man -Tlatin1 $< | ul -t dumb | todos >$@
 	touch -r $< $@
 
-dostmp1/readme.txt: docsrc/readme.dos
+dostmp1/readme.txt: docsrc/readme.dos VERSION scripts/process
 	scripts/process $< | todos >$@
 
 dostmp1/todo.txt: unixtmp1/TODO

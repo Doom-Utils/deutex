@@ -3,6 +3,33 @@ Edit docsrc/changes.html instead.
 
                          History of changes for DeuTex
                                        
+   DeuTex 4.2.0 (AYM 1999-11-14)
+          
+          + Doc: fixed error in documentation of -pkgfx, -pknormal and
+            -usedtex.
+          + Game: Strife: fixed DeuTex aborting when extracting textures
+            for versions of Strife >= 1.1. The problem was that
+            Strife 1.1 and above use a different format for the TEXTURE1
+            and TEXTURE2 lumps (Strife 1.0 uses the same format as Doom).
+            New options "-tf strife11", "-itf strife11" and "-otf
+            strife11" to support that format. Option -strife has been
+            changed to imply "-tf strife11". New option -strife10 that is
+            identical to -strife except that it does not imply "-tf
+            strife11". Summary :
+               o if you have the Strife 1.0 iwad, use "-strife10" (or
+                 "-tf normal"),
+               o if you have Strife 1.1 or above, use "-strife" (or "-tf
+                 strife11").
+            Thanks to Kim Parrot for reporting the bug and Len Pitre for
+            pointing me in the right direction.
+          + Sound: fixed two bugs in reading Sun audio (.au) files. Fixes
+            error "WAV: can't read data of./sounds/foo.au" (sic) when
+            trying to build a wad. One of these bugs prevented from
+            reading Sun audio files on little-endian machines. It had
+            been there for a long time ; v3.8 has it and the v3.6 binary
+            behaves like it had it too. I doubt that anyone had ever been
+            able to use .au files on little-endian machines before.
+            
    DeuTex 4.1.0 (AYM 1999-11-01)
           
           + CLI: new options -sneas, -sneaps and -sneats.

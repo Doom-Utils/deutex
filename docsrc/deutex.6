@@ -31,52 +31,69 @@ deutex, deusf \- do things with wad files
 .B  deutex \-man
 .br
 \fBdeutex\fP [\fIoptions\fP]
-.B \-make \fP\fR[\fP\fIdirctivs.txt\fP\fR] \fP\fIout.wad\fP
+.B \-make
+\fR[\fP\fIdirctivs.txt\fP\fR] \fP\fIout.wad\fP
 .br
 \fBdeutex\fP [\fIoptions\fP]
-.B \-wadir \fP\fIin.wad\fP
+.B \-wadir
+.I in.wad
 .br
 \fBdeutex\fP [\fIoptions\fP]
-.B \-check \fP\fIin.wad\fP
+.B \-check
+.I in.wad
 .br
 \fBdeutex\fP [\fIoptions\fP]
-.B \-usedtex \fP\fIin.wad\fP
+.B \-usedtex
+.RI [ in.wad ]
 .br
 \fBdeutex\fP [\fIoptions\fP]
-.B \-unused \fP\fIin.wad\fP
+.B \-unused
+.I in.wad
 .br
 \fBdeutex\fP [\fIoptions\fP]
-.B \-xtract \fP\fIin.wad \fP\fR[\fP\fIdirctivs.txt\fP\fR]\fP
+.B \-xtract
+.I in.wad
+.RI [ dirctivs.txt ]
 .br
 \fBdeutex\fP [\fIoptions\fP]
-.B \-get \fP\fIentry \fP\fR[\fP\fIin.wad\fP\fR]\fP
+.B \-get
+.I entry
+.RI [ in.wad ]
 .br
 \fBdeutex\fP [\fIoptions\fP]
-.B \-pknormal \fP\fIin.wad \fP\fR[\fP\fIout.txt\fP\fR]\fP
+.B \-pknormal
+.RI [ in.wad " [" out.txt ]]
 .br
 \fBdeutex\fP [\fIoptions\fP]
-.B \-pkgrahix \fP\fIin.wad \fP\fR[\fP\fIout.txt\fP\fR]\fP
+.B \-pkgrahix
+.RI [ in.wad " [" out.txt ]]
 .br
 \fBdeutex\fP [\fIoptions\fP]
-.B \-add \fP\fIincomplete.wad out.wad\fP
+.B \-add
+.I incomplete.wad out.wad
 .br
 \fBdeutex\fP [\fIoptions\fP]
-.B \-append \fP\fIincomplete.wad\fP
+.B \-append
+.I incomplete.wad
 .br
 \fBdeutex\fP [\fIoptions\fP]
-.B \-join \fP\fIincomplete.wad in.wad\fP
+.B \-join
+.I incomplete.wad in.wad
 .br
 \fBdeutex\fP [\fIoptions\fP]
-.B \-merge \fP\fIin.wad\fP
+.B \-merge
+.I in.wad
 .br
 \fBdeutex\fP [\fIoptions\fP]
 .B \-restor\fP
 .br
 \fBdeutex\fP [\fIoptions\fP]
-.B \-as \fP\fIsprite.wad\fP
+.B \-as
+.I sprite.wad
 .br
 \fBdeutex\fP [\fIoptions\fP]
-.B \-af \fP\fIflats.wad\fP
+.B \-af
+.I flats.wad
 
 .BR "deusf \-?" | \-h | \-help | \-\-help
 .br
@@ -166,6 +183,9 @@ Debug mode.
 .TP 14
 \fB\-strife \fP\fIdir\fP
 (opt.) Indicate the directory of Strife.
+.TP 14
+\fB\-strife10 \fP\fIdir\fP
+(opt.) Indicate the directory of Strife 1.0.
 .TP 14
 \fB\-dir \fP\fIdir\fP
 (opt.) Indicate the working directory.
@@ -275,13 +295,19 @@ Same as above.
 \fB\-ole\fP
 (opt.) Create little endian wads (default).
 .TP 14
-\fB\-ipf \fP\fR{\fP\fBalpha\fP\fR|\fP\fBpr\fP\fR|\fP\fBnormal\fP\fR}\fP
+\fB\-ipf \fP\fR{\fP\fBalpha\fP\fR|\fP\fBnormal\fP\fR|\fP\fBpr\fP\fR}\fP
 (opt.) Picture format (default is "normal").
 .TP 14
-\fB\-itf \fP\fR{\fP\fBnone\fP\fR|\fP\fBnameless\fP\fR|\fP\fBnormal\fP\fR}\fP
+\fB\-tf \fP\fR{\fP\fBnameless\fP\fR|\fP\fBnone\fP\fR|\fP\fBnormalstrife11\fP\fR}\fP
 (opt.) Texture format (default is "normal").
 .TP 14
-\fB\-itl \fP\fR{\fP\fBnone\fP\fR|\fP\fBtextures\fP\fR|\fP\fBnormal\fP\fR}\fP
+\fB\-itf \fP\fR{\fP\fBnameless\fP\fR|\fP\fBnone\fP\fR|\fP\fBnormalstrife11\fP\fR}\fP
+(opt.) Input texture format (default is "normal").
+.TP 14
+\fB\-otf \fP\fR{\fP\fBnameless\fP\fR|\fP\fBnone\fP\fR|\fP\fBnormalstrife11\fP\fR}\fP
+(opt.) Output texture format (default is "normal").
+.TP 14
+\fB\-itl \fP\fR{\fP\fBnone\fP\fR|\fP\fBnormal\fP\fR|\fP\fBtextures\fP\fR}\fP
 (opt.) Texture lump (default is "normal").
 .TP 14
 \fB\-iwad\fP
@@ -305,25 +331,25 @@ Check the textures.
 \fB\-test \fP\fIin.wad\fP
 Same as above.
 .TP 14
-\fB\-usedtex \fP\fIin.wad\fP
+\fB\-usedtex \fP\fR[\fP\fIin.wad\fP\fR]\fP
 List textures used in all levels.
 .TP 14
 \fB\-unused \fP\fIin.wad\fP
 Find unused spaces in a wad.
 .TP 14
-\fB\-xtract \fP\fIin.wad \fP\fR[\fP\fIdirctivs.txt\fP\fR]\fP
+\fB\-xtract \fP\fR[\fP\fIin.wad \fP\fR[\fP\fIdirctivs.txt\fP\fR]]\fP
 Extract some/all entries from a wad.
 .TP 14
-\fB\-extract \fP\fIin.wad \fP\fR[\fP\fIdirctivs.txt\fP\fR]\fP
+\fB\-extract \fP\fR[\fP\fIin.wad \fP\fR[\fP\fIdirctivs.txt\fP\fR]]\fP
 Same as above.
 .TP 14
 \fB\-get \fP\fIentry \fP\fR[\fP\fIin.wad\fP\fR]\fP
 Get a wad entry from main wad or in.wad.
 .TP 14
-\fB\-pknormal \fP\fIin.wad \fP\fR[\fP\fIout.txt\fP\fR]\fP
+\fB\-pknormal \fP\fR[\fP\fIin.wad \fP\fR[\fP\fIout.txt\fP\fR]]\fP
 Detect identical normal.
 .TP 14
-\fB\-pkgfx \fP\fIin.wad \fP\fR[\fP\fIout.txt\fP\fR]\fP
+\fB\-pkgfx \fP\fR[\fP\fIin.wad \fP\fR[\fP\fIout.txt\fP\fR]]\fP
 Detect identical graphics.
 .TP 14
 \fB\-add \fP\fIincomplete.wad out.wad\fP

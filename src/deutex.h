@@ -279,11 +279,12 @@ void XTRtextureUsed(const char *wadin);
 /*
  *	Misc globals, set by command line arguments
  */
-typedef enum { PF_NORMAL, PF_ALPHA,    PF_PR   } picture_format_t;
-typedef enum { TF_NORMAL, TF_NAMELESS, TF_NONE } texture_format_t;
-typedef enum { TL_NORMAL, TL_TEXTURES, TL_NONE } texture_lump_t;
+typedef enum { PF_NORMAL, PF_ALPHA,    PF_PR                } picture_format_t;
+typedef enum { TF_NORMAL, TF_NAMELESS, TF_NONE, TF_STRIFE11 } texture_format_t;
+typedef enum { TL_NORMAL, TL_TEXTURES, TL_NONE              } texture_lump_t;
 extern picture_format_t picture_format;
-extern texture_format_t texture_format;
+extern texture_format_t input_texture_format;
+extern texture_format_t output_texture_format;
 extern texture_lump_t   texture_lump;
 extern const char *debug_ident;
 

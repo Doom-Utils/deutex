@@ -86,26 +86,26 @@ static Bool WSafe;
 static Bool George;
 #endif /*DeuTex*/
 char trnR,trnG,trnB;
-picture_format_t picture_format = PF_NORMAL;
-texture_format_t texture_format = TF_NORMAL;
-texture_lump_t   texture_lump   = TL_NORMAL;
+picture_format_t picture_format        = PF_NORMAL;
+texture_format_t input_texture_format  = TF_NORMAL;
+texture_format_t output_texture_format = TF_NORMAL;
+texture_lump_t   texture_lump          = TL_NORMAL;
 const char *debug_ident = NULL;
+static char anon[1] = { '\0' };
 
 typedef void (*comfun_t) (int argc, const char *argv[]);
 static int is_prefix (const char *s1, const char *s2);
-#ifdef DeuTex
 static void call_opt (comfun_t func, ...);
-#endif
 
 
 /*
 ** commands
 */
-void COMhelp(int argc, const char *argv[]);
-void COMmanopt(int argc, const char *argv[]);
-void COMformat(int argc, const char *argv[]);
+void COMhelp (int argc, const char *argv[]);
+void COMmanopt (int argc, const char *argv[]);
+void COMformat (int argc, const char *argv[]);
 void COMipf (int argc, const char *argv[]);
-void COMitf (int argc, const char *argv[]);
+void COMtf (int argc, const char *argv[]);
 void COMitl (int argc, const char *argv[]);
 
 /*
@@ -170,34 +170,40 @@ void COMdoom(int argc, const char *argv[])
 
 #ifdef DeuTex
 void COMdoom02(int argc, const char *argv[])
-{  call_opt (COMdoom, argv[1], NULL);
-   call_opt (COMipf,  "alpha", NULL);
-   call_opt (COMitf,  "none",  NULL);
-   call_opt (COMitl,  "none",  NULL);
+{  call_opt (COMdoom, anon, argv[1], NULL);
+   call_opt (COMipf,  anon, "alpha", NULL);
+   call_opt (COMtf,   "tf", "none",  NULL);
+   call_opt (COMitl,  anon, "none",  NULL);
    (void)argc;
 }
 
 void COMdoom04(int argc, const char *argv[])
-{  call_opt (COMdoom, argv[1],    NULL);
-   call_opt (COMipf,  "alpha",    NULL);
-   call_opt (COMitf,  "nameless", NULL);
-   call_opt (COMitl,  "textures", NULL);
+{  call_opt (COMdoom, anon, argv[1],    NULL);
+   call_opt (COMipf,  anon, "alpha",    NULL);
+   call_opt (COMtf,   "tf", "nameless", NULL);
+   call_opt (COMitl,  anon, "textures", NULL);
    (void)argc;
 }
 
 void COMdoom05(int argc, const char *argv[])
-{  call_opt (COMdoom, argv[1],    NULL);
-   call_opt (COMipf,  "alpha",    NULL);
-   call_opt (COMitl,  "textures", NULL);
+{  call_opt (COMdoom, anon, argv[1],    NULL);
+   call_opt (COMipf,  anon, "alpha",    NULL);
+   call_opt (COMitl,  anon, "textures", NULL);
    (void)argc;
 }
 
 void COMdoompr(int argc, const char *argv[])
-{  call_opt (COMdoom, argv[1],  NULL);
-   call_opt (COMipf,  "pr",     NULL);
+{  call_opt (COMdoom, anon, argv[1],  NULL);
+   call_opt (COMipf,  anon, "pr",     NULL);
    (void)argc;
 }
 #endif
+
+void COMstrife(int argc, const char *argv[])
+{  call_opt (COMdoom, anon, argv[1],    NULL);
+   call_opt (COMtf,   "tf", "strife11", NULL);
+   (void)argc;
+}
 
 void COMmain(int argc, const char *argv[])
 {  DoomDir=NULL;
@@ -494,20 +500,62 @@ void COMipf (int argc, const char *argv[])
     ProgError ("Usage is \"-ipf {alpha|pr|normal}\"");
   Info ("Input picture format is \"%s\"\n", argv[1]);
 }
+#endif  /* #ifdef DeuTex */
 
-void COMitf (int argc, const char *argv[])
+void COMtf (int argc, const char *argv[])
 {
-  if (argc >= 2 && ! strcmp (argv[1], "none"))
-    texture_format = TF_NONE;
-  else if (argc >= 2 && ! strcmp (argv[1], "nameless"))
-    texture_format = TF_NAMELESS;
-  else if (argc >= 2 && ! strcmp (argv[1], "normal"))
-    texture_format = TF_NORMAL;
+  int set_in = 0;
+  int set_out = 0;
+
+  if (! strcmp (argv[0], "itf"))
+    set_in = 1;
+  else if (! strcmp (argv[0], "otf"))
+    set_out = 1;
+  else if (! strcmp (argv[0], "tf"))
+  {
+    set_in = 1;
+    set_out = 1;
+  }
   else
-    ProgError ("Usage is \"-itf {none|nameless|normal}\"");
-  Info ("Input texture format is \"%s\"\n", argv[1]);
+    Bug ("COMtf: bad argv[0] \"%.32s\"", argv[0]);
+
+  if (argc >= 2 && ! strcmp (argv[1], "nameless"))
+  {
+    if (set_in)
+      input_texture_format = TF_NAMELESS;
+    if (set_out)
+      output_texture_format = TF_NAMELESS;
+  }
+  else if (argc >= 2 && ! strcmp (argv[1], "none"))
+  {
+    if (set_in)
+      input_texture_format = TF_NONE;
+    if (set_out)
+      output_texture_format = TF_NONE;
+  }
+  else if (argc >= 2 && ! strcmp (argv[1], "normal"))
+  {
+    if (set_in)
+      input_texture_format = TF_NORMAL;
+    if (set_out)
+      output_texture_format = TF_NORMAL;
+  }
+  else if (argc >= 2 && ! strcmp (argv[1], "strife11"))
+  {
+    if (set_in)
+      input_texture_format = TF_STRIFE11;
+    if (set_out)
+      output_texture_format = TF_STRIFE11;
+  }
+  else
+    ProgError ("Usage is \"-%.32s {nameless|none|normal|strife11}\"", argv[0]);
+  if (set_in)
+    Info ("Input texture format is \"%s\"\n", argv[1]);
+  if (set_out)
+    Info ("Output texture format is \"%s\"\n", argv[1]);
 }
 
+#ifdef DeuTex
 void COMitl (int argc, const char *argv[])
 {
   if (argc >= 2 && ! strcmp (argv[1], "none"))
@@ -621,7 +669,8 @@ static comdef_t Com[]=
 #endif
  {OPT,1,"heretic",  COMdoom,   "<dir>","indicate the directory of Heretic"},
  {OPT,1,"hexen",    COMdoom,   "<dir>","indicate the directory of Hexen"},
- {OPT,1,"strife",   COMdoom,   "<dir>","indicate the directory of Strife"},
+ {OPT,1,"strife",   COMstrife, "<dir>","indicate the directory of Strife"},
+ {OPT,1,"strife10", COMdoom,   "<dir>","indicate the directory of Strife 1.0"},
 #if defined DeuTex
  {OPT,1,"dir",      COMdir,    "<dir>","indicate the working directory"},
  {OPT,0,"deu",      COMdeu,    NULL,   "add 64k of junk to workaround a bug of DEU 5.21"},
@@ -666,9 +715,11 @@ static comdef_t Com[]=
  {OPT,0,"ile",      COMile,    NULL,   "input wads are little endian (default)"},
  {OPT,0,"obe",      COMobe,    NULL,   "create big endian wads (default LE)"},
  {OPT,0,"ole",      COMole,    NULL,   "create little endian wads (default)"},
- {OPT,1,"ipf",      COMipf,    "{alpha|pr|normal}", "picture format (default is \"normal\")"},
- {OPT,1,"itf",      COMitf,    "{none|nameless|normal}", "texture format (default is \"normal\")"},
- {OPT,1,"itl",      COMitl,    "{none|textures|normal}", "texture lump (default is \"normal\")"},
+ {OPT,1,"ipf",      COMipf,    "{alpha|normal|pr}", "picture format (default is \"normal\")"},
+ {OPT,1,"tf",       COMtf,     "{nameless|none|normalstrife11}", "texture format (default is \"normal\")"},
+ {OPT,1,"itf",      COMtf,     "{nameless|none|normalstrife11}", "input texture format (default is \"normal\")"},
+ {OPT,1,"otf",      COMtf,     "{nameless|none|normalstrife11}", "output texture format (default is \"normal\")"},
+ {OPT,1,"itl",      COMitl,    "{none|normal|textures}", "texture lump (default is \"normal\")"},
 #endif /* DeuTex */
 
 #if defined DeuTex
@@ -686,13 +737,13 @@ static comdef_t Com[]=
  {CMD,1,"check",    COMcheck,  "<in.wad>","check the textures"},
  {CMD,1,"test",     COMcheck,  "<in.wad>",NULL},
 #if defined DeuTex
- {CMD,0,"usedtex",  COMusedtex,"<in.wad>","list textures used in all levels"},
+ {CMD,0,"usedtex",  COMusedtex,"[<in.wad>]","list textures used in all levels"},
  {NIL,1,"unused",   COMvoid,   "<in.wad>","find unused spaces in a wad"},
- {CMD,0,"xtract",   COMxtra,   "<in.wad> [<dirctivs.txt>]","extract some/all entries from a wad"},
- {CMD,0,"extract",  COMxtra,   "<in.wad> [<dirctivs.txt>]",NULL},
+ {CMD,0,"xtract",   COMxtra,   "[<in.wad> [<dirctivs.txt>]]","extract some/all entries from a wad"},
+ {CMD,0,"extract",  COMxtra,   "[<in.wad> [<dirctivs.txt>]]",NULL},
  {CMD,1,"get",      COMget,    "<entry> [<in.wad>]","get a wad entry from main wad or in.wad"},
- {CMD,1,"pknormal", COMpackNorm,"<in.wad> [<out.txt>]","Detect identical normal"},
- {CMD,1,"pkgfx",    COMpackGfx,"<in.wad> [<out.txt>]","Detect identical graphics"},
+ {CMD,1,"pknormal", COMpackNorm,"[<in.wad> [<out.txt>]]","Detect identical normal"},
+ {CMD,1,"pkgfx",    COMpackGfx,"[<in.wad> [<out.txt>]]","Detect identical graphics"},
 #endif /*DeuTex*/
 
  {CMD,2,"add",      COMadd,    "<incomplete.wad> <out.wad>","add sprites & flats of a pwad to those of Doom"},
@@ -1183,7 +1234,6 @@ static int is_prefix (const char *s1, const char *s2)
 }
 
 
-#ifdef DeuTex
 /*
  *	call_opt
  *	Equivalent to having the same option on the command line
@@ -1194,9 +1244,8 @@ static void call_opt (comfun_t func, ...)
    const char *argv[10];
    va_list args;
 
-   argv[0] = "BUG!";
    va_start (args, func);
-   for (argc = 1; argc < sizeof argv / sizeof *argv; argc++)
+   for (argc = 0; argc < sizeof argv / sizeof *argv; argc++)
    {
       argv[argc] = va_arg (args, const char *);
       if (argv[argc] == NULL)
@@ -1207,7 +1256,6 @@ static void call_opt (comfun_t func, ...)
    }
    func (argc, argv);
 }
-#endif
 
 
 #endif /*DeuTex and DeuSF*/

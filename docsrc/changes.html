@@ -6,6 +6,46 @@
 <h1>History of changes for DeuTex</h1>
 
 <dl>
+<p><dt>DeuTex 4.2.0 (AYM 1999-11-14)
+<dd>
+	<ul>
+	<p><li>Doc: fixed error in documentation of <code>-pkgfx</code>,
+	<code>-pknormal</code> and <code>-usedtex</code>.
+
+	<p><li>Game: Strife: fixed DeuTex aborting when extracting textures
+	for versions of Strife &gt;=&nbsp;1.1. The problem was that
+	Strife&nbsp;1.1 and above use a different format for the
+	<code>TEXTURE1</code> and <code>TEXTURE2</code> lumps (Strife&nbsp;1.0
+	uses the same format as Doom). New options "<code>-tf
+	strife11</code>", "<code>-itf strife11</code>" and "<code>-otf
+	strife11</code>" to support that format. Option <code>-strife</code>
+	has been changed to imply "<code>-tf strife11</code>". New option
+	<code>-strife10</code> that is identical to <code>-strife</code>
+	except that it does <em>not</em> imply "<code>-tf strife11</code>".
+	Summary&nbsp;:
+
+	<p><ul>
+	<li>if you have the Strife&nbsp;1.0 iwad, use "<code>-strife10</code>"
+	(or "<code>-tf normal</code>"),
+
+	<li>if you have Strife&nbsp;1.1 or above, use "<code>-strife</code>"
+	(or "<code>-tf strife11</code>").
+	</ul>
+
+	<p>Thanks to Kim Parrot for reporting the bug and Len Pitre for
+	pointing me in the right direction.
+
+	<p><li>Sound: fixed two bugs in reading Sun audio (<code>.au</code>)
+	files. Fixes error "<code>WAV: can't read data
+	of./sounds/foo.au</code>" (sic) when trying to build a wad. One of
+	these bugs prevented from reading Sun audio files on little-endian
+	machines. It had been there for a long time&nbsp;; v3.8 has it and the
+	v3.6 binary behaves like it had it too. I doubt that anyone had ever
+	been able to use <code>.au</code> files on little-endian machines
+	before.
+
+	</ul>
+
 <p><dt>DeuTex 4.1.0 (AYM 1999-11-01)
 <dd>
 	<ul>

@@ -23,6 +23,7 @@ Place, Suite 330, Boston, MA 02111-1307, USA.
 
 
 #include "deutex.h"
+#include <errno.h>
 #include "tools.h"
 #include "endianm.h"
 #include "mkwad.h"
@@ -65,7 +66,7 @@ static void SNDsaveWave(char *file,char  *buffer,Int32 size,Int32 speed)
   Int32 wsize,sz=0;
   fp=fopen(file,FOPEN_WB);
   if(fp==NULL)
-  { ProgError("WAV: can't write %s",file);
+  { ProgError("WAV: can't open %s for writing (%s)", file, strerror (errno));
   }
   /*header*/
   strncpy(headr.riff,"RIFF",4);
@@ -97,7 +98,8 @@ char  *SNDloadWaveFile(char *file, Int32 *psize, Int32 *pspeed)
   Int32 chunk;
   char  *data;
   fp=fopen(file,FOPEN_RB);
-  if(fp==NULL)				ProgError("WAV: can't read file %s",file);
+  if(fp==NULL)
+    ProgError("WAV: can't open %s for reading", file, strerror (errno));
   /*read RIFF HEADER*/
   if(fread(&headr,sizeof(struct RIFFHEAD),1,fp)!=1)
 					ProgError("WAV: can't read header");
@@ -138,7 +140,7 @@ char  *SNDloadWaveFile(char *file, Int32 *psize, Int32 *pspeed)
   data=(char  *)Malloc(datasize);
   for(wsize=0;wsize<datasize;wsize+=sz)
   { sz = (datasize-wsize>MEMORYCACHE)? MEMORYCACHE:(datasize-wsize);
-    if(fread((data+(wsize)),(size_t)sz,1,fp)!=1)    	ProgError("WAV: can't read data of%s",file);
+    if(fread((data+(wsize)),(size_t)sz,1,fp)!=1)    	ProgError("WAV: can't read data of %s",file);
   }
   fclose(fp);
   *psize=datasize;
@@ -164,7 +166,8 @@ static void SNDsaveAu(char *file,char  *buffer,Int32 size,Int32 speed)
 { FILE *fp;
   Int32 i,wsize,sz=0;
   fp=fopen(file,FOPEN_WB);
-  if(fp==NULL)ProgError("WAV: can't write %s",file);
+  if(fp==NULL)
+    ProgError("AU: can't open %s for writing (%s)", file, strerror (errno));
   /*header*/
   strncpy(heada.snd,".snd",4);
   write_i32_be (&heada.dataloc,  sizeof (struct AUHEAD));
@@ -183,25 +186,28 @@ static void SNDsaveAu(char *file,char  *buffer,Int32 size,Int32 speed)
   }
     fclose(fp);
 }
-char  *SNDloadAuFile(char *file, Int32 *psize, Int32 *pspeed)
+
+char *SNDloadAuFile(char *file, Int32 *psize, Int32 *pspeed)
 { FILE *fp;
   Int32 wsize,sz=0,i,smplrate,datasize;
-  char  *data;
+  char *data;
   fp=fopen(file,FOPEN_RB);
-  if(fp==NULL)				ProgError("AU: can't read file %s",file);
+  if(fp==NULL)
+    ProgError("AU: can't open %s for reading (%s)", file, strerror (errno));
   /*read AU HEADER*/
   if(fread(&heada,sizeof(struct AUHEAD),1,fp)!=1)
+    ProgError("AU: can't read header");
 
   /*check AU header*/
   if(strncmp(heada.snd,".snd",4)!=0)	ProgError("AU: not an audio file.");
-  /*read RIFF HEADER*/
   if(peek_i32_be (&heada.format) != 2)	ProgError("AU: not linear 8 bit.");
   if(peek_i32_be (&heada.channel)!= 1)	ProgError("AU: not one channel.");
 
-  if(fseek(fp,heada.dataloc,SEEK_SET))  ProgError("AU: bad header");
+  if (fseek (fp, peek_i32_be (&heada.dataloc), SEEK_SET))
+    ProgError("AU: bad header");
   smplrate = peek_i32_be (&heada.smplrate);
   datasize = peek_i32_be (&heada.datasize);
-  /*check WAVE header*/
+  /*check header*/
   if(smplrate!=11025)
 	Warning("sample rate of %s is %u instead of 11025",file,smplrate);
   if(datasize>0x100000L)
@@ -210,7 +216,7 @@ char  *SNDloadAuFile(char *file, Int32 *psize, Int32 *pspeed)
   data=(char  *)Malloc(datasize);
   for(wsize=0;wsize<datasize;wsize+=sz)
   { sz = (datasize-wsize>MEMORYCACHE)? MEMORYCACHE:(datasize-wsize);
-    if(fread((data+(wsize)),(size_t)sz,1,fp)!=1) ProgError("WAV: can't read data of%s",file);
+    if(fread((data+(wsize)),(size_t)sz,1,fp)!=1) ProgError("AU: can't read data of %s",file);
   }
   fclose(fp);
   /*convert from signed to unsigned char*/
@@ -245,7 +251,8 @@ static void SNDsaveVoc(char *file,char  *buffer,Int32 size,Int32 speed)
 { FILE *fp;
   Int32 wsize,sz=0;
   fp=fopen(file,FOPEN_WB);
-  if(fp==NULL)ProgError("VOC: can't write %s",file);
+  if(fp==NULL)
+    ProgError("VOC: can't open %s for writing", file, strerror (errno));
   /*VOC header*/
   strncpy(headv.ident,VocId,VOCIDLEN);
   headv.eof=0x1A;
@@ -277,7 +284,8 @@ char  *SNDloadVocFile(char *file, Int32 *psize, Int32 *pspeed)
   Int32 wsize,sz=0,smplrate,datasize;
   char  *data;
   fp=fopen(file,FOPEN_RB);
-  if(fp==NULL)				ProgError("VOC: can't read file %s",file);
+  if(fp==NULL)
+    ProgError("VOC: can't open %s for reading (%s)", file, strerror (errno));
   /*read VOC HEADER*/
   if(fread(&headv,sizeof(struct VOCHEAD),1,fp)!=1) ProgError("VOC: can't read header");
   if(strncmp(VocId,headv.ident,VOCIDLEN)!=0) ProgError("VOC: bad header");
