@@ -150,10 +150,10 @@ DOBJTEX = $(SRC:.c=.otd)
 
 all: deutex deusf
 
-deutex: $(OBJTEX) .deutex
+deutex: $(OBJTEX) tmp/_deutex
 	$(CC) $(LDFLAGS) -o deutex $(OBJTEX) -lm
 
-deusf: $(OBJSF) .deusf
+deusf: $(OBJSF) tmp/_deusf
 	$(CC) $(LDFLAGS) -o deusf $(OBJSF) -lm
 
 dall: ddeutex ddeusf
@@ -165,17 +165,21 @@ dds: ddeusf
 
 ddeutex: $(DOBJTEX)
 	$(DCC) $(DLDFLAGS) -o deutex $(DOBJTEX) -lm
-	(sleep 1; touch .deutex) &  # Force next "make deutex" to relink
+	# Force next "make deutex" to relink
+	(sleep 1; mkdir -p tmp; touch tmp/_deutex) &
 
 ddeusf: $(DOBJSF)
 	$(DCC) $(DLDFLAGS) -o deusf $(DOBJSF) -lm
-	(sleep 1; touch .deusf) &  # Force next "make deusf" to relink
+	# Force next "make deusf" to relink
+	(sleep 1; mkdir -p tmp; touch tmp/_deusf) &
 
-.deutex:
-	touch .deutex
+tmp/_deutex:
+	-mkdir tmp
+	touch $@
 
-.deusf:
-	touch .deusf
+tmp/_deusf:
+	-mkdir tmp
+	touch $@
 
 install:
 	install -p -m 0755 deutex   $(PREFIX)/bin
@@ -293,6 +297,7 @@ distbindos: $(DISTFILESBIN) $(DDOCDOS)
 # save - your daily backup
 save:
 	tar -zcvf ../deutex-$$(date '+%Y%m%d').tar.gz\
+	  --exclude dostmp1 --exclude unixtmp1\
 	  --exclude "*~" --exclude "*.o"\
 	  --exclude "*.os" --exclude "*.ot"\
 	  --exclude "*.osd" --exclude "*.otd" .

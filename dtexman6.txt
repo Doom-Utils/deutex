@@ -64,6 +64,89 @@ ____________                   __________________________
 
 
 
+================= RELEASE NOTES FOR VERSION 4.0 ==================
+
+		 THIS MANUAL IS NOT UP TO DATE !
+			READ THIS FIRST !
+
+For a complete list of all the changes between DeuTex 3.6 and
+Deutex 4.0, see the CHANGES file. Here is a quick summary of the
+important features.
+
+1. The default transparent colour has been changed from cyan (0,
+   255, 255) to dark blue-green (0, 47, 47).
+
+   If you try to build with DeuTex 4 a wad from old graphics files
+   that use cyan (0, 255, 255) for the transparent areas, there
+   will be no error message but the parts that were supposed to be
+   transparent will come out as opaque, light blue or white areas.
+
+   The easiest solution in the short term is to run DeuTex with
+   the option "-rgb 0 255 255" when building. The best long-term
+   solution is to change your images so that they use (0, 47, 47)
+   instead of (0, 255, 255). For BMP and GIF images, you can do
+   that very quickly by editing the palette. For PPM images, use
+   the flood fill function of your graphics editor.
+
+2. Flats are now put between FF_START and F_END so you don't need
+   DeuSF anymore to put flats in pwads. "It just works, right out
+   of the box !"
+
+3. Doom alpha 0.4 and Doom alpha 0.5 are now supported. To extract
+   the contents of the iwads,
+ 
+     deutex -doom04 c:\doom0_4 -xtract
+     deutex -doom05 c:\doom0_5 -xtract
+
+   Some graphics are mistakenly put in the lumps directory
+   (TITLEPIC, MSKUL*, ...). Levels are not extracted properly yet.
+   You will see at lot of warnings like
+
+     Warning: ** Not enough entry in level **
+     Warning: ** will not overwrite file ./lumps/flatname.lmp **
+     Warning: ** will not overwrite file ./lumps/points.lmp **
+     Warning: ** will not overwrite file ./lumps/lines.lmp **
+     Warning: ** will not overwrite file ./lumps/sectors.lmp **
+     Warning: ** will not overwrite file ./lumps/things.lmp **
+
+   Ignore them. To extract levels from the Doom alphas, use Yadex
+   (http://www.teaser.fr/~amajorel/yadex/).
+
+4. Doom press release pre-beta is now supported. To extract the
+   contents of the iwad,
+
+     deutex -doompr c:\doomdemo -xtract
+
+5. Hexen is now partly supported (still a lot to do). New
+   command-line switch -hexen. To extract the contents of the
+   iwad,
+
+     deutex -hexen c:\hexen -xtract
+
+6. Strife is now fairly well supported (some remaining glitches).
+   New command-line switch -strife. To extract the contents of the
+   iwad,
+
+     deutex -strife c:\strife -xtract
+
+7. New command-line switch -doom2.
+
+8. Easier to build on Unix systems, especially Linux. On DOS and
+   Windows, now builds with DJGPP, Cygwin and MSC 6.0. There
+   shouldn't be any endianness problems now.
+
+9. DeuTex is now libre (GPL + LGPL + PBMPLUS license).
+
+10. The GIF format is deprecated. It will be removed. See
+    http://lpf.ai.mit.edu/Patents/Gif/Gif.html to know why. Move
+    to BMP or PPM. The default graphics format for Unix is now
+    PPM.
+
+11. Assorted bug fixes.
+
+-- AYM 1999-10-02
+
+==================================================================
 
 
 ------------------------ Data Utility License -------------------------
@@ -112,6 +195,7 @@ DeuTex (since it can call DeuTex) but it's much easier to use.
 
  The sources of DeuTex 3.4 are out, and those of DeuTex 3.6 should
  follow soon. They might be out when you read this manual.
+
 
 
                                                                   page i
@@ -3470,11 +3554,17 @@ or generally supported my efforts:
    Jason Mezzacca     72510.3424@compuserve.com
    C. Gasparo         cgasparo@cymbal.aix.calpoly.edu
    Avery Andrews      andaling@durras.anu.edu.au
-   (I'm maybe forgetting you!)
+   Matthew W. Miller  mattm@infinet.com
+   Kim Parrot         kelm@eisa.net.au
+   Martin {_|G|NRG}   MartinG@munich.netsurf.de
+   (I hope I'm not forgetting you!)
 
 
    Thanks to Justin Fisher for letting me use DeuTex and DeuSF on a
    new install for Alien-TC (despite all the small mistakes I made).
+
+   Thanks to Jonathan Wilson <wilsonj@xoommail.com> for figuring out
+   the formats of the Doom alpha and press release pre-beta pictures.
 
  Now comes the guy YOU all want to thank:
 

@@ -312,11 +312,12 @@ char huge *SNDloadVocFile(char *file, Int32 *psize, Int32 *pspeed)
 void SNDsaveSound(char *file,char huge *buffer,Int32 size,SNDTYPE Sound,Bool fullSND)
 { char huge *data;
   Int32 datasize;
-  Int16 type,speed,headsize;
+  Int16 type,headsize;
+  UInt16 speed;
   headsize = sizeof(Int16)+sizeof(Int16)+sizeof(Int32);
   if(size<headsize)	ProgError("Sound size too small");
   type     = peek_i16_le (buffer);
-  speed    = peek_i16_le (buffer + 2);
+  speed    = peek_u16_le (buffer + 2);
   datasize = peek_i32_le (buffer + 4);
   data	   = buffer+(headsize);
   if(type!=3)		Bug("not a WAVE");

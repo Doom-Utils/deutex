@@ -563,12 +563,13 @@ static comdef_t Com[]=
  {OPT,0,"overwrite",COMstroy,  NULL,   "overwrite all"},
 #endif /*DeuTex*/
  {OPT,1,"wtx",      COMwintex, "<iwad>","WinTex shortcut"},
- {OPT,1,"doom",     COMdoom,   "<dir>","indicate the directory of Doom/Doom II"},
+ {OPT,1,"doom",     COMdoom,   "<dir>","indicate the directory of Doom"},
+ {OPT,1,"doom2",    COMdoom,   "<dir>","indicate the directory of Doom II"},
 #ifdef DeuTex
  {OPT,1,"doom02",   COMdoom02, "<dir>","indicate the directory of Doom alpha 0.2"},
  {OPT,1,"doom04",   COMdoom04, "<dir>","indicate the directory of Doom alpha 0.4"},
  {OPT,1,"doom05",   COMdoom05, "<dir>","indicate the directory of Doom alpha 0.5"},
- {OPT,1,"doompr",   COMdoompr, "<dir>","indicate the directory of Doom press release pre-beta"},
+ {OPT,1,"doompr",   COMdoompr, "<dir>","indicate the directory of Doom PR pre-beta"},
 #endif
  {OPT,1,"heretic",  COMdoom,   "<dir>","indicate the directory of Heretic"},
  {OPT,1,"hexen",    COMdoom,   "<dir>","indicate the directory of Hexen"},
@@ -603,7 +604,7 @@ static comdef_t Com[]=
  {OPT,0,"flats",    COMflat,   NULL,   "select flats"},
  {OPT,0,"v0",       COMverbose,NULL,   "set verbosity level to 0"},
  {OPT,0,"v1",       COMverbose,NULL,   "set verbosity level to 1"},
- {OPT,0,"v2",       COMverbose,NULL,   "set verbosity level to 2"},
+ {OPT,0,"v2",       COMverbose,NULL,   "set verbosity level to 2 (default)"},
  {OPT,0,"v3",       COMverbose,NULL,   "set verbosity level to 3"},
  {OPT,0,"v4",       COMverbose,NULL,   "set verbosity level to 4"},
  {OPT,0,"v5",       COMverbose,NULL,   "set verbosity level to 5"},
@@ -828,8 +829,11 @@ got_it:
 #if defined DeuTex
          if(!(Select&BALL))  Select = BALL;
          if (Picture == PICGIF)
-	   Warning ("GIF support may go away in the future."
-	       " Use PPM or BMP instead.");
+	 {
+	   Warning ("GIF support may go away in the future (see");
+	   Warning ("http://lpf.ai.mit.edu/Patents/Gif/Gif.html).");
+	   Warning ("Use PPM or BMP instead.");
+	 }
 #endif /*DeuTex*/
          d->exec(argc,argv);
          PrintExit();

@@ -341,8 +341,8 @@ char huge *RAWtoPIC(Int32 *ppicsz, char huge *raw, Int16 rawX, Int16 rawY,Int16 
   /*
   ** convert raw (doom colors) to PIC
   */
-  write_i16_le (&pichead->Xsz, rawX);
-  write_i16_le (&pichead->Ysz, rawY);
+  write_i16_le (&pichead->Xsz,   rawX);
+  write_i16_le (&pichead->Ysz,   rawY);
   write_i16_le (&pichead->Xinsr, Xinsr);
   write_i16_le (&pichead->Yinsr, Yinsr);
   colnpos=colnbase;
@@ -482,8 +482,8 @@ char huge *PICtoRAW(Int16 *prawX,Int16 *prawY,Int16 *pXinsr,Int16 *pYinsr, const
       xofs = *p++;
       yofs = *p++;
    }
-   if((rawX<1)||(rawX>320))return NULL; /*illegal height*/
-   if((rawY<1)||(rawY>200))return NULL; /*illegal width*/
+   if((rawX<1)||(rawX>4096))return NULL; /*illegal height*/
+   if((rawY<1)||(rawY>4096))return NULL; /*illegal width*/
 
    /* Skip past the column offsets */
    offsets = p;
@@ -645,10 +645,12 @@ char huge *BMPtoRAW(Int16 *prawX,Int16 *prawY,char *file)
    */
 
    fd=fopen(file,FOPEN_RB);
-   if(fd==NULL)                         ProgError("Can't open %s for reading",file);
+   if(fd==NULL)
+      ProgError("Can't open %s for reading",file);
    if(fread(sig,2,1,fd)!=1)
-					ProgError("Can't read sig of BMP %s",file);
-   if(strncmp(sig,"BM",2)!=0)           ProgError("Bmp: signature incorrect");
+      ProgError("Can't read sig of BMP %s",file);
+   if(strncmp(sig,"BM",2)!=0)
+      ProgError("Bmp: signature incorrect");
 
    head=(struct BMPHEAD huge *)Malloc(sizeof(struct BMPHEAD));
    if(fread(head,sizeof(struct BMPHEAD),1,fd)!=1)

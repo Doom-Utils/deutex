@@ -14,20 +14,20 @@ no provision for reading and writing integers otherwise than in
 the native endianness.
 
 <ul>
-<li>To read an integer from a file with a particular endianness,
+<p><li>To read an integer from a file with a particular endianness,
 use use <code>fread_i16_le()</code>,
 <code>fread_i16_be()</code>, <code>fread_i32_le()</code> and
 <code>fread_i32_be()</code>. The first argument is the file
 descriptor, the second argument is a pointer on a variable that
-will receive the value read from the file.</p>
+will receive the value read from the file.
 
-<li>To write an integer to a file with a particular endianness,
+<p><li>To write an integer to a file with a particular endianness,
 use <code>fwrite_i16_le()</code>, <code>fwrite_i16_be()</code>,
 <code>fwrite_i32_le()</code> and <code>fwrite_i32_be()</code>.
 The first argument is the file descriptor, the second argument
-is the value to write.</p>
+is the value to write.
 
-<li>To read an integer with a particular endianness from a
+<p><li>To read an integer with a particular endianness from a
 memory area, use <code>read_i16_le()</code>,
 <code>read_i16_be()</code>, <code>read_i32_le()</code> and
 <code>read_i32_be()</code>. The first argument is a pointer on
@@ -35,9 +35,8 @@ the memory area, the second argument is a pointer on a variable
 that will receive the value read from the memory area.
 Alternatively, you can use the <code>peek_i*()</code> functions
 that take no second argument but instead return the read value.
-</p>
 
-<li>To write an integer with a particular endianness to a memory
+<p><li>To write an integer with a particular endianness to a memory
 area, use <code>write_i16_le()</code>,
 <code>write_i16_be</code>, <code>write_i32_le()</code> and
 <code>write_i32_be()</code>. The first argument is a pointer on

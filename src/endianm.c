@@ -75,6 +75,18 @@ i16 peek_i16_le (const void *ptr)
 
 
 /*
+ *	peek_u16_le
+ *	Read a little-endian 16-bit unsigned integer from memory area
+ *	pointed to by <ptr>.
+ */
+u16 peek_u16_le (const void *ptr)
+{
+  return ((const unsigned char *) ptr)[0]
+      | (((const unsigned char *) ptr)[1] << 8);
+}
+
+
+/*
  *	peek_i32_be
  *	Read a big-endian 32-bit signed integer from memory area
  *	pointed to by <ptr>.

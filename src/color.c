@@ -45,7 +45,7 @@ UInt8 COLindex( UInt8 R, UInt8 G, UInt8 B,UInt8 index);
 UInt8 COLpalMatch( UInt8 R, UInt8 G, UInt8 B);
 
 
-static struct PIXEL huge *COLpal;
+static struct PIXEL huge *COLpal;  /* The game palette (comes from PLAYPAL) */
 static struct PIXEL COLinv;
 static  UInt8 COLinvisib;
 static Bool COLok=FALSE;
@@ -289,10 +289,8 @@ UInt8 COLindex( UInt8 R, UInt8 G, UInt8 B, UInt8 index)
 {  Int16 i;
    if(COLok!=TRUE) Bug("COLok");
    /*check for invisible color*/
-   if(R==COLinv.R)
-	 if(G==COLinv.G)
-	   if(B==COLinv.B)
-		 return COLinvisib;
+   if(R==COLinv.R && G==COLinv.G && B==COLinv.B)
+      return COLinvisib;
    /*check for DOOM palette*/
    i= ((Int16)index)&0xFF;
    if(R==COLpal[i].R)

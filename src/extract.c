@@ -43,10 +43,12 @@ Place, Suite 330, Boston, MA 02111-1307, USA.
 
 extern char file[128];
 
+#if 0
 static void stop (void)
 {
   ;
 }
+#endif
 
 /*
 ** try to save entry as BitMap .BMP
@@ -78,8 +80,10 @@ static Bool XTRbmpSave(Int16 *pinsrX,Int16 *pinsrY,struct WADDIR huge *entry,
    WADRseek(info,start);
    WADRreadBytes(info,buffer,size);
    /* DEBUG */
-   if (! strncmp (name, "W18_1", 8))
+#if 0
+   if (! strncmp (name, "PSYBA0", 8))
      stop ();
+#endif
    res = PICsaveInFile(file,type,buffer,size,pinsrX,pinsrY,Picture);
    if(res==TRUE)Detail("Saved picture as %s\n",file);
    Free(buffer);

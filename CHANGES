@@ -3,6 +3,21 @@ Edit docsrc/changes.html instead.
 
                          History of changes for DeuTex
                                        
+   DeuTex 4.0.3 (AYM 1999-10-02)
+          
+          + CLI: new option -doom2 as suggested by Matthew Miller.
+          + Graphics: now accepts to extract pictures as large as
+            4096×4096 (previously the limit was 320×200). This fixes
+            "Failed to write sprite" errors when trying to extract PSYBA0
+            and PSYBB0 from strain.wad. Thanks to Matthew miller for
+            reporting the bug.
+          + Misc: added a useful URL to the GIF warning.
+          + Sound: fixed a bug that caused DeuTex to extract sounds with
+            unlikely sample rates like 4 GHz whenever the sample rate in
+            the lump was higher than 32767 Hz (for example DSVILACT and
+            DSVILSIT from ncc1701.wad, with a sample rate of 44.1 kHz).
+            Thanks to Matthew Miller for reporting the bug.
+            
    DeuTex 4.0.2 (AYM 1999-09-19)
           
           + CLI: new options

@@ -113,7 +113,9 @@ Int16 CMPOloadPic(Int32 *size,struct WADINFO *rwad, char *file, const
     res=PICGIF;
     if (! gif_warning)
     {
-      Warning ("GIF support may go away in the future. Switch to PPM or BMP.");
+      Warning ("GIF support may go away in the future (see");
+      Warning ("http://lpf.ai.mit.edu/Patents/Gif/Gif.html).");
+      Warning ("Switch to PPM or BMP.");
       gif_warning = 1;
     }
   }
