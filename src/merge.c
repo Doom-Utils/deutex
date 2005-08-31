@@ -1,11 +1,9 @@
 /*
-This file is part of DeuTex.
+This file is Copyright © 1994-1995 Olivier Montanuy,
+             Copyright © 1999-2005 André Majorel.
 
-DeuTex incorporates code derived from DEU 5.21 that was put in the public
+It may incorporate code derived from DEU 5.21 that was put in the public
 domain in 1994 by Raphaël Quinet and Brendon Wyber.
-
-DeuTex is Copyright © 1994-1995 Olivier Montanuy,
-          Copyright © 1999-2000 André Majorel.
 
 This program is free software; you can redistribute it and/or modify it under
 the terms of the GNU General Public License as published by the Free Software
@@ -16,13 +14,14 @@ This program is distributed in the hope that it will be useful, but WITHOUT
 ANY WARRANTY; without even the implied warranty of MERCHANTABILITY or FITNESS
 FOR A PARTICULAR PURPOSE. See the GNU General Public License for more details.
 
-You should have received a copy of the GNU General Public License along with
-this library; if not, write to the Free Software Foundation, Inc., 59 Temple
-Place, Suite 330, Boston, MA 02111-1307, USA.
+You should have received a copy of the GNU General Public License
+along with this program; if not, write to the Free Software
+Foundation, Inc., 51 Franklin Street, Fifth Floor, Boston, MA  02110-1301, USA
 */
 
 
 #include "deutex.h"
+#include <errno.h>
 #include "tools.h"
 #include "endianm.h"
 #include "mkwad.h"
@@ -58,11 +57,11 @@ static void HDRplunderWad(struct WADINFO *rwad,struct WADINFO *ewad)
   /*
   ** copy entries from WAD
   */
-  Phase("Copying entries from Wad (Please wait).\n");
+  Phase("ME10", "Copying entries from wad (please wait)");
   data = (char  *)Malloc(MEMORYCACHE);
   for(n=0;n<(rwad->ntry);n++)
   {
-    if((n&0x7F)==0) Phase(".");
+    /*if((n&0x7F)==0) Phase("."); FIXME need /dev/tty output */
     ostart=rwad->dir[n].start;
     osize=rwad->dir[n].size;
     /*detect external entries */
@@ -79,14 +78,14 @@ static void HDRplunderWad(struct WADINFO *rwad,struct WADINFO *ewad)
 	  WADRreadBytes(ewad,data,sz);
 	  if(WADRwriteBytes2(rwad,data,sz)<0)
 	  { WADRchsize(rwad,oldfilesz);
-	    ProgError("Not enough disk space.");
+	    ProgError("ME13", "Not enough disk space");
 	    break;
 	  }
 	}
       }
     }
   }
-  Phase("\n");
+  /*Phase("\n"); FIXME need /dev/tty output */
   Free(data);
 }
 
@@ -107,17 +106,17 @@ static Int32 HDRinsertWad(struct WADINFO *rwad,struct WADINFO *ewad,Int32 *pesiz
   estart=WADRposition(rwad);
   WADRseek(ewad,0);
   esize=ewad->maxpos;
-  Phase("Inserting Wad file into Wad.\n");
+  Phase("ME16", "Inserting wad file into wad");
   data = (char  *)Malloc(MEMORYCACHE);
   for(wsize=0;wsize<esize;wsize+=sz)
   { sz=(esize-wsize>MEMORYCACHE)? MEMORYCACHE:esize-wsize;
     WADRreadBytes(ewad,data,sz);
     if(WADRwriteBytes2(rwad,data,sz)<0)
     { WADRchsize(rwad,oldfilesz);
-      ProgError("Not enough disk space.");
+      ProgError("ME19", "Not enough disk space");
       break;
     }
-    if((wsize&0xF000)==0) Phase(".");
+    /*if((wsize&0xF000)==0) Phase("."); FIXME need /dev/tty output */
   }
   Free(data);
   for(n=0;n<(rwad->ntry);n++)
@@ -128,7 +127,7 @@ static Int32 HDRinsertWad(struct WADINFO *rwad,struct WADINFO *ewad,Int32 *pesiz
       rwad->dir[n].start += estart;
     }
   }
-  Phase("\n");
+  /* Phase("\n"); FIXME need /dev/tty output */
   *pesize=  esize;
   return estart;
 }
@@ -149,7 +148,7 @@ void HDRrestoreWAD(const char *wadres)
   Int32 time;
   FILE *fp;
   Bool Fail;
-  Phase("Attempting to restore WAD %s\n",wadres);
+  Phase("ME22", "Attempting to restore wad %s", fname (wadres));
   /*open DOOM.WAD*/
   rwad.ok=0;
   WADRopenR(&rwad,wadres);
@@ -174,8 +173,8 @@ void HDRrestoreWAD(const char *wadres)
 	  if(strncmp(HDRdir[0].name,"IZNOGOOD",8)!=0) Fail=TRUE;
 	}
   }
-  if(Fail != FALSE) ProgError("Not a modified WAD");
-  Phase("Restoration infos seem correct.\n");
+  if(Fail != FALSE) ProgError("ME25", "Not a modified WAD");
+  Phase("ME28", "Restoration infos seem correct");
   dirpos = peek_i32_le (&HDRdir[1].start);
   ntry   = peek_i32_le (&HDRdir[1].size);
   rwadstart = peek_i32_le (&HDRdir[2].start);
@@ -197,10 +196,11 @@ void HDRrestoreWAD(const char *wadres)
     fp=fopen(ewadfile,FOPEN_RB);
     if(fp!=NULL)
     { fclose(fp);
-      Info("File %s already exist: internal WAD discarded.\n",ewadfile);
+      Info("ME31", "%s already exists, internal WAD discarded",
+	  fname (ewadfile));
     }
     else
-    { Phase("Restoring internal WAD %s\n",ewadfile);
+    { Phase("ME34", "Restoring internal wad %s", fname (ewadfile));
       if((fp=fopen(ewadfile,FOPEN_WB))!=NULL)
       { data = (char  *)Malloc( MEMORYCACHE);
 	size = ewadsize;
@@ -209,15 +209,19 @@ void HDRrestoreWAD(const char *wadres)
 	for(wsize=0;wsize<size;wsize+=sz)
 	{ sz=(size-wsize>MEMORYCACHE)? MEMORYCACHE : size-wsize;
 	  WADRreadBytes(&rwad,data,sz);
+	  errno = 0;
 	  if(fwrite(data,(size_t)sz,1,fp)!=1)
-	  { Warning("Can't write %s",ewadstart);break;
+	  { Warning("ME37", "%s: %s",
+	      fnameofs (ewadfile, (long) ewadstart),
+	      errno == 0 ? "write error" : strerror (errno));
+	    break;
 	  }
 	}
 	Free(data);
 	fclose(fp);
       }
-    else
-      Warning("Can't open %s",ewadfile);
+      else
+	Warning("ME40", "%s: %s", fname (ewadfile), strerror (errno));
     }
   }
   WADRopenA(&rwad,wadres);
@@ -227,7 +231,7 @@ void HDRrestoreWAD(const char *wadres)
   WADRchsize(&rwad,rwadstart+rwadsize);
   WADRclose(&rwad);
   SetFileTime(wadres,time);
-  Output("Restoration of %s should be successful.\n",wadres);
+  Output("Restoration of %s should be successful\n", fname (wadres));
 }
 /**************** End WAD restoration **********************/
 
@@ -238,7 +242,7 @@ static void HDRsetDir(struct WADINFO *rwad,Bool IsIwad,Bool Restore,
 { static char name[8];
   Int32 pos;
         /*Set the old references */
-  Phase("Writing new WAD directory\n");
+  Phase("ME43", "Writing new wad directory");
   write_i32_le (&HDRdir[0].start, 0x24061968L);
   write_i32_le (&HDRdir[0].size,  666L);
   Normalise(HDRdir[0].name,"IZNOGOOD");
@@ -298,13 +302,14 @@ void PSTmergeWAD(const char *doomwad,const char *wadin,NTRYB select)
   Int16 pnm;char  *Pnam;Int32 Pnamsz=0;
   Int32 dirpos,ntry,isize,pstart,psize,time;
   struct WADDIR  *NewDir;Int32 NewNtry;
-  Phase("Attempting to merge IWAD %s and PWAD %s\n",doomwad,wadin);
+  Phase("ME46", "Attempting to merge iwad %s and pwad %s",
+      fname (doomwad), wadin);
   /*open iwad,get iwad directory*/
   iwad.ok=0;
   WADRopenR(&iwad,doomwad);
   /*find PNAMES*/
   pnm=WADRfindEntry(&iwad,"PNAMES");
-  if(pnm<0) ProgError("Can't find PNAMES in main WAD");
+  if(pnm<0) ProgError("ME49", "Can't find PNAMES in iwad");
   Pnam=WADRreadEntry(&iwad,pnm,&Pnamsz);
   /* identify iwad*/
   iiden=IDENTentriesIWAD(&iwad, Pnam, Pnamsz,TRUE);
@@ -362,16 +367,15 @@ void ADDappendSpriteFloor(const char *doomwad, const char *wadres,NTRYB select)
   Int16 pnm;char  *Pnam;Int32 Pnamsz;
   Int32 dirpos,ntry,psize,time;
   struct WADDIR  *NewDir;Int32 NewNtry;
-  Phase("Appending ");
-  if(select&BSPRITE) Phase("Sprites ");
-  if(select&BFLAT)   Phase("Flats ");
-  Phase("from IWAD %s to PWAD %s\n",doomwad,wadres);
+  Phase("ME52", "Appending sprites and/or flats");
+  Phase("ME52", " from iwad %s", fname (doomwad));
+  Phase("ME52", " to   pwad %s", fname (wadres));
   /* get iwad directory, and identify */
   iwad.ok=0;
   WADRopenR(&iwad,doomwad);
   /*find PNAMES*/
   pnm=WADRfindEntry(&iwad,"PNAMES");
-  if(pnm<0) ProgError("Can't find PNAMES in main WAD");
+  if(pnm<0) ProgError("ME61", "Can't find PNAMES in iwad");
   Pnam=WADRreadEntry(&iwad,pnm,&Pnamsz);
   /* identify iwad*/
   iiden=IDENTentriesIWAD(&iwad, Pnam, Pnamsz,TRUE);
@@ -415,13 +419,14 @@ void ADDjoinWads(const char *doomwad, const char *wadres, const char
   struct WADDIR  *NewDir;Int32 NewNtry;
   Bool TexuMrg = FALSE;
   Int32 dirpos,ntry,rsize,estart,esize,time;
-  Phase("Merging PWAD %s into PWAD %s\n",wadext,wadres);
+  Phase("ME64", "Merging pwad %s", fname (wadext));
+  Phase("ME64", " into pwad %s", fname (wadres));
   /* get iwad directory, and identify */
   iwad.ok=0;
   WADRopenR(&iwad,doomwad);
   /*find PNAMES*/
   entry=WADRfindEntry(&iwad,"PNAMES");
-  if(entry<0) ProgError("Can't find PNAMES in main WAD");
+  if(entry<0) ProgError("ME70", "Can't find PNAMES in iwad");
   Entry=WADRreadEntry(&iwad,entry,&EntrySz);
   /* get ewad directory, and identify */
   ewad.ok=0;
@@ -438,44 +443,44 @@ void ADDjoinWads(const char *doomwad, const char *wadres, const char
   rtexu=WADRfindEntry(&rwad,"TEXTURE1");
   if((etexu>=0)&&(rtexu>=0))
   { TexuMrg=TRUE;
-   iwad.ok=0;
-   WADRopenR(&iwad,doomwad);
-   /*find PNAMES in IWAD and init*/
-   pnm=WADRfindEntry(&iwad,"PNAMES");
-   if(pnm<0) Bug("JnPnm");
-   Entry=WADRreadEntry(&iwad,entry,&EntrySz);
-   PNMinit(Entry,EntrySz);
-   Free(Entry);
-   /*declare TEXTURE1 from IWAD*/
-   TXUinit();
+    iwad.ok=0;
+    WADRopenR(&iwad,doomwad);
+    /*find PNAMES in IWAD and init*/
+    pnm=WADRfindEntry(&iwad,"PNAMES");
+    if(pnm<0) Bug("ME73", "JnPnm");
+    Entry=WADRreadEntry(&iwad,entry,&EntrySz);
+    PNMinit(Entry,EntrySz);
+    Free(Entry);
+    /*declare TEXTURE1 from IWAD*/
+    TXUinit();
   }
   WADRclose(&iwad);
   if(TexuMrg==TRUE)
   { /*add TEXTURE1 from rwad*/
-   Phase("  With TEXTURE1 from %s\n",wadres);
-   PatchSz=0;Patch=NULL;
-   pnm=WADRfindEntry(&rwad,"PNAMES");
-   if(pnm>=0)
-   { Phase("  Declaring Patches from %s\n",wadres);
-     riden[pnm]=EVOID;
-     Patch=WADRreadEntry(&rwad,pnm,&PatchSz);
-   }
-   Entry=WADRreadEntry(&rwad,rtexu,&EntrySz);
-   TXUreadTEXTURE(Entry,EntrySz,Patch,PatchSz,TRUE);
+    Phase("ME76", "  With TEXTURE1 from %s", fname (wadres));
+    PatchSz=0;Patch=NULL;
+    pnm=WADRfindEntry(&rwad,"PNAMES");
+    if(pnm>=0)
+    { Phase("ME79", "  Declaring patches from %s", fname (wadres));
+      riden[pnm]=EVOID;
+      Patch=WADRreadEntry(&rwad,pnm,&PatchSz);
+    }
+    Entry=WADRreadEntry(&rwad,rtexu,&EntrySz);
+    TXUreadTEXTURE(rwad.dir[pnm].name, Entry, EntrySz, Patch, PatchSz, TRUE);
     if(PatchSz!=0)Free(Patch);
     Free(Entry);
     riden[rtexu]=EVOID; /* forget r texu*/
     /*TEXTURE1 from ewad*/
-    Phase("  And TEXTURE1 from %s\n",wadext);
+    Phase("ME82", "  And TEXTURE1 from %s", fname (wadext));
     PatchSz=0;Patch=NULL;
     pnm=WADRfindEntry(&ewad,"PNAMES");
     if(pnm>=0)
-    { Phase("  Declaring Patches from %s\n",wadext);
+    { Phase("ME85", "  Declaring Patches from %s", fname (wadext));
       eiden[pnm]=EVOID;
       Patch=WADRreadEntry(&ewad,pnm,&PatchSz);
     }
     Entry=WADRreadEntry(&ewad,etexu,&EntrySz);
-    TXUreadTEXTURE(Entry,EntrySz,Patch,PatchSz,FALSE);
+    TXUreadTEXTURE(ewad.dir[pnm].name, Entry, EntrySz, Patch, PatchSz, FALSE);
     if(PatchSz!=0)Free(Patch);
     Free(Entry);
     eiden[etexu]=EVOID; /* forget e texu*/
@@ -546,17 +551,16 @@ void ADDallSpriteFloor(const char *wadout, const char *doomwad, const char
   Int16 pnm;char  *Pnam;Int32 Pnamsz;
   struct WADDIR  *NewDir;Int32 NewNtry;
 
-  Phase("Copying ");
-  if(select&BSPRITE) Phase("Sprites ");
-  if(select&BFLAT)   Phase("Flats ");
-  Phase("from IWAD %s and PWAD %s\n",doomwad,wadres);
-  Phase("Into PWAD %s\n",wadout);
+  Phase("ME88", "Copying sprites and/or flats");
+  Phase("ME88", " from iwad %s", fname (doomwad));
+  Phase("ME88", " and  pwad %s", fname (wadres));
+  Phase("ME88", " into pwad %s", fname (wadout));
   /* get iwad directory, and identify */
   iwad.ok=0;
   WADRopenR(&iwad,doomwad);
   /*find PNAMES*/
   pnm=WADRfindEntry(&iwad,"PNAMES");
-  if(pnm<0) ProgError("Can't find PNAMES in main WAD");
+  if(pnm<0) ProgError("ME91", "Can't find PNAMES in main WAD");
   Pnam=WADRreadEntry(&iwad,pnm,&Pnamsz);
   /* identify iwad*/
   iiden=IDENTentriesIWAD(&iwad, Pnam, Pnamsz,TRUE);
@@ -567,7 +571,7 @@ void ADDallSpriteFloor(const char *wadout, const char *doomwad, const char
   /**/
   Free(Pnam);
   /*where to put pwad? at pwadstart*/
-  if((iwad.maxpos|pwad.maxpos)&EXTERNAL )Bug("AddExt");
+  if((iwad.maxpos|pwad.maxpos)&EXTERNAL )Bug("ME94", "AddExt");
   /* merge the two directories */
   NewDir=LISmergeDir(&NewNtry,TRUE,TRUE,select,&iwad,iiden,EXTERNAL,&pwad,piden,0);
   /* create a new PWAD*/
@@ -590,7 +594,7 @@ void ADDallSpriteFloor(const char *wadout, const char *doomwad, const char
   WADRclose(&pwad);
   WADRwriteDir(&rwad, 1);
   WADRclose(&rwad);
-  Output("Addition of Sprites and Floors is complete\n");
+  Phase("ME98", "Addition of sprites and floors is complete");
 }
 
 

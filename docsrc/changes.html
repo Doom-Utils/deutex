@@ -1,15 +1,294 @@
+<!DOCTYPE HTML PUBLIC "-//W3C//DTD HTML 4.01//EN"
+   "http://www.w3.org/TR/html4/strict.dtd">
 <html>
-<head>
-<title>History of changes for DeuTex</title>
-</head>
-<body>
+  <head>
+    <meta http-equiv="Content-Type" content="text/html; charset=ISO-8859-1">
+    <title>History of changes for DeuTex</title>
+    <meta http-equiv="Content-Style-Type" content="text/css">
+    <style type="text/css">
+      p {
+	margin-bottom:		0.5em;
+	margin-top:		0.5em;
+      }
+      blockquote {
+	margin-bottom:		0.5em;
+	margin-top:		0.5em;
+      }
+      dt {
+	margin-bottom:		0.5em;
+	margin-top:		1em;
+      }
+      dd {
+	margin-bottom:		1em;
+	margin-top:		1em;
+      }
+
+      ul > li {
+	margin-bottom:		0.5em;
+	margin-top:		0.5em;
+      }
+      ul.compact > li {
+	margin-bottom:		0;
+	margin-top:		0;
+      }
+
+      dl.compact {
+	margin-bottom:		1em;
+	margin-top:		1em;
+      }
+      dl.compact > dt {
+	float:			left;
+	/* If you omit margin-bottom and margin-top, Firefox renders it
+	   like this :
+
+	          dd1
+	   dt1
+	          dd2
+	      dt2
+	            dd3
+		 dt3
+		       dd4
+		    dt4
+		       p
+
+	   WTF ?  */
+	margin-bottom:		0;
+	margin-top:		0;
+      }
+      dl.compact > dd {
+	margin-left:		7em;
+      }
+    </style>
+  </head>
+  <body>
+
 <h1>History of changes for DeuTex</h1>
 
 <dl>
-<p><dt>DeuTex 4.4.0 (AYM 2000-01-05)
-<dd>
-	<ul>
-	<p><li>Game: Hexen: musics are now identified and extracted properly.
+  <dt>DeuTex 4.4.902 (AYM 2005-08-31)
+  <dd>
+    <ul>
+      <li>
+	Build: vanilla <code>make</code> compatibility: removed all occurrences
+	of "<code>$&lt;</code>" not in inference rules in the makefile.
+
+      <li>
+	Build: vanilla <code>make</code> compatibility: removed all
+	"<code>\</code>" followed by empty lines.
+	On NCR MP-RAS, <code>make</code> quotes all empty lines that
+	follow&nbsp;!
+
+      <li>
+	Build: there is now a "<code>./configure</code>" script (GNU autoconf
+	work-alike).
+
+	<p>
+	  Installing somewhere else than <code>/usr/local</code> is now done by
+	  giving <code>./configure</code> the <code>--prefix</code> option.
+	</p>
+
+	<p>
+	  <code>CC</code>, <code>CFLAGS</code> and <code>LDFLAGS</code> are now
+	  auto-detected.
+	  The defaults can be overridden by passing <code>./configure</code>
+	  the <code>--cc</code>, <code>--cflags</code> and
+	  <code>--ldflags</code> options.
+	</p>
+
+	<p>
+	  The fixed-size types (<code>Int16</code> etc.) are now correctly set
+	  on all LP64 platforms, not just Alpha.
+	</p>
+
+      <li>
+	Build: the OPTIONS section is now updated automatically.
+	This impacts no-one but hackers.
+
+      <li>
+	Code: two <code>char[8]</code> were used as <code>char[9]</code>
+	(caught by NCR/MetaWare <code>cc</code> on NCR MP-RAS).
+
+      <li>
+	Code: C89 compatibility: removed a few "<code>//</code>" comments that
+	had slipped into the source.
+
+      <li>
+	Code: a few functions were declared as <code>static</code> but defined
+	as <code>extern</code> (caught by NCR/MetaWare <code>cc</code> on NCR
+	MP-RAS).
+
+      <li>
+	Code: <code>static</code>- and <code>const</code>-correctness fixes.
+
+      <li>Code: removed the little-used <code>Legal()</code> function.
+
+      <li>
+	Doc: man page: in DESCRIPTION, added a short list of examples to help
+	new users getting started.
+	Added a FILES section.
+	Made the SEE ALSO section a bit more specific.
+
+      <li>
+	Doc: in <code>--help</code> and the man page, divided the options into
+	groups and sorted them alphabetically within each group.
+	It seems to be clearer that way.
+
+      <li>Doc: added a FAQ.
+
+      <li>Doc: obfuscated all email addresses (<code>tr .@ +=</code>).
+
+      <li>
+	Game: Strife: the <code>SCRIPT<var>nn</var></code> lumps are now
+	extracted in human-readable form into the <code>scripts/</code>
+	directory.
+	The reverse operation is not implemented.
+	Since we understand the Strife script format only partially, the output
+	format is still in flux.
+	New option <code>-scripts</code> to extract only the scripts.
+	The reverse engineering was done in collaboration with Matthew W.
+	Miller.
+
+      <li>
+	Graphics: it's now possible to build wads that use a custom
+	<code>PLAYPAL</code>.
+	Previously, DeuTex always used the <code>PLAYPAL</code> from the iwad
+	when building.
+	It now uses the one in <code>lumps/</code> if it exists.
+	Thanks to Ras2 for reporting the problem.
+
+      <li>
+	Graphics: rewrote <code>COLdiff()</code> as a macro.
+	On my system, the time to build a wad made of a single 1M-pixel patch
+	is down from 1.32s to 0.85s (35% faster), which is not surprising since
+	DeuTex used to spend about 40% of its time in <code>COLdiff()</code>.
+	The time to rebuild the Strife iwad is down from 8.6s to 7.2s (16%
+	faster).
+
+      <li>
+	Graphics: removed the "quantisation is slow" warnings that DeuTex used
+	to spew when composing from PPMs and 24-bit BMPs.
+	Those warnings were relevant to an old quantisation algorithm that has
+	not been used since at least version 3.8 (<code>#ifdef
+	QUANTSLOW</code>).
+
+      <li>
+	Graphics: lifted the arbitrary limit of 256 patches per texture.
+	DeuTex will now accept as many patches as the wad format allows
+	(32,767).
+	If a texture definition has more than that many patches, DeuTex will
+	discard the excess patches with a warning, instead of dying with a
+	cryptic message like "<code>Line <var>n</var>: Illegal char
+	'*'</code>".
+
+      <li>
+	Graphics: lifted the arbitrary limit of 4096 on patch width.
+	DeuTex now handles patches as wide as the wad format allows (32,767).
+
+      <li>
+	Graphics: textures wider than 4096 are now accepted with a warning.
+	PrBoom 2.2.3 is known to take textures as wide as 16,384 pixels.
+	8192&times;128 textures make XDoom 20001001 crash in
+	<code>Z_Malloc</code>.
+	1024&times;128 textures make Doom freeze in <code>R_Init</code>.
+	The maximum acceptable widths might be higher if the height of the
+	texture is lesser than 128 but I haven't looked into it.
+	Thanks to David Damerell for testing.
+
+      <li>Misc: removed the annoying startup banner.
+
+      <li>
+	Misc: if no command is given, emit a meaningful error message instead
+	of suggesting to switch to WinTex.
+	And exit with code 1 instead of 255.
+
+      <li>
+	Misc: all messages now look like this&nbsp;:
+
+	<blockquote>
+	  <p>
+	    <code><var>c</var> <var>code</var> <var>string</var></code>
+	  </p>
+	</blockquote>
+
+	<p>
+	  <var>c</var> is the class of the message&nbsp;: "<b>i</b>" for
+	  information, "<b>w</b>" for warning, "<b>E</b>" for error, "<b>B</b>"
+	  for bug.
+	</p>
+
+	<p>
+	  <var>code</var> is a unique 4-character alphanumeric code which
+	  unambiguously identifies the message.
+	</p>
+
+	<p>
+	  Some of the messages have been rewritten to be more informative
+	  (mention the filename, the nature of the error, etc.).
+	</p>
+
+      <li>
+        <p>
+	  Misc: at the request of Kim "Sparky" Parrott, all messages are now
+	  copied to a file named "<code>deutex.log</code>"
+	  ("<code>deusf.log</code>" for DeuSF).
+	  The default log file name can be overridden through the
+	  "<code>-log</code>" option.
+	  If you don't want a log file, try "<code>-log /dev/null</code>"
+	  (Unix) or "<code>-log nul</code>" (DOS).
+	</p>
+
+	<p>
+	  The log is only written if a command that works with wads is given.
+	  <code>--help</code>, <code>--version</code> etc. do not create a log.
+	</p>
+
+      <li>Misc: removed the 30 command-line arguments limit.
+
+      <li>
+	Misc: made exit status a little bit more normal (2 for errors and 3 for
+	bugs instead of -5 and -10).
+
+      <li>
+	Sound: new option <code>-rate</code> to specify what DeuTex should do
+	when including sound files whose sample rate is not exactly
+	11025&nbsp;Hz.
+	The choices are&nbsp;:
+
+	<dl class="compact">
+	  <dt><code>reject</code></dt>
+	  <dd>consider it a fatal error and exit immediately with a non-zero
+	    exit code.</dd>
+
+	  <dt><code>force</code></dt>
+	  <dd>emit a warning and force it to 11025&nbsp;Hz by resampling up or
+	    down.</dd>
+
+	  <dt><code>warn</code></dt>
+	  <dd>emit a warning but include it as is anyway.</dd>
+
+	  <dt><code>accept</code></dt>
+	  <dd>silently include it as is.</dd>
+	</dl>
+
+	Previously, the default (and only option) used to be
+	"<code>force</code>". It's now "<code>warn</code>".
+
+	<p>
+	  Thanks to Matthew W. Miller for telling me about this issue (which he
+	  did in 1999&nbsp;; the six-year delay is mine, all mine).
+	</p>
+
+      <li>
+	Sound: write errors while extracting PC speaker sounds are now actually
+	detected and reported.
+
+    </ul>
+
+  <dt>DeuTex 4.4.0 (AYM 2000-01-05)
+  <dd>
+    <ul>
+      <li>
+        Game: Hexen: musics are now identified and extracted properly.
 
 	<p>The old music identification code assumed that any lump whose name
 	does not begin with either "<code>D_</code>" or "<code>MUS_</code>"
@@ -32,7 +311,7 @@
 	using the <code>-musid</code> option and let me know whether it
 	improves your condition.
 
-	<p><li>Game: Hexen, Doom alpha 0.4/0.5: levels are now properly
+	<li>Game: Hexen, Doom alpha 0.4/0.5: levels are now properly
 	extracted and included.
 
 	<p>There have been changes in the undocumented details of DeuTex's
@@ -47,7 +326,7 @@
 	should, all the needed lumps and nothing else, there shouldn't be any
 	trouble.
 
-	<p><li>Game: Heretic and Hexen: does not abort anymore with
+	<li>Game: Heretic and Hexen: does not abort anymore with
 	"<code>Bug: *** idinx (12) ***</code>" when trying to include the
 	graphic lumps (resp. <code>CREDIT</code>, <code>E2END</code>,
 	<code>FINAL1</code>, <code>FINAL2</code>, <code>HELP1</code>,
@@ -57,66 +336,69 @@
 	<code>TITLE</code>). More generally, DeuTex now accepts to compose wads
 	even when there are graphic files in <code>lumps/</code>.
 
-	<p><li>Game: Hexen: does not abort anymore with "<code>Height of FLAT
+	<li>Game: Hexen: does not abort anymore with "<code>Height of FLAT
 	./flats/x_001.ppm is not 64 or 65</code>" when trying to include flats
 	<code>X_001</code> through <code>X_011</code>. In addition, DeuTex now
 	just emits a warning instead of aborting for other oddball heights
 	(i.e. not 64, 65 or 128). Have fun. <code>;-)</code> This is true for
 	all iwads, not only Hexen.
 
-	<p><li>Graphics: the annoying "<code>quantisation is slow</code>"
+	<li>Graphics: the annoying "<code>quantisation is slow</code>"
 	warnings now appear at most once.
  
-	<p><li>Misc: to disambiguate the "<code>&lt;count&gt; warnings
+	<li>Misc: to disambiguate the "<code>&lt;count&gt; warnings
 	omitted</code>" message, added optional scope prefix and changed the
 	picture extraction function to use it.
 
-	<p><li>Misc: got rid of the "don't bother Olivier" banner. People must
+	<li>Misc: got rid of the "don't bother Olivier" banner. People must
 	have got the message by now.
 
-	</ul>
+    </ul>
 
-<p><dt>DeuTex 4.3.0 (AYM 1999-12-24)
-<dd>
-	<ul>
-	<p><li>Graphics: fixed ancient bug where DeuTex sometimes failed to
+  <dt>DeuTex 4.3.0 (AYM 1999-12-24)
+  <dd>
+    <ul>
+	<li>Graphics: fixed ancient bug where DeuTex sometimes failed to
 	include custom patches if they were not explicitly listed in the
 	<code>[patches]</code> section. If the first patch used in
 	<code>texture1.txt</code> was a custom patch, it <em>had</em> to be
 	listed in <code>[patches]</code> or DeuTex would forget to include it.
 	This is the same bug Olivier mentioned in the home page&nbsp;:
 
-	<i><blockquote>
-	  The support for wall patches in DeuTex has been modified. You must
-	  now explicitely declare all your patches in a [PATCHE] section.
+	<blockquote>
+	  <p>
+	    <i>The support for wall patches in DeuTex has been modified. You
+	    must now explicitely declare all your patches in a [PATCHE]
+	    section.</i>
 
-	  <p>If you don't do this, DeuTex will attempt to work as usual, but
-	  there seems to ba a bug in this part of the code, so sometime some
-	  needed patches are not loaded.
-	</blockquote></i>
+	  <p>
+	    <i>If you don't do this, DeuTex will attempt to work as usual, but
+	    there seems to ba a bug in this part of the code, so sometime some
+	    needed patches are not loaded.</i>
+	</blockquote>
 
 	After some summary testing, looks like it's fixed.
 
-	<p><li>Misc: more error handling improvements.
+	<li>Misc: more error handling improvements.
 
-	<p><li>Misc: bumped version number and cleaned things up for public
+	<li>Misc: bumped version number and cleaned things up for public
 	release.
 
-	<p><li>Misc: decreased maximum number of warnings per picture from 10
+	<li>Misc: decreased maximum number of warnings per picture from 10
 	to 5.
 
-	<p><li>Platform: fixed <code>ftruncate()</code> being undeclared when
+	<li>Platform: fixed <code>ftruncate()</code> being undeclared when
 	compiling with DJGPP and updated the building-on-DOS section of the
 	doc.
 
-	</ul>
+    </ul>
 
-<p><dt>DeuTex 4.2.2 (AYM 1999-11-20) (not for public consumption)
-<dd>
-	<ul>
-	<p><li>Misc: made certain failure messages more informative.
+  <dt>DeuTex 4.2.2 (AYM 1999-11-20) (not for public consumption)
+  <dd>
+    <ul>
+	<li>Misc: made certain failure messages more informative.
 	
-	<p><li>Platform: fixed several bugs that showed in the DOS precompiled
+	<li>Platform: fixed several bugs that showed in the DOS precompiled
 	executables for 4.1.0 and 4.2.0 (most common symptom : DeuTex aborting
 	    with a "<code>Can't read WAD</code>" error message).
 
@@ -150,14 +432,14 @@
 	<p>All the above applies only to the DOS precompiled executables. Other
 	platforms did not have these problems.
 
-	</ul>
+    </ul>
 
-<p><dt>DeuTex 4.2.1 (AYM 1999-11-16) (not for public consumption)
-<dd>
-	<ul>
-	<p><li>CLI: fixed segfault on "<code>deutex --vers</code>".
+  <dt>DeuTex 4.2.1 (AYM 1999-11-16) (not for public consumption)
+  <dd>
+    <ul>
+	<li>CLI: fixed segfault on "<code>deutex --vers</code>".
 
-	<p><li>Graphics: new option <code>-usedidx</code>. When called with
+	<li>Graphics: new option <code>-usedidx</code>. When called with
 	this option, DeuTex scans all the graphics in the wad and prints
 	statistics about which palette indices they use. (By "graphics" is meant
 	"any data that is converted into an RGB triplet by looking up
@@ -166,31 +448,31 @@
 	for my own use, to help me decide which index should be used to store
 	the transparent colour for Hexen.
 
-	<p><li>Misc: made certain failure messages more informative.
+	<li>Misc: made certain failure messages more informative.
 	
-	<p><li>Misc: made printing of lump names garbage-proof.
+	<li>Misc: made printing of lump names garbage-proof.
 
-	<p><li>Platform: fixed a huge DOS bug that made DeuTex fail with
+	<li>Platform: fixed a huge DOS bug that made DeuTex fail with
 	a "<code>Can't read WAD</code>" error whenever it had to read more
 	than 65535 bytes from a wad at once.
 
-	<p><li>Platform: flushing <code>stdout</code> before writing to
+	<li>Platform: flushing <code>stdout</code> before writing to
 	<code>stderr</code> so that messages come out in the right order when
 	both outputs are redirected.
 
-	<p><li>Sound: all conditions that used to be fatal errors when
+	<li>Sound: all conditions that used to be fatal errors when
 	extracting sound lumps now just elicit a warning message, indicating
 	which lump it was and what action was taken.
 
-	</ul>
+    </ul>
 
-<p><dt>DeuTex 4.2.0 (AYM 1999-11-14)
-<dd>
-	<ul>
-	<p><li>Doc: fixed error in documentation of <code>-pkgfx</code>,
+  <dt>DeuTex 4.2.0 (AYM 1999-11-14)
+  <dd>
+    <ul>
+	<li>Doc: fixed error in documentation of <code>-pkgfx</code>,
 	<code>-pknormal</code> and <code>-usedtex</code>.
 
-	<p><li>Game: Strife: fixed DeuTex aborting when extracting textures
+	<li>Game: Strife: fixed DeuTex aborting when extracting textures
 	for versions of Strife &gt;=&nbsp;1.1. The problem was that
 	Strife&nbsp;1.1 and above use a different format for the
 	<code>TEXTURE1</code> and <code>TEXTURE2</code> lumps (Strife&nbsp;1.0
@@ -202,7 +484,7 @@
 	except that it does <em>not</em> imply "<code>-tf strife11</code>".
 	Summary&nbsp;:
 
-	<p><ul>
+	<ul>
 	<li>if you have the Strife&nbsp;1.0 iwad, use "<code>-strife10</code>"
 	(or "<code>-tf normal</code>"),
 
@@ -213,7 +495,7 @@
 	<p>Thanks to Kim Parrott for reporting the bug and Len Pitre for
 	pointing me in the right direction.
 
-	<p><li>Sound: fixed two bugs in reading Sun audio (<code>.au</code>)
+	<li>Sound: fixed two bugs in reading Sun audio (<code>.au</code>)
 	files. Fixes error "<code>WAV: can't read data
 	of./sounds/foo.au</code>" (sic) when trying to build a wad. One of
 	these bugs prevented from reading Sun audio files on little-endian
@@ -222,25 +504,25 @@
 	been able to use <code>.au</code> files on little-endian machines
 	before.
 
-	</ul>
+    </ul>
 
-<p><dt>DeuTex 4.1.0 (AYM 1999-11-01)
-<dd>
-	<ul>
-	<p><li>CLI: new options <code>-sneas</code>, <code>-sneaps</code> and
+  <dt>DeuTex 4.1.0 (AYM 1999-11-01)
+  <dd>
+    <ul>
+	<li>CLI: new options <code>-sneas</code>, <code>-sneaps</code> and
 	<code>-sneats</code>.
 
-	<p><li>Code: removed all occurrences of "<code>huge</code>" on the
+	<li>Code: removed all occurrences of "<code>huge</code>" on the
 	theory that, on platforms where it's meaningful, we always use the
 	huge memory model anyway.
 
-	<p><li>Code: replaced certain occurrences of "<code>Int32</code>" by
+	<li>Code: replaced certain occurrences of "<code>Int32</code>" by
 	"<code>iolen_t</code>".
 
-	<p><li>Code: replaced certain occurrences of "<code>256</code>" by
+	<li>Code: replaced certain occurrences of "<code>256</code>" by
 	"<code>NCOLOURS</code>".
 
-	<p><li>Doom alpha 0.4: <code>AMENA0</code> and <code>MSKUL*</code> are
+	<li>Doom alpha 0.4: <code>AMENA0</code> and <code>MSKUL*</code> are
 	now correctly recognized as graphics and not as lumps anymore. The 21
 	graphic lumps that ended up in <code>lumps/</code> are now properly
 	extracted (into <code>sneaps/</code> and <code>sneats/</code>). (The
@@ -251,62 +533,62 @@
 	extracted as lumps&nbsp;: <code>GNUM[0-9]</code> and
 	<code>HUFONT</code>.
 
-	<p><li>Doom alpha 0.5: the 86 graphic lumps that ended up in
+	<li>Doom alpha 0.5: the 86 graphic lumps that ended up in
 	<code>lumps/</code> are now properly extracted (into
 	<code>sneaps/</code> and <code>sneats/</code>). Still extracted as
 	lump&nbsp;: <code>HUFONT</code>.
 
-	<p><li>Graphics: errors that used to cause DeuTex to give up on
+	<li>Graphics: errors that used to cause DeuTex to give up on
 	extracting a picture now just make it skip the rest of column. It also
 	prints detailed messages about what it didn't like and in which picture
 	it occurred instead of bailing out silently.
 
-	<p><li>Misc: new option <code>-di</code> to debug entry
+	<li>Misc: new option <code>-di</code> to debug entry
 	identification. Useful mainly to hackers.
 
-	<p><li>Misc: cosmetic changes in the generated
+	<li>Misc: cosmetic changes in the generated
 	<code>wadinfo.txt</code> and in the phase messages.
 
-	<p><li>Misc: no more messages "<code>Creating PWAD</code>" and
+	<li>Misc: no more messages "<code>Creating PWAD</code>" and
 	"<code>WAD is complete...</code>" during level extraction.
 
-	<p><li>Misc: set a limit of 10 warnings per picture, to prevent
+	<li>Misc: set a limit of 10 warnings per picture, to prevent
 	invalid pictures from uselessly flooding the output.
 
-	</ul>
+    </ul>
 
-<p><dt>DeuTex 4.0.3 (AYM 1999-10-02)
-<dd>
-	<ul>
-	<p><li>CLI: new option <code>-doom2</code> as suggested by Matthew
+  <dt>DeuTex 4.0.3 (AYM 1999-10-02)
+  <dd>
+    <ul>
+	<li>CLI: new option <code>-doom2</code> as suggested by Matthew
 	Miller.
 
-	<p><li>Graphics: now accepts to extract pictures as large as
+	<li>Graphics: now accepts to extract pictures as large as
 	4096&times;4096 (previously the limit was 320&times;200). This fixes
 	"<code>Failed to write sprite</code>" errors when trying to extract
 	<code>PSYBA0</code> and <code>PSYBB0</code> from
 	<code>strain.wad</code>. Thanks to Matthew miller for reporting the
 	bug.
 
-	<p><li>Misc: added a useful URL to the GIF warning.
+	<li>Misc: added a useful URL to the GIF warning.
 
-	<p><li>Platform: now builds without errors on FAT filesystems
+	<li>Platform: now builds without errors on FAT filesystems
 	(replaced <code>.deutex</code> and <code>.deusf</code> by
 	<code>tmp/_deutex</code> and <code>tmp/_deusf</code>).
 
-	<p><li>Sound: fixed a bug that caused DeuTex to extract sounds with
+	<li>Sound: fixed a bug that caused DeuTex to extract sounds with
 	unlikely sample rates like 4&nbsp;GHz whenever the sample rate in the
 	lump was higher than 32767&nbsp;Hz (for example <code>DSVILACT</code>
 	and <code>DSVILSIT</code> from <code>ncc1701.wad</code>, with a sample
 	rate of 44.1&nbsp;kHz). Thanks to Matthew Miller for reporting the
 	bug.
 
-	</ul>
+    </ul>
 
-<p><dt>DeuTex 4.0.2 (AYM 1999-09-19)
-<dd>
-	<ul>
-	<p><li>CLI: new options
+  <dt>DeuTex 4.0.2 (AYM 1999-09-19)
+  <dd>
+    <ul>
+	<li>CLI: new options
 	
 	  <ul>
 	  <li><code>-doom02</code> (implies <code>-ipf alpha</code>,
@@ -327,13 +609,13 @@
 	that is in <code>c:\doom0_4</code>, type "<code>deutex -doom04
 	c:\doom0_4 -xtract</code>".
 
-	<p><li>Code: replaced certain unjustified uses of <code>Int32</code>
+	<li>Code: replaced certain unjustified uses of <code>Int32</code>
 	by <code>long</code>.
 
-	<p><li>Doc: removed <code>old/readme.txt</code>. It's so out of date
+	<li>Doc: removed <code>old/readme.txt</code>. It's so out of date
 	that it's more confusing than useful.
 
-	<p><li>Game: Doom alpha and Doom PR: it's now possible to extract
+	<li>Game: Doom alpha and Doom PR: it's now possible to extract
 	graphics, patches, sprites and textures from those iwads. Three new
 	options&nbsp;:
 
@@ -363,16 +645,16 @@
 	<p>Note that extracting levels and some other lumps from the Doom
 	alpha iwads does not work yet.
 
-	<p><li>Platform: new target in the makefile to generate a binary DOS
+	<li>Platform: new target in the makefile to generate a binary DOS
 	distribution with the executables and the user documentation in DOS
 	format, with DOS-ish names.
 
-	</ul>
+    </ul>
 
-<p><dt>DeuTex 4.0.1 (AYM 1999-09-10)
-<dd>
-	<ul>
-	<p><li>CLI: reworked the command line arguments parsing, with
+  <dt>DeuTex 4.0.1 (AYM 1999-09-10)
+  <dd>
+    <ul>
+	<li>CLI: reworked the command line arguments parsing, with
 	the following consequences.
 
 	  <ul>
@@ -409,13 +691,13 @@
 
 	  </ul>
 
-	<p><li>Code: replaced direct testing of <code>__MSDOS__</code>,
+	<li>Code: replaced direct testing of <code>__MSDOS__</code>,
 	<code>__OS2__</code>, <code>__GNUC__</code>,
 	<code>__BORLANDC__</code> by <code>DT_CC</code> and
 	<code>DT_OS</code>. This is hopefully going to make Udo's job a
 	bit easier.
 
-	<p><li>Code: now uses the same <code>fopen()</code> modes for
+	<li>Code: now uses the same <code>fopen()</code> modes for
 	all platforms: "<code>{rw}b</code>" for binary mode and
 	"<code>{rw}</code>" for text mode, as per the ANSI/ISO C
 	standard. This will fix the problem Udo Munk reported with the
@@ -426,60 +708,60 @@
 	DOS, make sure your C compiler is configured so that
 	"<code>{rw}</code>" opens files in <em>text</em> mode.
 
-	<p><li>Code: added to the distribution archive
+	<li>Code: added to the distribution archive
 	<code>gifcodec.c</code> that I had forgotten to include (it's
 	not used anyway).
 
-	<p><li>Code: added to the distribution archive
+	<li>Code: added to the distribution archive
 	<code>src/{deusf,deusfos,deutex,deutexos}.def</code> that I had
 	forgotten to include. I guess that's Windows/OS/2-only stuff.
 
-	<p><li>Doc: updated <code>making.txt</code> and renamed it as
+	<li>Doc: updated <code>making.txt</code> and renamed it as
 	<code>INSTALL</code> for homogeneity. Removed obsolete reference
 	to <code>alpha.sh</code> and the file itself.
 
-	<p><li>Doc: made more legal updates.
+	<li>Doc: made more legal updates.
 
-	<p><li>Doc: documented <code>DOOMWADDIR</code> in the man page.
+	<li>Doc: documented <code>DOOMWADDIR</code> in the man page.
 
-	<p><li>Misc: changed the default graphics format for Unix from
+	<li>Misc: changed the default graphics format for Unix from
 	GIF to PPM, so that fewer user sites are broken if and when GIF
 	support is removed. For the same reason, added a warning message
 	when <code>-gif</code> is used or the first time an image is
 	read from a GIF file.
 
-	<p><li>Misc: changed the lookup order for images to PPM, BMP,
+	<li>Misc: changed the lookup order for images to PPM, BMP,
 	GIF (was BMP, GIF, PPM).
 
-	<p><li>Platform: fixed a couple of things that didn't work on
+	<li>Platform: fixed a couple of things that didn't work on
 	16-bit platforms (real-mode DOS).
 
-	<p><li>Platform: now compiles on DOS with Borland C++ 4.0.
+	<li>Platform: now compiles on DOS with Borland C++ 4.0.
 	
-	<p><li>Platform: now compiles on DOS with MSC 6.0. The MSC 6.0
+	<li>Platform: now compiles on DOS with MSC 6.0. The MSC 6.0
 	build is functional but limited because it can't allocate blocks
 	larger than 64 kB, which is insufficient for certain images. I
 	can't use <code>halloc()</code> instead of <code>malloc()</code>
 	because it does not supporting resizing (i.e. there's no
 	<code>hrealloc()</code> function).
 
-	<p><li>Platform: in response to Udo's remarks, DJGPP and Cygwin
+	<li>Platform: in response to Udo's remarks, DJGPP and Cygwin
 	are now properly identified (<code>__DJGPP__</code> and
 	<code>__CYGWIN__</code>).
 
-	<p><li>Platform: added sanity checks on specified-size types
+	<li>Platform: added sanity checks on specified-size types
 	<code>Int32</code> and friends.
 
-	</ul>
+    </ul>
 
-<p><dt>DeuTex 4.0.0a3 (AYM 1999-09-05)
-<dd>
-	<ul>
-	<p><li>Code: removed incongruous <code>#define</code>-ing of
+  <dt>DeuTex 4.0.0a3 (AYM 1999-09-05)
+  <dd>
+    <ul>
+	<li>Code: removed incongruous <code>#define</code>-ing of
 	<code>O_BINARY</code> and <code>SEEK_SET</code>.
 
-	<p><li>Code: after Udo Munk's report, fixed warnings in
-	  <ul>
+	<li>Code: after Udo Munk's report, fixed warnings in
+	  <ul class="compact">
 	  <li><code>src/color.c(74)</code>
 	  <li><code>src/ident.c(583)</code>
 	  <li><code>src/ident.c(658)</code>
@@ -491,78 +773,78 @@
 	  <li><code>src/picture.c(912)</code>
 	  </ul>
 
-	<p><li>Doc: updated <code>making.txt</code>.
+	<li>Doc: updated <code>making.txt</code>.
 
-	<p><li>Legal: as agreed to by Olivier Montanuy, DeuTex is now
+	<li>Legal: as agreed to by Olivier Montanuy, DeuTex is now
 	entirely GPL'd. Well, <em>almost</em> entirely, since it
 	includes code written by different authors in <code>lzw.c</code>
 	and elsewhere. Changed the notices in the source files and added
 	new file <code>LICENSE</code> to clarify things.
 
-	<p><li>Makefile: should now work with all C compilers (removed
+	<li>Makefile: should now work with all C compilers (removed
 	<code>-Wall</code> from <code>CFLAGS</code>).
 
-	<p><li>Makefile: <code>clean</code> now removes the DOS
+	<li>Makefile: <code>clean</code> now removes the DOS
 	executables if they exist.
 
-	<p><li>Makefile: does not compile with debug information in by
+	<li>Makefile: does not compile with debug information in by
 	default anymore.
 
-	<p><li>Makefile: new targets <code>dall</code>,
+	<li>Makefile: new targets <code>dall</code>,
 	<code>ddt</code>, <code>dds</code>, <code>ddeutex</code>
 	and <code>ddeusf</code> for compiling with debug
 	information and all warnings.
 
-	<p><li>Makefile: new target <code>help</code>.
+	<li>Makefile: new target <code>help</code>.
 
-	<p><li>Makefile: new target <code>distdos</code>.
+	<li>Makefile: new target <code>distdos</code>.
 
-	<p><li>Platform: replaced <code>unlink()</code> by
+	<li>Platform: replaced <code>unlink()</code> by
 	<code>remove()</code> for portability. Thanks to Udo for
 	reporting this.
 
-	<p><li>Platform: on 8.3 filesystems, make should not choke on
+	<li>Platform: on 8.3 filesystems, make should not choke on
 	<code>docsrc/changes.html</code> anymore. Thanks to Udo for
 	reporting this.
 
-	<p><li>Sound: corrected some misleading endianness
+	<li>Sound: corrected some misleading endianness
 	comments in <code>sound.c</code>.
 
-	</ul>
+    </ul>
 
-<p><dt>DeuTex 4.0.0a2 (AYM 1999-08-14)
-<dd>
-	<ul>
-	<p><li>Game: easier to use with Strife (now looks for
+  <dt>DeuTex 4.0.0a2 (AYM 1999-08-14)
+  <dd>
+    <ul>
+	<li>Game: easier to use with Strife (now looks for
 	"<code>strife1.wad</code>", new option "<code>-strife</code>").
 
-	<p><li>Game: easier to use with Hexen (new option
+	<li>Game: easier to use with Hexen (new option
 	"<code>-hexen</code>").
 
-	<p><li>Command line: new options "<code>-hexen</code>" and
+	<li>Command line: new options "<code>-hexen</code>" and
 	"<code>-strife</code>".
 
-	<p><li>Command line: new option "<code>--version</code>" (prints
+	<li>Command line: new option "<code>--version</code>" (prints
 	version number and returns 0).
 
-	<p><li>Doc: various changes in the man page, in the output of
+	<li>Doc: various changes in the man page, in the output of
 	"<code>-help</code>" and "<code>-man</code>" and elsewhere.
 
-	<p><li>Makefile: various improvements.
+	<li>Makefile: various improvements.
 
-	<p><li>Distribution: set modes straight.
+	<li>Distribution: set modes straight.
 
-	</ul>
+    </ul>
 
-<p><dt>DeuTex 4.0.0a1 (AYM 1999-08-12)
-<dd>
-	<ul>
-	<p><li>General: fixed many segfaults that were caused by
+  <dt>DeuTex 4.0.0a1 (AYM 1999-08-12)
+  <dd>
+    <ul>
+	<li>General: fixed many segfaults that were caused by
 	attempts to <code>fclose (NULL)</code>.
 
-	<p><li>Game: Strife is now supported.
+	<li>Game: Strife is now supported.
 
-	<p><li>Wad: new options <code>-be</code>, <code>-le</code>,
+	<li>Wad: new options <code>-be</code>, <code>-le</code>,
 	<code>-ibe</code>, <code>-ile</code>, <code>-obe</code> and
 	<code>-ole</code> to control the endianness of the wads.
 	<strong>Caution</strong>: don't use them if you don't know what
@@ -572,18 +854,18 @@
 	create a big-endian wad. Those options are here more for the
 	sake of completeness than anything else.
 
-	<p><li>Wad: made "<code>%</code>" legal in names, to deal with
+	<li>Wad: made "<code>%</code>" legal in names, to deal with
 	Strife's "<code>INVFONG%</code>" and
-	"<code>INVFONY%</code>".</p>
+	"<code>INVFONY%</code>".
 
-	<p><li>Wad, graphics: end-of-flats marker is now
+	<li>Wad, graphics: end-of-flats marker is now
 	<code>F_END</code> by default instead of <code>FF_END</code>.
 	The reason for this change is that, with <code>F_END</code>, you
 	don't need DeuSF to get Doom to see your new flats. Should you
 	need to, it's still possible to get <code>FF_END</code> by using
 	<code>-fend</code>.
 
-	<p><li>Graphics: the default transparent colour is now a dark
+	<li>Graphics: the default transparent colour is now a dark
 	blue-green (rgb:00/2f/2f). It used to be cyan (rgb:00/ff/ff)
 	which was blindingly bright, especially compared to the usually
 	dark colours used in Doom textures. It's no fun to tweak shades
@@ -597,61 +879,61 @@
 	transparent colour in WinTex mode&nbsp;; it's still (0, 255,
 	255).
 
-	<p><li>Graphics: fixed segfaults due to bug in conversion of
+	<li>Graphics: fixed segfaults due to bug in conversion of
 	bitmap images to Doom pictures. Occured in certain 2-pixel high
 	images such as <code>STBFN045</code> in the Strife iwad.
 
-	<p><li>Graphics: now supports pictures and textures up to 509
+	<li>Graphics: now supports pictures and textures up to 509
 	high (was limited to 128).
 
-	<p><li>Graphics: now supports pictures and textures up to 1024
+	<li>Graphics: now supports pictures and textures up to 1024
 	wide (was limited to 512).
 
-	<p><li>Graphics: new option "<code>-pf</code>" to deal with the
+	<li>Graphics: new option "<code>-pf</code>" to deal with the
 	different picture format in the Doom alpha iwad (the underlying
-	functionality is not implemented yet !)
+	functionality is not implemented yet&nbsp;!)
 
-	<p><li>Graphics: using <code>-ppm</code> does not cause anymore
+	<li>Graphics: using <code>-ppm</code> does not cause anymore
 	DeuTex to abort with "<code>Bug: *** psvit ***</code>".
 
-	<p><li>Graphics: fixed "<code>-ppm</code>" message.
+	<li>Graphics: fixed "<code>-ppm</code>" message.
 
-	<p><li>Sound, platform: a bug that must have prevented reading
+	<li>Sound, platform: a bug that must have prevented reading
 	<code>.wav</code> files on big endian machines has been
 	squashed.
 
-	<p><li>Command line: options can't start with a slash
+	<li>Command line: options can't start with a slash
 	("<code>/</code>") anymore. I don't think anyone used it and was
 	a silly feature for a Unix program.
 
-	<p><li>Command line: not case insensitive anymore.
+	<li>Command line: not case insensitive anymore.
 	
-	<p><li>Command line: changed the wording of error messages to
+	<li>Command line: changed the wording of error messages to
 	use "option" instead of "command".
 
-	<p><li>Command line: added options "<code>-?</code>" and
+	<li>Command line: added options "<code>-?</code>" and
 	"<code>--help</code>" as synonyms for "<code>-help</code>".
 
-	<p><li>Doc: new option "<code>-man</code>" to print help in
+	<li>Doc: new option "<code>-man</code>" to print help in
 	<code>troff -man</code> source format for inclusion in the man
 	page.
 
-	<p><li>Doc: the version number is now a free-form string.
+	<li>Doc: the version number is now a free-form string.
 
-	<p><li>Doc: Made on-line help more compact.
+	<li>Doc: Made on-line help more compact.
 
-	<p><li>Doc: updated "<code>making.txt</code>".
+	<li>Doc: updated "<code>making.txt</code>".
 
-	<p><li>Doc: made a proper <code>README</code> file.
+	<li>Doc: made a proper <code>README</code> file.
 
-	<p><li>Makefile: renamed "<code>unix</code>" target as
+	<li>Makefile: renamed "<code>unix</code>" target as
 	"<code>strip</code>".
 
-	<p><li>Makefile: new target "<code>install</code>".
+	<li>Makefile: new target "<code>install</code>".
 
-	<p><li>Makefile: new target "<code>dist</code>".
+	<li>Makefile: new target "<code>dist</code>".
 
-	<p><li>Platform: reworked the handling of endianness. DeuTex
+	<li>Platform: reworked the handling of endianness. DeuTex
 	used to deal with that through a set of macros that swapped
 	bytes whenever the required endianness was not the same as the
 	native endianness. To known the native endianness, DeuTex relied
@@ -676,12 +958,12 @@
 	end result is that you don't have to worry about endianness
 	anymore.
 
-	<p><li>Internal: in <code>TXTinit()</code>, removed useless
+	<li>Internal: in <code>TXTinit()</code>, removed useless
 	"<code>% 0xFF</code>" in index of <code>TXTval</code>.
 
-	</ul>
+    </ul>
 
-</dl>
+  </dl>
 
 </body>
 </html>

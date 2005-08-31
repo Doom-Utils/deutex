@@ -23,13 +23,11 @@
 
 
 /*
-This file is part of DeuTex.
+This file is Copyright © 1994-1995 Olivier Montanuy,
+             Copyright © 1999-2005 André Majorel.
 
-DeuTex incorporates code derived from DEU 5.21 that was put in the public
+It may incorporate code derived from DEU 5.21 that was put in the public
 domain in 1994 by Raphaël Quinet and Brendon Wyber.
-
-DeuTex is Copyright © 1994-1995 Olivier Montanuy,
-          Copyright © 1999-2000 André Majorel.
 
 This program is free software; you can redistribute it and/or modify it under
 the terms of the GNU General Public License as published by the Free Software
@@ -40,9 +38,9 @@ This program is distributed in the hope that it will be useful, but WITHOUT
 ANY WARRANTY; without even the implied warranty of MERCHANTABILITY or FITNESS
 FOR A PARTICULAR PURPOSE. See the GNU General Public License for more details.
 
-You should have received a copy of the GNU General Public License along with
-this library; if not, write to the Free Software Foundation, Inc., 59 Temple
-Place, Suite 330, Boston, MA 02111-1307, USA.
+You should have received a copy of the GNU General Public License
+along with this program; if not, write to the Free Software
+Foundation, Inc., 51 Franklin Street, Fifth Floor, Boston, MA  02110-1301, USA
 */
 
 
@@ -50,9 +48,11 @@ Place, Suite 330, Boston, MA 02111-1307, USA.
 #define AUTO_BUG_INSERT                TRUE
 
 #include "deutex.h"
+#include <limits.h>
 #include <stdarg.h>
 #include <ctype.h>
 #include "tools.h"
+#include "log.h"
 #include "mkwad.h"
 #include "merge.h"
 #include "extract.h"
@@ -87,15 +87,25 @@ static Bool WSafe;
 static Bool George;
 #endif /*DeuTex*/
 char trnR,trnG,trnB;
-picture_format_t picture_format        = PF_NORMAL;
-texture_format_t input_texture_format  = TF_NORMAL;
-texture_format_t output_texture_format = TF_NORMAL;
-texture_lump_t   texture_lump          = TL_NORMAL;
-const char *debug_ident    = NULL;
-int old_music_ident_method = 0;
+picture_format_t picture_format         = PF_NORMAL;
+texture_format_t input_texture_format   = TF_NORMAL;
+texture_format_t output_texture_format  = TF_NORMAL;
+texture_lump_t   texture_lump           = TL_NORMAL;
+rate_policy_t    rate_policy            = RP_WARN;
+clobber_t        clobber                = CLOBBER_NO;
+const char      *debug_ident            = NULL;
+int              old_music_ident_method = 0;
+const char      *palette_lump           = "PLAYPAL";
+#if defined DeuTex
+const char      *logfile                = "deutex.log";
+#elif defined DeuSF
+const char      *logfile                = "deusf.log";
+#endif
+
 static char anon[1]        = { '\0' };
 
 typedef void (*comfun_t) (int argc, const char *argv[]);
+static void opt_widths ();
 static int is_prefix (const char *s1, const char *s2);
 static void call_opt (comfun_t func, ...);
 
@@ -131,14 +141,15 @@ void COMwintxn(int argc, const char *argv[])
    WadInfOk=TRUE;
    Select|= atoi(argv[4]);        /*select*/
    num = argv[5];                /*colour*/
-   if(strlen(num)<6) ProgError("Bad Color");
+   if(strlen(num)<6) ProgError("AA24", "Invalid colour \"%.128s\"", num);
    trnR= (((num[0]&0xF)<<4)+(num[1]&0xF))&0xFF;
    trnG= (((num[2]&0xF)<<4)+(num[3]&0xF))&0xFF;
    trnB= (((num[4]&0xF)<<4)+(num[5]&0xF))&0xFF;
-   Info("Transparent colour is R=%d G=%d B=%d\n",
+   Info("AA26", "Transparent colour is R=%d G=%d B=%d",
     ((int)trnR&0xFF),((int)trnG&0xFF),((int)trnB&0xFF));
    (void)argc;
 }
+
 void COMwintxm(int argc, const char *argv[])
 {  PrintInit(TRUE);                /*-out*/
    PrintVerbosity(3);                /*-v3*/
@@ -149,6 +160,7 @@ void COMwintxm(int argc, const char *argv[])
    (void)argc;
 }
 #endif /*DeuTex*/
+
 void COMwintex(int argc, const char *argv[])
 {  PrintInit(TRUE);                /*-out*/
    PrintVerbosity(3);                /*-v3*/
@@ -159,15 +171,20 @@ void COMwintex(int argc, const char *argv[])
    trnR= 0;trnG= 255;trnB= 255;
    (void)argc;
 }
+
 void COMverbose(int argc, const char *argv[])
 {  PrintVerbosity(argv[0][2]-'0');
-   Info("Verbosity level is %c.\n",argv[0][2]);
+   Info("AA10", "Verbosity level is %c",argv[0][2]);
    (void)argc;
+}
+
+void COMlog(int argc, const char *argv[])
+{  logfile = argv[1];
 }
 
 void COMdoom(int argc, const char *argv[])
 {  DoomDir=argv[1];
-   Info("Main directory: %s.\n",DoomDir);
+   Info("AA15", "Main directory: %s",DoomDir);
    (void)argc;
 }
 
@@ -211,7 +228,7 @@ void COMstrife(int argc, const char *argv[])
 void COMmain(int argc, const char *argv[])
 {  DoomDir=NULL;
    strncpy(MainWAD,argv[1],128);
-   Info("Main IWAD file: %s.\n",MainWAD);
+   Info("AA16", "Main IWAD file: %s",MainWAD);
    (void)argc;
 }
 
@@ -263,13 +280,13 @@ void COMrestor(int argc, const char *argv[])
 */
 void COMsprit(int argc, const char *argv[])
 { Select&= ~BFLAT;
-  Info("Select SPRITES\n");
+  Info("AA60", "Select sprites");
   (void)argc;(void)argv;
 }
 
 void COMflat(int argc, const char *argv[])
 { Select&= ~BSPRITE;
-  Info("Select FLATS\n");
+  Info("AA61", "Select flats");
   (void)argc;(void)argv;
 }
 #endif /*DeuSF*/
@@ -280,79 +297,85 @@ void COMflat(int argc, const char *argv[])
 */
 void COMsprit(int argc, const char *argv[])
 { Select|=BSPRITE;
-  Info("Select sprites\n");
+  Info("AA62", "Select sprites");
   (void)argc;(void)argv;
 }
 
 void COMflat(int argc, const char *argv[])
 { Select|=BFLAT;
-  Info("Select flats\n");
+  Info("AA63", "Select flats");
   (void)argc;(void)argv;
 }
 
 void COMlevel(int argc, const char *argv[])
 { Select|=BLEVEL;
-  Info("Select levels\n");
+  Info("AA64", "Select levels");
   (void)argc;(void)argv;
 }
 
 void COMlump(int argc, const char *argv[])
 { Select|=BLUMP;
-  Info("Select lumps\n");
+  Info("AA65", "Select lumps");
   (void)argc;(void)argv;
 }
 
 void COMtextur(int argc, const char *argv[])
 { Select|=BTEXTUR;
-  Info("Select textures\n");
-  (void)argc;(void)argv;
-}
-
-void COMsound(int argc, const char *argv[])
-{ Select|=BSOUND;
-  Info("Select sounds\n");
-  (void)argc;(void)argv;
-}
-
-void COMmusic(int argc, const char *argv[])
-{ Select|=BMUSIC;
-  Info("Select musics\n");
-  (void)argc;(void)argv;
-}
-
-void COMgraphic(int argc, const char *argv[])
-{ Select|=BGRAPHIC;
-  Info("Select graphics\n");
-  (void)argc;(void)argv;
-}
-
-void COMsneas(int argc, const char *argv[])
-{ Select|=BSNEA;
-  Info("Select sneas\n");
-  (void)argc;(void)argv;
-}
-
-void COMsneaps(int argc, const char *argv[])
-{ Select|=BSNEAP;
-  Info("Select sneaps\n");
-  (void)argc;(void)argv;
-}
-
-void COMsneats(int argc, const char *argv[])
-{ Select|=BSNEAT;
-  Info("Select sneats\n");
+  Info("AA66", "Select textures");
   (void)argc;(void)argv;
 }
 
 void COMpatch(int argc, const char *argv[])
 { Select|=BPATCH;
-  Info("Select patches\n");
+  Info("AA67", "Select patches");
+  (void)argc;(void)argv;
+}
+
+void COMsound(int argc, const char *argv[])
+{ Select|=BSOUND;
+  Info("AA68", "Select sounds");
+  (void)argc;(void)argv;
+}
+
+void COMmusic(int argc, const char *argv[])
+{ Select|=BMUSIC;
+  Info("AA69", "Select musics");
+  (void)argc;(void)argv;
+}
+
+void COMgraphic(int argc, const char *argv[])
+{ Select|=BGRAPHIC;
+  Info("AA70", "Select graphics");
+  (void)argc;(void)argv;
+}
+
+void COMsneas(int argc, const char *argv[])
+{ Select|=BSNEA;
+  Info("AA71", "Select sneas");
+  (void)argc;(void)argv;
+}
+
+void COMsneaps(int argc, const char *argv[])
+{ Select|=BSNEAP;
+  Info("AA72", "Select sneaps");
+  (void)argc;(void)argv;
+}
+
+void COMsneats(int argc, const char *argv[])
+{ Select|=BSNEAT;
+  Info("AA73", "Select sneats");
+  (void)argc;(void)argv;
+}
+
+void COMscripts(int argc, const char *argv[])
+{ Select|=BSCRIPT;
+  Info("AA74", "Select scripts");
   (void)argc;(void)argv;
 }
 
 void COMgeorge(int argc, const char *argv[])
 { George=TRUE;
-  Info("Use S_END for sprites.\n");
+  Info("AA32", "Using S_END for sprites");
   (void)argc;(void)argv;
 }
 
@@ -362,97 +385,140 @@ void PicDebug(char *file, const char *DataDir, const char *name);
 
 void COMdebug(int argc, const char *argv[])
 {
-#if 1
 #include "color.h"
   static struct WADINFO iwad;
   Int16 pnm;
   char  *Colors; Int32 Pnamsz=0;
   iwad.ok=0;
   WADRopenR(&iwad,MainWAD);
-  pnm=WADRfindEntry(&iwad,"PLAYPAL");
-  if(pnm<0) ProgError("Can't find PLAYPAL in Main WAD");
+  pnm=WADRfindEntry(&iwad,palette_lump);
+  if(pnm<0)
+    ProgError("GD04", "Can't find %s in Main WAD", lump_name (palette_lump));
   Colors=WADRreadEntry(&iwad,pnm,&Pnamsz);
-  COLinit(trnR,trnG,trnB,Colors,(Int16)Pnamsz);
+  COLinit(trnR,trnG,trnB,Colors,(Int16)Pnamsz, iwad.filename, palette_lump);
   Free(Colors);
   WADRclose(&iwad);
   PicDebug(file,DataDir,(argc<2)? "test":argv[1]);
   COLfree();
-#endif
   (void)argc;(void)argv;
 }
 
 void COMdi (int argc, const char *argv[])
 {
-  Info ("Debugging identification of entry %s\n", lump_name (argv[1]));
+  Info("ID01", "Debugging identification of entry %s", lump_name (argv[1]));
   debug_ident = argv[1];
-  (void) argc;
+  (void)argc;
 }
 
 void COMmusid (int argc, const char *argv[])
 {
-  Info ("Using old music identification method.\n");
+  Info ("AA19", "Using old music identification method");
   old_music_ident_method = 1;
-  (void) argc;
-  (void) argv;
+  (void)argc;
+  (void)argv;
 }
 
 void COMdeu(int argc, const char *argv[])
 { HowMuchJunk=MAXJUNK64;
-  Info("Some junk will be added at end of WAD, for DEU 5.21.\n");
+  Info("AA33",
+      "Will add 64 kB of junk at end of wad for DEU 5.21 compatibility");
   (void)argc;(void)argv;
 }
+
 void COMdir(int argc, const char *argv[])
 { DataDir=argv[1];
-  Info("Files will be saved in directory %s.\n",DataDir);
+  Info("AA22", "Files will be saved in directory %s",DataDir);
   (void)argc;
 }
+
 void COMfullsnd(int argc, const char *argv[])
 { fullSND=TRUE;
-  Info("Saving complete sounds.\n");
+  Info("AA46", "Saving sounds beyond declared length");
   (void)argc;(void)argv;
 }
-void COMstroy(int argc, const char *argv[])
-{ WSafe=FALSE;
-  Info("Overwrite existing files.\n");
-  if(argc)(void)argv;
+
+void COMrate(int argc, const char *argv[])
+{ 
+  if (argc >= 2 && ! strcmp (argv[1], "reject"))
+    rate_policy = RP_REJECT;
+  else if (argc >= 2 && ! strcmp (argv[1], "force"))
+    rate_policy = RP_FORCE;
+  else if (argc >= 2 && ! strcmp (argv[1], "warn"))
+    rate_policy = RP_WARN;
+  else if (argc >= 2 && ! strcmp (argv[1], "accept"))
+    rate_policy = RP_ACCEPT;
+  else
+    ProgError ("AA41", "Usage is \"-rate {reject|force|warn|accept}\"");
+  Info("AA42", "Sample rate policy is \"%s\"", argv[1]);
+  (void)argc; 
 }
-void COMgif(int argc, const char *argv[])
-{ Picture=PICGIF;
-  Info("Saving pictures as GIF (.gif)\n");
-  (void)argc;(void)argv;
+
+void COMstroy (int argc, const char *argv[])
+{
+  WSafe = FALSE;
+  Info ("AA28", "Overwrite existing files");
+  (void) argc;
+  (void) argv;
 }
-void COMbmp(int argc, const char *argv[])
-{ Picture=PICBMP;
-  Info("Saving pictures as BMP (.bmp)\n");
-  (void)argc;(void)argv;
+
+void COMgif (int argc, const char *argv[])
+{
+  Picture = PICGIF;
+  Info ("AA50", "Saving pictures as GIF (.gif)");
+  (void) argc;
+  (void) argv;
 }
-void COMppm(int argc, const char *argv[])
-{ Picture=PICPPM;
-  Info("Saving pictures as rawbits (P6) PPM (.ppm)\n");
-  (void)argc;(void)argv;
+
+void COMbmp (int argc, const char *argv[])
+{
+  Picture = PICBMP;
+  Info ("AA51", "Saving pictures as BMP (.bmp)");
+  (void) argc;
+  (void) argv;
 }
-void COMau(int argc, const char *argv[])
-{ Sound=SNDAU;
-  Info("Save sounds as Sun audio (.au)\n");
-  (void)argc;(void)argv;
+
+void COMppm (int argc, const char *argv[])
+{
+  Picture = PICPPM;
+  Info ("AA52", "Saving pictures as rawbits PPM (P6, .ppm)");
+  (void) argc;
+  (void) argv;
 }
-void COMwave(int argc, const char *argv[])
-{ Sound=SNDWAV;
-  Info("Save sounds as wave (.wav)\n");
-  (void)argc;(void)argv;
+
+void COMau (int argc, const char *argv[])
+{
+  Sound = SNDAU;
+  Info ("AA43", "Save sounds as Sun audio (.au)");
+  (void) argc;
+  (void) argv;
 }
-void COMvoc(int argc, const char *argv[])
-{ Sound=SNDVOC;
-  Info("Save sounds as voc (.voc)\n");
-  (void)argc;(void)argv;
+
+void COMwave (int argc, const char *argv[])
+{
+  Sound = SNDWAV;
+  Info ("AA45", "Save sounds as WAVE (.wav)");
+  (void) argc;
+  (void) argv;
 }
-void COMrgb(int argc, const char *argv[])
-{ trnR=(char)(atoi(argv[1])&0xFF);
-  trnG=(char)(atoi(argv[2])&0xFF);
-  trnB=(char)(atoi(argv[3])&0xFF);
-  Info("Transparent colour is R=%d G=%d B=%d\n",
-  ((int)trnR&0xFF),((int)trnG&0xFF),((int)trnB&0xFF));
-  (void)argc;
+
+void COMvoc (int argc, const char *argv[])
+{
+  Sound = SNDVOC;
+  Info ("AA44", "Save sounds as voc (.voc)");
+  (void) argc;
+  (void) argv;
+}
+
+void COMrgb (int argc, const char *argv[])
+{
+  trnR = (char) (atoi (argv[1]) & 0xFF);
+  trnG = (char) (atoi (argv[2]) & 0xFF);
+  trnB = (char) (atoi (argv[3]) & 0xFF);
+  Info ("AA21", "Transparent colour is R=%d G=%d B=%d",
+    ((int) trnR & 0xFF),
+    ((int) trnG & 0xFF),
+    ((int) trnB & 0xFF));
+  (void) argc;
 }
 
 void COMle (int argc, const char *argv[])
@@ -503,13 +569,15 @@ void COMipf (int argc, const char *argv[])
 {
   if (argc >= 2 && ! strcmp (argv[1], "alpha"))
     picture_format = PF_ALPHA;
-  else if (argc >= 2 && ! strcmp (argv[1], "pr"))
-    picture_format = PF_PR;
   else if (argc >= 2 && ! strcmp (argv[1], "normal"))
     picture_format = PF_NORMAL;
+  else if (argc >= 2 && ! strcmp (argv[1], "pr"))
+    picture_format = PF_PR;
+  else if (argc >= 2 && ! strcmp (argv[1], "rott"))
+    picture_format = PF_ROTT;
   else
-    ProgError ("Usage is \"-ipf {alpha|pr|normal}\"");
-  Info ("Input picture format is \"%s\"\n", argv[1]);
+    ProgError ("PI01", "Usage is \"-ipf {alpha|normal|pr|rott}\"");
+  Info ("PI02", "Input picture format is \"%s\"", argv[1]);
 }
 #endif  /* #ifdef DeuTex */
 
@@ -528,7 +596,7 @@ void COMtf (int argc, const char *argv[])
     set_out = 1;
   }
   else
-    Bug ("COMtf: bad argv[0] \"%.32s\"", argv[0]);
+    Bug ("AA90", "Invalid argv[0] \"%.32s\"", argv[0]);
 
   if (argc >= 2 && ! strcmp (argv[1], "nameless"))
   {
@@ -559,11 +627,12 @@ void COMtf (int argc, const char *argv[])
       output_texture_format = TF_STRIFE11;
   }
   else
-    ProgError ("Usage is \"-%.32s {nameless|none|normal|strife11}\"", argv[0]);
+    ProgError ("TX04", "Usage is \"-%.32s {nameless|none|normal|strife11}\"",
+	argv[0]);
   if (set_in)
-    Info ("Input texture format is \"%s\"\n", argv[1]);
+    Info ("TX05", "Input texture format is \"%s\"", argv[1]);
   if (set_out)
-    Info ("Output texture format is \"%s\"\n", argv[1]);
+    Info ("TX06", "Output texture format is \"%s\"", argv[1]);
 }
 
 #ifdef DeuTex
@@ -576,8 +645,8 @@ void COMitl (int argc, const char *argv[])
   else if (argc >= 2 && ! strcmp (argv[1], "normal"))
     texture_lump = TL_NORMAL;
   else
-    ProgError ("Usage is \"-itl {none|textures|normal}\"");
-  Info ("Input texture lump is \"%s\"\n", argv[1]);
+    ProgError ("TX01", "Usage is \"-itl {none|textures|normal}\"");
+  Info ("TX02", "Input texture lump is \"%s\"", argv[1]);
 }
 
 /*
@@ -586,7 +655,7 @@ void COMitl (int argc, const char *argv[])
 */
 void COMiwad(int argc, const char *argv[])
 { Type=IWAD;
-  Info("Build an IWAD file.\n");
+  Info("AA31", "Building an iwad");
   (void)argc;(void)argv;
 }
 /*
@@ -630,7 +699,7 @@ void COMpackGfx(int argc, const char *argv[])
 
 void COMvoid(int argc, const char *argv[])
 {  XTRvoidSpacesInWAD(argv[1]);
-	(void)argc;
+   (void)argc;
 }
 
 void COMusedtex(int argc, const char *argv[])
@@ -668,151 +737,225 @@ void COMcheck(int argc, const char *argv[])
 }
 
 
-typedef char COMTYPE;
-#define END  1
-#define NIL  2
-#define OPT  3
-#define CMD  4
+enum
+{
+  OC_MASK = 0xc0,
+  OC_SEC  = 0x00,
+  OC_OPT  = 0x40,
+  OC_MOD  = 0x80,
+  OC_END  = 0xc0,
+};
+
+#define PASS(comtype) ((comtype) & 0x1f)
+
+typedef unsigned char COMTYPE;
+#define SEC OC_SEC		/* Section (used by --help/-man)	*/
+#define CM0 OC_MOD + 0		/* Modal (no banner, no log, no iwad)	*/
+				/* -------- Banner is printed --------	*/
+#define CM1 OC_MOD + 1		/* Modal (banner, no log, no iwad)	*/
+#define OP1 OC_OPT + 2		/* Opt (-log)				*/
+				/* -------- Log file is opened --------	*/
+#define OP2 OC_OPT + 3		/* Opt (banner, log)			*/
+#define CM3 OC_MOD + 0x04	/* Modal (banner, log, no iwad)		*/
+#define CM4 OC_MOD + 0x24	/* Modal (banner, log, iwad required)	*/
+#define END OC_END
+
 typedef struct
 { COMTYPE type;
-       char argc;
-	  char *com;
+      char argc;
+	char *com;
 	            comfun_t exec;
-			         char *use;
-				         char *help;
+				char *use;
+							char *help;
 } comdef_t;
+
+/* FIXME should be at the top of the file but we need comdef_t */
+static const comdef_t *parse_argv (int *argc, const char ***argv, int pass);
 
 static comdef_t Com[]=
 {
- {NIL,0,"?",        COMhelp,   NULL,   "print list of options"},
- {NIL,0,"h",        COMhelp,   NULL,   NULL},
- {NIL,0,"help",     COMhelp,   NULL,   NULL},
- {NIL,0,"-help",    COMhelp,   NULL,   NULL},
+ {SEC,0,NULL,       NULL,	NULL,			"Modal options not requiring an iwad"},
+ {CM1,0,"?",        COMhelp,	NULL,			"same as \1--help\3"},
+ {CM1,0,"h",        COMhelp,	NULL,			"same as \1--help\3"},
+ {CM1,0,"help",     COMhelp,	NULL,			"same as \1--help\3"},
+ {CM1,0,"-help",    COMhelp,	NULL,			"print list of options"},
 #ifdef DeuTex
- {NIL,0,"man",      COMmanopt, NULL,   "print list of options in troff -man format"},
+ {CM0,0,"man",      COMmanopt,	NULL,			"print list of options in troff -man format"},
 #endif
- {NIL,0,"-version", COMvers,   NULL,   "print version number and exit successfully"},
- {NIL,0,"syntax",   COMformat, NULL,   "print the syntax of wad creation directives"},
-#if defined DeuTex
- {OPT,5,"win",      COMwintxn, "<doom> <data> <info> <select> <colour>","WinTex shortcut"},
- {OPT,2,"wim",      COMwintxm, "<doom> <select>","WinTex shortcut"},
- {CMD,0,"debug",    COMdebug,  NULL,   "Debug mode"},
- {OPT,1,"di",       COMdi,     "<name>", "Debug identification of entry"},
- {OPT,0,"musid",    COMmusid,  NULL,   "use old music identification method"},
- {OPT,0,"overwrite",COMstroy,  NULL,   "overwrite all"},
+ {CM0,0,"syntax",   COMformat,	NULL,			"print the syntax of wad creation directives"},
+#ifdef DeuTex
+ {CM3,1,"unused",   COMvoid,	"<in.wad>",		"find unused spaces in a wad"},
 #endif /*DeuTex*/
- {OPT,1,"wtx",      COMwintex, "<iwad>","WinTex shortcut"},
- {OPT,1,"doom",     COMdoom,   "<dir>","indicate the directory of Doom"},
- {OPT,1,"doom2",    COMdoom,   "<dir>","indicate the directory of Doom II"},
+ {CM0,0,"-version", COMvers,	NULL,			"print version number and exit successfully"},
+
+ {SEC,0,NULL, NULL, NULL, "Modal options requiring an iwad"},
+ {CM4,2,"add",      COMadd,	"<in.wad> <out.wad>",	"copy sp & fl of iwad and \2in.wad\3 to \2out.wad\3"},
+ {CM4,1,"af",       COMappf,	"<flats.wad>",		"append all floors/ceilings to the wad"},
+ {CM4,1,"append",   COMapp,	"<io.wad>",		"add sprites & flats of iwad to \2io.wad\3"},
+ {CM4,1,"as",       COMapps,	"<sprite.wad>",		"append all sprites to the wad"},
 #ifdef DeuTex
- {OPT,1,"doom02",   COMdoom02, "<dir>","indicate the directory of Doom alpha 0.2"},
- {OPT,1,"doom04",   COMdoom04, "<dir>","indicate the directory of Doom alpha 0.4"},
- {OPT,1,"doom05",   COMdoom05, "<dir>","indicate the directory of Doom alpha 0.5"},
- {OPT,1,"doompr",   COMdoompr, "<dir>","indicate the directory of Doom PR pre-beta"},
+ {CM4,1,"build",    COMmake,	"[<in.txt>] <out.wad>",	"make a pwad"},
 #endif
- {OPT,1,"heretic",  COMdoom,   "<dir>","indicate the directory of Heretic"},
- {OPT,1,"hexen",    COMdoom,   "<dir>","indicate the directory of Hexen"},
- {OPT,1,"strife",   COMstrife, "<dir>","indicate the directory of Strife"},
- {OPT,1,"strife10", COMdoom,   "<dir>","indicate the directory of Strife 1.0"},
-#if defined DeuTex
- {OPT,1,"dir",      COMdir,    "<dir>","indicate the working directory"},
- {OPT,0,"deu",      COMdeu,    NULL,   "add 64k of junk to workaround a bug of DEU 5.21"},
+ {CM4,1,"check",    COMcheck,	"<in.wad>",		"check the textures"},
+#ifdef DeuTex
+ {CM4,1,"create",   COMmake,	"[<in.txt>] <out.wad>",	"same as \1-build\3"},
+ {CM4,0,"debug",    COMdebug,	"[<file>]",		"debug colour conversion"},
+ {CM4,0,"extract",  COMxtra,	"[<in.wad> [<out.txt>]]","same as \1-xtract\3"},
+ {CM4,1,"get",      COMget,	"<entry> [<in.wad>]",	"get a wad entry from main wad or \2in.wad\3"},
+#endif
+ {CM4,2,"join",     COMjoin,	"<incomplete.wad> <in.wad>","append sprites & flats of Doom to a pwad"},
+#ifdef DeuTex
+ {CM4,1,"make",     COMmake,	"[<in.txt>] <out.wad>",	"same as \1-build\3"},
+#endif
+ {CM4,1,"merge",    COMmerge,	"<in.wad>",		"merge doom.wad and a pwad"},
+#ifdef DeuTex
+ {CM4,1,"pkgfx",    COMpackGfx,	"[<in.wad> [<out.txt>]]","detect identical graphics"},
+ {CM4,1,"pknormal", COMpackNorm,"[<in.wad> [<out.txt>]]","detect identical normal"},
+#endif
+ {CM4,0,"restore",  COMrestor,	NULL,			"restore doom.wad and the pwad"},
+ {CM4,1,"test",     COMcheck,	"<in.wad>",		"same as \1-check\3"},
+#ifdef DeuTex
+ {CM4,0,"usedidx",  COMusedidx,	"[<in.wad>]",		"colour index usage statistics"},
+ {CM4,0,"usedtex",  COMusedtex,	"[<in.wad>]",		"list textures used in all levels"},
+#endif /*DeuTex*/
+ {CM4,0,"wadir",    COMwadir,	"[<in.wad>]",		"list and identify entries in a wad"},
+#ifdef DeuTex
+ {CM4,0,"xtract",   COMxtra,	"[<in.wad> [<out.txt>]]","extract some/all entries from a wad"},
+#endif /*DeuTex*/
 
- {OPT,3,"rgb",      COMrgb,    "<r> <g> <b>","specify the transparent colour (default 0/47/47)"},
- {OPT,0,"gif",      COMgif,    NULL,   "save pictures as GIF (.gif)"},
- {OPT,0,"bmp",      COMbmp,    NULL,   "save pictures as BMP (.bmp)"},
- {OPT,0,"ppm",      COMppm,    NULL,   "save pictures as rawbits (P6) PPM (.ppm)"},
- {OPT,0,"au",       COMau,     NULL,   "save sound as Sun audio (.au)"},
- {OPT,0,"wav",      COMwave,   NULL,   "save sound as wave (.wav)"},
- {OPT,0,"voc",      COMvoc,    NULL,   "save sound as voc (.voc)"},
- {OPT,0,"fullsnd",  COMfullsnd,NULL,   "save sound lumps beyond declared length"},
+ {SEC,0,NULL,       NULL,	NULL,		"General options"},
+#ifdef DeuTex
+ {OP2,0,"overwrite",COMstroy,	NULL,		"overwrite all"},
+#endif
+#ifdef DeuTex
+ {OP2,1,"dir",      COMdir,	"<dir>",	"extraction directory (default \1.\3)"},
+#endif
 
- {OPT,0,"levels",   COMlevel,  NULL,   "select levels"},
- {OPT,0,"lumps",    COMlump ,  NULL,   "select lumps"},
- {OPT,0,"sounds",   COMsound,  NULL,   "select sounds"},
- {OPT,0,"musics",   COMmusic,  NULL,   "select musics"},
- {OPT,0,"textures", COMtextur, NULL,   "select textures"},
- {OPT,0,"graphics", COMgraphic,NULL,   "select graphics"},
- {OPT,0,"sneas",    COMsneas,  NULL,   "select sneas (sneaps and sneats)"},
- {OPT,0,"sneaps",   COMsneaps, NULL,   "select sneaps"},
- {OPT,0,"sneats",   COMsneats, NULL,   "select sneats"},
+ {SEC,0,NULL,       NULL,	NULL,		"Iwad"},
+ {OP2,1,"doom",     COMdoom,	"<dir>",	"path to Doom iwad"},
+ {OP2,1,"doom2",    COMdoom,	"<dir>",	"path to Doom II iwad"},
+#ifdef DeuTex
+ {OP2,1,"doom02",   COMdoom02,	"<dir>",	"path to Doom alpha 0.2 iwad"},
+ {OP2,1,"doom04",   COMdoom04,	"<dir>",	"path to Doom alpha 0.4 iwad"},
+ {OP2,1,"doom05",   COMdoom05,	"<dir>",	"path to Doom alpha 0.5 iwad"},
+ {OP2,1,"doompr",   COMdoompr,	"<dir>",	"path to Doom PR pre-beta iwad"},
+#endif
+ {OP2,1,"heretic",  COMdoom,	"<dir>",	"path to Heretic iwad"},
+ {OP2,1,"hexen",    COMdoom,	"<dir>",	"path to Hexen iwad"},
+#ifdef DeuSF
+ {OP2,1,"main",     COMmain,	NULL,		"pathname of iwad"},
+#endif
+ {OP2,1,"strife",   COMstrife,	"<dir>",	"path to Strife iwad"},
+ {OP2,1,"strife10", COMdoom,	"<dir>",	"path to Strife 1.0 iwad"},
+
+#ifdef DeuTex
+ {SEC,0,NULL,       NULL,	NULL,		"Wad options"},
+ {OP2,0,"be",       COMbe,	NULL,		"assume all wads are big endian (default LE)"},
+ {OP2,0,"deu",      COMdeu,	NULL,		"add 64k of junk for DEU 5.21 compatibility"},
+ {OP2,0,"george",   COMgeorge,	NULL,		"same as \1-s_end\3"},
+ {OP2,0,"ibe",      COMibe,	NULL,		"input wads are big endian (default LE)"},
+ {OP2,0,"ile",      COMile,	NULL,		"input wads are little endian (default)"},
+ {OP2,1,"ipf",      COMipf,	"<code>",	"picture format (\1alpha\3, *\1normal\3, \1pr\3, \1rott\3)"},
+ {OP2,1,"itf",      COMtf,	"<code>",	"input texture format (\1nameless\3, \1none\3, *\1normal\3, \1strife11\3)"},
+ {OP2,1,"itl",      COMitl,	"<code>",	"texture lump (\1none\3, *\1normal\3, \1textures\3)"},
+ {OP2,0,"iwad",     COMiwad,	NULL,		"compose iwad, not pwad"},
+ {OP2,0,"le",       COMle,	NULL,		"assume all wads are little endian (default)"},
+ {OP2,0,"musid",    COMmusid,	NULL,		"use old music identification method"},
+ {OP2,0,"obe",      COMobe,	NULL,		"create big endian wads (default LE)"},
+ {OP2,0,"ole",      COMole,	NULL,		"create little endian wads (default)"},
+ {OP2,1,"otf",      COMtf,	"<code>",	"output texture format (\1nameless\3, \1none\3, *\1normal\3, \1strife11\3)"},
  /*by request from George Hamlin*/
- {OPT,0,"s_end",    COMgeorge, NULL,   "use S_END for sprites, not SS_END"},
- {OPT,0,"george",   COMgeorge, NULL,   NULL},
-#endif /*DeuTex*/
- {OPT,0,"sprites",  COMsprit,  NULL,   "select sprites"},
-#if defined DeuTex
- {OPT,0,"patches",  COMpatch,  NULL,   "select patches"},
-#endif /*DeuTex*/
- {OPT,0,"flats",    COMflat,   NULL,   "select flats"},
- {OPT,0,"v0",       COMverbose,NULL,   "set verbosity level to 0"},
- {OPT,0,"v1",       COMverbose,NULL,   "set verbosity level to 1"},
- {OPT,0,"v2",       COMverbose,NULL,   "set verbosity level to 2 (default)"},
- {OPT,0,"v3",       COMverbose,NULL,   "set verbosity level to 3"},
- {OPT,0,"v4",       COMverbose,NULL,   "set verbosity level to 4"},
- {OPT,0,"v5",       COMverbose,NULL,   "set verbosity level to 5"},
-#if defined DeuTex
- {OPT,0,"be",       COMbe,     NULL,   "assume all wads are big endian (default LE)"},
- {OPT,0,"le",       COMle,     NULL,   "assume all wads are little endian (default)"},
- {OPT,0,"ibe",      COMibe,    NULL,   "input wads are big endian (default LE)"},
- {OPT,0,"ile",      COMile,    NULL,   "input wads are little endian (default)"},
- {OPT,0,"obe",      COMobe,    NULL,   "create big endian wads (default LE)"},
- {OPT,0,"ole",      COMole,    NULL,   "create little endian wads (default)"},
- {OPT,1,"ipf",      COMipf,    "{alpha|normal|pr}", "picture format (default is \"normal\")"},
- {OPT,1,"tf",       COMtf,     "{nameless|none|normalstrife11}", "texture format (default is \"normal\")"},
- {OPT,1,"itf",      COMtf,     "{nameless|none|normalstrife11}", "input texture format (default is \"normal\")"},
- {OPT,1,"otf",      COMtf,     "{nameless|none|normalstrife11}", "output texture format (default is \"normal\")"},
- {OPT,1,"itl",      COMitl,    "{none|normal|textures}", "texture lump (default is \"normal\")"},
-#endif /* DeuTex */
-
-#if defined DeuTex
- {OPT,0,"iwad",     COMiwad,   NULL,   "compose iwad, not pwad"},
-
- {CMD,1,"make",     COMmake,   "[<dirctivs.txt>] <out.wad>","make a pwad, from the creation directives"},
- {CMD,1,"build",    COMmake,   "[<dirctivs.txt>] <out.wad>",NULL},
- {CMD,1,"create",   COMmake,   "[<dirctivs.txt>] <out.wad>",NULL},
+ {OP2,0,"s_end",    COMgeorge,	NULL,		"use \1S_END\3 for sprites, not \1SS_END\3"},
+ {OP2,1,"tf",       COMtf,	"<code>",	"texture format (\1nameless\3, \1none\3, *\1normal\3, \1strife11\3)"},
 #endif /*DeuTex*/
 
-#if defined DeuSF
- {OPT,1,"main",     COMmain,   NULL,   "Indicate main wad"},
+ {SEC,0,NULL,       NULL,	NULL,		"Lump selection"},
+ {OP2,0,"flats",    COMflat,	NULL,		"select flats"},
+#ifdef DeuTex
+ {OP2,0,"graphics", COMgraphic,	NULL,		"select graphics"},
+ {OP2,0,"levels",   COMlevel,	NULL,		"select levels"},
+ {OP2,0,"lumps",    COMlump,	NULL,		"select lumps"},
+ {OP2,0,"musics",   COMmusic,	NULL,		"select musics"},
+ {OP2,0,"patches",  COMpatch,	NULL,		"select patches"},
+ {OP2,0,"scripts",  COMscripts,	NULL,		"select Strife scripts"},
+ {OP2,0,"sneas",    COMsneas,	NULL,		"select sneas (sneaps and sneats)"},
+ {OP2,0,"sneaps",   COMsneaps,	NULL,		"select sneaps"},
+ {OP2,0,"sneats",   COMsneats,	NULL,		"select sneats"},
+ {OP2,0,"sounds",   COMsound,	NULL,		"select sounds"},
+#endif /*DeuTex*/
+ {OP2,0,"sprites",  COMsprit,	NULL,		"select sprites"},
+#ifdef DeuTex
+ {OP2,0,"textures", COMtextur,	NULL,		"select textures"},
+#endif /*DeuTex*/
+
+#ifdef DeuTex
+ {SEC,0,NULL,       NULL,	NULL,		"Graphics"},
+ {OP2,0,"bmp",      COMbmp,	NULL,		"save pictures as BMP (\1.bmp\3)"},
+ {OP2,0,"gif",      COMgif,	NULL,		"save pictures as GIF (\1.gif\3)"},
+ {OP2,0,"ppm",      COMppm,	NULL,		"save pictures as rawbits PPM (P6, \1.ppm\3)"},
+ {OP2,3,"rgb",      COMrgb,	"<r> <g> <b>",	"specify the transparent colour (default 0 47 47)"},
 #endif
- {CMD,0,"wadir",    COMwadir,  "<in.wad>","list and identify entries in a wad"},
- {CMD,1,"check",    COMcheck,  "<in.wad>","check the textures"},
- {CMD,1,"test",     COMcheck,  "<in.wad>",NULL},
-#if defined DeuTex
- {CMD,0,"usedtex",  COMusedtex,"[<in.wad>]","list textures used in all levels"},
- {CMD,0,"usedidx",  COMusedidx,"[<in.wad>]","colour index usage statistics"},
- {NIL,1,"unused",   COMvoid,   "<in.wad>","find unused spaces in a wad"},
- {CMD,0,"xtract",   COMxtra,   "[<in.wad> [<dirctivs.txt>]]","extract some/all entries from a wad"},
- {CMD,0,"extract",  COMxtra,   "[<in.wad> [<dirctivs.txt>]]",NULL},
- {CMD,1,"get",      COMget,    "<entry> [<in.wad>]","get a wad entry from main wad or in.wad"},
- {CMD,1,"pknormal", COMpackNorm,"[<in.wad> [<out.txt>]]","Detect identical normal"},
- {CMD,1,"pkgfx",    COMpackGfx,"[<in.wad> [<out.txt>]]","Detect identical graphics"},
-#endif /*DeuTex*/
 
- {CMD,2,"add",      COMadd,    "<incomplete.wad> <out.wad>","add sprites & flats of a pwad to those of Doom"},
- {CMD,1,"append",   COMapp,    "<incomplete.wad>","append sprites & flats of Doom to a pwad"},
- {CMD,2,"join",     COMjoin,   "<incomplete.wad> <in.wad>","append sprites & flats of Doom to a pwad"},
- {CMD,1,"merge",    COMmerge,  "<in.wad>","merge doom.wad and a pwad"},
- {CMD,0,"restore",  COMrestor, NULL,   "restore doom.wad and the pwad"},
- {CMD,1,"as",       COMapps,   "<sprite.wad>","append all sprites to the wad"},
- {CMD,1,"af",       COMappf,   "<flats.wad>","append all floors/ceilings to the wad"},
- {END,0,"",         COMhelp,   NULL,   ""}
+#ifdef DeuTex
+ {SEC,0,NULL,       NULL,	NULL,		"Sound"},
+ {OP2,0,"au",       COMau,	NULL,		"save sounds as Sun audio (\1.au\3)"},
+ {OP2,0,"fullsnd",  COMfullsnd,	NULL,		"save sounds beyond declared length"},
+ {OP2,1,"rate",     COMrate,	"<code>",	"policy for != 11025 Hz (\1reject\3, \1force\3, *\1warn\3, \1accept\3)"},
+ {OP2,0,"voc",      COMvoc,	NULL,		"save sounds as voc (\1.voc\3)"},
+ {OP2,0,"wav",      COMwave,	NULL,		"save sounds as WAVE (\1.wav\3)"},
+#endif
+
+ {SEC,0,NULL,       NULL,	NULL,		"Reporting"},
+#ifdef DeuTex
+ {OP2,1,"di",       COMdi,	"<name>",	"debug identification of entry"},
+ {OP1,1,"log",      COMlog,	"<file>",	"name of log file (default \1deutex.log\3)"},
+#elif defined DeuSF
+ {OP1,1,"log",      COMlog,	"<file>",	"name of log file (default \1deusf.log\3)"},
+#endif
+ {OP2,0,"v0",       COMverbose,	NULL,		"set verbosity level to 0"},
+ {OP2,0,"v1",       COMverbose,	NULL,		"set verbosity level to 1"},
+ {OP2,0,"v2",       COMverbose,	NULL,		"set verbosity level to 2 (default)"},
+ {OP2,0,"v3",       COMverbose,	NULL,		"set verbosity level to 3"},
+ {OP2,0,"v4",       COMverbose,	NULL,		"set verbosity level to 4"},
+ {OP2,0,"v5",       COMverbose,	NULL,		"set verbosity level to 5"},
+
+ {SEC,0,NULL,       NULL,	NULL,		"WinTex-related options"},
+#ifdef DeuTex
+ {OP2,5,"win",      COMwintxn,	"<doom> <data> <info> <select> <colour>", "WinTex shortcut"},
+ {OP2,2,"wim",      COMwintxm,	"<doom> <select>",	"WinTex shortcut"},
+#endif /*DeuTex*/
+ {OP2,1,"wtx",      COMwintex,	"<iwad>",		"WinTex shortcut"},
+
+ {END,0,"",         COMhelp,	NULL,		""}
 };
 
-int main( int argc, const char *argv[])
-{  FILE *fp;
-
-   /* Options for which you don't want the banners */
-   if (argc == 2 && ! strcmp (argv[1], "--version"))
-     COMvers (argc, argv);
-#ifdef DeuTex
-   if (argc == 2 && ! strcmp (argv[1], "-man"))  /* Sorry for the ugliness */
+int main (int argc, char *argv_non_const[])
+{
+   /* Create argv[] identical to argv_[] but of type (const char **). We
+      do this to avoid the warnings about initialising a (const char **)
+      with a (char **). */
+   const char **argv = malloc (argc * sizeof *argv);
+   if (argv == NULL)
+     ProgError ("MM69", "Out of memory (%d)", argc);
    {
-     COMmanopt (argc, argv);
-     return 0;
+     size_t n;
+
+     for (n = 0; n < argc; n++)
+       argv[n] = argv_non_const[n];
    }
-#endif
+
+   /* Do a first pass through argv to process the options where you
+      don't want the banners (-version, -man) */
+   {
+     int c = argc - 1;
+     const char **v = argv + 1;
+     const comdef_t *d = parse_argv (&c, &v, 0);
+     if (d != NULL)
+     {
+       d->exec (c, v);
+       exit (0);
+     }
+   }
 
 #ifdef DT_ALPHA
    printf (
@@ -830,14 +973,6 @@ int main( int argc, const char *argv[])
      "\t|  INTENDED FOR PUBLIC CONSUMPTION.  |\n"
      "\t|     DO NOT FURTHER DISTRIBUTE.     |\n"
      "\t+------------------------------------+\n\n");
-#endif
-#if 0
-   printf (
-     "+---------------------------------------------------+\n"
-     "|  Send questions and bug reports to the current    |\n"
-     "|  maintainer, André Majorel <amajorel@teaser.fr>,  |\n"
-     "|  NOT to Olivier Montanuy !                        |\n"
-     "+---------------------------------------------------+\n\n");
 #endif
 
    /* Sanity checks */
@@ -881,155 +1016,313 @@ int main( int argc, const char *argv[])
    */
    PrintInit(FALSE);
    PrintVerbosity(2);
-   /*
-   ** copyright notice
-   */
-   PrintCopyright();
-   /*
-   ** directories
-   */
-   DataDir     = ".";  /*work directory*/
-   DoomDir    = getenv("DOOMWADDIR");
-   if(DoomDir == NULL)
-     DoomDir    = ".";
-   else
-     Phase("Doom directory is %.128s\n",DoomDir);
-   /*
-   ** Command line
-   */
-   argc--;argv++;
-   if(argc>30) ProgError("too many arguments");
 
-   /* Parse the command line from left to right.
-      Try to match the each argument against the
-      longest possible option defined. */
-   while(argc>0)
-   { const comdef_t *d = Com + sizeof Com / sizeof *Com - 1;
-     const char *arg = *argv;
-     if (*arg != '-')
-        ProgError("Argument \"%s\": expected an option", arg);
-     arg++;
-
+   /* Do a second pass through argv to catch options like --help that
+      shouldn't cause the creation of a log file. */
+   {
+     int c = argc - 1;
+     const char **v = argv + 1;
+     const comdef_t *d = parse_argv (&c, &v, 1);
+     if (d != NULL)
      {
-       const comdef_t *w;
-       for (w = Com; w->type != END; w++)
+       d->exec (c, v);
+       exit (0);
+     }
+   }
+
+   /* At this point, we have either (1) no modal option or (2) a modal
+      option which requires writing to log. Make a third pass through
+      argv to find out. */
+   {
+     int c = argc - 1;
+     const char **v = argv + 1;
+     const comdef_t *d = parse_argv (&c, &v, 4);
+     if (d == NULL)
+       ProgError ("AA96", "No command given");
+
+     /* We now know we need to create a log. Do a pass through argv to
+        catch -log. */
+     {
+       int c = argc - 1;
+       const char **v = argv + 1;
+       parse_argv (&c, &v, 2);
+     }
+
+     /* Create the log file. From now on, all calls to Detail, Phase,
+	Info, Warning, nf_err, ProgError and Bug will update the log.
+	FIXME Output() will too and I'm not sure that's right. */
+     lopen ();
+
+     /* Write the header of the log file. */
+     /* FIXME use Info */
+     lprintf ("%c AA00 %s %s\n", MSGCLASS_INFO, DEUTEXNAME, deutex_version);
+     {
+       int n;
+       for (n = 1; n < argc; n++)
+	 /* FIXME use Info() */
+	 lprintf ("%c AA05 argv[%d] \"%s\"\n", MSGCLASS_INFO, n, argv[n]);
+     }
+
+     /* Default iwad directory */
+     DataDir = ".";
+     DoomDir = getenv ("DOOMWADDIR");
+     if (DoomDir == NULL)
+       DoomDir = ".";
+     else
+       Phase ("AA17", "Doom directory is %.128s", DoomDir);
+
+     /* Honour the non-modal options */
+     {
+       int c = argc - 1;
+       const char **v = argv + 1;
+       parse_argv (&c, &v, 3);
+     }
+
+     /* If the modal option requires an iwad, find it. */
+     if (d->type & 0x20)
+     {
+       static const char *wads[] =
        {
-	 if (is_prefix (arg, w->com))
+	 "doom",		/* Doom, Ultimate Doom, Doom alpha */
+	 "doom2",		/* Doom II */
+	 "plutonia",		/* Final Doom */
+	 "tnt",			/* Final Doom */
+	 "heretic",		/* Heretic */
+	 "hexen",		/* Hexen */
+	 "strife1",		/* Strife */
+	 "doompres",		/* Doom Press Release pre-beta */
+	 "doom1",		/* Doom shareware */
+	 "heretic1",		/* Heretic demo */
+	 "strife0",		/* Strife demo */
+	 NULL
+       };
+       int gotit = 0;
+       const char **w;
+       for (w = wads; *w != NULL; w++)
+       {
+	 if (MakeFileName (MainWAD, ".", "", "", *w, "wad") == TRUE)
 	 {
-	   if (! strcmp (arg, w->com))  /* Exact match. */
-	   {
-	     d = w;
-	     goto got_it;
-	   }
-	   if (d->type != END)  /* Ambiguous partial match. */
-	     ProgError ("\"-%s\" is ambiguous (-%s, -%s)", arg, d->com, w->com);
-           /* Unambiguous partial match. */
-	   d = w;
+	   gotit = 1;
+	   break;
 	 }
        }
-     }
-got_it:
-
-     if (argc - 1 < d->argc)
-       ProgError("Usage: %s%s%s",
-	   d->com,
-	   d->use ? " "    : "",
-	   d->use ? d->use : "");
-     switch(d->type)
-     { case END:
-         ProgError("Option %s is not defined.",argv[0]);
-         PrintExit();
-         return 0;
-       case NIL:
-         d->exec(argc,argv);
-         PrintExit();
-         return 0;
-       case OPT:
-         d->exec(argc,argv);
-         break;
-       case CMD:
-         /*find DOOM,HERETIC*/
-         if(DoomDir==NULL)
-         { /*
-           ** check if file exists
-           */
-           fp=fopen(MainWAD,FOPEN_RB);
-	   if(fp!=NULL)
-             fclose(fp);  /* AYM 1999-01-13 once again, the code assumed
-			     that calling fclose with a NULL pointer is
-			     a normal thing to do. */
-           if(fp==NULL) DoomDir=".";
-         }
-         if(DoomDir!=NULL)
-         { /*
-           ** look for main wad
-           */
-           if(    MakeFileName(MainWAD,DoomDir,"","","doompres","wad")!=TRUE
-	       && MakeFileName(MainWAD,DoomDir,"","","doom",    "wad")!=TRUE
-	       && MakeFileName(MainWAD,DoomDir,"","","doom2",   "wad")!=TRUE
-               && MakeFileName(MainWAD,DoomDir,"","","heretic", "wad")!=TRUE
-               && MakeFileName(MainWAD,DoomDir,"","","hexen",   "wad")!=TRUE
-               && MakeFileName(MainWAD,DoomDir,"","","strife1", "wad")!=TRUE
-               && MakeFileName(MainWAD,".",    "","","doompres","wad")!=TRUE
-               && MakeFileName(MainWAD,".",    "","","doom",    "wad")!=TRUE
-	       && MakeFileName(MainWAD,".",    "","","doom2",   "wad")!=TRUE
-               && MakeFileName(MainWAD,".",    "","","heretic", "wad")!=TRUE
-               && MakeFileName(MainWAD,".",    "","","hexen",   "wad")!=TRUE
-               && MakeFileName(MainWAD,".",    "","","strife1", "wad")!=TRUE)
-             ProgError("Can't find any of doom.wad, doom2.wad, doompres.wad,"
-		 " heretic.wad, hexen.wad, strife1.wad");
-         }
-         /*selection bytes*/
-#if defined DeuTex
-         if(!(Select&BALL))  Select = BALL;
-         if (Picture == PICGIF)
+       if (! gotit)
+       {
+	 for (w = wads; *w != NULL; w++)
 	 {
-	   Warning ("GIF support may go away in the future (see");
-	   Warning ("http://lpf.ai.mit.edu/Patents/Gif/Gif.html).");
-	   Warning ("Use PPM or BMP instead.");
+	   if (MakeFileName (MainWAD, DoomDir, "", "", *w, "wad") == TRUE)
+	   {
+	     gotit = 1;
+	     break;
+	   }
 	 }
-#endif /*DeuTex*/
-         d->exec(argc,argv);
-         PrintExit();
-         return 0;
+       }
+       if (! gotit)
+	  ProgError ("AA18",
+	      "Can't find any of doom.wad, doom2.wad, doompres.wad,"
+	      " heretic.wad, hexen.wad, strife1.wad");
+#if 0
+       if(    MakeFileName(MainWAD,DoomDir,"","","doompres","wad")!=TRUE
+	   && MakeFileName(MainWAD,DoomDir,"","","doom",    "wad")!=TRUE
+	   && MakeFileName(MainWAD,DoomDir,"","","doom2",   "wad")!=TRUE
+	   && MakeFileName(MainWAD,DoomDir,"","","heretic", "wad")!=TRUE
+	   && MakeFileName(MainWAD,DoomDir,"","","hexen",   "wad")!=TRUE
+	   && MakeFileName(MainWAD,DoomDir,"","","strife1", "wad")!=TRUE
+	   && MakeFileName(MainWAD,".",    "","","doompres","wad")!=TRUE
+	   && MakeFileName(MainWAD,".",    "","","doom",    "wad")!=TRUE
+	   && MakeFileName(MainWAD,".",    "","","doom2",   "wad")!=TRUE
+	   && MakeFileName(MainWAD,".",    "","","heretic", "wad")!=TRUE
+	   && MakeFileName(MainWAD,".",    "","","hexen",   "wad")!=TRUE
+	   && MakeFileName(MainWAD,".",    "","","strife1", "wad")!=TRUE)
+	 ;
+#endif
      }
-   argv += d->argc + 1;
-   argc -= d->argc + 1;
+
+#if defined DeuTex
+     if (! (Select & BALL))
+       Select = BALL;
+     if (Picture == PICGIF)
+       Warning ("GX10", "GIF support may go away in the future");
+#endif /*DeuTex*/
+     if (ROTT)
+       palette_lump = "PAL";
+     d->exec (c, v);
    }
-   NoCommandGiven();
-   PrintExit();
-   return -1;
+
+   Info ("AA99", "Normal exit");
+   return 0;
 }
 
 
+/*
+ *	parse_argv - parse the command line
+ *
+ *	Only the non-modal options whose group matches the <pass>
+ *	argument are executed.
+ *
+ *	Modal options are never executed. If their group matches <pass>,
+ *	the function returns a pointer to their definition in Com[].
+ *	Otherwise, the function returns a null pointer.
+ *
+ *	Upon return, *argc and *argv point one past the last argument
+ *	processed.
+ */
+static const comdef_t *parse_argv (int *argc, const char ***argv, int pass)
+{
+  /* Parse the command line from left to right. Try to match the each
+     argument against the longest possible option defined. */
+  while (*argc > 0)
+  {
+    const comdef_t *d = Com + sizeof Com / sizeof *Com - 1;
+    const char *arg = **argv;
+    if (*arg != '-')
+      ProgError("AA92", "Argument \"%s\": not an option", arg);
+    arg++;
+
+    {
+      const comdef_t *w;
+      for (w = Com; w->type != END; w++)
+      {
+	int r;
+
+	if ((w->type & OC_MASK) == OC_SEC)
+	  continue;
+	r = is_prefix (arg, w->com);
+	if (r != 0)
+	{
+	  if (r > 1)  /* Exact match. */
+	  {
+	    d = w;
+	    goto got_it;
+	  }
+	  if (d->type != END)  /* Ambiguous partial match. */
+	    ProgError ("AA93", "\"-%s\" is ambiguous (-%s, -%s)",
+		arg, d->com, w->com);
+	  /* Unambiguous partial match. */
+	  d = w;
+	}
+      }
+    }
+got_it:
+
+    if (*argc - 1 < d->argc)
+      ProgError("AA94", "Usage: -%s%s%s",
+	  d->com,
+	  d->use ? " "    : "",
+	  d->use ? d->use : "");
+
+    {
+      int class = (d->type & 0xc0);
+      int group = (d->type & 0x1f);
+
+      if (class == OC_SEC)
+      {
+	;  /* Can't happen */
+      }
+      else if (class == OC_OPT)
+      {
+	if (group == pass)
+	  d->exec (*argc, *argv);
+      }
+      else if (class == OC_MOD)
+      {
+	if (group == pass)
+	  return d;
+	else
+	  return NULL;  /* Parsing ALWAYS stops at the first modal option. */
+      }
+      else if (class == OC_END)
+      {
+	ProgError("AA95", "Invalid option \"%s\"", **argv);
+      }
+      else
+      {
+	Bug ("AA97", "Com #%d: invalid class %02Xh", (int) (d - Com), class);
+      }
+    }
+
+    *argv += d->argc + 1;
+    *argc -= d->argc + 1;
+  }
+
+  return NULL;  /* Found no modal option for this pass number */
+}
 
 
 /*
 ** Print Help
 */
-#define COLUMN1_WIDTH 22
+#define TTYCOL 79
+#define OPTINDENT 2
+#define COLSPACING 2
 void COMhelp(int argc, const char *argv[])
-{ const comdef_t *d;
-  Output("Help for %s:\n",DEUTEXNAME);
-  for(d = Com; d->type != END; d++)
+{
+  const comdef_t *d;
+  size_t width1 = 22;
+  size_t width2 = 22;
+  int section = 0;
+
+  printf ("Help for %s:\n", DEUTEXNAME);
+  opt_widths ();
+  for (d = Com; d->type != END; d++)
   {
-    char buf[200];
-    sprintf (buf, "-%s", d->com);
-    if (d->use)
+    /* Do a first pass on all the options for this section. Find out how
+       wide the left and right columns need to be. */
+    if (d->type == SEC)
     {
-      strcat (buf, " ");
-      strcat (buf, d->use);
+      if (section++)
+	putchar ('\n');
+      printf ("%s:\n", d->help);
+      width1 = *((short *) &d->exec) + OPTINDENT;
+      width2 = *((short *) &d->use);
+      if (width1 + 1 + width2 > TTYCOL)
+	width1 = TTYCOL - width2 - COLSPACING;
     }
-    if (strlen (buf) > COLUMN1_WIDTH)
-      Output ("%s\n%*s ", buf, COLUMN1_WIDTH, "");
+    /* Now that we know how wide the left column needs to be, print all
+       the options in this section. */
     else
-      Output("%-*s ", COLUMN1_WIDTH, buf);
-    Output ("%s", d->type == OPT ? "(opt.) " : "");
-    if (d->help)
-      Output ("%c%s.", toupper (d->help[0]), d->help + 1);
-    else
-      Output ("Same as above.");
-    putchar ('\n');
+    {
+      char buf[200];
+      size_t l;
+      size_t desclen;
+      const char *desc;
+
+      sprintf (buf, "%*s-%s", OPTINDENT, "", d->com);
+      if (d->use)
+      {
+	strcat (buf, " ");
+	strcat (buf, d->use);
+      }
+
+      l = strlen (buf);
+
+      desc = d->help;
+      {
+	const char *p;
+
+	for (desclen = 0, p = desc; *p != '\0'; p++)
+	  if (*p < '\1' || *p > '\3')
+	    desclen++;
+      }
+
+      if (l > width1 || l + COLSPACING + desclen > TTYCOL)
+	printf ("%s\n%*s", buf, (int) width1 + COLSPACING, "");
+      else
+	printf ("%-*s%*s", (int) width1, buf, COLSPACING, "");
+      for (; *desc != '\0'; desc++)
+      {
+	if (*desc == '\1')
+	  ;
+	else if (*desc == '\2')
+	  ;
+	else if (*desc == '\3')
+	  ;
+	else
+	  putchar (*desc);
+      }
+      putchar ('\n');
+    }
+
   }
   (void)argc;(void)argv;
 }
@@ -1042,7 +1335,7 @@ void COMvers (int argc, const char *argv[])
 {
   (void) argc;
   (void) argv;
-  print_version ();
+  printf ("%s %.32s\n", DEUTEXNAME, deutex_version);
   exit (0);
 }
 
@@ -1079,8 +1372,7 @@ static char *Format[] =
 void COMformat(int argc, const char *argv[])
 { int i;
   for(i=0;Format[i]!=NULL;i++)
-  { Output("%s\n",Format[i]);
-  }
+    puts (Format[i]);
   (void)argc;(void)argv;
 }
 
@@ -1191,92 +1483,122 @@ static void troff_puts (const char *s/*, char font*/)
 }
 
 
+/* Number of columns guaranteed when troff formats a man page in a
+   80-column width TTY. This is the minimum (Solaris 10). AIX, Digital
+   Unix, HP-UX and Irix all use more columns. */
+#define MANCOLS 60
+#define COLSPACING_MAN 2
 void COMmanopt(int argc, const char *argv[])
 { const comdef_t *d;
+  size_t width1 = 0;
+  size_t width2 = 0;
+
+  opt_widths ();
   for (d = Com; d->type != END; d++)
   {
-    const char *p = d->use;
-    *stack = '\0';
-    troff_start ();
-    troff_puts (".TP 14\n");
-
-    /* Print the option name in bold */
-    troff_push ('B');
-    troff_puts ("\\-");
-    troff_puts (d->com);
-    troff_pop ();
-    if (p)
-      troff_putc (' ');
-
-    /* Print the arguments. What's between < > is in italic,
-       [ ] { | } are in normal roman, the rest is in bold. */
-    if (p)
-      while (*p)			/* Print one arg. for each iteration */
-      {
-	if (isspace (*p))
-	  troff_putc (' ');
-	while (isspace (*p))
-	  p++;
-	troff_push ('B');
-	for (; *p && *p != ' '; p++)
-	{
-	  if (*p == '[' || *p == '{')
-	  {
-	    spush (*p);
-	    troff_push ('R');
-	    troff_putc (*p);
-	    troff_pop ();
-	  }
-	  else if (*p == '<')
-	  {
-	    spush (*p);
-	    troff_push ('I');
-	  }
-	  else if (*p == ']' || *p == '}')
-	  {
-	    spop ();
-	    troff_push ('R');
-	    troff_putc (*p);
-	    troff_pop ();
-	  }
-	  else if (*p == '>')
-	  {
-	    spop ();
-	    troff_pop ();
-	  }
-	  else if (*p == '|')
-	  {
-	    troff_push ('R');
-	    troff_putc ('|');
-	    troff_pop ();
-	  }
-	  else
-	    troff_putc (*p);
-	}
-	troff_pop ();
-      }
-    troff_end ();
-    troff_putc ('\n');
-
-    /* Print the description */
-    troff_start ();
-    if (d->help == NULL)
+    if (d->type == SEC)
     {
-      if (d > Com && d->exec == d[-1].exec)
-	troff_puts ("Same as above.\n");
-      else
-	troff_puts ("(no description)\n");
+      fprintf (stdout, ".SS %s\n", d->help);
+      width1 = d->argc + COLSPACING_MAN;
+      width2 = *((short *) &d->com) + 1;  /* + 1 because of the full stop */
     }
     else
     {
-      if (d->type == OPT)
-	troff_puts ("(opt.) ");
-      troff_putc (toupper (*d->help));
-      troff_puts (d->help + 1);
-      troff_putc ('.');
+      const char *p = d->use;
+      *stack = '\0';
+      troff_start ();
+      {
+	char buf[30];
+	if (width1 < 16 && width1 + width2 <= MANCOLS)
+	  sprintf (buf, ".TP %lu\n", (unsigned long) width1);
+	else
+	  strcpy (buf, ".TP\n");
+	troff_puts (buf);
+      }
+
+      /* Print the option name in bold */
+      troff_push ('B');
+      troff_puts ("\\-");
+      troff_puts (d->com);
+      troff_pop ();
+      if (p)
+	troff_putc (' ');
+
+      /* Print the arguments. What's between < > is in italic,
+	 [ ] { | } are in normal roman, the rest is in bold. */
+      if (p)
+	while (*p)			/* Print one arg. for each iteration */
+	{
+	  if (isspace (*p))
+	    troff_putc (' ');
+	  while (isspace (*p))
+	    p++;
+	  troff_push ('B');
+	  for (; *p && *p != ' '; p++)
+	  {
+	    if (*p == '[' || *p == '{')
+	    {
+	      spush (*p);
+	      troff_push ('R');
+	      troff_putc (*p);
+	      troff_pop ();
+	    }
+	    else if (*p == '<')
+	    {
+	      spush (*p);
+	      troff_push ('I');
+	    }
+	    else if (*p == ']' || *p == '}')
+	    {
+	      spop ();
+	      troff_push ('R');
+	      troff_putc (*p);
+	      troff_pop ();
+	    }
+	    else if (*p == '>')
+	    {
+	      spop ();
+	      troff_pop ();
+	    }
+	    else if (*p == '|')
+	    {
+	      troff_push ('R');
+	      troff_putc ('|');
+	      troff_pop ();
+	    }
+	    else
+	      troff_putc (*p);
+	  }
+	  troff_pop ();
+	}
+      troff_end ();
       troff_putc ('\n');
+
+      /* Print the description */
+      {
+	const unsigned char *p = (const unsigned char *) d->help;
+
+	if (islower (*p))
+	{
+	  troff_putc (toupper (*p));
+	  p++;
+	}
+	for (; *p != '\0'; p++)
+	{
+	  if (*p == '\1')
+	    fputs ("\\fB", stdout);
+	  else if (*p == '\2')
+	    fputs ("\\fI", stdout);
+	  else if (*p == '\3')
+	    fputs ("\\fP", stdout);
+	  else if (*p == '-')
+	    fputs ("\\-", stdout);
+	  else
+	    fputc (*p, stdout);
+	}
+	fputs (".\n", stdout);
+      }
     }
-    troff_end ();
   }
   (void)argc;(void)argv;
 }
@@ -1284,15 +1606,116 @@ void COMmanopt(int argc, const char *argv[])
 
 
 /*
- *	is_prefix
- *	Return non-zero iff s1 is a prefix of s2
+ *	opt_widths - make a pass through Com and compute widths per section
+ */
+static void opt_widths ()
+{
+  comdef_t *d;
+  comdef_t *current_section = NULL;
+  size_t width1t = 0;
+  size_t width1r = 0;
+  size_t width2t = 0;
+  size_t width2r = 0;
+
+  for (d = Com; ; d++)
+  {
+    if (d->type == SEC || d->type == END)
+    {
+      /* Seen all the entries of a section. Set
+	 - argc = maximum roff width of the first column,
+	 - com  = maximum roff width of the second column,
+	 - exec = maximum text width of the first column,
+	 - use  = maximum text width of second column. */
+      if (current_section != NULL)
+      {
+	current_section->argc = (char) width1r;
+	if (current_section->argc != width1r)
+	  current_section->argc = CHAR_MAX;  /* Can't happen */
+
+	*((short *) &current_section->com) = (short) width2r;
+	if (*((short *) &current_section->com) != width2r)
+	  *((short *) &current_section->com) = SHRT_MAX;  /* Can't happen */
+
+	*((short *) &current_section->exec) = (short) width1t;
+	if (*((short *) &current_section->exec) != width1t)
+	  *((short *) &current_section->exec) = SHRT_MAX;  /* Can't happen */
+
+	*((short *) &current_section->use) = (short) width2t;
+	if (*((short *) &current_section->use) != width2t)
+	  *((short *) &current_section->use) = SHRT_MAX;  /* Can't happen */
+      }
+    }
+
+    if (d->type == END)
+      break;
+
+    if (d->type == SEC)
+    {
+      current_section = d;
+      width1r = 0;
+      width1t = 0;
+      width2r = 0;
+      width2t = 0;
+      continue;
+    }
+
+    {					/* Width of column 1 (synopsis) */
+      size_t wr = 1 + strlen (d->com);
+      size_t wt = wr;
+      if (d->use != NULL)
+      {
+	const char *u;
+
+	wr++;
+	wt++;
+	for (u = d->use; *u != '\0'; u++)
+	{
+	  if (*u != '<' && *u != '>')
+	    wr++;
+	  wt++;
+	}
+      }
+      if (wr > width1r)
+	width1r = wr;
+      if (wt > width1t)
+	width1t = wt;
+    }
+
+    {					/* Width of column 2 (description) */
+      const char *desc;
+      size_t wr = 0;
+      size_t wt = 0;
+
+      for (desc = d->help; *desc != '\0'; desc++)
+      {
+	if (*desc < '\1' || *desc > '\3')
+	  wr++;
+	if (*desc < '\1' || *desc > '\3')
+	  wt++;
+      }
+      if (wr > width2r)
+	width2r = wr;
+      if (wt > width2t)
+	width2t = wt;
+    }
+  }
+}
+
+
+/*
+ *	is_prefix - tell whether a string an initial prefix of another
+ *
+ *	Return
+ *	   0 if s1 is not a prefix of s2
+ *	   1 if s1 is a prefix of s2
+ *	  >1 if s1 is equal to s2
  */
 static int is_prefix (const char *s1, const char *s2)
 {
   for (;; s1++, s2++)
   {
     if (*s1 == '\0')
-      return 1;
+      return (*s2 == '\0') ? 2 : 1;
     if (*s2 != *s1)
       return 0;
   }

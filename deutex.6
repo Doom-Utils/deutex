@@ -4,7 +4,7 @@
 .\" public domain in 1994 by Raphaël Quinet and Brendon Wyber.
 .\" 
 .\" DeuTex is Copyright © 1994-1995 Olivier Montanuy,
-.\"           Copyright © 1999-2000 André Majorel.
+.\"           Copyright © 1999-2005 André Majorel.
 .\" 
 .\" This program is free software; you can redistribute it and/or modify it
 .\" under the terms of the GNU General Public License as published by the
@@ -20,7 +20,7 @@
 .\" with this library; if not, write to the Free Software Foundation, Inc.,
 .\" 59 Temple Place, Suite 330, Boston, MA 02111-1307, USA.
 .\" 
-.TH DEUTEX 6 2000-01-05 "DeuTex 4.4.0"
+.TH DEUTEX 6 2005-08-31 "DeuTex 4.4.902"
 .SH NAME
 deutex, deusf \- do things with wad files
 .SH SYNOPSIS
@@ -31,33 +31,28 @@ deutex, deusf \- do things with wad files
 .B  deutex \-man
 .br
 \fBdeutex\fP [\fIoptions\fP]
-.B \-make
-\fR[\fP\fIdirctivs.txt\fP\fR] \fP\fIout.wad\fP
+.B \-add
+.I incomplete.wad out.wad
 .br
 \fBdeutex\fP [\fIoptions\fP]
-.B \-wadir
-.I in.wad
+.B \-af
+.I flats.wad
+.br
+\fBdeutex\fP [\fIoptions\fP]
+.B \-append
+.I incomplete.wad
+.br
+\fBdeutex\fP [\fIoptions\fP]
+.B \-as
+.I sprite.wad
 .br
 \fBdeutex\fP [\fIoptions\fP]
 .B \-check
 .I in.wad
 .br
 \fBdeutex\fP [\fIoptions\fP]
-.B \-usedtex
-.RI [ in.wad ]
-.br
-\fBdeutex\fP [\fIoptions\fP]
-.B \-usedidx
-.RI [ in.wad ]
-.br
-\fBdeutex\fP [\fIoptions\fP]
-.B \-unused
-.I in.wad
-.br
-\fBdeutex\fP [\fIoptions\fP]
-.B \-xtract
-.I in.wad
-.RI [ dirctivs.txt ]
+.B \-debug
+.RI [ in.gif ]
 .br
 \fBdeutex\fP [\fIoptions\fP]
 .B \-get
@@ -65,39 +60,49 @@ deutex, deusf \- do things with wad files
 .RI [ in.wad ]
 .br
 \fBdeutex\fP [\fIoptions\fP]
-.B \-pknormal
-.RI [ in.wad " [" out.txt ]]
-.br
-\fBdeutex\fP [\fIoptions\fP]
-.B \-pkgrahix
-.RI [ in.wad " [" out.txt ]]
-.br
-\fBdeutex\fP [\fIoptions\fP]
-.B \-add
-.I incomplete.wad out.wad
-.br
-\fBdeutex\fP [\fIoptions\fP]
-.B \-append
-.I incomplete.wad
-.br
-\fBdeutex\fP [\fIoptions\fP]
 .B \-join
 .I incomplete.wad in.wad
+.br
+\fBdeutex\fP [\fIoptions\fP]
+.B \-make
+\fR[\fP\fIdirctivs.txt\fP\fR] \fP\fIout.wad\fP
 .br
 \fBdeutex\fP [\fIoptions\fP]
 .B \-merge
 .I in.wad
 .br
 \fBdeutex\fP [\fIoptions\fP]
+.B \-pkgfx
+.RI [ in.wad " [" out.txt ]]
+.br
+\fBdeutex\fP [\fIoptions\fP]
+.B \-pknormal
+.RI [ in.wad " [" out.txt ]]
+.br
+\fBdeutex\fP [\fIoptions\fP]
 .B \-restor\fP
 .br
 \fBdeutex\fP [\fIoptions\fP]
-.B \-as
-.I sprite.wad
+.B \-usedidx
+.RI [ in.wad ]
 .br
 \fBdeutex\fP [\fIoptions\fP]
-.B \-af
-.I flats.wad
+.B \-usedtex
+.RI [ in.wad ]
+.br
+\fBdeutex\fP [\fIoptions\fP]
+.B \-unused
+.I in.wad
+.br
+\fBdeutex\fP [\fIoptions\fP]
+.B \-wadir
+.RI [ in.wad ]
+.br
+\fBdeutex\fP [\fIoptions\fP]
+.B \-xtract
+.I in.wad
+.RI [ dirctivs.txt ]
+.br
 
 .BR "deusf \-?" | \-h | \-help | \-\-help
 .br
@@ -106,314 +111,461 @@ deutex, deusf \- do things with wad files
 .BI "deusf " options
 .br
 .SH DESCRIPTION
-DeuTex is a wad composer for Doom, Heretic, Hexen and Strife. It can be used
-to extract the lumps of a wad and save them as individual files or the
-reverse, and much more.
-
+DeuTex is a wad composer for Doom, Heretic, Hexen and Strife.
+It can be used to extract the lumps of a wad and save them as individual files
+or the reverse, and much more.
+.PP
 When extracting a lump to a file, it does not just copy the raw data, it
 converts it to an appropriate format (such as PPM for graphics, Sun audio for
-samples, etc.). Conversely, when it reads files for inclusion in pwads, it
-does the necessary conversions (for example, from PPM to Doom picture format).
-
+samples, etc.).
+Conversely, when it reads files for inclusion in pwads, it does the necessary
+conversions (for example, from PPM to Doom picture format).
+.PP
 DeuSF is a trimmed version of DeuTex that is used to merge sprites and flats
 from a pwad into an iwad, which is sometimes necessary because Doom and its
 breed do not handle sprites in pwads well.
-
+.PP
 See \fBdocsrc/dtexman6.txt\fP for more information on DeuTex and DeuSF.
+.SS Decomposing a wad
+To decompose a wad (i.e. extract its contents), use the \fB\-extract\fP (a.k.a.
+\fB\-xtract\fP) command.
+When decomposing a wad, DeuTex creates one file for each lump.
+The files are created in one of the following subdirectories of the working
+directory: \fBflats/\fP, \fBlumps/\fP, \fBmusics/\fP, \fBpatches/\fP,
+\fBsounds/\fP, \fBsprites/\fP, \fBtextures/\fP.
+The decomposing process also creates a very important file, \fBwadinfo.txt\fP,
+which will be used later when composing.
+.PP
+To extract the contents of the Doom II iwad,
+.nf
+	\fBdeutex \-doom2 /path/to/doom2.wad \-xtract\fP
+.fi
+.PP
+To extract the contents of a Doom II pwad named \fImywad.wad\fP,
+.nf
+	\fBdeutex \-doom2 /path/to/doom2.wad \-xtract mywad.wad\fP
+.fi
+.PP
+To extract only the sprites,
+.nf
+	\fBdeutex \-doom2 /path/to/doom2.wad \-sprites \-xtract\fP
+.fi
+.PP
+To extract only the sounds and save them as .voc,
+.nf
+	\fBdeutex \-doom2 /path/to/doom2.wad \-sounds \-voc \-xtract\fP
+.fi
+.SS Composing (building) a wad
+Composing is the symmetrical process.
+It's done with the three commands \fB\-build\fP, \fB\-create\fP and
+\fB\-make\fP, that are equivalent.
+Using \fBwadinfo.txt\fP and the files in flats/, lumps/, musics/, patches/,
+sounds/, sprites/ and textures/, DeuTex creates a new wad.
+.PP
+To create a new pwad named \fImywad.wad\fP,
+.nf
+.RS
+\fBdeutex \-doom2 /path/to/doom2.wad \-make mywad.wad\fP
+.RE
+.fi
+.PP
+To create a new iwad named \fImytc.wad\fP,
+.nf
+.RS
+\fBdeutex \-doom2 /path/to/doom2.wad \-iwad \-make mytc.wad\fP
+.RE
+.fi
+.SS Other operations
+DeuTex has many (too many ?) other commands like \fB\-join\fP, \fB\-merge\fP,
+\fB\-usedtex\fP etc.
+See \fBdocsrc/dtexman6.txt\fP for a full description.
 .SH OPTIONS
-.TP 14
+.SS Modal options not requiring an iwad
+.TP
 \fB\-?\fP
-Print list of options.
-.TP 14
+Same as \fB\-\-help\fP.
+.TP
 \fB\-h\fP
-Same as above.
-.TP 14
+Same as \fB\-\-help\fP.
+.TP
 \fB\-help\fP
-Same as above.
-.TP 14
+Same as \fB\-\-help\fP.
+.TP
 \fB\--help\fP
-Same as above.
-.TP 14
+Print list of options.
+.TP
 \fB\-man\fP
-Print list of options in troff -man format.
-.TP 14
-\fB\--version\fP
-Print version number and exit successfully.
-.TP 14
+Print list of options in troff \-man format.
+.TP
 \fB\-syntax\fP
 Print the syntax of wad creation directives.
-.TP 14
-\fB\-win \fP\fIdoom data info select colour\fP
-(opt.) WinTex shortcut.
-.TP 14
-\fB\-wim \fP\fIdoom select\fP
-(opt.) WinTex shortcut.
-.TP 14
-\fB\-debug\fP
-Debug mode.
-.TP 14
-\fB\-di \fP\fIname\fP
-(opt.) Debug identification of entry.
-.TP 14
-\fB\-musid\fP
-(opt.) Use old music identification method.
-.TP 14
-\fB\-overwrite\fP
-(opt.) Overwrite all.
-.TP 14
-\fB\-wtx \fP\fIiwad\fP
-(opt.) WinTex shortcut.
-.TP 14
-\fB\-doom \fP\fIdir\fP
-(opt.) Indicate the directory of Doom.
-.TP 14
-\fB\-doom2 \fP\fIdir\fP
-(opt.) Indicate the directory of Doom II.
-.TP 14
-\fB\-doom02 \fP\fIdir\fP
-(opt.) Indicate the directory of Doom alpha 0.2.
-.TP 14
-\fB\-doom04 \fP\fIdir\fP
-(opt.) Indicate the directory of Doom alpha 0.4.
-.TP 14
-\fB\-doom05 \fP\fIdir\fP
-(opt.) Indicate the directory of Doom alpha 0.5.
-.TP 14
-\fB\-doompr \fP\fIdir\fP
-(opt.) Indicate the directory of Doom PR pre-beta.
-.TP 14
-\fB\-heretic \fP\fIdir\fP
-(opt.) Indicate the directory of Heretic.
-.TP 14
-\fB\-hexen \fP\fIdir\fP
-(opt.) Indicate the directory of Hexen.
-.TP 14
-\fB\-strife \fP\fIdir\fP
-(opt.) Indicate the directory of Strife.
-.TP 14
-\fB\-strife10 \fP\fIdir\fP
-(opt.) Indicate the directory of Strife 1.0.
-.TP 14
-\fB\-dir \fP\fIdir\fP
-(opt.) Indicate the working directory.
-.TP 14
-\fB\-deu\fP
-(opt.) Add 64k of junk to workaround a bug of DEU 5.21.
-.TP 14
-\fB\-rgb \fP\fIr g b\fP
-(opt.) Specify the transparent colour (default 0/47/47).
-.TP 14
-\fB\-gif\fP
-(opt.) Save pictures as GIF (.gif).
-.TP 14
-\fB\-bmp\fP
-(opt.) Save pictures as BMP (.bmp).
-.TP 14
-\fB\-ppm\fP
-(opt.) Save pictures as rawbits (P6) PPM (.ppm).
-.TP 14
-\fB\-au\fP
-(opt.) Save sound as Sun audio (.au).
-.TP 14
-\fB\-wav\fP
-(opt.) Save sound as wave (.wav).
-.TP 14
-\fB\-voc\fP
-(opt.) Save sound as voc (.voc).
-.TP 14
-\fB\-fullsnd\fP
-(opt.) Save sound lumps beyond declared length.
-.TP 14
-\fB\-levels\fP
-(opt.) Select levels.
-.TP 14
-\fB\-lumps\fP
-(opt.) Select lumps.
-.TP 14
-\fB\-sounds\fP
-(opt.) Select sounds.
-.TP 14
-\fB\-musics\fP
-(opt.) Select musics.
-.TP 14
-\fB\-textures\fP
-(opt.) Select textures.
-.TP 14
-\fB\-graphics\fP
-(opt.) Select graphics.
-.TP 14
-\fB\-sneas\fP
-(opt.) Select sneas (sneaps and sneats).
-.TP 14
-\fB\-sneaps\fP
-(opt.) Select sneaps.
-.TP 14
-\fB\-sneats\fP
-(opt.) Select sneats.
-.TP 14
-\fB\-s_end\fP
-(opt.) Use S_END for sprites, not SS_END.
-.TP 14
-\fB\-george\fP
-Same as above.
-.TP 14
-\fB\-sprites\fP
-(opt.) Select sprites.
-.TP 14
-\fB\-patches\fP
-(opt.) Select patches.
-.TP 14
-\fB\-flats\fP
-(opt.) Select flats.
-.TP 14
-\fB\-v0\fP
-(opt.) Set verbosity level to 0.
-.TP 14
-\fB\-v1\fP
-(opt.) Set verbosity level to 1.
-.TP 14
-\fB\-v2\fP
-(opt.) Set verbosity level to 2 (default).
-.TP 14
-\fB\-v3\fP
-(opt.) Set verbosity level to 3.
-.TP 14
-\fB\-v4\fP
-(opt.) Set verbosity level to 4.
-.TP 14
-\fB\-v5\fP
-(opt.) Set verbosity level to 5.
-.TP 14
-\fB\-be\fP
-(opt.) Assume all wads are big endian (default LE).
-.TP 14
-\fB\-le\fP
-(opt.) Assume all wads are little endian (default).
-.TP 14
-\fB\-ibe\fP
-(opt.) Input wads are big endian (default LE).
-.TP 14
-\fB\-ile\fP
-(opt.) Input wads are little endian (default).
-.TP 14
-\fB\-obe\fP
-(opt.) Create big endian wads (default LE).
-.TP 14
-\fB\-ole\fP
-(opt.) Create little endian wads (default).
-.TP 14
-\fB\-ipf \fP\fR{\fP\fBalpha\fP\fR|\fP\fBnormal\fP\fR|\fP\fBpr\fP\fR}\fP
-(opt.) Picture format (default is "normal").
-.TP 14
-\fB\-tf \fP\fR{\fP\fBnameless\fP\fR|\fP\fBnone\fP\fR|\fP\fBnormalstrife11\fP\fR}\fP
-(opt.) Texture format (default is "normal").
-.TP 14
-\fB\-itf \fP\fR{\fP\fBnameless\fP\fR|\fP\fBnone\fP\fR|\fP\fBnormalstrife11\fP\fR}\fP
-(opt.) Input texture format (default is "normal").
-.TP 14
-\fB\-otf \fP\fR{\fP\fBnameless\fP\fR|\fP\fBnone\fP\fR|\fP\fBnormalstrife11\fP\fR}\fP
-(opt.) Output texture format (default is "normal").
-.TP 14
-\fB\-itl \fP\fR{\fP\fBnone\fP\fR|\fP\fBnormal\fP\fR|\fP\fBtextures\fP\fR}\fP
-(opt.) Texture lump (default is "normal").
-.TP 14
-\fB\-iwad\fP
-(opt.) Compose iwad, not pwad.
-.TP 14
-\fB\-make \fP\fR[\fP\fIdirctivs.txt\fP\fR] \fP\fIout.wad\fP
-Make a pwad, from the creation directives.
-.TP 14
-\fB\-build \fP\fR[\fP\fIdirctivs.txt\fP\fR] \fP\fIout.wad\fP
-Same as above.
-.TP 14
-\fB\-create \fP\fR[\fP\fIdirctivs.txt\fP\fR] \fP\fIout.wad\fP
-Same as above.
-.TP 14
-\fB\-wadir \fP\fIin.wad\fP
-List and identify entries in a wad.
-.TP 14
-\fB\-check \fP\fIin.wad\fP
-Check the textures.
-.TP 14
-\fB\-test \fP\fIin.wad\fP
-Same as above.
-.TP 14
-\fB\-usedtex \fP\fR[\fP\fIin.wad\fP\fR]\fP
-List textures used in all levels.
-.TP 14
-\fB\-usedidx \fP\fR[\fP\fIin.wad\fP\fR]\fP
-Colour index usage statistics.
-.TP 14
+.TP
 \fB\-unused \fP\fIin.wad\fP
 Find unused spaces in a wad.
-.TP 14
-\fB\-xtract \fP\fR[\fP\fIin.wad \fP\fR[\fP\fIdirctivs.txt\fP\fR]]\fP
-Extract some/all entries from a wad.
-.TP 14
-\fB\-extract \fP\fR[\fP\fIin.wad \fP\fR[\fP\fIdirctivs.txt\fP\fR]]\fP
-Same as above.
-.TP 14
-\fB\-get \fP\fIentry \fP\fR[\fP\fIin.wad\fP\fR]\fP
-Get a wad entry from main wad or in.wad.
-.TP 14
-\fB\-pknormal \fP\fR[\fP\fIin.wad \fP\fR[\fP\fIout.txt\fP\fR]]\fP
-Detect identical normal.
-.TP 14
-\fB\-pkgfx \fP\fR[\fP\fIin.wad \fP\fR[\fP\fIout.txt\fP\fR]]\fP
-Detect identical graphics.
-.TP 14
-\fB\-add \fP\fIincomplete.wad out.wad\fP
-Add sprites & flats of a pwad to those of Doom.
-.TP 14
-\fB\-append \fP\fIincomplete.wad\fP
-Append sprites & flats of Doom to a pwad.
-.TP 14
-\fB\-join \fP\fIincomplete.wad in.wad\fP
-Append sprites & flats of Doom to a pwad.
-.TP 14
-\fB\-merge \fP\fIin.wad\fP
-Merge doom.wad and a pwad.
-.TP 14
-\fB\-restore\fP
-Restore doom.wad and the pwad.
-.TP 14
-\fB\-as \fP\fIsprite.wad\fP
-Append all sprites to the wad.
-.TP 14
+.TP
+\fB\--version\fP
+Print version number and exit successfully.
+.SS Modal options requiring an iwad
+.TP
+\fB\-add \fP\fIin.wad out.wad\fP
+Copy sp & fl of iwad and \fIin.wad\fP to \fIout.wad\fP.
+.TP
 \fB\-af \fP\fIflats.wad\fP
 Append all floors/ceilings to the wad.
+.TP
+\fB\-append \fP\fIio.wad\fP
+Add sprites & flats of iwad to \fIio.wad\fP.
+.TP
+\fB\-as \fP\fIsprite.wad\fP
+Append all sprites to the wad.
+.TP
+\fB\-build \fP\fR[\fP\fIin.txt\fP\fR] \fP\fIout.wad\fP
+Make a pwad.
+.TP
+\fB\-check \fP\fIin.wad\fP
+Check the textures.
+.TP
+\fB\-create \fP\fR[\fP\fIin.txt\fP\fR] \fP\fIout.wad\fP
+Same as \fB\-build\fP.
+.TP
+\fB\-debug \fP\fR[\fP\fIfile\fP\fR]\fP
+Debug colour conversion.
+.TP
+\fB\-extract \fP\fR[\fP\fIin.wad \fP\fR[\fP\fIout.txt\fP\fR]]\fP
+Same as \fB\-xtract\fP.
+.TP
+\fB\-get \fP\fIentry \fP\fR[\fP\fIin.wad\fP\fR]\fP
+Get a wad entry from main wad or \fIin.wad\fP.
+.TP
+\fB\-join \fP\fIincomplete.wad in.wad\fP
+Append sprites & flats of Doom to a pwad.
+.TP
+\fB\-make \fP\fR[\fP\fIin.txt\fP\fR] \fP\fIout.wad\fP
+Same as \fB\-build\fP.
+.TP
+\fB\-merge \fP\fIin.wad\fP
+Merge doom.wad and a pwad.
+.TP
+\fB\-pkgfx \fP\fR[\fP\fIin.wad \fP\fR[\fP\fIout.txt\fP\fR]]\fP
+Detect identical graphics.
+.TP
+\fB\-pknormal \fP\fR[\fP\fIin.wad \fP\fR[\fP\fIout.txt\fP\fR]]\fP
+Detect identical normal.
+.TP
+\fB\-restore\fP
+Restore doom.wad and the pwad.
+.TP
+\fB\-test \fP\fIin.wad\fP
+Same as \fB\-check\fP.
+.TP
+\fB\-usedidx \fP\fR[\fP\fIin.wad\fP\fR]\fP
+Colour index usage statistics.
+.TP
+\fB\-usedtex \fP\fR[\fP\fIin.wad\fP\fR]\fP
+List textures used in all levels.
+.TP
+\fB\-wadir \fP\fR[\fP\fIin.wad\fP\fR]\fP
+List and identify entries in a wad.
+.TP
+\fB\-xtract \fP\fR[\fP\fIin.wad \fP\fR[\fP\fIout.txt\fP\fR]]\fP
+Extract some/all entries from a wad.
+.SS General options
+.TP 12
+\fB\-overwrite\fP
+Overwrite all.
+.TP 12
+\fB\-dir \fP\fIdir\fP
+Extraction directory (default \fB.\fP).
+.SS Iwad
+.TP 15
+\fB\-doom \fP\fIdir\fP
+Path to Doom iwad.
+.TP 15
+\fB\-doom2 \fP\fIdir\fP
+Path to Doom II iwad.
+.TP 15
+\fB\-doom02 \fP\fIdir\fP
+Path to Doom alpha 0.2 iwad.
+.TP 15
+\fB\-doom04 \fP\fIdir\fP
+Path to Doom alpha 0.4 iwad.
+.TP 15
+\fB\-doom05 \fP\fIdir\fP
+Path to Doom alpha 0.5 iwad.
+.TP 15
+\fB\-doompr \fP\fIdir\fP
+Path to Doom PR pre\-beta iwad.
+.TP 15
+\fB\-heretic \fP\fIdir\fP
+Path to Heretic iwad.
+.TP 15
+\fB\-hexen \fP\fIdir\fP
+Path to Hexen iwad.
+.TP 15
+\fB\-strife \fP\fIdir\fP
+Path to Strife iwad.
+.TP 15
+\fB\-strife10 \fP\fIdir\fP
+Path to Strife 1.0 iwad.
+.SS Wad options
+.TP
+\fB\-be\fP
+Assume all wads are big endian (default LE).
+.TP
+\fB\-deu\fP
+Add 64k of junk for DEU 5.21 compatibility.
+.TP
+\fB\-george\fP
+Same as \fB\-s_end\fP.
+.TP
+\fB\-ibe\fP
+Input wads are big endian (default LE).
+.TP
+\fB\-ile\fP
+Input wads are little endian (default).
+.TP
+\fB\-ipf \fP\fIcode\fP
+Picture format (\fBalpha\fP, *\fBnormal\fP, \fBpr\fP, \fBrott\fP).
+.TP
+\fB\-itf \fP\fIcode\fP
+Input texture format (\fBnameless\fP, \fBnone\fP, *\fBnormal\fP, \fBstrife11\fP).
+.TP
+\fB\-itl \fP\fIcode\fP
+Texture lump (\fBnone\fP, *\fBnormal\fP, \fBtextures\fP).
+.TP
+\fB\-iwad\fP
+Compose iwad, not pwad.
+.TP
+\fB\-le\fP
+Assume all wads are little endian (default).
+.TP
+\fB\-musid\fP
+Use old music identification method.
+.TP
+\fB\-obe\fP
+Create big endian wads (default LE).
+.TP
+\fB\-ole\fP
+Create little endian wads (default).
+.TP
+\fB\-otf \fP\fIcode\fP
+Output texture format (\fBnameless\fP, \fBnone\fP, *\fBnormal\fP, \fBstrife11\fP).
+.TP
+\fB\-s_end\fP
+Use \fBS_END\fP for sprites, not \fBSS_END\fP.
+.TP
+\fB\-tf \fP\fIcode\fP
+Texture format (\fBnameless\fP, \fBnone\fP, *\fBnormal\fP, \fBstrife11\fP).
+.SS Lump selection
+.TP 11
+\fB\-flats\fP
+Select flats.
+.TP 11
+\fB\-graphics\fP
+Select graphics.
+.TP 11
+\fB\-levels\fP
+Select levels.
+.TP 11
+\fB\-lumps\fP
+Select lumps.
+.TP 11
+\fB\-musics\fP
+Select musics.
+.TP 11
+\fB\-patches\fP
+Select patches.
+.TP 11
+\fB\-scripts\fP
+Select Strife scripts.
+.TP 11
+\fB\-sneas\fP
+Select sneas (sneaps and sneats).
+.TP 11
+\fB\-sneaps\fP
+Select sneaps.
+.TP 11
+\fB\-sneats\fP
+Select sneats.
+.TP 11
+\fB\-sounds\fP
+Select sounds.
+.TP 11
+\fB\-sprites\fP
+Select sprites.
+.TP 11
+\fB\-textures\fP
+Select textures.
+.SS Graphics
+.TP
+\fB\-bmp\fP
+Save pictures as BMP (\fB.bmp\fP).
+.TP
+\fB\-gif\fP
+Save pictures as GIF (\fB.gif\fP).
+.TP
+\fB\-ppm\fP
+Save pictures as rawbits PPM (P6, \fB.ppm\fP).
+.TP
+\fB\-rgb \fP\fIr g b\fP
+Specify the transparent colour (default 0 47 47).
+.SS Sound
+.TP
+\fB\-au\fP
+Save sounds as Sun audio (\fB.au\fP).
+.TP
+\fB\-fullsnd\fP
+Save sounds beyond declared length.
+.TP
+\fB\-rate \fP\fIcode\fP
+Policy for != 11025 Hz (\fBreject\fP, \fBforce\fP, *\fBwarn\fP, \fBaccept\fP).
+.TP
+\fB\-voc\fP
+Save sounds as voc (\fB.voc\fP).
+.TP
+\fB\-wav\fP
+Save sounds as WAVE (\fB.wav\fP).
+.SS Reporting
+.TP 11
+\fB\-di \fP\fIname\fP
+Debug identification of entry.
+.TP 11
+\fB\-log \fP\fIfile\fP
+Name of log file (default \fBdeutex.log\fP).
+.TP 11
+\fB\-v0\fP
+Set verbosity level to 0.
+.TP 11
+\fB\-v1\fP
+Set verbosity level to 1.
+.TP 11
+\fB\-v2\fP
+Set verbosity level to 2 (default).
+.TP 11
+\fB\-v3\fP
+Set verbosity level to 3.
+.TP 11
+\fB\-v4\fP
+Set verbosity level to 4.
+.TP 11
+\fB\-v5\fP
+Set verbosity level to 5.
+.SS WinTex-related options
+.TP
+\fB\-win \fP\fIdoom data info select colour\fP
+WinTex shortcut.
+.TP
+\fB\-wim \fP\fIdoom select\fP
+WinTex shortcut.
+.TP
+\fB\-wtx \fP\fIiwad\fP
+WinTex shortcut.
+.SH DIAGNOSTICS
+All messages are identified by a unique code.
+Some messages are identical\ ; the code is useful to distinguish them.
+All codes have four characters\ ; two letters and two digits.
+The letters identify the part of the code where the message comes from, the
+digits give the message number within that area.
+In general, numbers are assigned so that messages that come from parts of the
+code that are executed earlier have lower numbers.
+.SH FILES
+.TP
+.IB dir /flats/
+When extracting, flats are saved to this directory.
+When composing, flats are read from this directory.
+.TP
+.IB dir /graphics/
+When extracting, graphics are saved to this directory.
+When composing, graphics are read from this directory.
+.TP
+.IB dir /levels/
+When extracting, levels are saved to this directory.
+When composing, levels are read from this directory.
+.TP
+.IB dir /lumps/
+When extracting, lumps are saved to this directory.
+When composing, lumps are read from this directory.
+.TP
+.IB dir /musics/
+When extracting, musics are saved to this directory.
+When composing, musics are read from this directory.
+.TP
+.IB dir /patches/
+When extracting, patches are saved to this directory.
+When composing, patches are read from this directory.
+.TP
+.IB dir /scripts/
+When extracting, Strife scripts are saved to this directory.
+When composing, Strife scripts are read from this directory.
+.TP
+.IB dir /sneaps/
+When extracting, Doom alpha sneaps are saved to this directory.
+When composing, Doom alpha sneaps are read from this directory.
+.TP
+.IB dir /sneats/
+When extracting, Doom alpha sneats are saved to this directory.
+When composing, Doom alpha sneats are read from this directory.
+.TP
+.IB dir /sounds/
+When extracting, sounds are saved to this directory.
+When composing, sounds are read from this directory.
+.TP
+.IB dir /sprites/
+When extracting, sprites are saved to this directory.
+When composing, sprites are read from this directory.
+.TP
+.IB dir /textures/texture1.txt
+The \fBTEXTURE1\fP lump (all but Doom alpha 0.4 and 0.5).
+.TP
+.IB dir /textures/texture2.txt
+The \fBTEXTURE2\fP lump (all commercial iwads except Doom 2).
+.TP
+.IB dir /textures/textures.txt
+The \fBTEXTURES\fP lump (Doom alpha 0.4 and 0.5).
+.TP
+.IB dir /wadinfo.txt
+The default master file.
 .SH ENVIRONMENT
 .TP
 .B DOOMWADDIR
-The directory where the iwad resides. The value of this
-environment variable is overridden by \fB\-main\fP, \fB\-doom\fP
-and friends.
+The directory where the iwad resides. The value of this environment variable is
+overridden by \fB\-main\fP, \fB\-doom\fP and friends.
 .SH BUGS
 See \fBTODO\fP.
 .SH LEGAL
-DeuTex is copyright © 1994-1995 Olivier Montanuy, copyright ©
-1999-2000 André Majorel.
-
-Most of this program is GPL'd but some of it is available under
-other licenses. This program is distributed in the hope that it
-will be useful, but WITHOUT ANY WARRANTY; without even the implied
-warranty of MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.
-See LICENSE for specific information and copyright notices. All
-trademarks are the property of their owners.
+DeuTex is copyright © 1994-1995 Olivier Montanuy, copyright © 1999-2005 André
+Majorel.
+.PP
+Most of this program is GPL'd but some of it is available under other licenses.
+This program is distributed in the hope that it will be useful, but WITHOUT ANY
+WARRANTY; without even the implied warranty of MERCHANTABILITY or FITNESS FOR A
+PARTICULAR PURPOSE.
+See LICENSE for specific information and copyright notices.
+All trademarks are the property of their owners.
 .SH AUTHOR
-The original author of DeuTex is Olivier Montanuy.
-
-From 1994 to 1996, DeuTex was maintained by Olivier Montanuy
-<Olivier.Montanuy@wanadoo.fr> with help from Per Allansson
-<c91peral@und.ida.liu.se>, James Bonfield
-<jkb@mrc-molecular-biology.cambridge.ac.uk>, Sharon Bowles, Mark
-Mathews <mark.mathews@channel1.com> and Chuck Rossi. The
-original manual was written by Kevin McGrail <hevkev@sfo.com>.
-
+The original author of DeuTex is Olivier Montanuy
+<Olivier.Montanuy=wanadoo+fr>.
+From 1994 to 1996, DeuTex was maintained by Olivier Montanuy with help from Per
+Allansson <c91peral=und+ida+liu+se>, James Bonfield
+<jkb=mrc-molecular-biology+cambridge+ac+uk>, Sharon Bowles, Mark Mathews
+<mark.mathews=channel1+com> and Chuck Rossi.
+The original manual was written by Kevin McGrail <hevkev=sfo+com>.
+.PP
 As of version 4 (1999), the maintainer is André Majorel
-<amajorel@teaser.fr>.
-
-Questions and bug reports should be sent to the current
-maintainer, \fInot\fP to the original authors.
+<URL:http://www.teaser.fr/~amajorel/>.
+.PP
+Questions and bug reports should be sent to the current maintainer, \fInot\fP
+to the original authors.
 .SH SEE ALSO
-.B man \-k doom wad
+.BR wadcat (6),
+.BR wadext (6),
+.BR wadext2 (6),
+.BR wadflat (6),
+.BR wadgc (6),
+.BR wadlc (6),
+.BR wadldc (6),
+.BR wadpatch (6),
+.BR wadsprit (6),
+.BR wadtex (6),
+.BR wadtxls (6),
+.BR xwadtools (6)

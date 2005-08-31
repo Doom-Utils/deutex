@@ -1,9 +1,9 @@
-                         License terms for DeuTex
+                         Licence terms for DeuTex
 
 ------------------------------------------------------------------------
 
 DeuTex is Copyright © 1994-1995 Olivier Montanuy,
-      and Copyright © 1999-2000 André Majorel.
+      and Copyright © 1999-2005 André Majorel.
 
 The parts of DeuTex that have been written by Olivier Montanuy,
 Kevin McGrail, André Majorel and other contributors are
@@ -28,7 +28,7 @@ Software Foundation, Inc., 59 Temple Place, Suite 330, Boston, MA
 ------------------------------------------------------------------------
 
 However, the DeuTex distribution includes material that was
-written by other people or distributed under different licenses :
+written by other people or distributed under different licences :
 
 1. DeuTex incorporates code derived from DEU 5.21. DEU 5.21 was
    put in the public domain in 1994 by Raphaël Quinet and Brendon
@@ -38,7 +38,7 @@ written by other people or distributed under different licenses :
 
 3. The file lzw.c contains the following notes :
 
-   > Copyright 1993, David Koblas (koblas@netcom.com)
+   > Copyright 1993, David Koblas (koblas=netcom+com)
    >
    > Permission to use, copy, modify, and to distribute this software
    > and its documentation for any purpose is hereby granted without
@@ -52,7 +52,7 @@ written by other people or distributed under different licenses :
    > This file is derived from ppmtogif.c and giftoppm.c
    > only the compression/decompression routines were kept.
    >
-   > Based on GIFENCOD by David Rowley <mgardi@watdscu.waterloo.edu>.
+   > Based on GIFENCOD by David Rowley <mgardi=watdscu+waterloo+edu>.
    > A Lempel-Zim compression based on "compress".
    >
    > Copyright (C) 1989 by Jef Poskanzer.
@@ -71,4 +71,4 @@ written by other people or distributed under different licenses :
 4. The files endianio.c and endianm.c are Copyright © André Majorel 1999
    and available under the terms of the LGPL.
 
--- AYM 1999-12-30
+-- AYM 2005-08-28

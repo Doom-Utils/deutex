@@ -3,15 +3,12 @@
  *	Palette index usage statistics (cf -usedidx)
  */
 
-
 /*
-This file is part of DeuTex.
+This file is Copyright © 1994-1995 Olivier Montanuy,
+             Copyright © 1999-2005 André Majorel.
 
-DeuTex incorporates code derived from DEU 5.21 that was put in the public
+It may incorporate code derived from DEU 5.21 that was put in the public
 domain in 1994 by Raphaël Quinet and Brendon Wyber.
-
-DeuTex is Copyright © 1994-1995 Olivier Montanuy,
-          Copyright © 1999-2000 André Majorel.
 
 This program is free software; you can redistribute it and/or modify it under
 the terms of the GNU General Public License as published by the Free Software
@@ -22,9 +19,9 @@ This program is distributed in the hope that it will be useful, but WITHOUT
 ANY WARRANTY; without even the implied warranty of MERCHANTABILITY or FITNESS
 FOR A PARTICULAR PURPOSE. See the GNU General Public License for more details.
 
-You should have received a copy of the GNU General Public License along with
-this library; if not, write to the Free Software Foundation, Inc., 59 Temple
-Place, Suite 330, Boston, MA 02111-1307, USA.
+You should have received a copy of the GNU General Public License
+along with this program; if not, write to the Free Software
+Foundation, Inc., 51 Franklin Street, Fifth Floor, Boston, MA  02110-1301, USA
 */
 
 
@@ -43,7 +40,7 @@ void usedidx_begin_lump (cusage_t *cusage, const char *name)
   int i;
 
   if (cusage == NULL)
-    Bug ("usedidx_begin_lump: bad cusage %p", cusage);
+    Bug ("UI10", "usedidx_begin_lump: null cusage");
   cusage->lump_uses = Malloc (NCOLOURS * sizeof *cusage->lump_uses);
   for (i = 0; i < NCOLOURS; i++)
     cusage->lump_uses[i] = 0;
@@ -57,8 +54,6 @@ void usedidx_begin_lump (cusage_t *cusage, const char *name)
  */
 void usedidx_pixel (cusage_t *cusage, unsigned char idx)
 {
-  if (idx > NCOLOURS)  /* Can't happen */
-    Bug ("usedidx_pixel: idx %d > NCOLOURS %d", (int) idx, (int) NCOLOURS);
   cusage->lump_uses[idx]++;
 }
 
@@ -71,7 +66,7 @@ void usedidx_end_lump (cusage_t *cusage)
 {
   int i;
   if (cusage == NULL)
-    Bug ("usedidx_end_lump: bad cusage %p", cusage);
+    Bug ("UI20", "usedidx_end_lump: null cusage");
   for (i = 0; i < NCOLOURS; i++)
   {
     if (cusage->lump_uses[i] > 0)

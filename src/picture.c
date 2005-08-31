@@ -1,11 +1,9 @@
 /*
-This file is part of DeuTex.
+This file is Copyright © 1994-1995 Olivier Montanuy,
+             Copyright © 1999-2005 André Majorel.
 
-DeuTex incorporates code derived from DEU 5.21 that was put in the public
+It may incorporate code derived from DEU 5.21 that was put in the public
 domain in 1994 by Raphaël Quinet and Brendon Wyber.
-
-DeuTex is Copyright © 1994-1995 Olivier Montanuy,
-          Copyright © 1999-2000 André Majorel.
 
 This program is free software; you can redistribute it and/or modify it under
 the terms of the GNU General Public License as published by the Free Software
@@ -16,9 +14,9 @@ This program is distributed in the hope that it will be useful, but WITHOUT
 ANY WARRANTY; without even the implied warranty of MERCHANTABILITY or FITNESS
 FOR A PARTICULAR PURPOSE. See the GNU General Public License for more details.
 
-You should have received a copy of the GNU General Public License along with
-this library; if not, write to the Free Software Foundation, Inc., 59 Temple
-Place, Suite 330, Boston, MA 02111-1307, USA.
+You should have received a copy of the GNU General Public License
+along with this program; if not, write to the Free Software
+Foundation, Inc., 51 Franklin Street, Fifth Floor, Boston, MA  02110-1301, USA
 */
 
 
@@ -33,6 +31,11 @@ Place, Suite 330, Boston, MA 02111-1307, USA.
 #include "ident.h"
 #include "color.h"
 #include "usedidx.h"
+
+
+#ifdef DeuTex
+static int wall_to_raw (char *data, Int32 datasz, const char *name);
+#endif
 
 
 /*
@@ -54,7 +57,7 @@ Place, Suite 330, Boston, MA 02111-1307, USA.
 #define FAIL0(s)   do{if (message) strcpy (message, s);     return 1;}while(0)
 #define FAIL1(f,a) do{if (message) sprintf (message, f, a); return 1;}while(0)
 int parse_pic_header (
-    const unsigned char *buf,
+    const char *buf,
     long bufsz,
     pic_head_t *h,
     char *message)
@@ -69,36 +72,54 @@ int parse_pic_header (
    h->colofs_size = (picture_format == PF_NORMAL) ? 4 : 2;
 
    /* Read the picture header */
-   if (picture_format != PF_ALPHA)
-   {
-      if (p + 8 - 1 > buf_end)
-	 FAIL0 ("header too short");
-      read_i16_le (p, &h->width);
-      p += 2;
-      read_i16_le (p, &h->height);
-      p += 2;
-      read_i16_le (p, &h->xofs);
-      p += 2;
-      read_i16_le (p, &h->yofs);
-      p += 2;
-   }
-   else
+   if (picture_format == PF_ALPHA)
    {
       if (p + 4 - 1 > buf_end)
-	 FAIL0 ("header too short");
+        FAIL0 ("header too short");
       h->width  = *p++;
       h->height = *p++;
       h->xofs   = *p++;
       h->yofs   = *p++;
    }
+   else if (picture_format == PF_ROTT)
+   {
+     Int16 unknown;
+
+     if (p + 10 - 1 > buf_end)
+       FAIL0 ("header too short");
+     read_i16_le (p, &unknown);		/* FIXME find out what it's for */
+     p += 2;
+     read_i16_le (p, &h->width);
+     p += 2;
+     read_i16_le (p, &h->height);
+     p += 2;
+     read_i16_le (p, &h->xofs);
+     p += 2;
+     read_i16_le (p, &h->yofs);
+     p += 2;
+   }
+   else
+   {
+     if (p + 8 - 1 > buf_end)
+       FAIL0 ("header too short");
+     read_i16_le (p, &h->width);
+     p += 2;
+     read_i16_le (p, &h->height);
+     p += 2;
+     read_i16_le (p, &h->xofs);
+     p += 2;
+     read_i16_le (p, &h->yofs);
+     p += 2;
+   }
 
    /* Sanity checks on picture size and offsets */
    if (h->width < 1)
       FAIL1 ("width < 1 (%d)", (int) h->width);
-   if (h->width > 4096)
-      FAIL1 ("width > 4096 (%d)", (int) h->width);
    if (h->height < 1)
       FAIL1 ("height < 1 (%d)", (int) h->height);
+#if 0
+   /*if (h->width > 4096)
+      FAIL1 ("width > 4096 (%d)", (int) h->width);*/
    if (h->height > 4096)
       FAIL1 ("height > 4096 (%d)", (int)h->height);
    if (h->xofs < -4096)
@@ -109,6 +130,7 @@ int parse_pic_header (
       FAIL1 ("Y-offset < -4096 (%d)", (int) h->yofs);
    if (h->yofs > 4096)
       FAIL1 ("Y-offset > 4096 (%d)", (int) h->yofs);
+#endif
 
    /* Array of column offsets. Column data. */ 
    h->colofs = p;
@@ -171,11 +193,11 @@ void PicDebug(char *file, const char *bmpdir, const char *name)
    Int16 rawX,rawY;
    struct PIXEL  * doompal;
 
-   Phase("BMP->RAW\n");
+   Phase("XX99", "BMP->RAW");
    MakeFileName(file,bmpdir,"","",name,"BMP");
    raw =BMPtoRAW(&rawX,&rawY,file);
    doompal = COLdoomPalet();
-   Phase("RAW->GIF\n");
+   Phase("XX99", "RAW->GIF");
    MakeFileName(file,bmpdir,"","",name,"GIF");
    RAWtoGIF(file,raw,rawX,rawY,doompal);
 
@@ -192,11 +214,11 @@ void PicDebug(char *file,const char *bmpdir, const char *name)
    Int16 rawX=0,rawY=0;
    struct PIXEL  * doompal;
 
-   Phase("GIF->RAW\n");
+   Phase("DB10", "GIF->RAW");
    MakeFileName(file,bmpdir,"","",name,"GIF");
    raw =GIFtoRAW(&rawX,&rawY,file);
    doompal = COLdoomPalet();
-   Phase("RAW->BMP\n");
+   Phase("DB20", "RAW->BMP");
    MakeFileName(file,bmpdir,"","",name,"BMP");
    RAWtoBMP(file,raw,rawX,rawY,doompal);
 
@@ -216,10 +238,12 @@ Bool PICsaveInFile (char *file, PICTYPE type, char *pic, Int32 picsz,
     Int16 *pXinsr, Int16 *pYinsr, IMGTYPE Picture, const char *name,
     cusage_t *cusage)
 { char  *raw=NULL;
-  Int16 rawX,rawY;
+  Int16 rawX = 0;			/* Initialise to placate GCC */
+  Int16 rawY = 0;			/* Initialise to placate GCC */
   struct PIXEL *doompal;
   char transparent;
 
+  /*Warning ("XX99", "PICsaveInFile: %s", fname (file));*/
   transparent =(char)COLinvisible();
   *pXinsr=INVALIDINT; /*default insertion point X*/
   *pYinsr=INVALIDINT; /*default insertion point Y*/
@@ -228,6 +252,7 @@ Bool PICsaveInFile (char *file, PICTYPE type, char *pic, Int32 picsz,
     case PWEAPN:
     case PSPRIT:
     case PPATCH:
+      /*Warning ("XX99", "PICtoRAW: %s", fname (file));*/
       raw = PICtoRAW (&rawX, &rawY, pXinsr, pYinsr, pic, picsz, transparent,
 	  name, cusage);
       if (raw==NULL) return FALSE;    /*was not a valid DoomPic*/
@@ -235,10 +260,20 @@ Bool PICsaveInFile (char *file, PICTYPE type, char *pic, Int32 picsz,
 
     case PFLAT:
       if(picsz==0x1000L)     { rawX=64;rawY=64;}
-      else if(picsz==0x1040) { rawX=64;rawY=65;}/*bug?*/
-      else if(picsz==0x2000) { rawX=64;rawY=128;}/*bug?*/
+      else if(picsz==0x1040) { rawX=64;rawY=65;}  /* Heretic scrolling flat */
+      else if(picsz==0x2000) { rawX=64;rawY=128;}  /* Hexen scrolling flat */
       else return FALSE;/*Wrong size for FLAT. F_SKY1*/
       raw=pic;    /*flat IS raw already*/
+      if (cusage != NULL)
+	usedidx_rectangle (pic, picsz, name, cusage);
+      break;
+
+    case PWALL:
+      if(picsz==4096)        { rawX=64;rawY=64;}
+      else return FALSE;/*Wrong size for WALL.*/
+      if (wall_to_raw (pic, picsz, name) != 0)
+	ProgError ("GW88", "Wall %s: wall_to_raw error", lump_name (name));
+      raw = pic;
       if (cusage != NULL)
 	usedidx_rectangle (pic, picsz, name, cusage);
       break;
@@ -266,7 +301,7 @@ Bool PICsaveInFile (char *file, PICTYPE type, char *pic, Int32 picsz,
       break;
 
     default:
-        Bug("picsv (%d)", (int) type);
+      Bug("GW90", "Invalid type %d", (int) type);
   }
 
   if (cusage == NULL)
@@ -292,7 +327,7 @@ Bool PICsaveInFile (char *file, PICTYPE type, char *pic, Int32 picsz,
 	RAWtoPPM(file,raw,rawX,rawY,doompal);
 	break;
        default:
-	Bug("psvit (%d)", (int) Picture);
+	Bug("GW91", "Invalid picture format %d", (int) Picture);
      }
   }
 
@@ -303,6 +338,7 @@ Bool PICsaveInFile (char *file, PICTYPE type, char *pic, Int32 picsz,
      break;
     case PFLAT: /*don't free pic!*/
     case PLUMP:
+    case PWALL:
      break;
   }
   return TRUE;
@@ -314,7 +350,7 @@ Int32 PICsaveInWAD(struct WADINFO *info,char *file,PICTYPE type,Int16 Xinsr,Int1
   char  *raw=NULL;
   Int16 rawX=0,rawY=0;
   char  *pic=NULL;
-  Int32 picsz;
+  Int32 picsz = 0;			/* Initialise to placate GCC */
   char transparent;
 
   /*
@@ -332,30 +368,39 @@ Int32 PICsaveInWAD(struct WADINFO *info,char *file,PICTYPE type,Int16 Xinsr,Int1
      raw = PPMtoRAW(&rawX,&rawY,file);
      break;
     default:
-     Bug("pwvit");
+     Bug("GB02", "Invalid picture conversion %d", (int)Picture);
   }
-  if((rawY<1)||(rawX<1))ProgError("Bad picture size");
-  // AYM (256 -> 509)
-  if(rawY>509)ProgError("Picture height can't be more than 509");
-  // AYM (512 -> 1024)
-  if(rawX>1024)ProgError("Picture width can't be more than 1024");
+  if (rawX < 1)
+    ProgError ("GB10", "%s: picture width < 1", fname (file));
+  if (rawY < 1)
+    ProgError ("GB11", "%s: picture height < 1", fname (file));
+  /* AYM (256 -> 509) */
+  if(rawY>509)
+    ProgError ("GB13", "%s: picture height > 509", fname (file));
   switch(type)
   { case PGRAPH: case PWEAPN: case PSPRIT: case PPATCH:
       break;
     case PFLAT: /*flats*/
       if(rawX!=64)
-	Warning ("%s: weird width for a flat (not 64)", fname (file));
+	Warning ("FB10", "%s: weird width for a flat (not 64)", fname (file));
       if(rawY!=64 && rawY!=65 && rawY != 128)
-	Warning ("%s: weird height for a flat (not 64, 65 or 128)", fname (file));
+	Warning ("FB11", "%s: weird height for a flat (not 64, 65 or 128)",
+	    fname (file));
       break;
     case PLUMP: /*special heretic lumps*/
       if(rawX!=320)
-        Warning ("%s: weird width for a lump (not 320)", fname (file));
+        Warning ("LB10", "%s: weird width for a lump (not 320)", fname (file));
       if(rawY!=200)
-        Warning ("%s: weird height for a lump (not 200)", fname (file));
+        Warning ("LB11", "%s: weird height for a lump (not 200)", fname (file));
+      break;
+    case PWALL:
+      if(rawX!=64)
+	Warning("WB10", "%s: weird width for a wall (not 64)", fname (file));
+      if(rawY!=64)
+	Warning("WB11", "%s: weird height for a wall (not 64)", fname (file));
       break;
     default:
-      Bug("picwt");
+      Bug("GB91", "Invalid type %d", (int)type);
   }
   /*
   ** calculate insertion point
@@ -374,6 +419,11 @@ Int32 PICsaveInWAD(struct WADINFO *info,char *file,PICTYPE type,Int16 Xinsr,Int1
         break;
     case PLUMP:    /*LUMP is RAW*/
     case PFLAT:    /*FLAT is RAW*/
+        picsz= ((Int32)rawX)*((Int32)rawY);
+        WADRwriteBytes(info,raw,picsz);
+        Free(raw);
+        break;
+    case PWALL:  /* FIXME rotate 270° */
         picsz= ((Int32)rawX)*((Int32)rawY);
         WADRwriteBytes(info,raw,picsz);
         Free(raw);
@@ -413,7 +463,8 @@ Int16 Yinsr;             /*insertion point*/
 #else
 #define OPTIMEM 0
 #endif
-char  *RAWtoPIC(Int32 *ppicsz, char  *raw, Int16 rawX, Int16 rawY,Int16 Xinsr,Int16 Yinsr, char transparent)
+static char *RAWtoPIC(Int32 *ppicsz, char  *raw, Int16 rawX, Int16 rawY,
+    Int16 Xinsr,Int16 Yinsr, char transparent)
 {  Int16 x,y;
    char pix,lastpix;            /*pixels*/
    /*Doom PIC */
@@ -489,8 +540,8 @@ char  *RAWtoPIC(Int32 *ppicsz, char  *raw, Int16 rawX, Int16 rawY,Int16 Xinsr,In
 	     should be started when we reach that position.
 	 */
 	if((setcount==256 || y==254) && lastpix!=transparent)
-	{ printf ("setcount=%d y=%d lastpix=%02X pix=%02X\n",
-	    (int) setcount, (int) y, (int) lastpix, (int) pix);
+	{ /*printf ("setcount=%d y=%d lastpix=%02X pix=%02X\n",
+	    (int) setcount, (int) y, (int) lastpix, (int) pix);*/
 	  if (setcount==256)
 	    setcount--;  /* That's backtracking */
 	  Set[1]=setcount;
@@ -504,8 +555,9 @@ char  *RAWtoPIC(Int32 *ppicsz, char  *raw, Int16 rawX, Int16 rawY,Int16 Xinsr,In
 	}
 	/* More than 509 pixels for this column. Quit. */
 	if(y >= 509)
-	{ Warning("Column has more than 509 pixels."
-	    " Truncating at (%d,%d).\n", (int) x, (int) y);
+	{ Warning("PI20",
+	    "Column has more than 509 pixels, truncating at (%d,%d)",
+	    (int) x, (int) y);
 	  break;
 	}
 	if(lastpix==transparent)  /* begining of post */
@@ -569,7 +621,7 @@ char  *RAWtoPIC(Int32 *ppicsz, char  *raw, Int16 rawX, Int16 rawY,Int16 Xinsr,In
 ** it points to an object of type cusage_t.
 ** That block is for colour usage statistics and we update it.
 */
-char  *PICtoRAW(Int16 *prawX,Int16 *prawY,Int16 *pXinsr,Int16 *pYinsr,
+static char *PICtoRAW(Int16 *prawX,Int16 *prawY,Int16 *pXinsr,Int16 *pYinsr,
       const char  *pic,Int32 picsz,char transparent, const char *name,
       cusage_t *cusage)
 {  Int16 x,y;         /*pixels*/
@@ -582,19 +634,19 @@ char  *PICtoRAW(Int16 *prawX,Int16 *prawY,Int16 *pXinsr,Int16 *pYinsr,
    Int32 rawpos,rawsz;
    pic_head_t h;
    int nw = 5;  /* Number of warnings left */
-   
+
    if (cusage != NULL)
       usedidx_begin_lump (cusage, name);
 
    notransp=0;/* this is to avoid trouble when the transparent
 		 index is used in a picture */
-   
+
    /* Read the header of the picture */
    {
       char message_buf[81];
       if (parse_pic_header (pic, picsz, &h, message_buf))
       {
-	 Warning ("Picture %s: %s. Skipping picture.",
+	 Warning ("PI10", "Picture %s: %s, skipping picture",
 	     lump_name (name), message_buf);
 	 return NULL;
       }
@@ -604,12 +656,14 @@ char  *PICtoRAW(Int16 *prawX,Int16 *prawY,Int16 *pXinsr,Int16 *pYinsr,
 
    /* Read all columns, post by post */
    /* allocate raw. (care: free it if error, before exit) */
+   /*Warning ("XX99", "%s: %d x %d",
+      lump_name (name), (int) h.width, (int) h.height);*/
    rawsz = (long) h.width * h.height;
    raw = (char  *) Malloc (rawsz);
    Memset (raw, transparent, rawsz);
    for (x = 0; x < h.width; x++)
    {
-      const unsigned char *post;
+      const unsigned char *post = NULL;	/* Initialised to avoid a warning */
       if (h.colofs_size == 4)
       {
 	 Int32 ofs;
@@ -630,12 +684,22 @@ char  *PICtoRAW(Int16 *prawX,Int16 *prawY,Int16 *pXinsr,Int16 *pYinsr,
       }
       else
       {
-	 Bug ("Bad colofs_size %d", (int) h.colofs_size);  /* Can't happen */
+	 Bug ("PI90", "Invalid colofs_size %d", (int) h.colofs_size);
+	 /* Can't happen */
       }
+      /*Warning ("XX99", "%s: %03d %p %p %p",
+	  lump_name (name),
+	  x,
+	  pic,
+	  post,
+	  pic_end
+	);*/
+
       if (post < (const unsigned char *) pic)
       {
 	 LimitedWarn (&nw,
-	     "Picture %s(%d): column has bad offset %ld. Skipping column.",
+	     "PI11",
+	     "Picture %s(%d): column has bad offset %ld, skipping column",
 	     lump_name (name),
 	     (int) x,
 	     (long) ((const char *) pic - (const char *) post));
@@ -644,7 +708,8 @@ char  *PICtoRAW(Int16 *prawX,Int16 *prawY,Int16 *pXinsr,Int16 *pYinsr,
       if (post < h.data)
       {
 	 LimitedWarn (&nw,
-	     "Picture %s(%d): column has suspicious offset %ld.",
+	     "PI12",
+	     "Picture %s(%d): column has suspicious offset %ld",
 	     lump_name (name),
 	     (int) x,
 	     (long) ((const char *) pic - (const char *) post));
@@ -657,7 +722,8 @@ char  *PICtoRAW(Int16 *prawX,Int16 *prawY,Int16 *pXinsr,Int16 *pYinsr,
 	if (post > pic_end)
 	{
 	   LimitedWarn (&nw,
-	    "Picture %s(%d): post starts past EOL. Skipping rest of column.",
+	    "PI13",
+	    "Picture %s(%d): post starts past EOL, skipping rest of column",
 	       lump_name (name), (int) x); 
 	   goto done_with_column;
 	}
@@ -672,7 +738,8 @@ char  *PICtoRAW(Int16 *prawX,Int16 *prawY,Int16 *pXinsr,Int16 *pYinsr,
         if (post_end > pic_end)
 	{
 	  LimitedWarn (&nw,
-	      "Picture %s(%d): post spans EOL. Skipping rest of column.",
+	      "PI14",
+	      "Picture %s(%d): post spans EOL, skipping rest of column",
 	      lump_name (name), (int) x);
 	  goto done_with_column;  /* Used to be fatal--AYM 1999-10-16 */
 	}
@@ -681,7 +748,8 @@ char  *PICtoRAW(Int16 *prawX,Int16 *prawY,Int16 *pXinsr,Int16 *pYinsr,
         { if (y >= h.height)
 	  {
 	    LimitedWarn (&nw,
-	  "Picture %s(%d): post Y-offset too high. Skipping rest of column.",
+		"PI15",
+	  "Picture %s(%d): post Y-offset too high, skipping rest of column",
 		lump_name (name), (int) x);
 	    goto done_with_column;  /* Used to be fatal--AYM 1999-10-16 */
 	  }
@@ -701,7 +769,7 @@ done_with_column:
    }
 
    /*return*/
-   LimitedEpilog (&nw, "Picture %s: ", lump_name (name));
+   LimitedEpilog (&nw, "PI16", "Picture %s: ", lump_name (name));
    if (cusage != NULL)
      usedidx_end_lump (cusage);
    *pXinsr = h.xofs;
@@ -735,7 +803,8 @@ static char *snea_to_raw (Int16 *prawX, Int16 *prawY, Int16 *pXinsr,
 
   if (pixels + 2 != sneasz)
   {
-    Warning ("Snea %s: mismatch between size and geometry. Skipping snea.",
+    Warning ("SN10",
+	"Snea %s: mismatch between size and geometry, skipping snea",
 	lump_name (name));
     Free (raw);
     return NULL;
@@ -761,6 +830,47 @@ static char *snea_to_raw (Int16 *prawX, Int16 *prawY, Int16 *pXinsr,
 
 
 
+/******************* ROTT wall module ************************/
+
+/*
+ *	wall_to_raw - convert ROTT wall data to a RAW bitmap
+ *
+ *	A ROTT wall is a 64x64 pixel matrix, read down and right. To
+ *	convert it to RAW format, mirror it along the first diagonal
+ *	((0,0)-(63,63)).
+ */
+#define WALL_DIM 64
+static int wall_to_raw (char *data, Int32 datasz, const char *name)
+{
+  char *s = data + 1;
+  char *d = s + WALL_DIM - 1;
+  int i;
+  int j;
+
+  if (datasz != WALL_DIM * WALL_DIM)
+  {
+    Warning ("WA10", "Wall %s: size not %d",
+	lump_name (name), WALL_DIM * WALL_DIM);
+    return 0;
+  }
+
+  for (i = 1; i < WALL_DIM; i++)
+  {
+    for (j = i; j < WALL_DIM; j++)
+    {
+      char swap = *d;			/* Swap (*s) and (*d) */
+      *d = *s;
+      *s = swap;
+      s++;
+      d += WALL_DIM;
+    }
+    s += 1 + i;
+    d = s + WALL_DIM - 1;
+  }
+
+  return 0;
+}
+/******************* End ROTT wall module ************************/
 
 
 
@@ -808,7 +918,7 @@ Int32  ColorImp;                /*32 ClrImportant   nb of important colors in pa
 **
 ** out:  UInt8 *raw;  Int16 rawX; Int16 rawY;
 */
-char  *BMPtoRAW(Int16 *prawX,Int16 *prawY,char *file)
+static char *BMPtoRAW(Int16 *prawX,Int16 *prawY,char *file)
 {
    struct BMPHEAD    *head;      /*bmp header*/
    struct BMPPALET   *palet;     /*palet. 8 bit*/
@@ -831,24 +941,25 @@ char  *BMPtoRAW(Int16 *prawX,Int16 *prawY,char *file)
 
    fd=fopen(file,FOPEN_RB);
    if(fd==NULL)
-      ProgError("Can't open %s for reading",file);
+      ProgError("BR10", "%s: %s", fname (file), strerror (errno));
    if(fread(sig,2,1,fd)!=1)
-      ProgError("Can't read sig of BMP %s",file);
+      ProgError("BR11", "%s: read error in header", fname (file));
    if(strncmp(sig,"BM",2)!=0)
-      ProgError("Bmp: signature incorrect");
+      ProgError("BR12", "%s: bad BMP magic", fname (file));
 
    head=(struct BMPHEAD  *)Malloc(sizeof(struct BMPHEAD));
    if(fread(head,sizeof(struct BMPHEAD),1,fd)!=1)
-     ProgError("Bmp: can't read header");
+     ProgError("BR13", "%s: read error in header", fname (file));
    /*
    ** check the BMP header
    */
-   if (peek_i32_le (&head->compress) != 0) ProgError("Bmp: not RGB");
+   if (peek_i32_le (&head->compress) != 0)
+     ProgError("BR14", "%s: not an RGB BMP", fname (file));
    read_i32_le (&head->startpix, &startpix);
    szx = (Int16) peek_i32_le (&head->szx);
    szy = (Int16) peek_i32_le (&head->szy);
-   if(szx<1) ProgError("Bmp: bad width");
-   if(szy<1) ProgError("Bmp: bad height");
+   if(szx<1) ProgError("BR15", "%s: bad width", fname (file));
+   if(szy<1) ProgError("BR16", "%s: bad height", fname (file));
    ncols = peek_i32_le (&head->ColorUsed);
    /*
    ** Allocate memory for raw bytes
@@ -860,34 +971,32 @@ char  *BMPtoRAW(Int16 *prawX,Int16 *prawY,char *file)
    nbits = (Int16) ((peek_i32_le (&head->planebits)>>16)&0xFFFFL);
    switch(nbits)
    { case 24:
-       {
-	 static warned_once = 0;
-
-	 if (! warned_once)
-	 {
-	   Info("Warning: Color quantisation is slow. Use 8 bit BMP.\n");
-	   warned_once = 1;
-	 }
-       }
-       linesz=((((Int32)szx)*sizeof(struct BMPPIXEL))+3L)&~3L; /*RGB, aligned mod 4*/
+       /*RGB, aligned mod 4*/
+       linesz=((((Int32)szx)*sizeof(struct BMPPIXEL))+3L)&~3L;
        break;
      case 8:
        linesz=(((Int32)szx)+3L)&~3L;     /*Idx, aligned mod 4*/
-       if(ncols>256)                    ProgError("Bmp: palette should be 256 color");
+       if(ncols>256)
+	 ProgError("BR17", "%s: palette should have 256 entries", fname (file));
        if(ncols<=0) ncols=256;   /*Bug of PaintBrush*/
        paletsz=(ncols)*sizeof(struct BMPPALET);
        /*set position to palette  (a bit hacked)*/
-       if(fseek(fd,0xEL+peek_i32_le(&head->headsz),SEEK_SET))ProgError("Bmp: seek failed");
+       if(fseek(fd,0xEL+peek_i32_le(&head->headsz),SEEK_SET))
+	 ProgError("BR18", "%s: can't seek to BMP palette (%s)",
+	     fname (file),
+	     strerror (errno));  /* FIXME mention the destination offset */
        /*load palette*/
        palet=(struct BMPPALET  *)Malloc(paletsz);
-       if(fread(palet,(size_t)paletsz,1,fd)!=1)   ProgError("Bmp: can't read palette");
+       if(fread(palet,(size_t)paletsz,1,fd)!=1)
+	 ProgError("BR19", "%s: can't read palette", fname (file));
        for(p=0;p<ncols;p++)
        {  Idx2Doom[p]=COLindex(palet[p].R,palet[p].G,palet[p].B,(UInt8)p);
        }
        Free(palet);
        break;
      default:
-        ProgError("Bmp: type not supported (%d bits)",nbits);
+        ProgError("BR20", "%s: unsupported BMP type (%d bits)",
+	    fname (file), nbits);
    }
    bmpxy=((Int32)linesz)*((Int32)szy);
    /*Most windows application bug on one of the other*/
@@ -896,18 +1005,22 @@ char  *BMPtoRAW(Int16 *prawX,Int16 *prawY,char *file)
    /*PaintBrush: pixlen is null*/
    if(head->pixlen<bmpxy)
      if(peek_i32_le(&head->bmplen)<(startpix+bmpxy))
-       ProgError("Bmp: size of pixel area incorrect");
+       ProgError("BR21", "%s: size of pixel area incorrect", fname (file));
 
    Free(head);
    /* seek start of pixels */
-   if(fseek(fd,startpix,SEEK_SET))      ProgError("Bmp: seek failed");
+   if(fseek(fd,startpix,SEEK_SET))
+     ProgError("BR22", "%s: can't seek to pixel data (%s)",
+	 fname (file),
+	 strerror (errno));  /* FIXME mention the destination offset */
    /* read lines */
    line = (UInt8  *)Malloc(linesz);
    bmpidxs=(UInt8  *)line;
    pixs=(struct BMPPIXEL  *)line;
    /*convert bmp pixels/bmp indexs into doom indexs*/
    for(y=szy-1;y>=0;y--)
-   {  if(fread(line,(size_t)linesz,1,fd)!=1)    ProgError("Can't read BMP line");
+   {  if(fread(line,(size_t)linesz,1,fd)!=1)
+         ProgError("BR23", "%s: read error in pixel data", fname (file));
       for(x=0;x<szx;x++)
       {  switch(nbits)
          {  case 24:
@@ -935,7 +1048,8 @@ char  *BMPtoRAW(Int16 *prawX,Int16 *prawY,char *file)
 ** out:  Int32 bmpsz;
 **       UInt8 bmp[bmpsz];
 */
-void RAWtoBMP(char *file,char  *raw,Int16 rawX, Int16 rawY,struct PIXEL  *doompal)
+static void RAWtoBMP(char *file, char *raw, Int16 rawX, Int16 rawY,
+    struct PIXEL *doompal)
 {
    struct BMPHEAD    *head; /*bmp header*/
    struct BMPPALET   *palet;/*palet. 8 bit*/
@@ -948,10 +1062,12 @@ void RAWtoBMP(char *file,char  *raw,Int16 rawX, Int16 rawY,struct PIXEL  *doompa
    char sig[2];
    /*BMP 8 bits avec DOOM Palette*/
 
-  fd=fopen(file,FOPEN_WB);
+   fd=fopen(file,FOPEN_WB);
 
    if(fd==NULL)
-     ProgError("Can't create %s (%s)", file, strerror (errno));
+     ProgError("BW10", "%s: %s",
+	 fname (file),
+	 strerror (errno));
    ncol=256;
    paletsz=ncol*sizeof(struct BMPPALET);
    linesz=(rawX+3)&(~3);  /*aligned mod 4*/
@@ -959,7 +1075,8 @@ void RAWtoBMP(char *file,char  *raw,Int16 rawX, Int16 rawY,struct PIXEL  *doompa
    startpix=2+sizeof(struct BMPHEAD)+paletsz;
    bmplen=startpix+pixlen;
    strncpy(sig,"BM",2);
-   if(fwrite(sig,2,1,fd)!=1)   ProgError("Can't write file %s",file);
+   if(fwrite(sig,2,1,fd)!=1)
+     ProgError("BW11", "%s: write error", fname (file));
    /*Header*/
    head=(struct BMPHEAD *)Malloc(sizeof(struct BMPHEAD));
    write_i32_le (&head->bmplen,    bmplen);
@@ -976,7 +1093,7 @@ void RAWtoBMP(char *file,char  *raw,Int16 rawX, Int16 rawY,struct PIXEL  *doompa
    write_i32_le (&head->ColorUsed, ncol);
    write_i32_le (&head->ColorImp,  ncol);
    if(fwrite(head,sizeof(struct BMPHEAD),1,fd)!=1)
-     ProgError("Can't write file %s",file);
+     ProgError("BW12", "%s: write error", fname (file));
    Free(head);
    /*
    ** set palette
@@ -990,7 +1107,7 @@ void RAWtoBMP(char *file,char  *raw,Int16 rawX, Int16 rawY,struct PIXEL  *doompa
      palet[x].Zero = 0;
    }
    if(fwrite(palet,(size_t)paletsz,1,fd)!=1)
-     ProgError("Can't write file %s",file);
+     ProgError("BW13", "%s: write error", fname (file));
    Free(palet);
    /*
    ** set data
@@ -1006,11 +1123,12 @@ void RAWtoBMP(char *file,char  *raw,Int16 rawX, Int16 rawY,struct PIXEL  *doompa
      {   bmpidxs[((Int32)x)]=0;
      }
      if(fwrite(bmpidxs,1,linesz,fd)!=linesz)
-       ProgError("Can't write file %s",file);
+       ProgError("BW14", "%s: write error", fname (file));
    }
    Free(bmpidxs);
    /*done*/
-   fclose(fd);
+   if (fclose(fd))
+     ProgError ("BW15", "%s: %s", fname (file), strerror (errno));
 }
 /******************* end BMP module ************************/
 
@@ -1034,14 +1152,15 @@ void RAWtoBMP(char *file,char  *raw,Int16 rawX, Int16 rawY,struct PIXEL  *doompa
 
 
 /******************* PPM module ****************/
-void RAWtoPPM(char *file, char *raw, Int16 rawX, Int16 rawY,
+static void RAWtoPPM (char *file, char *raw, Int16 rawX, Int16 rawY,
     struct PIXEL *doompal)
 {
    FILE *fp;
 
    fp=fopen(file,FOPEN_WB);
    if(fp==NULL)
-     ProgError("Can't create %s (%s)", file, strerror (errno));
+     ProgError("PW10", "%s: %s",
+	 fname (file), strerror (errno));
    /* header */
    fprintf(fp,"P6\n%d %d\n255\n",rawX,rawY);
    /* data */
@@ -1051,10 +1170,11 @@ void RAWtoPPM(char *file, char *raw, Int16 rawX, Int16 rawY,
      for (p = raw; p < pmax; p++)
        fwrite (doompal + *p, sizeof *doompal, 1, fp);
    }
-   fclose(fp);
+   if (fclose(fp))
+     ProgError ("PW11", "%s: %s", fname (file), strerror (errno));
 }
 
-char *PPMtoRAW(Int16 *prawX,Int16 *prawY,char *file)
+static char *PPMtoRAW (Int16 *prawX, Int16 *prawY, char *file)
 {
    Int32 rawpos, rawSz;
    Int16 rawX,rawY;
@@ -1063,16 +1183,16 @@ char *PPMtoRAW(Int16 *prawX,Int16 *prawY,char *file)
    char buff[20];
    UInt8 c;Int16 n;
    FILE *fd;
-   static warned_once = 0;
 
    /*BMP 8 bits avec DOOM Palette*/
 
    fd=fopen(file,FOPEN_RB);
-   if(fd==NULL)     ProgError("Can't open %s",file);
+   if (fd==NULL)
+     ProgError("PR10", "%s: %s", fname (file), strerror (errno));
    if(getc(fd)!='P' || getc(fd) != '6')
    {
      fclose(fd);
-     ProgError("%s is not a rawbits PPM (P6) file");
+     ProgError ("PR11", "%s: not a rawbits PPM (P6) file", fname (file));
    }
    c=getc(fd);
    while(isspace(c))c=getc(fd);
@@ -1090,18 +1210,21 @@ char *PPMtoRAW(Int16 *prawX,Int16 *prawY,char *file)
    while(isspace(c))c=getc(fd);
    for(n=0;n<10;n++){if(!isdigit(c))break;buff[n]=c;c=getc(fd);}buff[n]='\0';
    /* data */
-   if(rawX<1) {fclose(fd);ProgError("%s: bad width", file);}
-   if(rawY<1) {fclose(fd);ProgError("%s: bad height", file);}
+   if(rawX<1)
+   {
+     fclose(fd);
+     ProgError("PR12", "%s: width < 1 (%d)", fname (file), (int) rawX);
+   }
+   if(rawY<1)
+   {
+     fclose(fd);
+     ProgError("PR13", "%s: height < 1 (%d)", fname (file), (int) rawY);
+   }
    rawSz=((Int32)rawX)*((Int32)rawY);
    raw=(char  *)Malloc(rawSz);
-   if (! warned_once)
-   {
-     Info("Warning: Color quantisation is slow. Use ppmquant.\n");
-     warned_once = 1;
-   }
    for(rawpos=0;rawpos<rawSz;rawpos++)
    { if(fread(&pix,sizeof(struct PIXEL),1,fd)!=1)
-     {fclose(fd);ProgError("%s: unexpected EOF");}
+     {fclose(fd);ProgError("PR15", "%s: read error", fname (file));}
      raw[rawpos]=COLindex(pix.R,pix.G,pix.B,0);
    }
    fclose(fd);
@@ -1194,7 +1317,7 @@ static char  *GIFintlace(char  *org,Int16 Xsz,Int16 Ysz);
 /*
 **  Read a Gif file
 */
-char  *GIFtoRAW(Int16 *rawX,Int16 *rawY,char *file)
+static char *GIFtoRAW (Int16 *rawX, Int16 *rawY, char *file)
 {   Int16  Xsz=0,Ysz=0;
     static Bool IntLace=FALSE;
     Int16  bitPixel;
@@ -1205,7 +1328,8 @@ char  *GIFtoRAW(Int16 *rawX,Int16 *rawY,char *file)
     char    *raw = NULL;
 
    fd=fopen(file,FOPEN_RB);
-   if (fd == NULL) ProgError("Can't open %s",file);
+   if (fd == NULL)
+     ProgError("GR10", "%s: %s", fname (file), strerror (errno));
 #if NEWGIFD
 #else
    decompressInit();
@@ -1216,21 +1340,21 @@ char  *GIFtoRAW(Int16 *rawX,Int16 *rawY,char *file)
    if (fread (GifIdent,6,1,fd)!=1)
    {
      fclose(fd);
-     ProgError("GIF: read error");
+     ProgError ("GR11", "%s: read error in GIF magic", fname (file));
    }
    if (strncmp (GifIdent,"GIF87a",6) && strncmp (GifIdent,"GIF89a",6))
    {
      fclose(fd);
-     ProgError("GIF: not a 87a or 89a GIF");
+     ProgError ("GR12", "%s: not a 87a or 89a GIF", fname (file));
    }
-   if (fread_u16_le (fd, &GifHead.xsize)
-    || fread_u16_le (fd, &GifHead.ysize)
+   if (fread_i16_le (fd, &GifHead.xsize)
+    || fread_i16_le (fd, &GifHead.ysize)
     || (chr = fgetc (fd), GifHead.info     = chr, chr == EOF)   /* Training */
     || (chr = fgetc (fd), GifHead.backgnd  = chr, chr == EOF)   /* for the */
     || (chr = fgetc (fd), GifHead.aspratio = chr, chr == EOF))  /* IOCCC */
    {
      fclose(fd);
-     ProgError("GIF: read error");
+     ProgError ("GR13", "%s: read error in GIF header", fname (file));
    }
    bitPixel=            1<<((GifHead.info&0x07)+1);
    GifScreen.BitPixel = bitPixel;
@@ -1241,7 +1365,8 @@ char  *GIFtoRAW(Int16 *rawX,Int16 *rawY,char *file)
    /* read Global Color Map */
    if ((GifHead.info)&COLORMAP)
    { if(fread(GifColor,sizeof(struct PIXEL),bitPixel,fd)!=bitPixel)
-     { fclose(fd);ProgError("GIF: read error");
+     { fclose(fd);
+       ProgError ("GR14", "%s: read error in GIF data", fname (file));
      }
    }
    /*
@@ -1254,17 +1379,17 @@ char  *GIFtoRAW(Int16 *rawX,Int16 *rawY,char *file)
 	GIFextens(fd);
       else if(c==',')   /*valid image start*/
       { if(raw!=NULL)  /* only keep first image*/
-	{ Warning("GIF: Other images discarded.");
+	{ Warning("GR15", "%s: other GIF images discarded", fname (file));
 	  break;
 	}
-	if (fread_u16_le (fd, &GifImage.ofsx)
-	 || fread_u16_le (fd, &GifImage.ofsy)
-	 || fread_u16_le (fd, &GifImage.xsize)
-	 || fread_u16_le (fd, &GifImage.ysize)
+	if (fread_i16_le (fd, &GifImage.ofsx)
+	 || fread_i16_le (fd, &GifImage.ofsy)
+	 || fread_i16_le (fd, &GifImage.xsize)
+	 || fread_i16_le (fd, &GifImage.ysize)
 	 || (chr = fgetc (fd), GifHead.info = chr, chr == EOF))
 	{
 	  fclose(fd);
-	  ProgError("GIF: read error");
+	  ProgError ("GR16", "%s: read error", fname (file));
 	}
 	/* GifImage.ofsx,ofsy  X,Y offset ignored */
 	bitPixel = 1<<((GifImage.info&0x07)+1);
@@ -1272,11 +1397,13 @@ char  *GIFtoRAW(Int16 *rawX,Int16 *rawY,char *file)
 	Xsz = GifImage.xsize;
 	Ysz = GifImage.ysize;
 	if((Xsz<1)||(Ysz<1))
-	{ fclose(fd);ProgError("GIF: bad size");
+	{ fclose(fd);
+	  ProgError ("GR17", "%s: bad size", fname (file));
 	}
 	if(GifImage.info & COLORMAP)
 	{ if(fread(GifColor,sizeof(struct PIXEL),bitPixel,fd)!=bitPixel)
-	  { fclose(fd);ProgError("GIF: read error");
+	  { fclose(fd);
+	    ProgError ("GR18", "%s: read error", fname (file));
 	  }
 	}
 	/*read the GIF. if many pictures, only the last
@@ -1287,7 +1414,8 @@ char  *GIFtoRAW(Int16 *rawX,Int16 *rawY,char *file)
       /*else, not a valid start character, skip to next*/
    }
    fclose(fd);
-   if(raw == NULL) ProgError("GIF: No picture found");
+   if(raw == NULL)
+     ProgError ("GR19", "%s: no picture found", fname (file));
    /*convert colors*/
    for (c=0; c<256; c++)
    { Idx2Doom[c]=(UInt8)COLindex((UInt8)GifColor[c].R,(UInt8)GifColor[c].G,(UInt8)GifColor[c].B,(UInt8)c);
@@ -1372,11 +1500,11 @@ static char  *GIFreadPix(FILE *fd,Int16 Xsz,Int16 Ysz)
    ExitDecoder();
 #else
    /* Initialize the Compression routines */
-   if (fread(&c,1,1,fd)!=1) ProgError("GIF: read error" );
-   if (LWZReadByte(fd, TRUE, c) < 0) ProgError("GIF: bad code in image" );
+   if (fread(&c,1,1,fd)!=1) ProgError("GR50", "GIF: read error" );
+   if (LWZReadByte(fd, TRUE, c) < 0) ProgError("GR51", "GIF: bad code in image" );
    /* read the file */
    for(rawpos=0;rawpos<rawSz;rawpos++)
-   { if ((v = LWZReadByte(fd,FALSE,c)) < 0 ) ProgError("GIF: too short");
+   { if ((v = LWZReadByte(fd,FALSE,c)) < 0 ) ProgError("GR52", "GIF: too short");
      raw[rawpos]=(v&0xFF);
    }
    while (LWZReadByte(fd,FALSE,c)>=0);  /* ignore extra data */
@@ -1433,12 +1561,14 @@ static code_int NextPixel(void )
 }
 #endif
 
-void RAWtoGIF(char *file,char  *raw,Int16 rawX,Int16 rawY,struct PIXEL *doompal )
+static void RAWtoGIF (char *file, char *raw, Int16 rawX, Int16 rawY,
+    struct PIXEL *doompal )
 {  FILE *fd;
    Int32 rawSz;
 
    fd=fopen(file,FOPEN_WB);
-   if(fd==NULL)ProgError("Can't open GIF file %s",file);
+   if (fd==NULL)
+     ProgError("GW10", "%s: %s", fname (file), strerror (errno));
    rawSz = (Int32)rawX * (Int32)rawY;
    /* screen header */
    strncpy(GifIdent,"GIF87a",6);
@@ -1474,7 +1604,8 @@ void RAWtoGIF(char *file,char  *raw,Int16 rawX,Int16 rawY,struct PIXEL *doompal 
    /* termination */
    fputc(0,fd);   /*0 length packet to end*/
    fputc(';',fd); /*GIF file terminator*/
-   fclose(fd);    /*the end*/
+   if (fclose(fd))
+     ProgError ("GW11", "%s: %s", fname (file), strerror (errno));
 }
 /******************* End GIF module ************************/
 

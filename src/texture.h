@@ -5,7 +5,7 @@ DeuTex incorporates code derived from DEU 5.21 that was put in the public
 domain in 1994 by Raphaël Quinet and Brendon Wyber.
 
 DeuTex is Copyright © 1994-1995 Olivier Montanuy,
-          Copyright © 1999-2000 André Majorel.
+          Copyright © 1999-2001 André Majorel.
 
 This program is free software; you can redistribute it and/or modify it under
 the terms of the GNU General Public License as published by the Free Software
@@ -45,7 +45,7 @@ Bool TXUexist(char *Name);
 	/*does it exist?*/
 Int32 TXUwriteTEXTUREtoWAD(struct WADINFO *info);
 	/*write the TEXTURE entry in Wad*/
-void TXUreadTEXTURE(char  *Data,Int32 DataSz,char  *Patch,Int32 PatchSz,Bool Redefn);
+void TXUreadTEXTURE(const char *texture1_name, const char *Data, Int32 DataSz, const char *Patch, Int32 PatchSz, Bool Redefn);
 	/*read texture from raw data = TEXTURE entry */
 void TXUwriteTexFile(const char *file);
 	/*write the TEXTURE entry to a file*/

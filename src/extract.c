@@ -1,11 +1,9 @@
 /*
-This file is part of DeuTex.
+This file is Copyright © 1994-1995 Olivier Montanuy,
+             Copyright © 1999-2005 André Majorel.
 
-DeuTex incorporates code derived from DEU 5.21 that was put in the public
+It may incorporate code derived from DEU 5.21 that was put in the public
 domain in 1994 by Raphaël Quinet and Brendon Wyber.
-
-DeuTex is Copyright © 1994-1995 Olivier Montanuy,
-          Copyright © 1999-2000 André Majorel.
 
 This program is free software; you can redistribute it and/or modify it under
 the terms of the GNU General Public License as published by the Free Software
@@ -16,9 +14,9 @@ This program is distributed in the hope that it will be useful, but WITHOUT
 ANY WARRANTY; without even the implied warranty of MERCHANTABILITY or FITNESS
 FOR A PARTICULAR PURPOSE. See the GNU General Public License for more details.
 
-You should have received a copy of the GNU General Public License along with
-this library; if not, write to the Free Software Foundation, Inc., 59 Temple
-Place, Suite 330, Boston, MA 02111-1307, USA.
+You should have received a copy of the GNU General Public License
+along with this program; if not, write to the Free Software
+Foundation, Inc., 51 Franklin Street, Fifth Floor, Boston, MA  02110-1301, USA
 */
 
 
@@ -32,7 +30,9 @@ Place, Suite 330, Boston, MA 02111-1307, USA.
 #include "color.h"
 #include "picture.h"
 #include "sound.h"
+#include "sscript.h"
 #include "usedidx.h"
+
 
 /*compile only for DeuTex*/
 #if defined DeuTex
@@ -71,11 +71,11 @@ static Bool XTRbmpSave(Int16 *pinsrX,Int16 *pinsrY,struct WADDIR  *entry,
      case PICBMP: extens="BMP";break;
      case PICPPM: extens="PPM";break;
      case PICTGA: extens="TGA";break;
-     default: Bug("img type");
+     default: Bug("EX47", "Invalid img type %d", (int) Picture);
    }
    res = MakeFileName(file,DataDir,dir,"",name,extens);
    if((WSafe==TRUE)&&(res==TRUE))
-   { Warning("Will not overwrite file %s",file);
+   { Warning("EX48", "Will not overwrite file %s",file);
      return TRUE;
    }
    buffer=(char  *)Malloc(size);
@@ -83,7 +83,7 @@ static Bool XTRbmpSave(Int16 *pinsrX,Int16 *pinsrY,struct WADDIR  *entry,
    WADRreadBytes(info,buffer,size);
    res = PICsaveInFile(file,type,buffer,size,pinsrX,pinsrY,Picture, name,
        cusage);
-   if(res==TRUE)Detail("Saved picture as %s\n",file);
+   if(res==TRUE)Detail("EX49", "Saved picture as %s", fname (file));
    Free(buffer);
    return res;
 }
@@ -114,32 +114,36 @@ void XTRextractWAD(const char *doomwad, const char *DataDir, const char
   Bool res;
   Int16 insrX=0,insrY=0;
   Bool EntryFound;
-  /*PNAMES*/
-  Int16 pnm;char  *Pnam;Int32 Pnamsz;
   char *extens=NULL;
   /*text file to write*/
   static struct TXTFILE *TXT = NULL;
-  Phase("Extracting entries from WAD %s\n",wadin);
+  Phase("EX00", "Extracting entries from wad %s", wadin);
   /*open iwad,get iwad directory*/
   iwad.ok=0;
   WADRopenR(&iwad,doomwad);
 
   /* If -usedidx, we're only interested in graphics. */
   if (cusage != NULL)
-     select &= (BGRAPHIC | BSPRITE | BPATCH | BFLAT | BSNEAP | BSNEAT);
+     select &= (BGRAPHIC | BSPRITE | BPATCH | BFLAT | BSNEAP | BSNEAT | BWALL);
 
-  /*find PNAMES*/
-  pnm=WADRfindEntry(&iwad,"PNAMES");
-  if(pnm<0) ProgError("Can't find PNAMES in main WAD");
-  Pnam=WADRreadEntry(&iwad,pnm,&Pnamsz);
   /*read WAD*/
   pwad.ok=0;
   WADRopenR(&pwad,wadin);
-  pnb=(Int16)pwad.ntry;
   pdir=pwad.dir;
-  piden=IDENTentriesPWAD(&pwad, Pnam, Pnamsz);
-  /**/
-  Free(Pnam);
+  pnb=(Int16)pwad.ntry;
+
+  /*find PNAMES*/
+  { Int16 pnm=WADRfindEntry(&iwad,"PNAMES");
+    char *Pnam=NULL;
+    Int32 Pnamsz=0;
+    if(pnm<0)
+      Warning("EX01", "Iwad: no PNAMES lump");
+    else
+      Pnam=WADRreadEntry(&iwad,pnm,&Pnamsz);
+    piden=IDENTentriesPWAD(&pwad, Pnam, Pnamsz);
+    if(Pnam!=NULL)
+      Free(Pnam);
+  }
 
   /*
   ** prepare for graphics
@@ -147,20 +151,40 @@ void XTRextractWAD(const char *doomwad, const char *DataDir, const char
 
   /* Read PLAYPAL */
   {
-    char  *Colors=NULL;
-    pnm=WADRfindEntry(&pwad,"PLAYPAL");
-    if(pnm>=0)
-      Colors=WADRreadEntry(&pwad,pnm,&Pnamsz);
+    const char     *lumpname = palette_lump;
+    struct WADINFO *wad;
+    Int16           lumpnum;
+    char           *lumpdata = NULL;
+    Int32           lumpsz;
+
+    wad = &pwad;
+    lumpnum = WADRfindEntry (wad, lumpname);
+    if (lumpnum >= 0)
+      lumpdata = WADRreadEntry (wad, lumpnum, &lumpsz);
     else
-    { pnm=WADRfindEntry(&iwad,"PLAYPAL");
-      if(pnm>=0)
-	Colors=WADRreadEntry(&iwad,pnm,&Pnamsz);
+    {
+      wad = &iwad;
+      lumpnum = WADRfindEntry (wad, lumpname);
+      if (lumpnum >= 0)
+	lumpdata = WADRreadEntry (wad, lumpnum, &lumpsz);
       else
-	/* FIXME Should not be fatal, if all you want is to extract levels. */
-	ProgError("Can't find PLAYPAL.");
+      {
+	long n;
+
+	wad = NULL;
+	lumpdata = Malloc (768);
+	Warning ("EX02", "No %s lump found, making up a palette", lumpname);
+	for (n = 0; n < 256; n++)
+	{
+	  lumpdata[3*n]   = n;
+	  lumpdata[3*n+1] = (n & 0x7f) << 1;
+	  lumpdata[3*n+2] = (n & 0x3f) << 2;
+	}
+      }
     }
-    COLinit(trnR,trnG,trnB,Colors,(Int16)Pnamsz);
-    Free(Colors);
+    COLinit (trnR, trnG, trnB, lumpdata, (Int16) lumpsz,
+	(wad == NULL) ? "(nofile)" : wad->filename, lumpname);
+    Free (lumpdata);
   }
 
   /* If TITLEPAL exists, read the first 768 bytes of it. But
@@ -193,17 +217,25 @@ void XTRextractWAD(const char *doomwad, const char *DataDir, const char
   ** read the PNAMES entry in PWAD
   ** or in DOOM.WAD if it does not exist elsewhere
   */
-  pnm=WADRfindEntry(&pwad,"PNAMES");
-  if(pnm>=0)
-    Pnam=WADRreadEntry(&pwad,pnm,&Pnamsz);
-  else
-  { pnm=WADRfindEntry(&iwad,"PNAMES");
+  do
+  { Int16 pnm=WADRfindEntry(&pwad,"PNAMES");
+    char *Pnam;
+    Int32 lumpsz;
     if(pnm>=0)
-      Pnam=WADRreadEntry(&iwad,pnm,&Pnamsz);
-    else ProgError("Can't find PNAMES in main WAD");
+      Pnam=WADRreadEntry(&pwad,pnm,&lumpsz);
+    else
+    { pnm=WADRfindEntry(&iwad,"PNAMES");
+      if(pnm<0)
+      { Warning("EX03", "Iwad: no PNAMES lump (2)");
+	break;
+      }
+      Pnam=WADRreadEntry(&iwad,pnm,&lumpsz);
+    }
+    PNMinit(Pnam,lumpsz);
+    Free(Pnam);
   }
-  PNMinit(Pnam,Pnamsz);
-  Free(Pnam);
+  while (0);
+
   /*
   ** iwad not needed anymore
   */
@@ -232,7 +264,7 @@ void XTRextractWAD(const char *doomwad, const char *DataDir, const char
   ** LEVELS
   */
   if(select&BLEVEL)
-  { Phase("Extracting levels...\n");
+  { Phase("EX10", "Extracting levels...");
     for(EntryFound=FALSE,p=0;p<pnb;p++)
     { switch(piden[p]&EMASK)
       { case ELEVEL: case EMAP:
@@ -250,7 +282,7 @@ void XTRextractWAD(const char *doomwad, const char *DataDir, const char
 	    ;
 	  res=MakeFileName(file,DataDir,"LEVELS","",pdir[p].name,"WAD");
 	  if((WSafe==TRUE)&&(res==TRUE))
-	    Warning("will not overwrite file %s",file);
+	    Warning("EX11", "Will not overwrite file %s",file);
 	  else
 	  { WADRopenW(&lwad,file,PWAD, 0);
 	    ostart=WADRposition(&lwad);/*BC++ 4.5 bug*/
@@ -271,7 +303,7 @@ void XTRextractWAD(const char *doomwad, const char *DataDir, const char
   ** LUMPS
   */
   if(select&BLUMP)
-  { Phase("Extracting lumps...\n");
+  { Phase("EX15", "Extracting lumps...");
     ostart=0x80000000L;osize=0;
     for(EntryFound=FALSE,p=0;p<pnb;p++)
     { if((piden[p]&EMASK)==ELUMP)
@@ -295,11 +327,11 @@ void XTRextractWAD(const char *doomwad, const char *DataDir, const char
           if(res!=TRUE)   /*normal lumps*/
           { res=MakeFileName(file,DataDir,"LUMPS","",pdir[p].name,"LMP");
             if((WSafe==TRUE)&&(res==TRUE))
-            {  Warning("will not overwrite file %s",file);
+            {  Warning("EX16", "Will not overwrite file %s",file);
             }
             else
             { WADRsaveEntry(&pwad,p,file);
-              Detail("Saved Lump as   %s\n",file);
+              Detail("EX17", "Saved lump as   %s", fname (file));
             }
           }
           TXTaddEntry(TXT,pdir[p].name,NULL,INVALIDINT,INVALIDINT,FALSE,FALSE);
@@ -311,77 +343,77 @@ void XTRextractWAD(const char *doomwad, const char *DataDir, const char
   /*
   ** TEXTURES
   */
-if(select&BTEXTUR)
-{ EntryFound=FALSE;
-  for(p=0;p<pnb;p++)
-  { if(piden[p]==ETEXTUR+1)
-    { if(EntryFound!=TRUE)
-      {  MakeDir(file,DataDir,"TEXTURES","");
-         EntryFound=TRUE;
+  if(select&BTEXTUR)
+  { EntryFound=FALSE;
+    for(p=0;p<pnb;p++)
+    { if(piden[p]==ETEXTUR+1)
+      { if(EntryFound!=TRUE)
+	{  MakeDir(file,DataDir,"TEXTURES","");
+	   EntryFound=TRUE;
+	}
+	TXTaddEmptyLine (TXT);
+	TXTaddComment(TXT,"List of definitions for TEXTURE1");
+	TXTaddSection(TXT,"texture1");
+	
+	{
+	   const char *name;
+	   /* Always extract TEXTURES as texture1.txt ! -- AYM 1999-09-18 */
+	   if (texture_lump == TL_TEXTURES)
+	      name = "TEXTURE1";
+	   else
+	      name = pdir[p].name;
+	   TXTaddEntry(TXT,name,NULL,INVALIDINT,INVALIDINT,FALSE,FALSE);
+	   res=MakeFileName(file,DataDir,"TEXTURES","",name,"TXT");
+	}
+	if((WSafe==TRUE)&&(res==TRUE))
+	{         Warning("EX21", "Will not overwrite file %s",file);
+	}
+	else
+	{ buffer=(char  *)Malloc(pdir[p].size);
+	  WADRseek(&pwad,pdir[p].start);
+	  WADRreadBytes(&pwad,buffer,pdir[p].size);
+	  TXUinit();
+	  TXUreadTEXTURE(pdir[p].name, buffer, pdir[p].size, NULL, 0, TRUE);
+	  Free(buffer);
+	  TXUwriteTexFile(file);
+	  TXUfree();
+	}
       }
-      TXTaddEmptyLine (TXT);
-      TXTaddComment(TXT,"List of definitions for TEXTURE1");
-      TXTaddSection(TXT,"texture1");
-      
-      {
-	 const char *name;
-         /* Always extract TEXTURES as texture1.txt ! -- AYM 1999-09-18 */
-	 if (texture_lump == TL_TEXTURES)
-	    name = "TEXTURE1";
-	 else
-	    name = pdir[p].name;
-	 TXTaddEntry(TXT,name,NULL,INVALIDINT,INVALIDINT,FALSE,FALSE);
-	 res=MakeFileName(file,DataDir,"TEXTURES","",name,"TXT");
-      }
-      if((WSafe==TRUE)&&(res==TRUE))
-      {         Warning("will not overwrite file %s",file);
-      }
-      else
-      { buffer=(char  *)Malloc(pdir[p].size);
-        WADRseek(&pwad,pdir[p].start);
-        WADRreadBytes(&pwad,buffer,pdir[p].size);
-        TXUinit();
-        TXUreadTEXTURE(buffer,pdir[p].size,NULL,0,TRUE);
-        Free(buffer);
-        TXUwriteTexFile(file);
-        TXUfree();
+    }
+    for(p=0;p<pnb;p++)
+    { if(piden[p]==ETEXTUR+2)
+      { if(EntryFound!=TRUE)
+	{  MakeDir(file,DataDir,"TEXTURES","");
+	   EntryFound=TRUE;
+	}
+	TXTaddEmptyLine (TXT);
+	TXTaddComment(TXT,"List of definitions for TEXTURE2");
+	TXTaddSection(TXT,"texture2");
+	TXTaddEntry(TXT,pdir[p].name,NULL,INVALIDINT,INVALIDINT,FALSE,FALSE);
+	res=MakeFileName(file,DataDir,"TEXTURES","",pdir[p].name,"TXT");
+	if((WSafe==TRUE)&&(res==TRUE))
+	{         Warning("EX22", "Will not overwrite file %s",file);
+	}
+	else
+	{ buffer=(char  *)Malloc(pdir[p].size);
+	  WADRseek(&pwad,pdir[p].start);
+	  WADRreadBytes(&pwad,buffer,pdir[p].size);
+	  TXUinit();
+	  TXUreadTEXTURE(pdir[p].name, buffer, pdir[p].size, NULL, 0, TRUE);
+	  Free(buffer);
+	  TXUwriteTexFile(file);
+	  TXUfree();
+	}
       }
     }
   }
-  for(p=0;p<pnb;p++)
-  { if(piden[p]==ETEXTUR+2)
-    { if(EntryFound!=TRUE)
-      {  MakeDir(file,DataDir,"TEXTURES","");
-         EntryFound=TRUE;
-      }
-      TXTaddEmptyLine (TXT);
-      TXTaddComment(TXT,"List of definitions for TEXTURE2");
-      TXTaddSection(TXT,"texture2");
-      TXTaddEntry(TXT,pdir[p].name,NULL,INVALIDINT,INVALIDINT,FALSE,FALSE);
-      res=MakeFileName(file,DataDir,"TEXTURES","",pdir[p].name,"TXT");
-      if((WSafe==TRUE)&&(res==TRUE))
-      {         Warning("will not overwrite file %s",file);
-      }
-      else
-      { buffer=(char  *)Malloc(pdir[p].size);
-        WADRseek(&pwad,pdir[p].start);
-        WADRreadBytes(&pwad,buffer,pdir[p].size);
-        TXUinit();
-        TXUreadTEXTURE(buffer,pdir[p].size,NULL,0,TRUE);
-        Free(buffer);
-        TXUwriteTexFile(file);
-        TXUfree();
-      }
-    }
-   }
- }
 
 
   /*
   ** SOUNDS
   */
   if(select&BSOUND)
-  { Phase("Extracting sounds...\n");
+  { Phase("EX25", "Extracting sounds...");
     ostart=0x80000000L;osize=0;
     for(EntryFound=FALSE,p=0;p<pnb;p++)
     { if((piden[p]&EMASK)==ESOUND)
@@ -401,15 +433,18 @@ if(select&BTEXTUR)
           { case ESNDPC:
               res=MakeFileName(file,DataDir,"SOUNDS","",pdir[p].name,"TXT");
               if((WSafe==TRUE)&&(res==TRUE))
-              {  Warning("will not overwrite file %s",file);
+              {  Warning("EX26", "Will not overwrite file %s",file);
               }
               else
-              { buffer=(char  *)Malloc(pdir[p].size);
+              {
+		char name[33];
+		strcpy(name, lump_name(pdir[p].name));
+		buffer=(char  *)Malloc(pdir[p].size);
                 WADRseek(&pwad,pdir[p].start);
                 WADRreadBytes(&pwad,buffer,pdir[p].size);
-                SNDsavePCSound(file,buffer,pdir[p].size);
+                SNDsavePCSound(name, file, buffer, pdir[p].size);
                 Free(buffer);
-                Detail("Saved PC Sound as   %s\n",file);
+                Detail("EX27", "Saved PC sound as   %s", fname (file));
               }
               TXTaddEntry(TXT,pdir[p].name,NULL,INVALIDINT,INVALIDINT,FALSE,
 		  FALSE);
@@ -419,11 +454,11 @@ if(select&BTEXTUR)
               { case SNDAU:  extens="AU";break;
                 case SNDWAV: extens="WAV";break;
                 case SNDVOC: extens="VOC";break;
-                default: Bug("snd type");
+                default: Bug("EX28", "Invalid snd type %d", Sound);
               }
               res=MakeFileName(file,DataDir,"SOUNDS","",pdir[p].name,extens);
               if((WSafe==TRUE)&&(res==TRUE))
-              { Warning("will not overwrite file %s",file);
+              { Warning("EX29", "Will not overwrite file %s", fname (file));
               }
               else
               { buffer=(char  *)Malloc(pdir[p].size);
@@ -431,14 +466,14 @@ if(select&BTEXTUR)
                 WADRreadBytes(&pwad,buffer,pdir[p].size);
                 SNDsaveSound(file,buffer,pdir[p].size,Sound,fullSND,
 		    pdir[p].name);
-                Detail("Saved Sound as   %s\n",file);
+                Detail("EX30", "Saved sound as   %s", fname (file));
                 Free(buffer);
               }
               TXTaddEntry(TXT,pdir[p].name,NULL,INVALIDINT,INVALIDINT,FALSE,
 		  FALSE);
               break;
             default:
-              Bug("Snd type");
+              Bug("EX31", "Invalid snd type %d", piden[p]);
           }
         }
       }
@@ -449,7 +484,7 @@ if(select&BTEXTUR)
   ** MUSICS
   */
   if(select&BMUSIC)
-  { Phase("Extracting musics...\n");
+  { Phase("EX32", "Extracting musics...");
     ostart=0x80000000L;osize=0;
     for(EntryFound=FALSE,p=0;p<pnb;p++)
     { if((piden[p]&EMASK)==EMUSIC)
@@ -467,11 +502,12 @@ if(select&BTEXTUR)
         { ostart=pwad.dir[p].start; osize=pwad.dir[p].size;
           res=MakeFileName(file,DataDir,"MUSICS","",pdir[p].name,"MUS");
           if((WSafe==TRUE)&&(res==TRUE))
-          {  Warning("will not overwrite file %s",file);
+          {  Warning("EX33", "Will not overwrite file %s", fname (file));
           }
           else
-          { WADRsaveEntry(&pwad,p,file);
-            Detail("Saved Music as %s\n",file);
+          {
+	    Detail("EX34", "Saving music as %s", fname (file));
+	    WADRsaveEntry(&pwad,p,file);
           }
           TXTaddEntry(TXT,pdir[p].name,NULL,INVALIDINT,INVALIDINT,FALSE,FALSE);
         }
@@ -483,7 +519,7 @@ if(select&BTEXTUR)
   ** GRAPHICS
   */
   if(select&BGRAPHIC)
-  { Phase("Extracting graphics...\n");
+  { Phase("EX35", "Extracting graphics...");
     ostart=0x80000000L;osize=0;
     for(EntryFound=FALSE,p=0;p<pnb;p++)
     { if((piden[p]&EMASK)==EGRAPHIC)
@@ -509,17 +545,25 @@ if(select&BTEXTUR)
           else if(XTRbmpSave(&insrX,&insrY,&pdir[p],PFLAT,DataDir,"LUMPS",&pwad,
 	      Picture,WSafe, cusage)==TRUE)
           { /*Was saved as graphic lump*/
-            TXTaddComment(TXT,pdir[p].name);
+	    char *name = Malloc (sizeof pdir[p].name + 1);
+	    sprintf (name, "%.*s", (int) sizeof pdir[p].name, pdir[p].name);
+	    TXTaddComment(TXT, name);
+	    Free (name);
           }
-          else
+          else if (cusage == NULL)
           { if(MakeFileName(file,DataDir,"LUMPS","",pdir[p].name,"LMP")==TRUE)
-            {  Warning("Will not overwrite file %s",file);
+            {  Warning("EX36", "Will not overwrite file %s", fname (file));
             }
             else
             { WADRsaveEntry(&pwad,p,file);
-              Detail("Saved Lump as   %s\n",file);
+              Detail("EX37", "Saved lump as   %s", fname (file));
             }
-            TXTaddComment(TXT,pdir[p].name);
+	    {
+	      char *name = Malloc (sizeof pdir[p].name + 1);
+	      sprintf (name, "%.*s", (int) sizeof pdir[p].name, pdir[p].name);
+	      TXTaddComment(TXT, name);
+	      Free (name);
+	    }
           }
         }
       }
@@ -530,7 +574,7 @@ if(select&BTEXTUR)
   ** SPRITES
   */
   if(select&BSPRITE)
-  { Phase("Extracting sprites...\n");
+  { Phase("EX40", "Extracting sprites...");
     ostart=0x80000000L;osize=0;
     for(EntryFound=FALSE,p=0;p<pnb;p++)
     { if((piden[p]&EMASK)==ESPRITE)
@@ -549,7 +593,8 @@ if(select&BTEXTUR)
         { ostart=pwad.dir[p].start; osize=pwad.dir[p].size;
           if(XTRbmpSave(&insrX,&insrY,&pdir[p],PSPRIT,DataDir,"SPRITES",&pwad,
 	      Picture,WSafe, cusage)!=TRUE)
-          { Warning("failed to write sprite %s", lump_name (pwad.dir[p].name));
+          { Warning("EX41", "Failed to write sprite %s",
+	      lump_name (pwad.dir[p].name));
           }
           else
           { TXTaddEntry(TXT,pdir[p].name,NULL,insrX,insrY,FALSE,TRUE);
@@ -562,8 +607,8 @@ if(select&BTEXTUR)
   /*
   ** PATCHES
   */
-  if(select&BPATCH)
-  { Phase("Extracting patches...\n");
+  if (select & BPATCH)
+  { Phase("EX45", "Extracting patches...");
     for(EntryFound=FALSE,p=0;p<pnb;p++)
      { if((piden[p] & EMASK)==EPATCH)
        { if(EntryFound!=TRUE)
@@ -571,7 +616,7 @@ if(select&BTEXTUR)
 	   if (cusage == NULL)
 	      MakeDir(file,DataDir,"PATCHES","");
            TXTaddEmptyLine (TXT);
-           TXTaddComment(TXT,"List of wall patches");
+           TXTaddComment(TXT,"List of patches");
            TXTaddSection(TXT,"patches");
            EntryFound=TRUE;
          }
@@ -580,7 +625,8 @@ if(select&BTEXTUR)
          { TXTaddEntry(TXT,pdir[p].name,NULL,INVALIDINT,INVALIDINT,FALSE,FALSE);
          }
          else
-         { Warning("failed to write patch %s", lump_name (pwad.dir[p].name));
+         { Warning("EX46", "Failed to write patch %s",
+	     lump_name (pwad.dir[p].name));
          }
        }
      }
@@ -594,8 +640,8 @@ if(select&BTEXTUR)
   /*
   ** FLATS
   */
-  if(select&BFLAT)
-  { Phase("Extracting flats...\n");
+  if (select & BFLAT)
+  { Phase("EX50", "Extracting flats...");
     ostart=0x80000000L;osize=0;
     for(EntryFound=FALSE,p=0;p<pnb;p++)
     { if((piden[p]&EMASK)==EFLAT)
@@ -609,13 +655,14 @@ if(select&BTEXTUR)
         }
         if((ostart==pwad.dir[p].start)&&(osize==pwad.dir[p].size))
         { TXTaddEntry(TXT,pdir[p].name,NULL,INVALIDINT,INVALIDINT,TRUE,FALSE);
-            }
+	}
         else
         { ostart=pwad.dir[p].start; osize=pwad.dir[p].size;
           if(XTRbmpSave(&insrX,&insrY,&pdir[p],PFLAT,DataDir,"FLATS",&pwad,
 	      Picture,WSafe,cusage)!=TRUE)
           { if(strncmp(pwad.dir[p].name,"F_SKY1",6)!=0)
-            Warning("failed to write flat %s", lump_name (pwad.dir[p].name));
+            Warning("EX51", "Failed to write flat %s",
+		lump_name (pwad.dir[p].name));
           }
           else
             TXTaddEntry(TXT,pdir[p].name,NULL,INVALIDINT,INVALIDINT,FALSE,FALSE);
@@ -628,7 +675,7 @@ if(select&BTEXTUR)
   if (select & BSNEAP)
   {
     ENTRY type = ESNEAP;
-    Phase ("Extracting %s...\n", entry_type_plural (type));
+    Phase ("EX55", "Extracting %s...", entry_type_plural (type));
     ostart = 0x80000000L;
     osize = 0;
 
@@ -655,7 +702,7 @@ if(select&BTEXTUR)
 	      DataDir, entry_type_dir (type),&pwad, Picture, WSafe,
 	      cusage) != TRUE)
 	  {
-	    Warning("failed to write %.20s %s",
+	    Warning("EX56", "Failed to write %.20s %s",
 		entry_type_name (type), lump_name (pwad.dir[p].name));
 	  }
 	  else
@@ -672,7 +719,7 @@ if(select&BTEXTUR)
   if (select & BSNEAT)
   {
     ENTRY type = ESNEAT;
-    Phase ("Extracting %s...\n", entry_type_plural (type));
+    Phase ("EX60", "Extracting %s...", entry_type_plural (type));
     ostart = 0x80000000L;
     osize = 0;
 
@@ -699,7 +746,7 @@ if(select&BTEXTUR)
 	      DataDir, entry_type_dir (type),&pwad, Picture, WSafe,
 	      cusage) != TRUE)
 	  {
-	    Warning("failed to write %.20s %s",
+	    Warning("EX61", "Failed to write %.20s %s",
 		entry_type_name (type), lump_name (pwad.dir[p].name));
 	  }
 	  else
@@ -711,6 +758,89 @@ if(select&BTEXTUR)
       }
     }
   }
+
+  /* Extract all Strife scripts */
+  if (select & BSCRIPT)
+  {
+    ENTRY type = ESSCRIPT;
+    Phase ("EX65", "Extracting %s...", entry_type_plural (type));
+    ostart = 0x80000000L;
+    osize = 0;
+
+    for(EntryFound=FALSE,p=0;p<pnb;p++)
+    { if(piden[p] == type)
+      { if(EntryFound!=TRUE)
+	{
+	   char comment[40];
+	   if (cusage == NULL)
+	      MakeDir(file,DataDir,entry_type_dir(type),"");
+           TXTaddEmptyLine (TXT);
+	   sprintf (comment, "List of %.20s", entry_type_plural (type));
+	   TXTaddComment (TXT, comment);
+	   TXTaddSection (TXT, entry_type_section (type));
+	   EntryFound=TRUE;
+	}
+	if((ostart==pwad.dir[p].start)&&(osize==pwad.dir[p].size))
+	{
+	  TXTaddEntry(TXT,pdir[p].name,NULL,INVALIDINT,INVALIDINT,TRUE,FALSE);
+	}
+	else
+	{ ostart=pwad.dir[p].start; osize=pwad.dir[p].size;
+	  { res = MakeFileName (file, DataDir, entry_type_dir(type), "",
+	      pdir[p].name, "txt");
+            if (WSafe==TRUE && res==TRUE)
+            {  Warning("EX66", "Will not overwrite file %s",file);
+            }
+            else
+            { if (sscript_save (&pwad, p, file))
+	      {
+		Warning("EX67", "Failed to write %.20s %s",
+		  entry_type_name (type), lump_name (pwad.dir[p].name));
+	      }
+	      else
+	      {
+		TXTaddEntry(TXT,pdir[p].name,NULL,INVALIDINT,INVALIDINT,FALSE,
+		FALSE);
+	      }
+            }
+          }
+	}
+      }
+    }
+  }
+
+  /* Extract all ROTT walls. They're raw 64x64 bitmaps, between
+     WALLSTRT and WALLSTOP. This is based on the regular Doom
+     flats extraction code above. */
+  if (ROTT && (select & BWALL))
+  { Phase("EX70", "Extracting walls...");
+    ostart=0x80000000L;osize=0;
+    for(EntryFound=FALSE,p=0;p<pnb;p++)
+    { if((piden[p]&EMASK)==EWALL)
+      { if(EntryFound!=TRUE)
+        {  if (cusage == NULL)
+	      MakeDir(file,DataDir,"WALLS","");
+           TXTaddEmptyLine (TXT);
+           TXTaddComment(TXT,"List of walls");
+           TXTaddSection(TXT,"walls");
+           EntryFound=TRUE;
+        }
+        if((ostart==pwad.dir[p].start)&&(osize==pwad.dir[p].size))
+        { TXTaddEntry(TXT,pdir[p].name,NULL,INVALIDINT,INVALIDINT,TRUE,FALSE);
+	}
+        else
+        { ostart=pwad.dir[p].start; osize=pwad.dir[p].size;
+          if(XTRbmpSave(&insrX,&insrY,&pdir[p],PWALL,DataDir,"WALLS",&pwad,
+	      Picture,WSafe,cusage)!=TRUE)
+	    Warning("EX71", "Failed to write wall %s",
+		lump_name (pwad.dir[p].name));
+          else
+            TXTaddEntry(TXT,pdir[p].name,NULL,INVALIDINT,INVALIDINT,FALSE,FALSE);
+        }
+      }
+    }
+  }
+
 
   /* If -usedidx, print statistics */
   if (cusage != NULL)
@@ -737,7 +867,7 @@ if(select&BTEXTUR)
   TXTaddEmptyLine (TXT);
   TXTaddComment(TXT,"End of extraction");
   TXTcloseW(TXT);
-  Phase("End of extraction.\n");
+  Phase("EX99", "End of extraction");
 }
 
 /*********** End Xtract Module ***************/
@@ -760,22 +890,27 @@ void XTRgetEntry(const char *doomwad, const char *DataDir, const char *wadin,
   iwad.ok=0;
   WADRopenR(&iwad,doomwad);
    /*find PLAYPAL*/
-  e=WADRfindEntry(&iwad,"PLAYPAL");
-  if(e>=0) Colors=WADRreadEntry(&iwad,e,&Entrysz);
-  else  ProgError("Can't find PLAYPAL in main WAD");
+  e=WADRfindEntry(&iwad,palette_lump);
+  if(e>=0)
+    Colors=WADRreadEntry(&iwad,e,&Entrysz);
+  else
+    ProgError("GE00", "%s: no %s lump in the iwad",
+      fname (iwad.filename), lump_name (palette_lump));
   WADRclose(&iwad);
   pwad.ok=0;
   WADRopenR(&pwad,wadin);
-  e=WADRfindEntry(&pwad,"PLAYPAL");
+  e=WADRfindEntry(&pwad,palette_lump);
   if(e>=0)
   {  Free(Colors);
      Colors=WADRreadEntry(&pwad,e,&Entrysz);
   }
-  COLinit(trnR,trnG,trnB,Colors,(Int16)Entrysz);
+  COLinit(trnR,trnG,trnB,Colors,(Int16)Entrysz, pwad.filename, palette_lump);
   Free(Colors);
   e=WADRfindEntry(&pwad,Name);
-  if(e<0) ProgError("Can't find entry %s in WAD", lump_name (Name));
-  Phase("Extracting entry %s from WAD %s\n", lump_name (entry), wadin);
+  if(e<0)
+    ProgError("GE01", "%s: %s: lump not found",
+	fname (pwad.filename), lump_name (entry));
+  Phase("GE02", "%s: %s: extracting", fname (wadin), lump_name (entry));
   Entry=WADRreadEntry(&pwad,e,&Entrysz);
   /*try graphic*/
   if(Found!=TRUE)
@@ -785,14 +920,15 @@ void XTRgetEntry(const char *doomwad, const char *DataDir, const char *wadin,
         case PICBMP: extens="BMP";break;
         case PICPPM: extens="PPM";break;
         case PICTGA: extens="TGA";break;
-        default: Bug("img type");
+        default: Bug("GE03", "Invalid img type %d", (int) Picture);
       }
       MakeFileName(file,DataDir,"","",Name,extens);
       if(PICsaveInFile(file,PGRAPH,Entry,Entrysz,&insrX,&insrY,Picture, Name,
 	  NULL) ==TRUE)
-      { Info("Picture insertion point is (%d,%d)",insrX,insrY);
+      { Info("GE04", "Picture insertion point is (%d,%d)",insrX,insrY);
         Found=TRUE;
       }
+      /* FIXME try wall as well ? */
       else if((Entrysz==0x1000)||(Entrysz==0x1040))
       { if(PICsaveInFile(file,PFLAT,Entry,Entrysz,&insrX,&insrY,Picture, Name,
 	  NULL) ==TRUE)
@@ -814,7 +950,7 @@ void XTRgetEntry(const char *doomwad, const char *DataDir, const char *wadin,
         { case SNDAU:  extens="AU";break;
           case SNDWAV: extens="WAV";break;
           case SNDVOC: extens="VOC";break;
-          default: Bug("snd type");
+          default: Bug("GE05", "Invalid snd type %d", (int) Sound);
         }
         MakeFileName(file,DataDir,"","",Name,extens);
         SNDsaveSound(file,Entry,Entrysz,Sound,fullSND, Name);

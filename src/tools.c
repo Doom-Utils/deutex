@@ -1,11 +1,9 @@
 /*
-This file is part of DeuTex.
+This file is Copyright © 1994-1995 Olivier Montanuy,
+             Copyright © 1999-2005 André Majorel.
 
-DeuTex incorporates code derived from DEU 5.21 that was put in the public
+It may incorporate code derived from DEU 5.21 that was put in the public
 domain in 1994 by Raphaël Quinet and Brendon Wyber.
-
-DeuTex is Copyright © 1994-1995 Olivier Montanuy,
-          Copyright © 1999-2000 André Majorel.
 
 This program is free software; you can redistribute it and/or modify it under
 the terms of the GNU General Public License as published by the Free Software
@@ -16,9 +14,9 @@ This program is distributed in the hope that it will be useful, but WITHOUT
 ANY WARRANTY; without even the implied warranty of MERCHANTABILITY or FITNESS
 FOR A PARTICULAR PURPOSE. See the GNU General Public License for more details.
 
-You should have received a copy of the GNU General Public License along with
-this library; if not, write to the Free Software Foundation, Inc., 59 Temple
-Place, Suite 330, Boston, MA 02111-1307, USA.
+You should have received a copy of the GNU General Public License
+along with this program; if not, write to the Free Software
+Foundation, Inc., 51 Franklin Street, Fifth Floor, Boston, MA  02110-1301, USA
 */
 
 
@@ -28,7 +26,10 @@ Place, Suite 330, Boston, MA 02111-1307, USA.
 */
 
 #include "deutex.h"
+#include <errno.h>
+#include <stdarg.h>
 #include "tools.h"
+#include "log.h"
 
 /*MSDOS*/
 #if DT_OS == 'd'
@@ -108,8 +109,8 @@ void check_types (void)
   {
     /* FIXME Perhaps too strict. Wouldn't "<" suffice ? */
     if (t->actual_size != t->mandated_size)
-      ProgError ("Type %s has size %d (should be %d)."
-	  " Fix deutex.h and recompile.",
+      ProgError ("AA01", "Type %s has size %d (should be %d);"
+	  " fix deutex.h and recompile",
 	  t->name, (int) t->actual_size, (int) t->mandated_size);
   }
 }
@@ -174,13 +175,13 @@ void SetFileTime(const char *path, Int32 time)
 ** Copy memory
 */
 void Memcpy(void  *dest,const void  *src, long n)
-{ if(n<0) Bug("MovInf"); /*move inf to zero*/
+{ if(n<0) Bug("MM21", "MovInf"); /*move inf to zero*/
   if(n==0)return;
 #if DT_OS == 'd'
 #  if DT_CC == 'd'
   memcpy((char  *)dest,(char  *)src,(size_t)n);
 #  else
-  if(n>0x10000L) Bug("MovSup"); /*DOS limit: not more than 0x10000*/
+  if(n>0x10000L) Bug("MM22", "MovSup"); /*DOS limit: not more than 0x10000*/
   _fmemcpy(dest,src,(size_t)n);
 #  endif
 #elif DT_OS == 'o'
@@ -193,13 +194,13 @@ void Memcpy(void  *dest,const void  *src, long n)
 ** Set memory
 */
 void Memset(void  *dest,char car, long n)
-{ if(n<0) Bug("MStInf"); /*set inf to zero*/
+{ if(n<0) Bug("MM11", "MStInf"); /*set inf to zero*/
   if(n==0)return;
 #if DT_OS == 'd'
 #  if DT_CC == 'd'
   memset(dest,car,(size_t)n);
 #  else
-   if(n>0x10000L) Bug("MStSup"); /*DOS limit: not more than 0x10000*/
+   if(n>0x10000L) Bug("MM12", "MStSup"); /*DOS limit: not more than 0x10000*/
   _fmemset(dest,car,(size_t)n);
 #  endif
 #elif DT_OS == 'o'
@@ -219,19 +220,19 @@ void  *Malloc (long size)
 {
    void  *ret;
    if(size<1)
-   {  Warning("Attempt to allocate %ld bytes",size);
+   {  Warning("MM02", "Attempt to allocate %ld bytes",size);
       size=1;
    }
 #if DT_OS == 'd' && DT_CC == 'b'
    ret = farmalloc( size);
 #else
    if ((size_t) size != size)
-      ProgError ("Tried to allocate %ld b but couldn't."
-        " Use another compiler.", size);
+      ProgError ("MM03",
+	"Tried to allocate %ld b but couldn't; use another compiler", size);
    ret = malloc((size_t) size);
 #endif
    if (ret==NULL)
-      ProgError("Out of memory (Needed %ld bytes)", size);
+      ProgError("MM04", "Out of memory (needed %ld bytes)", size);
    return ret;
 }
 /*
@@ -241,19 +242,19 @@ void  *Realloc (void  *old, long size)
 {  void  *ret;
 
    if(size<1)
-   {  Warning("Attempt to allocate %ld bytes",size);
+   {  Warning("MM05", "Attempt to allocate %ld bytes",size);
       size=1;
    }
 #if DT_OS == 'd' && DT_CC == 'b'
    ret = farrealloc( old, size);
 #else
    if ((size_t) size != size)
-      ProgError ("Tried to realloc %ld b but couldn't."
-        " Use another compiler.", size);
+      ProgError ("MM06",
+	"Tried to realloc %ld b but couldn't; use another compiler", size);
    ret = realloc( old, (size_t)size);
 #endif
    if (ret==NULL)
-      ProgError( "Out of memory (Needed %ld bytes)", size);
+      ProgError("MM07", "Out of memory (needed %ld bytes)", size);
    return ret;
 }
 /*
@@ -390,37 +391,6 @@ void GetNameOfWAD(char name[8], const char *path)
     return;
 }
 
-/*****************************************************/
-
-
-
-void NoCommandGiven(void)
-{  Info("Suggestion: use WinTex 4.x as a WAD editor.\n");
-	return;
-}
-
-
-void PrintCopyright(void)
-{
-  Legal("%s %s Copyright 1994,95 O.Montanuy, Copyright 1999-2000 A.Majorel\n",
-      DEUTEXNAME,deutex_version);
-  Legal("  Ported to DOS, Unix, OS/2, Linux, SGiX, DEC Alpha.\n");
-  Legal("  Thanx to M.Mathews, P.Allansson, C.Rossi, J.Bonfield, U.Munk.\n");
-  Legal("  This program is freeware.\n");
-  Legal("Type \"%s --help\" to get the list of commands.\n",COMMANDNAME);
-  return;
-}
-
-
-/*
- *	print_version
- *	This is what --version calls
- */
-void print_version (void)
-{
-  printf ("%s %.32s\n", DEUTEXNAME, deutex_version);
-}
-
 
 /*****************************************************/
 
@@ -479,8 +449,9 @@ char *fname (const char *name)
  *	lump_name - return string containing lump name
  *
  *	Partially reentrant (returns pointer on one of two
- *	static buffer). The string is guaranteed to have at most
- *	32 characters and to contain only graphic characters.
+ *	static buffers). The string is guaranteed to have at
+ *	most 32 characters and to contain only graphic
+ *	characters.
  */
 char *lump_name (const char *name)
 {
@@ -540,6 +511,35 @@ char *short_dump (const char *data, size_t size)
 
 
 /*
+ *	quotechar - return the safe representation of a char
+ *
+ *	Not reentrant (returns pointer on static buffer). The string is
+ *	guaranteed to be exactly three characters long and not contain
+ *	any control or non-ASCII characters.
+ */
+const char *quotechar (char c)
+{
+  static char buf[4];
+
+  if (c >= 32 && c <= 126)
+  {
+    buf[0] = '"';
+    buf[1] = c;
+    buf[2] = '"';
+    buf[3] = '\0';
+  }
+  else
+  {
+    buf[0] = hex_digit[((unsigned char) c) >> 4];
+    buf[1] = hex_digit[((unsigned char) c) & 0x0f];
+    buf[2] = 'h';
+    buf[3] = '\0';
+  }
+  return buf;
+}
+
+
+/*
 ** Output and Error handling
 */
 static Bool asFile=FALSE;
@@ -548,6 +548,12 @@ static FILE *Stdout;  /*command output*/
 static FILE *Stderr;  /*errors*/
 static FILE *Stdwarn;  /*warningss*/
 static FILE *Stdinfo; /*infos*/
+
+#define stderr_  (Stderr  != NULL ? Stderr  : stderr)
+#define stdinfo_ (Stdinfo != NULL ? Stdinfo : stdout)
+#define stdout_  (Stdout  != NULL ? Stdout  : stdout)
+#define stdwarn_ (Stdwarn != NULL ? Stdwarn : stderr)
+
 void PrintInit(Bool asfile)
 {
 #if DT_OS == 'o'
@@ -558,10 +564,10 @@ void PrintInit(Bool asfile)
   /* choose */
   if(asfile==TRUE)
   { if((Stdout=fopen("output.txt",FOPEN_WT))==NULL)
-        ProgError("Can't open output.txt");
+        ProgError ("DI10", "output.txt: %s", strerror (errno));
     if((Stderr=fopen("error.txt",FOPEN_WT))==NULL)
     {   Stderr=stderr;
-        ProgError("Can't open error.txt");
+        ProgError ("DI20", "error.txt: %s", strerror (errno));
     }
     Stdinfo=stdout;
     Stdwarn=Stderr;
@@ -585,7 +591,6 @@ void PrintExit(void)
   }
 }
 
-
 void ActionDummy(void)
 { return; }
 
@@ -598,127 +603,212 @@ void ProgErrorAction(void (*action)(void))
 { Action = action;
 }
 
-void ProgError (const char *errstr, ...)
+void ProgError (const char *code, const char *fmt, ...)
 {
    va_list args;
-   fflush (Stdout);
-   va_start( args, errstr);
-   fprintf(Stderr, "\nError: ");
-   vfprintf(Stderr, errstr, args);
-   fprintf(Stderr, "\n");
-   va_end( args);
+
+   fflush (stdout_);
+   fprintf(stderr_, "E %s ", code);
+   lprintf("E %s ", code);
+   va_start(args, fmt);
+   vfprintf(stderr_, fmt, args);
+   va_end(args);
+   va_start(args, fmt);
+   vlprintf(fmt, args);
+   va_end(args);
+   fputc('\n', stderr_);
+   lputc('\n');
    (*Action)();  /* execute error handler*/
    PrintExit();
-   exit( -5);
+   exit(2);
 }
 
-void Bug (const char *errstr, ...)
-{  va_list args;
-   fflush (Stdout);
-   va_start( args, errstr);
-   fprintf(Stderr, "\nBug: ");
-   vfprintf(Stderr, errstr, args);
-   fprintf(Stderr, "\n");
-   fprintf(Stderr, "Please report that bug.\n");
-   va_end( args);  /* CloseWadFiles();*/
-   PrintExit();
-   exit( -10);
-}
-
-void Warning (const char *str, ...)
-{  va_list args;
-   fflush (Stdout);
-   va_start( args, str);
-   fprintf(Stdwarn, "Warning: ");
-   vfprintf(Stdwarn, str, args);
-   putc('\n', Stdwarn);
-   va_end( args);
-}
-
-void LimitedWarn (int *left, const char *fmt, ...)
+/*
+ *	nf_err - non fatal error message
+ */
+void nf_err (const char *code, const char *fmt, ...)
 {
-   if (left == NULL || (left != NULL && *left > 0))
-   {
-     va_list args;
-     fflush (Stdout);
-     fputs("Warning: ", Stdwarn);
-     va_start (args, fmt);
-     vfprintf (Stdwarn, fmt, args);
-     putc ('\n', Stdwarn);
-   }
-   if (left != NULL)
-     (*left)--;
+  va_list args;
+
+  fflush(stdout_);
+  fprintf(stderr_, "%c %s ", MSGCLASS_ERR, code);
+  lprintf("%c %s ", MSGCLASS_ERR, code);
+  va_start(args, fmt);
+  vfprintf(stderr_, fmt, args);
+  va_end(args);
+  va_start(args, fmt);
+  vlprintf(fmt, args);
+  va_end(args);
+  fputc('\n', stderr_);
+  lputc('\n');
+  fflush(stderr_);
 }
 
-void LimitedEpilog (int *left, const char *fmt, ...)
+void Bug (const char *code, const char *fmt, ...)
+{
+  va_list args;
+
+  fflush(stdout_);
+  fprintf(stdwarn_, "%c %s ", MSGCLASS_BUG, code);
+  lprintf("%c %s ", MSGCLASS_BUG, code);
+  va_start(args, fmt);
+  vfprintf(stderr_, fmt, args);
+  va_end(args);
+  va_start(args, fmt);
+  vlprintf(fmt, args);
+  va_end(args);
+  fputc('\n', stderr_);
+  lputc('\n');
+  fputs("Please report that bug\n", stderr_);
+  lputs("Please report that bug\n");
+  /* CloseWadFiles();*/
+  PrintExit();
+  exit(3);
+}
+
+void Warning (const char *code, const char *fmt, ...)
+{
+  va_list args;
+
+  fflush(stdout_);
+  fprintf(stdwarn_, "%c %s ", MSGCLASS_WARN, code);
+  lprintf("%c %s ", MSGCLASS_WARN, code);
+  va_start(args, fmt);
+  vfprintf(stdwarn_, fmt, args);
+  va_end(args);
+  va_start(args, fmt);
+  vlprintf(fmt, args);
+  va_end(args);
+  fputc('\n', stdwarn_);
+  lputc('\n');
+}
+
+void LimitedWarn (int *left, const char *code, const char *fmt, ...)
+{
+  if (left == NULL || (left != NULL && *left > 0))
+  {
+    va_list args;
+
+    fflush(stdout_);
+    fprintf(stdwarn_, "%c %s ", MSGCLASS_WARN, code);
+    lprintf("%c %s ", MSGCLASS_WARN, code);
+    va_start(args, fmt);
+    vfprintf(stdwarn_, fmt, args);
+    va_end(args);
+    va_start(args, fmt);
+    vlprintf(fmt, args);
+    va_end(args);
+    fputc('\n', stdwarn_);
+    lputc('\n');
+  }
+  if (left != NULL)
+    (*left)--;
+}
+
+void LimitedEpilog (int *left, const char *code, const char *fmt, ...)
 {
   if (left != NULL && *left < 0)
   {
-    fflush (Stdout);
-    fputs ("Warning: ", Stdwarn);
+    fflush (stdout_);
     if (fmt != NULL)
     {
       va_list args;
+      fprintf(stdwarn_, "%c %s ", MSGCLASS_WARN, code);
+      lprintf("%c %s ", MSGCLASS_WARN, code);
       va_start (args, fmt);
-      vfprintf (Stdwarn, fmt, args);
+      vfprintf (stdwarn_, fmt, args);
+      va_end (args);
+      va_start (args, fmt);
+      vlprintf (fmt, args);
       va_end (args);
     }
-    fprintf (Stdwarn, "%d warnings omitted\n", - *left);
+    fprintf (stdwarn_, "%d warnings omitted\n", - *left);
+    lprintf ("%d warnings omitted\n", - *left);
   }
 }
 
-void Legal(const char *str, ...)
-{  va_list args;va_start( args, str);
-   vfprintf(stdout, str, args);
-   va_end( args);
+void Output (const char *fmt, ...)
+{
+  va_list args;
+
+  va_start(args, fmt);
+  vfprintf(stdout_, fmt, args);
+  va_end(args);
+  va_start(args, fmt);
+  vlprintf(fmt, args);
+  va_end(args);
 }
 
-void Output (const char *str, ...)
-{  va_list args;va_start( args, str);
-   vfprintf(Stdout, str, args);
-   va_end( args);
+void Info (const char *code, const char *fmt, ...)
+{
+  if (Verbosity >= 1)
+  {
+    va_list args;
+
+    fprintf(stdinfo_, "%c %s ", MSGCLASS_INFO, code);
+    lprintf("%c %s ", MSGCLASS_INFO, code);
+    va_start(args, fmt);
+    vfprintf(stdinfo_, fmt, args);
+    va_end(args);
+    va_start(args, fmt);
+    vlprintf(fmt, args);
+    va_end(args);
+    fputc('\n', stdinfo_);
+    lputc('\n');
+  }
 }
 
-void Info (const char *str, ...)
-{  va_list args;va_start( args, str);
-   if(Verbosity>=1)
-     vfprintf(Stdinfo, str, args);
-   va_end( args);
+void Phase (const char *code, const char *fmt, ...)
+{
+  if (Verbosity >= 2)
+  {
+    va_list args;
+
+    fprintf(stdinfo_, "%c %s ", MSGCLASS_INFO, code);
+    lprintf("%c %s ", MSGCLASS_INFO, code);
+    va_start(args, fmt);
+    vfprintf(stdinfo_, fmt, args);
+    va_end(args);
+    va_start(args, fmt);
+    vlprintf(fmt, args);
+    va_end(args);
+    fputc('\n', stdinfo_);
+    lputc('\n');
+  }
 }
 
-void Phase (const char *str, ...)
-{  va_list args;va_start( args, str);
-   if(Verbosity>=2)
-     vfprintf(Stdinfo, str, args);
-   va_end( args);
-}
+void Detail (const char *code, const char *fmt, ...)
+{
+  if (Verbosity >= 3)
+  {
+    va_list args;
 
-void Detail (const char *str, ...)
-{  va_list args;va_start( args, str);
-   if(Verbosity>=3)
-     vfprintf(Stdinfo, str, args);
-   va_end( args);
+    fprintf (stdinfo_, "%c %s ", MSGCLASS_INFO, code);
+    lprintf ("%c %s ", MSGCLASS_INFO, code);
+    va_start(args, fmt);
+    vfprintf(stdinfo_, fmt, args);
+    va_end(args);
+    va_start(args, fmt);
+    vlprintf(fmt, args);
+    va_end(args);
+    fputc ('\n', stdinfo_);
+    lputc ('\n');
+  }
 }
 
 #if 0
 Int16 NbP=0;
 void Progress(void)
 { NbP++;
-  if(NbP&0xF==0) fprintf(Stdinfo,".");
+  if(NbP&0xF==0) fprintf(stdinfo_,".");
   if(NbP>0x400)
   { NbP=0;
-    fprintf(Stdinfo,"\n");
+    fprintf(stdinfo_,"\n");
   }
 }
 
 void ProgressEnds(void)
-{ fprintf(Stdinfo,"\n");
+{ fprintf(stdinfo_,"\n");
 }
 #endif
-
-
-
-
-
-
 

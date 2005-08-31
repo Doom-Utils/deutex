@@ -40,10 +40,10 @@ ____________                   __________________________
 
                    wad composition tool for Doom
                 Copyright (c) Olivier Montanuy 1994/95
-                Copyright (c) André Majorel 1999-2000
+                Copyright (c) André Majorel 1999-2005
 
                    Manual Edited by Kevin McGrail
-			 (hevkev@sfo.com)
+			 (hevkev=sfo+com)
 
 
 
@@ -56,7 +56,7 @@ ____________                   __________________________
    Serious trouble or identified bug:
 
          E-mail directly to the maintainer
-           amajorel@teaser.fr
+           amajorel=teaser+fr
 
         Note that this product is Freeware, and that support
         only depends on the good will of the involved people.
@@ -64,13 +64,13 @@ ____________                   __________________________
 
 
 
-================= RELEASE NOTES FOR VERSION 4.0 ==================
+================= RELEASE NOTES FOR VERSION 4.5 ==================
 
 		 THIS MANUAL IS NOT UP TO DATE !
 			READ THIS FIRST !
 
 For a complete list of all the changes between DeuTex 3.6 and
-Deutex 4.0, see the CHANGES file. Here is a quick summary of the
+Deutex 4.5, see the CHANGES file. Here is a quick summary of the
 important features.
 
 1. The default transparent colour has been changed from cyan (0,
@@ -98,19 +98,7 @@ important features.
      deutex -doom04 c:\doom0_4 -xtract
      deutex -doom05 c:\doom0_5 -xtract
 
-   Some graphics are extracted as lumps (GNUM[0-9]). Levels are
-   not extracted properly yet. You will see at lot of warnings
-   like
-
-     Warning: ** Not enough entry in level **
-     Warning: ** will not overwrite file ./lumps/flatname.lmp **
-     Warning: ** will not overwrite file ./lumps/points.lmp **
-     Warning: ** will not overwrite file ./lumps/lines.lmp **
-     Warning: ** will not overwrite file ./lumps/sectors.lmp **
-     Warning: ** will not overwrite file ./lumps/things.lmp **
-
-   Ignore them. To extract levels from the Doom alphas, use Yadex
-   (http://www.teaser.fr/~amajorel/yadex/).
+   Some graphics are extracted as lumps (GNUM[0-9]).
 
 4. Doom press release pre-beta is now supported. To extract the
    contents of the iwad,
@@ -140,14 +128,17 @@ important features.
 
 10. DeuTex is now libre (GPL + LGPL + PBMPLUS license).
 
-11. The GIF format is deprecated. It will be removed. See
-    http://lpf.ai.mit.edu/Patents/Gif/Gif.html to know why. Move
-    to BMP or PPM. The default graphics format for Unix is now
-    PPM.
+11. The default graphics format on Unix is now PPM.
 
-12. Assorted bug fixes.
+12. Sounds with sample rates different from 11025 Hz are now
+    allowed.
 
--- AYM 1999-11-16
+13. Many arbitrary limits have been lifted.
+
+14. Assorted bug fixes.
+
+-- AYM 2005-08-30
+
 
 ==================================================================
 
@@ -1093,7 +1084,7 @@ Hall of Mirrors with new Textures:
          Then, build the nodes and reject.
          Then add the new Textures.
 
-Why? We don't know.  leonardc@halcyon.com reported he saw a hall of
+Why? We don't know.  leonardc=halcyon+com reported he saw a hall of
 mirrors with old versions of DeuTex that didn't first load the old Doom
 Textures. It seems to be a problem with the node builders.
 
@@ -2116,12 +2107,40 @@ C)                        OPTIONAL COMMANDS
   -au       recognize either one when INSERTING sounds). The DOS
   -voc      version defaults to .WAV; the UNIX version defaults to .AU.
 
+  -fullsnd  When extracting a sound from a wad, causes DeuTex to extract
+            everything the lump contains instead of just the number of
+            samples indicated in the lump header.
 
+  -rate <policy>
 
+           Tells DeuTex what to do when asked to compose a wad from
+           sound files whose sample rate is not 11,025 Hz. The argument
+           can take the following values:
 
+              reject  consider it a fatal error
 
+              force   emit a warning and force the sample rate to
+                      11,025 Hz by crudely resampling up or down
 
+              warn    emit a warning (it's the default)
 
+              accept  don't even warn
+
+           Prior to version 4.5, the policy was always "force" because
+           the original Doom did not support anything else. Today, as
+           most engines support mixed sample rates, it makes sense to
+           be more relaxed about it. However, even some recent engines
+           still have limitations; for example, XDoom and LxDoom play
+           all sounds at 11,025 Hz, regardless of their actual
+           frequency and it has been reported that PrBoom has trouble
+           with sample rates that are not whole multiples of 11,025 Hz.
+           That's why the default policy is not "accept".
+
+           Matthew Miller should take credit for bringing all the above
+           to my attention.
+
+           Note that this option only takes effect when composing a
+           wad. When decomposing, DeuTex always saves sounds verbatim.
 
 
                                                                   page 24
@@ -2129,14 +2148,18 @@ C)                        OPTIONAL COMMANDS
 
 
 
-  -level    These tell DeuTex to select Sprites, patches, sounds, etc.
-  -lump     when composing/decomposing/merging pwads.  These commands
-  -texture  can be combined.  By default, all entries are selected.
-  -sound
-  -graphic
-  -sprite
-  -patch
-  -flat
+  -levels    These tell DeuTex to select Sprites, patches, sounds, etc.
+  -lumps     when composing/decomposing/merging pwads.  These commands
+  -textures  can be combined.  By default, all entries are selected.
+  -sounds
+  -musics
+  -graphics
+  -sprites
+  -patches
+  -flats
+  -sneas
+  -sneaps
+  -sneats
 
   -iwad     To be used with -make, this command makes an iwad instead
             of a pwad. This is necessary if you are building a pwad
@@ -3486,31 +3509,31 @@ DeuTex/DeuSF would not have existed without the help of these people:
    Steve McCrea                   Author of TRINITY.wad and DOOMTEX.
 
    Raphael Quinet                 Examples of GIF and DEU code.
-  (quinet@montefiore.ulg.ac.be)
+  (quinet=montefiore+ulg+ac+be)
 
    Denis Moeller                  Author of NWT. Securisation and
-  (denis@doomsday.sh.de)          compatibility of DeuTex and NWT.
+  (denis=doomsday+sh+de)          compatibility of DeuTex and NWT.
 
    Elias Papavassilopoulos        Doom technical information.
-  (ep104@cus.cam.ac.uk)
+  (ep104=cus+cam+ac+uk)
 
    Matt Fell                      Doom specs version 1.666
-  (matt.burnet@acebbs.com)
+  (matt+burnet=acebbs+com)
 
    Keith Wilkins                  Author of Wacker, first Texture
-  (spike@nectech.demon.co.uk)     composer. Try it!
+  (spike=nectech+demon+co+uk)     composer. Try it!
 
    Tom Neff                       Doom technical information.
   (tneff)
 
    Bernd Kreimeier                Author of DMADDS/DMADDF
-  (bernd@nero.uni-bonn.de)
+  (bernd=nero+uni-bonn+de)
 
    Dewi Morgan                    Unashamed flattery that lead me to
-  (D.Morgan@bradford.ac.uk)       create DeuSF from DeuTex code.
+  (D+Morgan=bradford+ac+uk)       create DeuSF from DeuTex code.
 
    Id software                    For the DEUTEX/DeuSF test bench, also
-  (help@idsoftware.com)           known as 'Doom', 'Doom2' or 'Heretic'
+  (help=idsoftware+com)           known as 'Doom', 'Doom2' or 'Heretic'
 
    Raven software                 For those cool graphics in Heretic.
                                   (and for messing with color palettes)
@@ -3519,10 +3542,10 @@ Special Thanx to:
 
 
    Mark Mathews                   DeuTex OS/2, DJGPP port.
-  (mark.mathews@channel1.com)     Improvements and suggestions.
+  (mark+mathews=channel1+com)     Improvements and suggestions.
 
    Per Allansson                  DeuTex Linux version.
-  (c91peral@und.ida.liu.se)
+  (c91peral=und+ida+liu+se)
 
    James Bonfield                 DeuTex DEC ALPHA port
 
@@ -3548,31 +3571,31 @@ Thanks to all of you who reported bugs and proposed corrections
 or generally supported my efforts:
 
 
-   Leonard Czajka     leonardc@halcyon.halcyon.com
-   Herve.Benvel       Herve.Benvel@inria.fr
-   Paolo Hutchison    paolo@netcom.com
-   M. Kernaghan       mkernagh@julian.uwo.ca
-   Thierry Vermat     vermat@evol10.univ-lyon1.fr
-   Jeremy Blackman    ranma@eskimo.com
-   Jason Mezzacca     72510.3424@compuserve.com
-   C. Gasparo         cgasparo@cymbal.aix.calpoly.edu
-   Avery Andrews      andaling@durras.anu.edu.au
-   Matthew W. Miller  mattm@infinet.com
-   Kim Parrot         kelm@eisa.net.au
-   Martin {_|G|NRG}   MartinG@munich.netsurf.de
+   Leonard Czajka     leonardc=halcyon+halcyon+com
+   Herve.Benvel       Herve.Benvel=inria+fr
+   Paolo Hutchison    paolo=netcom+com
+   M. Kernaghan       mkernagh=julian+uwo+ca
+   Thierry Vermat     vermat=evol10+univ-lyon1+fr
+   Jeremy Blackman    ranma=eskimo+com
+   Jason Mezzacca     72510+3424=compuserve+com
+   C. Gasparo         cgasparo=cymbal+aix+calpoly+edu
+   Avery Andrews      andaling=durras+anu+edu+au
+   Matthew W. Miller  mattm=infinet+com
+   Kim Parrot         kelm=eisa+net+au
+   Martin {_|G|NRG}   MartinG=munich+netsurf+de
    (I hope I'm not forgetting you!)
 
 
    Thanks to Justin Fisher for letting me use DeuTex and DeuSF on a
    new install for Alien-TC (despite all the small mistakes I made).
 
-   Thanks to Jonathan Wilson <wilsonj@xoommail.com> for figuring out
+   Thanks to Jonathan Wilson <wilsonj=xoommail+com> for figuring out
    the formats of the Doom alpha and press release pre-beta pictures.
 
  Now comes the guy YOU all want to thank:
 
          HevKev, also known as Kevin McGrail, novice Manual Editor.
-         74107.1254@compuserve.com
+         74107+1254=compuserve+com
 
 
  Before his contribution, I was the only one who knew how to use DeuTex.
@@ -3638,7 +3661,7 @@ Thanx for trying DeuTex.
         Olivier Montanuy,
 
 E-Mail:
-        Olivier.Montanuy@wanadoo.fr
+        Olivier+Montanuy=wanadoo+fr
 Address:
         Manoir de Keringant, St Quay Perros, 22700 Perros Guirec, FRANCE
         This is in Bretagne (Brittany), the westernmost part of France.

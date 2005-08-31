@@ -5,7 +5,7 @@ DeuTex incorporates code derived from DEU 5.21 that was put in the public
 domain in 1994 by Raphaël Quinet and Brendon Wyber.
 
 DeuTex is Copyright © 1994-1995 Olivier Montanuy,
-          Copyright © 1999-2000 André Majorel.
+          Copyright © 1999-2005 André Majorel.
 
 This program is free software; you can redistribute it and/or modify it under
 the terms of the GNU General Public License as published by the Free Software
@@ -22,6 +22,12 @@ Place, Suite 330, Boston, MA 02111-1307, USA.
 */
 
 
+#define MSGCLASS_INFO 'i'
+#define MSGCLASS_WARN 'w'
+#define MSGCLASS_ERR  'E'
+#define MSGCLASS_BUG  'B'
+
+
 void check_types (void);
 
 void PrintCopyright (void);
@@ -33,6 +39,7 @@ char *fnameofs (const char *name, long ofs);
 char *fname (const char *name);
 char *lump_name (const char *name);
 char *short_dump (const char *data, size_t size);
+const char *quotechar (char c);
 
 void PrintInit(Bool asFile);
 void PrintVerbosity(Int16 level);
@@ -40,16 +47,16 @@ void PrintExit(void);
 
 void ProgErrorCancel(void);
 void ProgErrorAction(void (*action)(void));
-void ProgError (const char *, ...);    /*fatal error. halt.*/
-void Bug (const char *, ...);          /*fatal bug. halt*/
-void Warning (const char *str, ...);   /*I'm not happy*/
-void LimitedWarn (int *left, const char *fmt, ...);
-void LimitedEpilog (int *left, const char *fmt, ...);
-void Output (const char *str, ...); /*command text output*/
-void Info (const char *str, ...);   /*useful indications*/
-void Phase (const char *str, ...);  /*phase of executions*/
-void Detail (const char *str, ...); /*technical details*/
-void Legal (const char *str, ...);  /*legal output*/
+void ProgError (const char *code, const char *fmt, ...);    /*fatal error. halt.*/
+void nf_err (const char *code, const char *fmt, ...);	/* Non-fatal error */
+void Bug (const char *code, const char *fmt, ...);          /*fatal bug. halt*/
+void Warning (const char *code, const char *str, ...);   /*I'm not happy*/
+void LimitedWarn (int *left, const char *code, const char *fmt, ...);
+void LimitedEpilog (int *left, const char *code, const char *fmt, ...);
+void Output (const char *fmt, ...); /*command text output*/
+void Info (const char *code, const char *fmt, ...);   /*useful indications*/
+void Phase (const char *code, const char *fmt, ...);  /*phase of executions*/
+void Detail (const char *code, const char *fmt, ...); /*technical details*/
 
 
 

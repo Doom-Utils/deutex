@@ -7,6 +7,15 @@ if not "%2" == "" goto usage
 set bcdir=%1
 
 cd src
+echo Generating config.h
+echo #undef HAVE_INTTYPES		>config.h
+echo #undef HAVE_SNPRINTF		>>config.h
+echo typedef signed char    int8_t;	>>config.h
+echo typedef short          int16_t;	>>config.h
+echo typedef long           int32_t;	>>config.h
+echo typedef unsigned char  uint8_t;	>>config.h
+echo typedef unsigned short uint16_t;	>>config.h
+echo typedef unsigned long  uint32_t;	>>config.h
 echo Building DeuTex
 bcc -mh -I%bcdir%include -L%bcdir%lib -DDeuTex -e..\deutex.exe *.c
 echo Building DeuSF

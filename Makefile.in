@@ -4,7 +4,7 @@
 # Platform-specific notes:
 #
 #   Unix    User targets should work on all Unices. Some _developer_
-#           targets, however, require lynx, GCC or GNU tar and gzip.
+#           targets, however, require Elinks, GCC or GNU tar and gzip.
 #
 #   DOS     "make [all]" should work with DJGPP and Cygwin. With other
 #           compilers, use the batch files in dos\ instead.
@@ -14,29 +14,22 @@
 #   Others  Don't know. Send feedback to the maintainer.
 #
 
-PREFIX=/usr/local
-
-# Compiled by users
-CFLAGS   = -O2
-CC       = cc
-LDFLAGS  =
-
 # Compiled by developers
-DCFLAGS  = -g -Wall -Wpointer-arith -Wstrict-prototypes
+DCFLAGS  = -g -Wall -Wpointer-arith -Wstrict-prototypes -pg
 DCC      = gcc
-DLDFLAGS = -g
-#-lefence
+DLDFLAGS = -g -pg
 
 #DEFINES = -DDT_ALPHA -DDT_PRIVATE
+#DEFINES = -DDT_PRIVATE
 
 ######### do not edit after this line #########
-VERSION       = $$(cat VERSION)
+VERSION       = `cat VERSION`
 DISTARC       = deutex-$(VERSION).tar.gz
 DISTARCDOS    = deutex-$(VERSION).zip
-DISTARCDOS8   = dtex$$(tr -cd '[0-9]' <VERSION).zip
+DISTARCDOS8   = dtex`tr -cd '[0-9]' <VERSION`.zip
 BINZIP        = deutex-$(VERSION).bin.dos.zip
 DISTDIR       = deutex-$(VERSION)
-DISTDIRDOS    = dtex$$(tr -cd '[0-9]' <VERSION)
+DISTDIRDOS    = dtex`tr -cd '[0-9]' <VERSION`
 DISTFILES     = $(DOC_SRC) $(HEADERS) $(MISCFILES) $(MISCSRC)\
 		$(SCRIPTS) $(SRC)
 DISTFILESBIN  = $(MISCFILES) deutex.exe deusf.exe
@@ -45,20 +38,23 @@ DOC_SRC =\
 	docsrc/README\
 	docsrc/changes.html\
 	docsrc/deutex.6\
+	docsrc/faq.html\
 	docsrc/hackers_guide.html\
 	docsrc/readme.dos\
 	docsrc/todo.html\
+	docsrc/transpblue.png
 
 DDOCUNIXFILES =\
 	unixtmp1/CHANGES\
 	unixtmp1/COPYING\
 	unixtmp1/COPYING.LIB\
+	unixtmp1/FAQ\
 	unixtmp1/INSTALL\
-	unixtmp1/LICENSE\
+	unixtmp1/LICENCE\
 	unixtmp1/README\
 	unixtmp1/TODO\
 	unixtmp1/deutex.6\
-	unixtmp1/dtexman6.txt\
+	unixtmp1/dtexman6.txt
 
 DDOCUNIX = unixtmp1 $(DDOCUNIXFILES)
 
@@ -67,11 +63,13 @@ DDOCDOSFILES =\
 	dostmp1/copying\
 	dostmp1/copying.lib\
 	dostmp1/dtexman6.txt\
-	dostmp1/license\
+	dostmp1/faq.txt\
+	dostmp1/install.txt\
+	dostmp1/licence.txt\
 	dostmp1/manpage.txt\
 	dostmp1/readme.txt\
-	dostmp1/todo.txt\
-	
+	dostmp1/todo.txt
+
 DDOCDOS = dostmp1 $(DDOCDOSFILES)
 
 HEADERS =\
@@ -83,23 +81,27 @@ HEADERS =\
 	src/gifcodec.h\
 	src/ident.h\
 	src/lists.h\
+	src/log.h\
 	src/merge.h\
 	src/mkwad.h\
 	src/picture.h\
 	src/sound.h\
+	src/sscript.h\
 	src/text.h\
 	src/texture.h\
 	src/tools.h\
 	src/usedidx.h\
-	src/wadio.h\
+	src/wadio.h
 
 MISCFILES =\
-	VERSION\
+	VERSION
 
 # Only in source distributions
 MISCSRC =\
-	Makefile\
+	Makefile.in\
+	configure\
 	dos/buildbc.bat\
+	dos/builddj.bat\
 	dos/buildmsc.bat\
 	old/deusf.ide\
 	old/deutex.ide\
@@ -108,10 +110,12 @@ MISCSRC =\
 	src/deusf.def\
 	src/deusfos.def\
 	src/deutex.def\
-	src/deutexos.def\
+	src/deutexos.def
 
 SCRIPTS =\
-	scripts/process\
+	scripts/codes\
+	scripts/html2txt\
+	scripts/process
 
 SRC =\
 	src/color.c\
@@ -124,25 +128,28 @@ SRC =\
 	src/ident.c\
 	src/listdir.c\
 	src/lists.c\
+	src/log.c\
 	src/lzw.c\
 	src/merge.c\
 	src/mkwad.c\
 	src/picture.c\
 	src/sound.c\
+	src/sscript.c\
 	src/substit.c\
 	src/text.c\
 	src/texture.c\
 	src/tools.c\
 	src/usedidx.c\
 	src/version.c\
-	src/wadio.c\
+	src/wadio.c
 
 OBJSF   = $(SRC:.c=.os)
 OBJTEX  = $(SRC:.c=.ot)
 DOBJSF  = $(SRC:.c=.osd)
 DOBJTEX = $(SRC:.c=.otd)
+MSGTEX  = $(SRC:.c=.mt)
 
-.SUFFIXES: .os .os~ .ot .ot~ .osd .osd~ .otd .otd~ $(SUFFIXES)
+.SUFFIXES: .mt .os .os~ .ot .ot~ .osd .osd~ .otd .otd~ $(SUFFIXES)
 
 .c.ot: src/deutex.h
 	$(CC) $(CFLAGS) $(DEFINES) -DDeuTex -o $@ -c $<
@@ -155,6 +162,9 @@ DOBJTEX = $(SRC:.c=.otd)
 
 .c.osd: src/deutex.h
 	$(DCC) $(DCFLAGS) $(DEFINES) -DDeuSF  -o $@ -c $<
+
+.c.mt: src/deutex.h
+	scripts/codes $< >$@. && mv $@. $@
 
 all: deutex deusf
 
@@ -174,26 +184,27 @@ dds: ddeusf
 ddeutex: $(DOBJTEX)
 	$(DCC) $(DLDFLAGS) -lm -o deutex $(DOBJTEX) 
 	@# Force next "make deutex" to relink
-	(sleep 1; mkdir -p tmp; touch tmp/_deutex) &
+	(sleep 1; mkdir -p tmp; >tmp/_deutex) &
 
 ddeusf: $(DOBJSF)
 	$(DCC) $(DLDFLAGS) -lm -o deusf $(DOBJSF) 
 	@# Force next "make deusf" to relink
-	(sleep 1; mkdir -p tmp; touch tmp/_deusf) &
+	(sleep 1; mkdir -p tmp; >tmp/_deusf) &
 
 tmp/_deutex:
-	-mkdir tmp
-	touch $@
+	[ -d tmp ] || mkdir tmp
+	>$@
 
 tmp/_deusf:
-	-mkdir tmp
-	touch $@
+	[ -d tmp ] || mkdir tmp
+	>$@
 
 install:
-	install -p -m 0755 deutex   $(PREFIX)/bin
-	install -p -m 0755 deusf    $(PREFIX)/bin
-	install -p -m 0644 deutex.6 $(PREFIX)/man/man6
-	ln -sf deutex.6             $(PREFIX)/man/man6/deusf.6
+	install -p -m 0755 deutex	$(BINDIR)
+	install -p -m 0755 deusf	$(BINDIR)
+	install -p -m 0644 deutex.6	$(MANDIR)/man6
+	if [ -d $(MANDIR)/man6/deusf.6 ]; then rmdir $(MANDIR)/man6/deusf.6; fi
+	ln -sf deutex.6			$(MANDIR)/man6/deusf.6
 
 src/version.c: VERSION
 	printf "const char deutex_version[] = \"%s\";\n" $(VERSION) >$@
@@ -202,85 +213,114 @@ strip: deutex deusf
 	strip deutex
 	strip deusf
 
+msg: msgtex
+
+msgtex: $(MSGTEX)
+
 doc: $(DDOCUNIX)
 
 unixtmp1:
 	mkdir -p $@
 
-unixtmp1/CHANGES: docsrc/changes.htm* VERSION
-	echo 'THIS IS A GENERATED FILE -- DO NOT EDIT !' >$@
-	echo 'Edit docsrc/changes.html instead.' >>$@
-	lynx -dump $< >>$@
+unixtmp1/CHANGES: docsrc/changes.html VERSION
+	scripts/html2txt docsrc/changes.html >$@_ && mv $@_ $@
 
 unixtmp1/COPYING: docsrc/COPYING
-	cp -p $< $@
+	cp -p docsrc/COPYING $@
 
 unixtmp1/COPYING.LIB: docsrc/COPYING.LIB
-	cp -p $< $@
+	cp -p docsrc/COPYING.LIB $@
+
+unixtmp1/FAQ: docsrc/faq.html VERSION
+	echo 'THIS IS A GENERATED FILE -- DO NOT EDIT !' >$@.1
+	printf 'Edit docsrc/faq.html instead.\n\n' >>$@.1
+	links -dump docsrc/faq.html >>$@.1
+	sed 's/^   //; s/^    //' $@.1 >$@.2
+	rm -f $@.1
+	mv $@.2 $@
 
 unixtmp1/INSTALL: docsrc/INSTALL VERSION scripts/process
-	scripts/process $< >$@
+	scripts/process docsrc/INSTALL >$@
 
-unixtmp1/LICENSE: docsrc/LICENSE VERSION scripts/process
-	scripts/process $< >$@
+unixtmp1/LICENCE: docsrc/LICENCE VERSION scripts/process
+	scripts/process docsrc/LICENCE >$@
 
 unixtmp1/README: docsrc/README VERSION scripts/process
-	scripts/process $< >$@
+	scripts/process docsrc/README >$@
 
-unixtmp1/TODO: docsrc/todo.htm* VERSION
-	echo 'THIS IS A GENERATED FILE -- DO NOT EDIT !' >$@
-	echo 'Edit docsrc/todo.html instead.' >>$@
-	lynx -dump $< >>$@
+unixtmp1/TODO: docsrc/todo.html VERSION
+	echo 'THIS IS A GENERATED FILE -- DO NOT EDIT !' >$@.1
+	printf 'Edit docsrc/todo.html instead.\n\n' >>$@.1
+	links -dump docsrc/todo.html >>$@.1
+	sed 's/^   //' $@.1 >$@.2
+	rm -f $@.1
+	mv $@.2 $@
 
-unixtmp1/deutex.6: docsrc/deutex.6 VERSION scripts/process
-	scripts/process $< >$@
+unixtmp1/deutex.6: docsrc/deutex.6 VERSION unixtmp1/deutex.6.opt\
+	  unixtmp1/deutex.6.diag scripts/process
+	scripts/process docsrc/deutex.6 >$@
+
+unixtmp1/deutex.6.diag:
+	echo 'FIXME \-\- not implemented yet' >$@
+
+unixtmp1/deutex.6.opt: deutex
+	./deutex -man >$@
 
 unixtmp1/dtexman6.txt: docsrc/dtexman6.txt
-	cp -p $< $@
+	cp -p docsrc/dtexman6.txt $@
 
 dostmp1:
 	mkdir -p $@
 
 dostmp1/changes.txt: unixtmp1/CHANGES
-	todos <$< >$@
-	touch -r $< $@
+	todos <unixtmp1/CHANGES >$@
+	touch -r unixtmp1/CHANGES $@
 
 dostmp1/copying: unixtmp1/COPYING
-	todos <$< >$@;
-	touch -r $< $@
+	todos <unixtmp1/COPYING >$@
+	touch -r unixtmp1/COPYING $@
 
 dostmp1/copying.lib: unixtmp1/COPYING.LIB
-	todos <$< >$@
-	touch -r $< $@
+	todos <unixtmp1/COPYING.LIB >$@
+	touch -r unixtmp1/COPYING.LIB $@
 
 dostmp1/dtexman6.txt: unixtmp1/dtexman6.txt
-	todos <$< >$@
-	touch -r $< $@
+	todos <unixtmp1/dtexman6.txt >$@
+	touch -r unixtmp1/dtexman6.txt $@
 
-dostmp1/license: unixtmp1/LICENSE
-	todos <$< >$@
-	touch -r $< $@
+dostmp1/faq.txt: unixtmp1/FAQ
+	todos <unixtmp1/FAQ >$@
+	touch -r unixtmp1/FAQ $@
+
+dostmp1/install.txt: docsrc/INSTALL VERSION scripts/process
+	scripts/process docsrc/INSTALL | todos >$@
+
+dostmp1/licence.txt: unixtmp1/LICENCE
+	todos <unixtmp1/LICENCE >$@
+	touch -r unixtmp1/LICENCE $@
 
 dostmp1/manpage.txt: unixtmp1/deutex.6
-	nroff -man -Tlatin1 $< | ul -t dumb | todos >$@
-	touch -r $< $@
+	nroff -man -Tlatin1 unixtmp1/deutex.6 | ul -t dumb | todos >$@
+	touch -r unixtmp1/deutex.6 $@
 
-dostmp1/readme.txt: docsrc/readme.dos VERSION scripts/process
-	scripts/process $< | todos >$@
+dostmp1/readme.txt: docsrc/README VERSION scripts/process
+	scripts/process docsrc/README | todos >$@
+
+dostmp1/readme-bin.txt: docsrc/readme.dos VERSION scripts/process
+	scripts/process docsrc/readme.dos | todos >$@
 
 dostmp1/todo.txt: unixtmp1/TODO
-	todos <$< >$@
-	touch -r $< $@
+	todos <unixtmp1/TODO >$@
+	touch -r unixtmp1/TODO $@
 
 clean:
 	rm -f $(OBJTEX) $(OBJSF) $(DOBJTEX) $(DOBJSF) deutex deusf
-	if [ -f deutex.exe ]; then rm deutex.exe; fi
-	if [ -f deusf.exe ]; then rm deusf.exe; fi
+	rm -f deutex.exe deusf.exe
 
 # dist - make the distribution archive for Unix (.tar.gz)
 dist: $(DISTFILES) $(DDOCUNIX)
 	mkdir -p $(DISTDIR)
-	cp -dpP $(DISTFILES) $(DISTDIR)
+	tar cf - $(DISTFILES) | (cd $(DISTDIR) && tar xvf -)
 	cp -p $(DDOCUNIXFILES) $(DISTDIR)
 	tar -zcf $(DISTARC) $(DISTDIR)
 	rm -rf $(DISTDIR)
@@ -288,7 +328,7 @@ dist: $(DISTFILES) $(DDOCUNIX)
 # distdos - make the distribution archive DOS (.zip, 8+3)
 distdos: $(DISTFILES) $(DDOCDOS)
 	mkdir -p $(DISTDIRDOS)
-	cp -dpP $(DISTFILES) $(DISTDIRDOS)
+	tar cf - $(DISTFILES) | (cd $(DISTDIRDOS) && tar xvf -)
 	cp -p $(DDOCDOSFILES) $(DISTDIRDOS)
 	if [ -e $(DISTARCDOS) ]; then rm $(DISTARCDOS); fi
 	zip -D -X -9 -r $(DISTARCDOS) $(DISTDIRDOS)
@@ -298,19 +338,23 @@ distdos: $(DISTFILES) $(DDOCDOS)
 
 # distbindos - make the DOS binary distribution archive (.zip, 8+3)
 TMP=tmpd
-distbindos: $(DISTFILESBIN) $(DDOCDOS)
+distbindos: $(DISTFILESBIN) $(DDOCDOS) dostmp1/readme-bin.txt
 	mkdir -p $(TMP)
 	cp -dpP $(DISTFILESBIN) $(TMP)
 	cp -p $(DDOCDOSFILES) $(TMP)
+	# Use a different readme.txt because this is a binary distribution
+	cp -p dostmp1/readme-bin.txt $(TMP)/readme.txt
+	# INSTALL is irrelevant to binary distributions
+	rm -f $(TMP)/install.txt
 	if [ -e $(BINZIP) ]; then rm $(BINZIP); fi
-	export name=$$(pwd)/$(BINZIP); cd $(TMP); zip -D -X -9 -R $$name '*'
+	export name=`pwd`/$(BINZIP); cd $(TMP); zip -D -X -9 -R $$name '*'
 	rm -rf $(TMP)
 	printf 'DeuTex %s\nhttp://www.teaser.fr/~amajorel/deutex/'\
 	  "$(VERSION)" | zip -z $(BINZIP)
 
 # save - your daily backup
 save:
-	tar -zcvf ../deutex-$$(date '+%Y%m%d').tar.gz\
+	tar -czvf ../deutex-`date '+%Y%m%d'`.tar.gz\
 	  --exclude dostmp1 --exclude unixtmp1\
 	  --exclude "*~" --exclude "*.o"\
 	  --exclude "*.os" --exclude "*.ot"\

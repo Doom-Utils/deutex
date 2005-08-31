@@ -1,11 +1,9 @@
 /*
-This file is part of DeuTex.
+This file is Copyright © 1994-1995 Olivier Montanuy,
+             Copyright © 1999-2005 André Majorel.
 
-DeuTex incorporates code derived from DEU 5.21 that was put in the public
+It may incorporate code derived from DEU 5.21 that was put in the public
 domain in 1994 by Raphaël Quinet and Brendon Wyber.
-
-DeuTex is Copyright © 1994-1995 Olivier Montanuy,
-          Copyright © 1999-2000 André Majorel.
 
 This program is free software; you can redistribute it and/or modify it under
 the terms of the GNU General Public License as published by the Free Software
@@ -16,9 +14,9 @@ This program is distributed in the hope that it will be useful, but WITHOUT
 ANY WARRANTY; without even the implied warranty of MERCHANTABILITY or FITNESS
 FOR A PARTICULAR PURPOSE. See the GNU General Public License for more details.
 
-You should have received a copy of the GNU General Public License along with
-this library; if not, write to the Free Software Foundation, Inc., 59 Temple
-Place, Suite 330, Boston, MA 02111-1307, USA.
+You should have received a copy of the GNU General Public License
+along with this program; if not, write to the Free Software
+Foundation, Inc., 51 Franklin Street, Fifth Floor, Boston, MA  02110-1301, USA
 */
 
 
@@ -28,6 +26,7 @@ Place, Suite 330, Boston, MA 02111-1307, USA.
 */
 
 #include "deutex.h"
+#include <errno.h>
 #include "tools.h"
 #include "text.h"
 #include <ctype.h>
@@ -94,7 +93,7 @@ void TXTinit(void)
       if(isdigit(n)) val |= NUMBER+EXESTRNG;
       if(isalpha(n)) val |= SECTION+NAME+EXESTRNG;
       if(isspace(n)) val |= SPACE;
-      if (n == '%')	// Deal with Strife's "INVFONG%" and "INVFONY%"
+      if (n == '%')	/* Deal with Strife's "INVFONG%" and "INVFONY%" */
 	val |= NAME;
       TXTval[n]=val;
     }
@@ -102,22 +101,35 @@ void TXTinit(void)
 }
 void TXTcloseR(struct TXTFILE *TXT)
 { 
-  if(TXTok!=TRUE) Bug("TxtClo");
+  if(TXTok!=TRUE) Bug("TR91", "TxtClo");
   fclose(TXT->fp);
   Free(TXT);
 }
 
-struct TXTFILE *TXTopenR(const char *file)
-{ struct TXTFILE *TXT;
+struct TXTFILE *TXTopenR(const char *file, int silent)
+{
+  struct TXTFILE *TXT;
+  size_t pathname_len;
   /*characters*/
   if(TXTok!=TRUE)  TXTinit();
-  TXT = (struct TXTFILE *)Malloc(sizeof(struct TXTFILE));
+  
+  pathname_len = strlen (file);
+  TXT = (struct TXTFILE *)Malloc(sizeof(struct TXTFILE) + pathname_len);
   /*some inits */
+  strcpy (TXT->pathname, file);
   TXT->Lines	   =1;/*start in line 1*/
   TXT->SectionStart=0;
   TXT->SectionEnd  =0;
   TXT->fp 	   = fopen(file,FOPEN_RT);
-  if(TXT->fp==NULL)  ProgError("Could not open file %s for reading",file);
+  if(TXT->fp==NULL)
+  {
+    if (silent)
+    {
+      Free(TXT);
+      return NULL;
+    }
+    ProgError("TR03", "%s: %s", fname (file), strerror (errno));
+  }
   return TXT;
 }
 
@@ -166,7 +178,8 @@ static Bool TXTread(struct TXTFILE *TXT,char name[8],Int16 valid)
      if(val & NEWLINE) continue;
      if(val & SPACE)   continue;
      if(val & valid) break;
-     ProgError("Line %d: Illegal char '%c'",TXT->Lines,c);
+     ProgError("TR11", "%s(%ld): illegal char %s",
+	 TXT->pathname, (long) TXT->Lines, quotechar (c));
    }
    name[0]=(char)c;
    for(n=1; n<256; n++ )
@@ -174,28 +187,31 @@ static Bool TXTread(struct TXTFILE *TXT,char name[8],Int16 valid)
      if(val&SPACE)
      { TXTungetc(TXT);break;}
      if(!(val&valid))
-        ProgError("Line %d: Illegal char '%c' in word",TXT->Lines,c);
+        ProgError("TR13", "%s(%ld): illegal char %s in word",
+	    TXT->pathname, (long) TXT->Lines, quotechar (c));
      if(n<8) name[n]=(char)c;
    }
    if(n<8)name[n]='\0';
    return TRUE;
 }
 Int16 TXTreadShort(struct TXTFILE *TXT)
-{ static char buffer[8];
+{ static char buffer[9];
   TXTread(TXT,buffer,NUMBER);
   buffer[8]='\0';
   return (Int16)atoi(buffer);
 }
 static Bool TXTboundSection(struct TXTFILE *TXT);
 static Bool TXTreadIdent(struct TXTFILE *TXT,char name[8])
-{ if(TXTok!=TRUE) Bug("TxtRid");
+{ if(TXTok!=TRUE) Bug("TR21", "%s: TxtRid", fname (TXT->pathname));
   if(TXTskipComment(TXT)==FALSE) return FALSE;
   /*check end of section*/
   if((TXT->Lines)>(TXT->SectionEnd))
   { if(TXTboundSection(TXT)==FALSE)
       return FALSE;   /*no other section*/
   }
-  if(TXTread(TXT,name,NAME|NUMBER)!=TRUE)      	ProgError("Line %d: Expecting identifier or 'END:'",TXT->Lines);
+  if(TXTread(TXT,name,NAME|NUMBER)!=TRUE)
+    ProgError("TR23", "%s(%ld): expected identifier or \"END:\"",
+	TXT->pathname, (long) TXT->Lines);
   Normalise(name,name);
   return TRUE;
 }
@@ -233,7 +249,8 @@ static void TXTreadOptionalName(struct TXTFILE *TXT,char name[8])
   }
   TXTungetc(TXT);
   if(TXTread(TXT,name,NAME|NUMBER)!=TRUE)
-  { ProgError("invalid optional name");
+  { ProgError("TR32", "%s(%ld): invalid optional name",
+      TXT->pathname, (long) TXT->Lines);
   }
 }
 /*
@@ -241,7 +258,7 @@ static void TXTreadOptionalName(struct TXTFILE *TXT,char name[8])
 ** but don't eat NEWLINE
 */
 static Int16 TXTreadOptionalShort(struct TXTFILE *TXT)
-{ static char name[8];
+{ static char name[9];
   Int16 n,c=0,val=0;
   while(1)
   { if(TXTgetc(TXT,&c,&val)!=TRUE)return INVALIDINT;
@@ -259,7 +276,8 @@ static Int16 TXTreadOptionalShort(struct TXTFILE *TXT)
      if(val&NEWLINE) {TXTungetc(TXT);break;}
      if(val&SPACE)break;
      if(!(val&NUMBER))
-	ProgError("Line %d: Illegal char '%c' in number",TXT->Lines,c);
+	ProgError("TR42", "%s(%ld): illegal char %s in number",
+	    fname (TXT->pathname), (long) TXT->Lines, quotechar (c));
      if(n<8) name[n]=(char)c;
    }
    if(n<8)name[n]='\0';
@@ -306,7 +324,7 @@ static Bool TXTboundSection(struct TXTFILE *TXT)
   if(TXTfindSection(TXT,TRUE)!=TRUE) return FALSE;
   TXT->SectionStart=TXT->Lines+1;
   /*check that we don't read twice the same section*/
-  if(TXT->SectionEnd>TXT->SectionStart) Bug("TxtBdS");
+  if(TXT->SectionEnd>TXT->SectionStart) Bug("TR51", "TxtBdS");
   if(TXTfindSection(TXT,FALSE)==TRUE)
     TXT->SectionEnd=TXT->Lines-1;
   else
@@ -321,7 +339,7 @@ static Bool TXTboundSection(struct TXTFILE *TXT)
 }
 Bool TXTseekSection(struct TXTFILE *TXT,const char *section)
 {
-  if(TXTok!=TRUE) Bug("TxtSks");
+  if(TXTok!=TRUE) Bug("TR61", "TxtSks");
   /*seek begin of file*/
   TXT->SectionStart=0;
   TXT->SectionEnd  =0;
@@ -338,9 +356,11 @@ Bool TXTseekSection(struct TXTFILE *TXT,const char *section)
 /*read a texture definition*/
 /*return FALSE if read End*/
 Bool TXTreadTexDef(struct TXTFILE *TXT,char name[8],Int16 *szx,Int16 *szy)
-{ if(TXTok!=TRUE) Bug("TxtTxd");
+{ if(TXTok!=TRUE) Bug("TR71", "TxtTxd");
   if(TXTskipComment(TXT)==FALSE) return FALSE; /*End*/
-  if(TXTread(TXT,name,NAME|NUMBER)!=TRUE)	ProgError("Line %d: Expecting identifier",TXT->Lines);
+  if(TXTread(TXT,name,NAME|NUMBER)!=TRUE)
+    ProgError("TR73", "%s(%ld): expecting identifier",
+	fname (TXT->pathname), (long) TXT->Lines);
   Normalise(name,name);
   *szx=TXTreadShort(TXT);
   *szy=TXTreadShort(TXT);
@@ -348,11 +368,12 @@ Bool TXTreadTexDef(struct TXTFILE *TXT,char name[8],Int16 *szx,Int16 *szy)
 }
 /*read a patch def.  Return FALSE if could not find '*' */
 Bool TXTreadPatchDef(struct TXTFILE *TXT,char name[8],Int16 *ofsx,Int16 *ofsy)
-{ if(TXTok!=TRUE) Bug("TxtRpd");
+{ if(TXTok!=TRUE) Bug("TR81", "TxtRpd");
   if(TXTskipComment(TXT)==FALSE) return FALSE;
   if(TXTcheckStartPatch(TXT)!=TRUE) return FALSE; /*not a patch line*/
   if(TXTread(TXT,name,NAME|NUMBER)!=TRUE)
-	   ProgError("Line %d: Expecting identifier",TXT->Lines);
+	   ProgError("TR83", "%s(%ld): expecting identifier",
+	       fname (TXT->pathname), (long) TXT->Lines);
   Normalise(name,name);
   *ofsx=TXTreadShort(TXT);
   *ofsy=TXTreadShort(TXT);
@@ -391,7 +412,8 @@ Bool TXTentryParse(char *name,char *filenam,Int16 *x,Int16 *y,Bool
     if(val & SPACE)          /*eat space*/
        { continue;}
     if(comment==FALSE)
-       { ProgError("Line %d: bad entry format",TXT->Lines);}
+       ProgError("TR87", "%s(%ld): bad entry format",
+	   fname (TXT->pathname), (long) TXT->Lines);
   }
   return TRUE;
 }
@@ -407,11 +429,16 @@ Bool TXTentryParse(char *name,char *filenam,Int16 *x,Int16 *y,Bool
 ** For any Writing of text files
 */
 struct TXTFILE *TXTopenW(const char *file) /*open, and init if needed*/
-{ struct TXTFILE *TXT;
+{
+  struct TXTFILE *TXT;
+  size_t pathname_len;
+
   /*characters*/
   if(TXTok!=TRUE)  TXTinit();
-  TXT = (struct TXTFILE *)Malloc(sizeof(struct TXTFILE));
+  pathname_len = strlen (file);
+  TXT = (struct TXTFILE *)Malloc(sizeof(struct TXTFILE) + pathname_len);
   /*some inits */
+  strcpy (TXT->pathname, file);
   TXT->Lines	   =1;/*start in line 1*/
   TXT->SectionStart=0;
   TXT->SectionEnd  =0;
@@ -422,9 +449,10 @@ struct TXTFILE *TXTopenW(const char *file) /*open, and init if needed*/
   else
   { fclose(TXT->fp);
     TXT->fp 	   = fopen(file,FOPEN_AT);
-    Warning("Appending to file %s",file);
+    Warning("TW03", "%s: already exists, appending to it", fname (file));
   }
-  if(TXT->fp==NULL)  ProgError("Could not write file %s",file);
+  if(TXT->fp==NULL)
+    ProgError("TW05", "%s: %s", fname (file), strerror (errno));
   return TXT;
 }
 
@@ -432,7 +460,7 @@ void TXTcloseW(struct TXTFILE *TXT)
 {
   if (TXT == &TXTdummy)
      return;
-  if(TXTok!=TRUE) Bug("TxtClo");
+  if(TXTok!=TRUE) Bug("TW91", "TxtClo");
   fclose(TXT->fp);
   Free(TXT);
 }
@@ -444,7 +472,7 @@ void TXTaddSection(struct TXTFILE *TXT,const char *def)
 { 
   if (TXT == &TXTdummy)
      return;
-  if(TXTok!=TRUE) Bug("TxtAdS");
+  if(TXTok!=TRUE) Bug("TW11", "TxtAdS");
   fprintf(TXT->fp,"[%.8s]\n",def);
 }
 
@@ -452,7 +480,7 @@ void TXTaddEntry(struct TXTFILE *TXT,const char *name,const char *filenam,Int16 
 { 
   if (TXT == &TXTdummy)
      return;
-  if(TXTok!=TRUE) Bug("TxtAdE");
+  if(TXTok!=TRUE) Bug("TW21", "TxtAdE");
   fprintf(TXT->fp,"%.8s",name);
 /* fprintf(TXT->fp,"%.8s=",name);*/
   if(filenam!=NULL)
@@ -468,7 +496,7 @@ void TXTaddComment(struct TXTFILE *TXT,const char *text)
 { 
   if (TXT == &TXTdummy)
      return;
-   if(TXTok!=TRUE) Bug("TxtAdC");
+   if(TXTok!=TRUE) Bug("TW31", "TxtAdC");
   fprintf(TXT->fp,"# %.256s\n",text);
 }
 
@@ -477,7 +505,7 @@ void TXTaddEmptyLine (struct TXTFILE *TXT)
   if (TXT == &TXTdummy)
      return;
   if (TXTok != TRUE)
-    Bug ("TxtAdL");
+    Bug ("TW41", "TxtAdL");
   putc ('\n', TXT->fp);
 }
 

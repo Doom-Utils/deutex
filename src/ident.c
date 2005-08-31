@@ -1,11 +1,9 @@
 /*
-This file is part of DeuTex.
+This file is Copyright © 1994-1995 Olivier Montanuy,
+             Copyright © 1999-2005 André Majorel.
 
-DeuTex incorporates code derived from DEU 5.21 that was put in the public
+It may incorporate code derived from DEU 5.21 that was put in the public
 domain in 1994 by Raphaël Quinet and Brendon Wyber.
-
-DeuTex is Copyright © 1994-1995 Olivier Montanuy,
-          Copyright © 1999-2000 André Majorel.
 
 This program is free software; you can redistribute it and/or modify it under
 the terms of the GNU General Public License as published by the Free Software
@@ -16,13 +14,14 @@ This program is distributed in the hope that it will be useful, but WITHOUT
 ANY WARRANTY; without even the implied warranty of MERCHANTABILITY or FITNESS
 FOR A PARTICULAR PURPOSE. See the GNU General Public License for more details.
 
-You should have received a copy of the GNU General Public License along with
-this library; if not, write to the Free Software Foundation, Inc., 59 Temple
-Place, Suite 330, Boston, MA 02111-1307, USA.
+You should have received a copy of the GNU General Public License
+along with this program; if not, write to the Free Software
+Foundation, Inc., 51 Franklin Street, Fifth Floor, Boston, MA  02110-1301, USA
 */
 
 
 #include "deutex.h"
+#include <ctype.h>
 #include "tools.h"
 #include "endianm.h"
 #include "mkwad.h"
@@ -146,11 +145,12 @@ Int16 IDENTinsrX(PICTYPE type,Int16 insrX,Int16 szx)
       return (Int16)(-(320-szx)/2);   /* -160+X??*/
     case PFLAT:       /*no insertion point*/
     case PLUMP:       /*no insertion point*/
+    case PWALL:       /*no insertion point*/
       return (Int16)0;
     case PGRAPH:    /*0,0 by default*/
       return (Int16)0;
     default:
-      Bug("idinx (%d)", (int) type);
+      Bug("FB25", "Idinx (%d)", (int) type);
   }
   return (Int16)0;
 }
@@ -172,11 +172,12 @@ Int16 IDENTinsrY(PICTYPE type,Int16 insrY,Int16 szy)
       return (Int16)(-(200-szy));
     case PFLAT:       /*no insertion point*/
     case PLUMP:       /*no insertion point*/
+    case PWALL:       /*no insertion point*/
       return (Int16)0;
     case PGRAPH:    /*0,0 by default*/
       return (Int16)0;
     default:
-      Bug("idiny (%d)", (int) type);
+      Bug("FB35", "Idiny (%d)", (int) type);
   }
   return 0;
 }
@@ -196,7 +197,7 @@ int IDENTgraphic(struct WADINFO *info,Int16 n)
   pic_head_t h;
   int x;
   int bad_order = 0;
-  Int32 ofs_prev;
+  Int32 ofs_prev = 0xdeadbeef;
 
   /* Slurp the whole lump. */
   buf = Malloc (size);
@@ -214,7 +215,7 @@ int IDENTgraphic(struct WADINFO *info,Int16 n)
   bad_order = 0;
   for (x = 0; x < h.width; x++)
   {
-    Int32 ofs;
+    Int32 ofs = 0xdeadbeef;
     
     /* Cut and pasted from picture.c. Bleagh. */
     if (h.colofs_size == 4)
@@ -237,7 +238,8 @@ int IDENTgraphic(struct WADINFO *info,Int16 n)
     }
     else
     {
-       Bug ("Bad colofs_size %d", (int) h.colofs_size);  /* Can't happen */
+       /* Can't happen */
+       Bug ("ID65", "Invalid colofs_size %d", (int) h.colofs_size);
     }
 
     if (buf + ofs < h.data || ofs >= size)
@@ -317,7 +319,7 @@ static void IDENTdirSet (ENTRY *ids, struct WADINFO *info, const char *name,
 	if (debug_ident != NULL
 	    && ((debug_ident[0] == '*' && debug_ident[1] == '\0')
 		|| ! strncmp (debug_ident, name, 8)))
-	  Info ("Ident: %-8s as %-8.32s by %.32s\n",
+	  Info ("ID90", "Ident: %-8s as %-8.32s by %.32s",
 	      lump_name (name), entry_type_name (ident), ident_func);
       ids[n]=ident;
       }
@@ -334,7 +336,7 @@ static void IDENTsetType (ENTRY *ids, struct WADINFO *info, int n,
   if (debug_ident != NULL
       && ((debug_ident[0] == '*' && debug_ident[1] == '\0')
 	  || ! strncmp (debug_ident, info->dir[n].name, 8)))
-    Info ("Ident: %-8s as %-8.32s by %.32s\n",
+    Info ("ID91", "Ident: %-8s as %-8.32s by %.32s",
 	lump_name (info->dir[n].name), entry_type_name (type), ident_func);
   ids[n] = type;
 }
@@ -435,7 +437,8 @@ static void IDENTdirFlats(ENTRY  *ids,struct WADINFO *info)
        if(ids[n]!=EVOID)
 	 if(ids[n]!=EFLAT)
 	   break; /*last flat*/
-      if((info->dir[n].size==0x1000)||(info->dir[n].size==0x2000)||(info->dir[n].size==0x1040))
+      if((info->dir[n].size==0x1000)||(info->dir[n].size==0x2000)
+	  ||(info->dir[n].size==0x1040))
       { IDENTsetType (ids, info, n, EFLAT);
       }
     }
@@ -446,10 +449,57 @@ static void IDENTdirFlats(ENTRY  *ids,struct WADINFO *info)
   else
   { IDENTsetType (ids, info, f_start, EVOID);
     for(n=f_end-1;n>f_start;n--)
-    { if((info->dir[n].size==0x1000)||(info->dir[n].size==0x2000)||(info->dir[n].size==0x1040))
+    { if((info->dir[n].size==0x1000)||(info->dir[n].size==0x2000)
+	||(info->dir[n].size==0x1040))
       { IDENTsetType (ids, info, n, EFLAT);
       }
     }
+  }
+}
+
+
+/*
+ *	IDENTdirWalls - identify ROTT walls (WALLSTRT/WALLSTOP)
+ *
+ *	Precond: ids contains EZZZZ for unidentified entries
+ */
+static void IDENTdirWalls(ENTRY *ids, struct WADINFO *info)
+{
+  Int16 w_start, w_end;
+  Int16 n;
+  const Int32 WALL_SIZE = 4096;
+
+  ident_func = "IDENTdirWalls";
+  w_start = WADRfindEntry (info, "WALLSTRT");
+  w_end   = WADRfindEntry (info, "WALLSTOP");
+  if (w_start < 0)
+    Warning ("IW05", "No WALLSTRT");
+  if (w_start < 0)
+    return;
+  if (w_start >= 0 && w_end < 0)
+    Warning ("IW06", "WALLSTRT but no WALLSTOP. Guessing where walls stop.");
+
+  IDENTdirSet (ids, info, "WALLSTRT", EVOID);
+  IDENTdirSet (ids, info, "WALLSTOP", EVOID);
+
+  for (n = w_start + 1; n > 0; n++)
+  {
+    if (n >= info->ntry)
+      break;
+    if (w_end >= 0 && n >= w_end)
+      break;
+    if (w_end < 0 && info->dir[n].size != WALL_SIZE)
+      break;
+    if (info->dir[n].size == 0)  /* The iwad has empty walls. Ignore them. */
+    {
+      IDENTsetType (ids, info, n, EVOID);
+      continue;
+    }
+    if (info->dir[n].size != WALL_SIZE)
+      Warning ("IW10", "Wall with size != %ld", (long) WALL_SIZE);
+    if (ids[n] != EZZZZ)
+      Warning ("IW11", "Wall already identified as %d", (int) ids[n]);
+    IDENTsetType (ids, info, n, EWALL);
   }
 }
 
@@ -460,7 +510,7 @@ static void IDENTdirFlats(ENTRY  *ids,struct WADINFO *info)
 static void IDENTdirLumps(ENTRY  *ids,struct WADINFO *info)
 {
   ident_func = "IDENTdirLumps";
-  IDENTdirSet(ids,info,"PLAYPAL",ELUMP);
+  IDENTdirSet(ids,info,palette_lump,ELUMP);
   IDENTdirSet(ids,info,"COLORMAP",ELUMP);
   IDENTdirSet(ids,info,"ENDOOM",ELUMP);
   IDENTdirSet(ids,info,"ENDTEXT",ELUMP);
@@ -498,7 +548,7 @@ static void IDENTdirPatches(ENTRY  *ids,struct WADINFO *info, char  *Pnam, Int32
   }
   else
   {
-    Bug ("Bad tl %d", (int) texture_lump);
+    Bug ("IP10", "Invalid tl %d", (int) texture_lump);
   }
   IDENTdirSet(ids,info,"PNAMES",EPNAME);
   /*
@@ -545,7 +595,8 @@ static void IDENTdirPatches(ENTRY  *ids,struct WADINFO *info, char  *Pnam, Int32
       Free(Pnames);
     }
     else  /*init with default DOOM Pnames*/
-    { PNMinit(Pnam,Pnamsz);
+    { if(Pnam!=NULL&&Pnamsz!=0)
+	PNMinit(Pnam,Pnamsz);
     }
     /*check for lost patches*/
     for(n=0;n<info->ntry;n++)
@@ -632,7 +683,7 @@ static void IDENTdirGraphics2(ENTRY  *ids,struct WADINFO *info,Bool Check)
 	  else
 	  {
 	    if (is_snea > 0 && is_picture > 0 && is_snea == is_picture)
-	      Warning ("Ambiguous type for %s (picture or snea ?)",
+	      Warning ("IG10", "Ambiguous type for %s (picture or snea ?)",
 		  lump_name (info->dir[n].name));
 	    IDENTsetType (ids, info, n, ELUMP);
 	  }
@@ -645,6 +696,31 @@ static void IDENTdirGraphics2(ENTRY  *ids,struct WADINFO *info,Bool Check)
     }
   }
 }
+	
+	
+/*
+ *	IDENTdirSscripts
+ *	Identify Strife scripts (SCRIPTnn). This function does
+ *	not make sense for other games than Strife.
+ */
+static void IDENTdirSscripts(ENTRY  *ids,struct WADINFO *info)
+{ Int16 n;
+  ident_func = "IDENTdirSscripts";
+
+  for(n=0;n<info->ntry;n++)
+  {
+    if(ids[n]==EZZZZ)
+    { 
+      if(memcmp(info->dir[n].name,"SCRIPT",6)==0
+	&& isdigit (info->dir[n].name[6])
+	&& isdigit (info->dir[n].name[7]))
+      {
+	IDENTsetType (ids, info, n, ESSCRIPT);
+      }
+    }
+  }
+}
+
 
 /*
 ** Ident PC sounds
@@ -665,6 +741,7 @@ static void IDENTdirPCSounds(ENTRY  *ids,struct WADINFO *info,Bool Check)
     }
   }
 }
+
 
 /*
  *	IDENTdirMusics
@@ -715,6 +792,7 @@ static void IDENTdirMusics(ENTRY  *ids,struct WADINFO *info,Bool Check)
   }
 }
 
+
 /*
 ** Ident sounds
 */
@@ -756,8 +834,8 @@ static void IDENTdirLevels (ENTRY *ids, struct WADINFO *info)
   const int part_num_max = IDENTlevelPartMax ();
   int in_level = 0;
   int lump_present[20];  /* Really sizeof Parts / sizeof *Parts */
-  char level_format;
-  int n0;
+  char level_format = '\0';		/* Initialised to avoid a warning */
+  int n0 = 0;				/* Initialised to avoid a warning */
   
   ident_func = "IDENTdirLevels";
   for (n = 0; n < info->ntry; n++)
@@ -791,9 +869,9 @@ static void IDENTdirLevels (ENTRY *ids, struct WADINFO *info)
     {
       int have_next = 0;
       char next_name[8];
-      int l_next;
+      int l_next = 0;			/* Initialised to avoid a warning */
       int p;
-      int p_next;
+      int p_next = 0;			/* Initialised to avoid a warning */
 
       p = IDENTlevelPart (name);
       lump_present[p] = 1;
@@ -823,7 +901,7 @@ static void IDENTdirLevels (ENTRY *ids, struct WADINFO *info)
 #if 0
 	  for (i = 0; i <= max_lumps; i++)
 	    if (! lump_present[i] && Part[i].mandatory)
-	      Warning ("Level %s: no %s lump", level_name, Part[i].name); 
+	      Warning ("XX99", "Level %s: no %s lump", level_name, Part[i].name); 
 #endif
 	  for (i = n0; i <= n; i++)
 	    IDENTsetType (ids, info, i, level);
@@ -857,14 +935,14 @@ static void IDENTdirLevels (ENTRY *ids, struct WADINFO *info)
 	l = IDENTlevelPart(name);
 	if (have_lump[l])
 	{
-	  Warning ("Level %s: duplicate %s lump",
+	  Warning ("XX99", "Level %s: duplicate %s lump",
 	      lump_name (level_name), lump_name (name));
 	  level_lump = 0;
 	}
 	if (l != level_lump)
 	{
 	  if (! wrong_order)
-	    Warning ("Level %s: lumps in the wrong order (%s)",
+	    Warning ("XX99", "Level %s: lumps in the wrong order (%s)",
 		level_name, lump_name (name));
 	  wrong_order = 1;
 	}
@@ -902,7 +980,7 @@ static void IDENTdirLevels (ENTRY *ids, struct WADINFO *info)
 
 	  for (n = 0; n <= max_lumps; n++)
 	    if (! have_lump[n] && IDENTlevelPartMandatory (n))
-	      Warning ("Level %s: no %s lump", IDENTlevelPartName (n)); 
+	      Warning ("XX99", "Level %s: no %s lump", IDENTlevelPartName (n)); 
 	}
     }
     "th ld sd v seg ss nod sec rej bm"
@@ -913,7 +991,7 @@ static void IDENTdirLevels (ENTRY *ids, struct WADINFO *info)
 #endif
   }
   if (in_level)
-    Bug ("Reached EOD while in level");
+    Bug ("IL11", "Reached EOD while in level");
 }
 
 
@@ -927,10 +1005,8 @@ ENTRY *IDENTentriesIWAD (struct WADINFO *info,char  *Pnam, Int32 Pnamsz,
 { Int16 n;
   Bool Doom=FALSE;
   ENTRY  *ids;
-  Phase("IWAD entry identification...");
-  if (debug_ident != NULL)
-    Phase("\n");
-  if(info->ok!=TRUE)Bug("IdnOeI");
+  Phase("ID50", "IWAD entry identification...");
+  if(info->ok!=TRUE)Bug("ID51", "IdnOeI");
   ids=(ENTRY  *)Malloc((info->ntry)*sizeof(ENTRY));
   if(WADRfindEntry(info,"ENDTEXT")<0)              /*Not Heretic*/
     if(WADRfindEntry(info,"ENDOOM")>=0) Doom=TRUE;
@@ -942,11 +1018,14 @@ ENTRY *IDENTentriesIWAD (struct WADINFO *info,char  *Pnam, Int32 Pnamsz,
   IDENTdirLumps(ids,info);         /*fast*/
   IDENTdirSprites(ids,info,FALSE); /*fast*/
   IDENTdirFlats(ids,info);         /*fast*/
+  if (ROTT)
+    IDENTdirWalls(ids,info);
   IDENTdirLevels(ids,info);        /*fast*/
   IDENTdirMusics(ids,info,FALSE);  /*fast*/
   IDENTdirPCSounds(ids,info,FALSE);/*fast*/
   IDENTdirPatches(ids,info,Pnam,Pnamsz,FALSE); /*fast*/
   IDENTdirGraphics(ids,info);      /*fast*/
+  IDENTdirSscripts(ids,info);  /* FIXME Should not be called if not Strife ! */
   if(Fast!=TRUE)
   { IDENTdirSounds(ids,info,Doom);   /*slow!*/
     IDENTdirGraphics2(ids,info,TRUE);/*slow!*/
@@ -963,14 +1042,13 @@ ENTRY *IDENTentriesIWAD (struct WADINFO *info,char  *Pnam, Int32 Pnamsz,
 	IDENTsetType (ids, info, n, EDATA);
     }
   }
-  Phase("done\n");
   /*
   ** check registration
   */
 /*
   switch(check)
   { case 1: case 2: break;
-	 default: ProgError("Please register your game.");
+	 default: ProgError("XX99", "please register your game");
   }
 */
 
@@ -983,10 +1061,8 @@ ENTRY *IDENTentriesIWAD (struct WADINFO *info,char  *Pnam, Int32 Pnamsz,
 ENTRY *IDENTentriesPWAD(struct WADINFO *info,char  *Pnam, Int32 Pnamsz)
 { Int16 n;
   ENTRY  *ids;
-  Phase("PWAD entry identification...");
-  if (debug_ident != NULL)
-    Phase("\n");
-  if(info->ok!=TRUE)Bug("IdnOeP");
+  Phase("ID10", "PWAD entry identification...");
+  if(info->ok!=TRUE)Bug("ID11", "IdnOeP");
   ids=(ENTRY  *)Malloc((info->ntry)*sizeof(ENTRY));
   /*
   ** identify for PWAD
@@ -994,43 +1070,54 @@ ENTRY *IDENTentriesPWAD(struct WADINFO *info,char  *Pnam, Int32 Pnamsz)
   for(n=0;n<info->ntry;n++)
     ids[n]=EZZZZ;
 #ifdef DEBUG
-  Phase("\nLumps...");
+  Phase("ID15", "Lumps...");
 #endif
   IDENTdirLumps(ids,info);
 #ifdef DEBUG
-  Phase("\nSprit...");
+  Phase("ID18", "Sprites...");
 #endif
   IDENTdirSprites(ids,info,TRUE);
 #ifdef DEBUG
-  Phase("\nFlat...");
+  Phase("ID21", "Flats...");
 #endif
   IDENTdirFlats(ids,info);
+  if (ROTT)
+  {
 #ifdef DEBUG
-  Phase("\nLev...");
+    Phase ("ID24", "Walls...");
+#endif
+    IDENTdirWalls(ids,info);
+  }
+#ifdef DEBUG
+  Phase("ID27", "Levels...");
 #endif
   IDENTdirLevels(ids,info);
 #ifdef DEBUG
-  Phase("\nMus...");
+  Phase("ID30", "Musics...");
 #endif
   IDENTdirMusics(ids,info,TRUE);
 #ifdef DEBUG
-  Phase("\nPCsnd...");
+  Phase("ID33", "PCsnd...");
 #endif
   IDENTdirPCSounds(ids,info,TRUE);
 #ifdef DEBUG
-  Phase("\nPatch...");
+  Phase("ID36", "Patches...");
 #endif
   IDENTdirPatches(ids,info,Pnam,Pnamsz,TRUE);
 #ifdef DEBUG
-  Phase("\nGraph...");
+  Phase("ID39", "Graphics(1)...");
 #endif
   IDENTdirGraphics(ids,info);
 #ifdef DEBUG
-  Phase("\nSnd...");
+  Phase("ID42", "Scripts...");
+#endif
+  IDENTdirSscripts(ids,info);  /* FIXME Should not be called if not Strife ! */
+#ifdef DEBUG
+  Phase("ID45", "Sounds...");
 #endif
   IDENTdirSounds(ids,info,FALSE);
 #ifdef DEBUG
-  Phase("\nGraph2...");
+  Phase("ID48", "Graphics(2)...");
 #endif
   IDENTdirGraphics2(ids,info,TRUE);
   ident_func = "IDENTentriesPWAD";
@@ -1046,7 +1133,6 @@ ENTRY *IDENTentriesPWAD(struct WADINFO *info,char  *Pnam, Int32 Pnamsz)
   /*
   ** unidentified entries are considered LUMPs
   */
-  Phase("done\n");
   /*the end. WADR is still opened*/
   return ids;
 }
@@ -1082,6 +1168,8 @@ static const entry_type_def_t entry_type_def[] =
   { ESNEA,    "snea",         "sneas",    -1     },
   { ESNEAP,   "sneap",        "sneaps",   PSNEAP },
   { ESNEAT,   "sneat",        "sneats",   PSNEAT },
+  { ESSCRIPT, "script",       "scripts",  -1     },
+  { EWALL,    "wall",         "walls",    PWALL  },
   { 0,        NULL,           NULL,       -1     }
 };
 

@@ -1,0 +1,71 @@
+THIS IS A GENERATED FILE -- DO NOT EDIT !
+Edit docsrc/faq.html instead.
+
+                            DeuTex FAQ
+
+1. When I extract the contents of the Heretic iwad, why are CREDIT, E2END,
+FINAL1, FINAL2, HELP1, HELP2 and TITLE extracted into lumps/ and not into
+graphics/ ?
+
+    They're extracted into lumps/ because that's what they are. The
+    graphics/ directory is for images that are in the in the so-called
+    "picture" format, described in section [5-1] of the [1]UDS
+    ([2]HTTP link). Those lumps are not in picture format, they're
+    just straight bitmaps (320  * 200 pixels, 64,000 bytes).
+
+    The distinction may seem academic, but it isn't. If those lumps
+    were extracted into graphics/, it would be impossible to compose
+    your wad correctly afterwards. In the wad created by DeuTex,
+    CREDIT and friends would be in the picture format while the engine
+    expects them to be in the 64000-byte matrix format.
+
+2. When I extract the contents of the Hexen iwad, why are CREDIT, FINALE1,
+FINALE2, FINALE3, HELP1, HELP2, INTERPIC and TITLE extracted into lumps/
+and not into graphics/ ?
+
+    See question [3]1.
+
+3. I've composed a wad. When I play it, the transparent areas in the
+graphics look opaque and blue or grey, like this :
+    [4]Screenshot
+
+    This is what happens when you try to use DeuTex 4 on files
+    extracted by DeuTex 3 or WinTex.
+
+    It happens because DeuTex 3 and WinTex use (0, 255, 255) (cyan)
+    for transparent areas while DeuTex 4 uses (0, 47, 47) (dark
+    blue-green). Therefore, what looks like a transparent pixel to
+    DeuTex 3 and WinTex just looks like an opaque, cyan pixel to
+    DeuTex 4. The closest match to cyan in the Doom palette is (115,
+    115, 255) (blue-mauve) so that's what you get.
+
+    Try one of the following :
+
+       * convert your files to use (0, 47, 47) instead of (0, 255,
+         255),
+       * recreate your files using DeuTex 4,
+       * recreate your files using DeuTex 3 with the "-rgb 0 47 47"
+         option,
+       * recreate your files using WinTex using the appropriate option
+         (if it exists),
+       * when composing, give DeuTex 4 the "-rgb 0 255 255" option.
+
+4. The musics are extracted into lumps/.
+
+    This has been fixed in version 4.4.
+
+5. When composing, is there a way to include only the resources actually
+used by the levels ?
+
+    No. Though it would certainly be nice to have.
+
+---------------------------------------------------------------------------
+
+AYM 2005-08-29
+
+References
+
+Visible links
+1. ftp://archives.3dgamers.com/pub/idgames/docs/editing/dmspec16.zip
+2. http://www.gamers.org/pub/idgames/docs/editing/dmspec16.zip
+3. file:///aym/src/doom/deutex/docsrc/faq.html#q1

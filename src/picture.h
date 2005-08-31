@@ -5,7 +5,7 @@ DeuTex incorporates code derived from DEU 5.21 that was put in the public
 domain in 1994 by Raphaël Quinet and Brendon Wyber.
 
 DeuTex is Copyright © 1994-1995 Olivier Montanuy,
-          Copyright © 1999-2000 André Majorel.
+          Copyright © 1999-2001 André Majorel.
 
 This program is free software; you can redistribute it and/or modify it under
 the terms of the GNU General Public License as published by the Free Software
@@ -53,7 +53,7 @@ typedef struct
   int dummy_bytes;		/* Are there dummy bytes around post data ? */
 } pic_head_t;
 
-int parse_pic_header (const unsigned char *buf, long size, pic_head_t *h,
+int parse_pic_header (const char *buf, long size, pic_head_t *h,
     char *message);
 
 

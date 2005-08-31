@@ -1,11 +1,9 @@
 /*
-This file is part of DeuTex.
+This file is Copyright © 1994-1995 Olivier Montanuy,
+             Copyright © 1999-2005 André Majorel.
 
-DeuTex incorporates code derived from DEU 5.21 that was put in the public
+It may incorporate code derived from DEU 5.21 that was put in the public
 domain in 1994 by Raphaël Quinet and Brendon Wyber.
-
-DeuTex is Copyright © 1994-1995 Olivier Montanuy,
-          Copyright © 1999-2000 André Majorel.
 
 This program is free software; you can redistribute it and/or modify it under
 the terms of the GNU General Public License as published by the Free Software
@@ -16,9 +14,9 @@ This program is distributed in the hope that it will be useful, but WITHOUT
 ANY WARRANTY; without even the implied warranty of MERCHANTABILITY or FITNESS
 FOR A PARTICULAR PURPOSE. See the GNU General Public License for more details.
 
-You should have received a copy of the GNU General Public License along with
-this library; if not, write to the Free Software Foundation, Inc., 59 Temple
-Place, Suite 330, Boston, MA 02111-1307, USA.
+You should have received a copy of the GNU General Public License
+along with this program; if not, write to the Free Software
+Foundation, Inc., 51 Franklin Street, Fifth Floor, Boston, MA  02110-1301, USA
 */
 
 
@@ -66,7 +64,7 @@ static void SNDsaveWave(char *file,char  *buffer,Int32 size,Int32 speed)
   Int32 wsize,sz=0;
   fp=fopen(file,FOPEN_WB);
   if(fp==NULL)
-  { ProgError("Can't open %s for writing (%s)", fname (file), strerror (errno));
+  { ProgError("RW10", "%s: %s", fname (file), strerror (errno));
   }
   /*header*/
   strncpy(headr.riff,"RIFF",4);
@@ -88,7 +86,7 @@ static void SNDsaveWave(char *file,char  *buffer,Int32 size,Int32 speed)
   for(wsize=0;wsize<size;wsize+=sz)
   { sz= (size-wsize>MEMORYCACHE)? MEMORYCACHE:(size-wsize);
     if(fwrite((buffer+(wsize)),(size_t)sz,1,fp)!=1)
-      ProgError("%s: write error (%s)", fname (file), strerror (errno));
+      ProgError("RW11", "%s: write error", fname (file));
   }
   fclose(fp);
 }
@@ -100,24 +98,24 @@ char  *SNDloadWaveFile(char *file, Int32 *psize, Int32 *pspeed)
   char  *data;
   fp=fopen(file,FOPEN_RB);
   if(fp==NULL)
-    ProgError("Can't open %s for reading (%s)", fname (file), strerror (errno));
+    ProgError("RR10", "%s: %s", fname (file), strerror (errno));
   /*read RIFF HEADER*/
   if(fread(&headr,sizeof(struct RIFFHEAD),1,fp)!=1)
-     ProgError("%s: can't read header", fname (file));
+     ProgError("RR11", "%s: read error in header", fname (file));
   /*check RIFF header*/
   if(strncmp(headr.riff,"RIFF",4)!=0)
-     ProgError("%s: bad RIFF magic in header (%s)",
+     ProgError("RR12", "%s: bad RIFF magic in header (%s)",
 	 fname (file), short_dump (headr.riff, 4));
   if(strncmp(headr.wave,"WAVE",4)!=0)
-     ProgError("%s: bad WAVE magic in header (%s)",
+     ProgError("RR13", "%s: bad WAVE magic in header (%s)",
 	 fname (file), short_dump (headr.wave, 4));
   chunk=sizeof(struct RIFFHEAD);
   for(sz=0;;sz++)
   { if(sz>256)
-       ProgError("%s: no fmt", fname (file));
+       ProgError("RR14", "%s: no fmt", fname (file));
     fseek(fp,chunk,SEEK_SET);
     if(fread(&headc,sizeof(struct CHUNK),1,fp)!=1)
-      ProgError("%s: no fmt", fname (file));
+      ProgError("RR15", "%s: no fmt", fname (file));
     if(strncmp(headc.name,"fmt ",4)==0)break;
     /* There used to be a bug here; sizeof (struct CHUNK) had 
       its bytes swapped too. Reading .wav files on big endian
@@ -127,34 +125,35 @@ char  *SNDloadWaveFile(char *file, Int32 *psize, Int32 *pspeed)
   fseek(fp,chunk,SEEK_SET);
   fread(&headf,sizeof(struct WAVEFMT),1,fp);
   if(peek_i16_le (&headf.tag)!=1)
-    ProgError("%s: not raw data", fname (file));
+    ProgError("RR16", "%s: not raw data", fname (file));
   if(peek_i16_le (&headf.channel)!=1)
-    ProgError("%s: not one channel", fname (file));
+    ProgError("RR17", "%s: not one channel", fname (file));
   smplrate=peek_i32_le(&headf.smplrate);
   
   for(sz=0;;sz++)
   { if(sz>256)
-      ProgError("%s: no data", fname (file));
+      ProgError("RR18", "%s: no data", fname (file));
     fseek(fp,chunk,SEEK_SET);
     if(fread(&headc,sizeof(struct CHUNK),1,fp)!=1)
-      ProgError("%s: no data", fname (file));
+      ProgError("RR19", "%s: no data", fname (file));
     if(strncmp(headc.name,"data",4)==0)break;
     /* Same endianness bug as above. */
     chunk += sizeof (struct CHUNK) + peek_i32_le (&headc.size);
   }
   fseek(fp,chunk,SEEK_SET);
   if(fread(&headw,sizeof(struct WAVEDATA),1,fp)!=1)
-    ProgError("%s: no data", fname (file));
+    ProgError("RR20", "%s: no data", fname (file));
   datasize = peek_i32_le (&headw.datasize);
   /*check WAVE header*/
-  if(datasize>0x100000L)
-    ProgError("%s: sample too long (%ld)", fname (file), (long) datasize);
+  if(datasize>0x1000000L)  /* AYM 2000-04-22 */
+    ProgError("RR21", "%s: sample too long (%ld)",
+	fname (file), (long) datasize);
   /*read data*/
   data=(char  *)Malloc(datasize);
   for(wsize=0;wsize<datasize;wsize+=sz)
   { sz = (datasize-wsize>MEMORYCACHE)? MEMORYCACHE:(datasize-wsize);
     if(fread((data+(wsize)),(size_t)sz,1,fp)!=1)
-      ProgError("%s: error reading data", fname (file));
+      ProgError("RR22", "%s: read error in data", fname (file));
   }
   fclose(fp);
   *psize=datasize;
@@ -181,7 +180,7 @@ static void SNDsaveAu(char *file,char  *buffer,Int32 size,Int32 speed)
   Int32 i,wsize,sz=0;
   fp=fopen(file,FOPEN_WB);
   if(fp==NULL)
-    ProgError("AU: can't open %s for writing (%s)", fname (file), strerror (errno));
+    ProgError("AW10", "%s: %s", fname (file), strerror (errno));
   /*header*/
   strncpy(heada.snd,".snd",4);
   write_i32_be (&heada.dataloc,  sizeof (struct AUHEAD));
@@ -190,13 +189,15 @@ static void SNDsaveAu(char *file,char  *buffer,Int32 size,Int32 speed)
   write_i32_be (&heada.smplrate, speed);
   write_i32_be (&heada.channel,  1);
   heada.info[0]='\0';
-  if(fwrite(&heada,sizeof(struct AUHEAD),1,fp)!=1)ProgError("AU: write error");
+  if(fwrite(&heada,sizeof(struct AUHEAD),1,fp)!=1)
+    ProgError("AW11", "%s: write error", fname (file));
   for(i=0;i<size;i++)
   { buffer[i]-=0x80;
   }
   for(wsize=0;wsize<size;wsize+=sz)
   { sz= (size-wsize>MEMORYCACHE)? MEMORYCACHE:(size-wsize);
-    if(fwrite((buffer+(wsize)),(size_t)sz,1,fp)!=1)ProgError("AU: write error");
+    if(fwrite((buffer+(wsize)),(size_t)sz,1,fp)!=1)
+      ProgError("AW12", "%s: write error", fname (file));
   }
     fclose(fp);
 }
@@ -207,35 +208,33 @@ char *SNDloadAuFile(char *file, Int32 *psize, Int32 *pspeed)
   char *data;
   fp=fopen(file,FOPEN_RB);
   if(fp==NULL)
-    ProgError("Can't open %s for reading (%s)", fname (file), strerror (errno));
+    ProgError("AR10", "%s: %s", fname (file), strerror (errno));
   /*read AU HEADER*/
   if(fread(&heada,sizeof(struct AUHEAD),1,fp)!=1)
-    ProgError("%s: can't read header", fname (file));
+    ProgError("AR11", "%s: read error in header", fname (file));
 
   /*check AU header*/
   if(strncmp(heada.snd,".snd",4)!=0)
-    ProgError ("%s: bad magic in header (%s)",
+    ProgError ("AR12", "%s: bad magic in header (%s)",
 	fname (file), short_dump (heada.snd, 4));
   if(peek_i32_be (&heada.format) != 2)
-    ProgError("%s: not linear 8 bit", fname (file));
+    ProgError("AR13", "%s: not linear 8 bit", fname (file));
   if(peek_i32_be (&heada.channel)!= 1)
-    ProgError("%s: not one channel", fname (file));
+    ProgError("AR14", "%s: not one channel", fname (file));
 
   if (fseek (fp, peek_i32_be (&heada.dataloc), SEEK_SET))
-    ProgError("%s: bad header", fname (file));
+    ProgError("AR15", "%s: bad header", fname (file));
   smplrate = peek_i32_be (&heada.smplrate);
   datasize = peek_i32_be (&heada.datasize);
   /*check header*/
-  if(smplrate!=11025)
-    Warning("%s: sample rate is %u instead of 11025", fname (file), smplrate);
   if(datasize>0x100000L)
-	ProgError("%s: sample too long (%ld)", fname (file), (long) datasize);
+	ProgError("AR16", "%s: sample too long (%ld)", fname (file), (long) datasize);
   /*read data*/
   data=(char  *)Malloc(datasize);
   for(wsize=0;wsize<datasize;wsize+=sz)
   { sz = (datasize-wsize>MEMORYCACHE)? MEMORYCACHE:(datasize-wsize);
     if(fread((data+(wsize)),(size_t)sz,1,fp)!=1)
-      ProgError("%s: error reading data", fname (file));
+      ProgError("AR17", "%s: read error in data", fname (file));
   }
   fclose(fp);
   /*convert from signed to unsigned char*/
@@ -271,7 +270,7 @@ static void SNDsaveVoc(char *file,char  *buffer,Int32 size,Int32 speed)
   Int32 wsize,sz=0;
   fp=fopen(file,FOPEN_WB);
   if(fp==NULL)
-    ProgError("VOC: can't open %s for writing", fname (file), strerror (errno));
+    ProgError("VW10", "%s: %s", fname (file), strerror (errno));
   /*VOC header*/
   strncpy(headv.ident,VocId,VOCIDLEN);
   headv.eof=0x1A;
@@ -291,7 +290,8 @@ static void SNDsaveVoc(char *file,char  *buffer,Int32 size,Int32 speed)
   /*VOC data*/
   for(wsize=0;wsize<size;wsize+=sz)
   { sz= (size-wsize>MEMORYCACHE)? MEMORYCACHE:(size-wsize);
-    if(fwrite((buffer+(wsize)),(size_t)sz,1,fp)!=1)ProgError("VOC: write error");
+    if(fwrite((buffer+(wsize)),(size_t)sz,1,fp)!=1)
+      ProgError("VW11", "%s: write error", fname (file));
   }
   blockv.type=0;/*last block*/
   fwrite(&blockv,1,1,fp);
@@ -304,26 +304,34 @@ char  *SNDloadVocFile(char *file, Int32 *psize, Int32 *pspeed)
   char  *data;
   fp=fopen(file,FOPEN_RB);
   if(fp==NULL)
-    ProgError("VOC: can't open %s for reading (%s)", fname (file), strerror (errno));
+    ProgError("VR10", "%s: %s", fname (file), strerror (errno));
   /*read VOC HEADER*/
-  if(fread(&headv,sizeof(struct VOCHEAD),1,fp)!=1) ProgError("VOC: can't read header");
-  if(strncmp(VocId,headv.ident,VOCIDLEN)!=0) ProgError("VOC: bad header");
-  if(fseek(fp,headv.block1,SEEK_SET)) ProgError("VOC: bad header");
-  if(fread(&blockv,sizeof(struct VOCHEAD),1,fp)!=1) ProgError("VOC: can't read block");
-  if(blockv.type!=1) ProgError("VOC: first block is not sound");
+  if(fread(&headv,sizeof(struct VOCHEAD),1,fp)!=1)
+    ProgError("VR11", "%s: read error in header", fname (file));
+  if(strncmp(VocId,headv.ident,VOCIDLEN)!=0)
+    ProgError("VR12", "%s: bad magic", fname (file));
+  if(fseek(fp,headv.block1,SEEK_SET))
+    ProgError("VR13", "%s: bad header", fname (file));
+  if(fread(&blockv,sizeof(struct VOCHEAD),1,fp)!=1)
+    ProgError("VR14", "%s: read error in first block", fname (file));
+  if(blockv.type!=1)
+    ProgError("VR15", "%s: first block is not sound", fname (file));
   datasize= ((blockv.sizeU)<<16)&0xFF0000L;
   datasize+=((blockv.sizeM)<<8)&0xFF00L;
   datasize+= (blockv.sizeL)&0xFFL;
   datasize -=2;
   /*check VOC header*/
-  if(datasize>0x10000L) ProgError("VOC: sample too long!");
-  if(blockv.cmprs!=0) ProgError("VOC: compression not supported.");
+  if(datasize>0x10000L)
+    ProgError("VR16", "%s: sample too long", fname (file));
+  if(blockv.cmprs!=0)
+    ProgError("VR17", "%s: compression not supported", fname (file));
   smplrate= (1000000L)/(256-(((int)blockv.rate)&0xFF));
   /*read data*/
   data=(char  *)Malloc(datasize);
   for(wsize=0;wsize<datasize;wsize+=sz)
   { sz = (datasize-wsize>MEMORYCACHE)? MEMORYCACHE:(datasize-wsize);
-    if(fread((data+(wsize)),(size_t)sz,1,fp)!=1)    	ProgError("VOC: can't read sound");
+    if(fread((data+(wsize)),(size_t)sz,1,fp)!=1)
+      ProgError("VR18", "%s: read error in data", fname (file));
   }
   fclose(fp);
   /*should check for more blocks*/
@@ -336,34 +344,37 @@ char  *SNDloadVocFile(char *file, Int32 *psize, Int32 *pspeed)
 
 
 /**************** generic sound *******************/
-void SNDsaveSound(char *file,char  *buffer,Int32 size,SNDTYPE Sound,Bool
-    fullSND, const char *name)
-{ char  *data;
-  Int32 datasize;
-  Int32 phys_size;
-  Int16 type,headsize;
-  UInt16 speed;
-  headsize = sizeof(Int16)+sizeof(Int16)+sizeof(Int32);
-  if(size<headsize)
+void SNDsaveSound (char *file, char *buffer, Int32 size, SNDTYPE format,
+    Bool fullsnd, const char *name)
+{
+  char  *data;
+  Int32  datasize;
+  Int32  phys_size;
+  Int16  type;
+  Int16  headsize;
+  UInt16 rate;
+
+  headsize = sizeof (Int16) + sizeof (Int16) + sizeof (Int32);
+  if (size < headsize)
   {
-    Warning ("Sound %s: lump has no header. Skipping.");
+    Warning ("SD10", "Sound %s: lump has no header, skipping",
+	lump_name (name));
     return;
   }
   type     = peek_i16_le (buffer);
-  speed    = peek_u16_le (buffer + 2);
+  rate     = peek_u16_le (buffer + 2);
   datasize = peek_i32_le (buffer + 4);
-  data	   = buffer+(headsize);
+  data	   = buffer + headsize;
   if (type!=3)
-    Warning ("Sound %s: weird type %d. Extracting anyway.",
+    Warning ("SD11", "Sound %s: weird type %d, extracting anyway",
 	lump_name (name), type);
 
   phys_size = size - headsize;
   if (datasize > phys_size)
   {
-    Warning (
-	"Sound %s: declared sample size %lu greater than lump size %lu ;",
+    Warning ("SD12",
+	"Sound %s: declared length %lu > lump size %lu, truncating",
 	lump_name (name), (unsigned long) datasize, (unsigned long) phys_size);
-    Warning ("Sound %s: truncating to lump size.", lump_name (name));
     datasize = phys_size;
   }
   /* Sometimes the size of sound lump is greater
@@ -371,99 +382,140 @@ void SNDsaveSound(char *file,char  *buffer,Int32 size,SNDTYPE Sound,Bool
 
   else if (datasize < phys_size)
   {
-    if (fullSND == TRUE)       /* Save entire lump */
+    if (fullsnd == TRUE)       /* Save entire lump */
       datasize = phys_size;
     else
     {
-      Warning (
-	"Sound %s: lump size %lu greater than declared sample size %lu ;",
+      Warning ("SD13",
+	"Sound %s: lump size %lu > declared length %lu, truncating",
 	lump_name (name), (unsigned long) datasize, (unsigned long) phys_size);
-      Warning ("Sound %s: truncating to declared sample size.",
-	  lump_name (name));
     }
   }
 
-  switch(Sound)
-  { case SNDWAV: SNDsaveWave(file,data,datasize,speed);break;
-    case SNDAU:  SNDsaveAu(file,data,datasize,speed);break;
-    case SNDVOC: SNDsaveVoc(file,data,datasize,speed);break;
-    default:  Bug("sndsv");
+  switch (format)
+  {
+    case SNDWAV: SNDsaveWave (file,data,datasize,rate); break;
+    case SNDAU:  SNDsaveAu   (file,data,datasize,rate); break;
+    case SNDVOC: SNDsaveVoc  (file,data,datasize,rate); break;
+    default:     Bug ("SD14", "sndsv %d", (int) format);
   }
 }
 
 
-Int32 SNDcopyInWAD(struct WADINFO *info,char *file,SNDTYPE Sound)
-{ Int32 size=0,d,s,soundsize,datasize,speed;
-  char  *data=NULL;
-  long rate;
-  switch(Sound)
-  { case SNDWAV: data=SNDloadWaveFile(file,&datasize,&speed);break;
-    case SNDAU:  data=SNDloadAuFile(file,&datasize,&speed);break;
-    case SNDVOC: data=SNDloadVocFile(file,&datasize,&speed);break;
-    default:  Bug("sndcw");
+Int32 SNDcopyInWAD (struct WADINFO *info, char *file, SNDTYPE format)
+{
+  Int32  size = 0;
+  Int32  datasize;
+  Int32  rate;
+  char  *data = NULL;
+  long   wadrate;
+
+  switch (format)
+  {
+    case SNDWAV: data = SNDloadWaveFile (file, &datasize, &rate); break;
+    case SNDAU:  data = SNDloadAuFile   (file, &datasize, &rate); break;
+    case SNDVOC: data = SNDloadVocFile  (file, &datasize, &rate); break;
+    default:     Bug ("SC10", "sndcw %d", (int) format);
   }
-  rate = (11025L<<8)/((Int32)speed);
-  soundsize= (datasize*rate)>>8;
-  rate = ((Int32)speed<<8)/11025L;
-  if(speed>11025)
-  { Warning("shrinking %ld to 11025 sample/s",speed);
-    for(s=0;s<soundsize;s++)
-    { d= (s*rate)>>8;  /* (s*((Int32)speed))/11025;*/
-      data[s]= data[d];
-    }
-    data=(char  *)Realloc(data,soundsize);
+  wadrate = rate;
+  switch (rate_policy)
+  {
+    case RP_REJECT:
+      if (rate != 11025)
+	ProgError ("SC11", "%s: sample rate not 11025 Hz", fname (file));
+      break;
+
+    case RP_FORCE:
+      if (rate > 11025)
+      {
+	Warning("SC12", "%s: resampling down from %ld Hz to 11025 Hz",
+	  fname (file),
+	  rate);
+	wadrate = 11025;
+	{
+	  double ratio = 11025.0 / rate;
+	  long s;
+
+	  datasize = (Int32) (ratio * datasize) + 1;
+	  for (s = 0; s < datasize; s++)
+	    data[s] = data[(size_t) (s / ratio + 0.5)];
+	}
+	data = (char *) Realloc (data, datasize);
+      }
+      else if (rate < 11025)
+      {
+	Warning("SC13", "%s: resampling up from %ld Hz to 11025 Hz",
+	  fname (file),
+	  rate);
+	wadrate = 11025;
+	{
+	  double ratio = 11025.0 / rate;
+	  long s;
+
+	  datasize = (Int32) (ratio * datasize) + 1;
+	  data = (char *) Realloc (data, datasize);
+	  for (s = datasize - 1; s >= 0; s--)
+	    data[s] = data[(size_t) (s / ratio + 0.5)];
+	}
+      }
+      break;
+
+    case RP_WARN:
+      if (rate != 11025)
+	Warning ("SC14",
+	    "%s: sample rate != 11025 Hz, won't work on Doom < 1.4",
+	    fname (file));
+      break;
+
+    case RP_ACCEPT:
+      break;
+
+    default:
+      Bug ("SC15", "SNDcopyInWAD: rate_policy %d", (int) rate_policy);
   }
-  else if(speed < 11025)
-  { Warning("expanding %ld to 11025 sample/s",speed);
-    data=(char  *)Realloc(data,soundsize);
-    for(s=soundsize-1;s>=0;s--)
-    { d= (s*rate)>>8;
-      data[s]= data[d];
-    }
+
+  if (datasize > 0)
+  {
+    size  = WADRwriteShort (info, 3);
+    size += WADRwriteShort (info, wadrate);
+    size += WADRwriteLong  (info, datasize);
+    size += WADRwriteBytes (info, data, datasize);
   }
-  else  /*11025*/
-  { soundsize=datasize;
-  }
-  if(soundsize>0)
-  { size= WADRwriteShort(info,3);
-    size+=WADRwriteShort(info,11025);
-    size+=WADRwriteLong(info,soundsize);
-    size+=WADRwriteBytes(info,data,soundsize);
-  }
-  Free(data);
+  Free (data);
   return size;
 }
-/*********** end soundcard sound effects  WAVE ***********/
-
-
 
 
 /*********** PC speaker sound effect ***********/
 
 
-void SNDsavePCSound(char *file,char  *buffer,Int32 size)
+void SNDsavePCSound(const char *lumpname, const char *file, const char *buffer,
+    Int32 size)
 { FILE *fp;
-  char  *data;
+  const char *data;
   Int16 datasize,type,headsize;
   Int16 i;
   headsize = sizeof(Int16)+sizeof(Int16);
-  if(size<headsize)	ProgError("WAV: wrong size");
+  if(size<headsize)
+    ProgError("KW10", "FIXME: wrong size", fname (file));
   type     = peek_i16_le (buffer);
   datasize = peek_i16_le (buffer + 2);
   data= buffer+(sizeof(Int16)+sizeof(Int16));
-  if(type!=0)		Bug("SNDsavePCcound: not a PC sound");
-  if(size<datasize+headsize)ProgError("WAV: wrong size");
+  if(type!=0)
+    Bug("KW11", "FIXME: not a PC sound", fname (file));
+  if(size<datasize+headsize)
+    ProgError("KW12", "FIXME: wrong size", fname (file));
   fp=fopen(file,FOPEN_WT); /*text file*/
   if(fp==NULL)
-    ProgError("Can't open %s for writing (%s)",
-	fname (file), strerror (errno));
+    ProgError("KW13", "%s: %s", fname (file), strerror (errno));
   for(i=0;i<datasize;i++)
   { fprintf(fp,"%d\n",((int)data[i])&0xFF);
 #ifdef WinDeuTex
     windoze();   /*Actually Process Windows Messages*/
 #endif
   }
-  fclose(fp);
+  if (fclose(fp) != 0)
+    ProgError("KW14", "%s: %s", fname (file), strerror (errno));
 }
 
 Int32 SNDcopyPCSoundInWAD(struct WADINFO *info,char *file)
@@ -471,14 +523,17 @@ Int32 SNDcopyPCSoundInWAD(struct WADINFO *info,char *file)
   Int32 size,datasizepos;
   Int16 datasize,s;
   char c;
-  Txt=TXTopenR(file);
+  Txt=TXTopenR(file, 1);
+  if (Txt == NULL)
+    ProgError("KR10", "%s: %s", fname (file), strerror (errno));
   size=WADRwriteShort(info,0);
   datasizepos=WADRposition(info);
   size+=WADRwriteShort(info,-1);
   datasize=0;
   while(TXTskipComment(Txt)!=FALSE)
   { s=TXTreadShort(Txt);
-    if((s<0)||(s>255))ProgError("SND: number out of bounds [0-255]");
+    if((s<0)||(s>255))
+      ProgError("KR11", "%s: number out of bounds [0-255]", fname (file));
     datasize+=sizeof(char);
     c=(char)(s&0xFF);
     size+=WADRwriteBytes(info,&c,sizeof(c));

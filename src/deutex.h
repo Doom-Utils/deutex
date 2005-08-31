@@ -5,7 +5,7 @@ DeuTex incorporates code derived from DEU 5.21 that was put in the public
 domain in 1994 by Raphaël Quinet and Brendon Wyber.
 
 DeuTex is Copyright © 1994-1995 Olivier Montanuy,
-          Copyright © 1999-2000 André Majorel.
+          Copyright © 1999-2005 André Majorel.
 
 This program is free software; you can redistribute it and/or modify it under
 the terms of the GNU General Public License as published by the Free Software
@@ -22,6 +22,8 @@ Place, Suite 330, Boston, MA 02111-1307, USA.
 */
 
 
+#define ROTT 0  /* FIXME make it a run-time option */
+
 /*use old GIF encoder, new one is doing errors*/
 #define NEWGIFE 0
 /*use old GIF decoder, new one is down*/
@@ -31,23 +33,7 @@ Place, Suite 330, Boston, MA 02111-1307, USA.
 #define DeuSF   for DOS .EXE  Unix Linux OS/2
 *********************************************/
 
-#if defined (__alpha)        /*__ALPHA__ for Alpha processor?*/
-/*long = int64 on a 64bit processor*/
-typedef char           Int8;
-typedef short          Int16;
-typedef int            Int32;
-typedef unsigned char  UInt8;
-typedef unsigned short UInt16;
-typedef unsigned int   UInt32;
-#else
-/*long = Int32 on a 32 bit processor*/
-typedef char           Int8;
-typedef short          Int16;
-typedef long           Int32;
-typedef unsigned char  UInt8;
-typedef unsigned short UInt16;
-typedef unsigned long  UInt32;
-#endif
+#include "config.h"
 
 #if defined DeuTex
 #if defined DeuSF
@@ -113,6 +99,19 @@ extern const char deutex_version[];
    /* Do nothing */
 #endif
 
+/* Fixed-size types */
+#ifdef HAVE_INTTYPES
+#  include <inttypes.h>
+#endif
+
+typedef int8_t   Int8;
+typedef int16_t  Int16;
+typedef int32_t  Int32;
+typedef uint8_t  UInt8;
+typedef uint16_t UInt16;
+typedef uint32_t UInt32;
+
+
 #include <stdlib.h>
 #include <stdio.h>
 #include <string.h>
@@ -160,19 +159,21 @@ typedef Int16 WADTYPE;
 /************ deutex.c ************/
 /* Entry selection Bits*/
 typedef Int16 NTRYB;
-#define BLEVEL 		(0x01)
-#define BLUMP		(0x02)
-#define BSOUND		(0x04)
-#define BTEXTUR		(0x08)
-#define BGRAPHIC	(0x10)
-#define BSPRITE		(0x20)
-#define BPATCH		(0x40)
-#define BFLAT		(0x80)
-#define BMUSIC		(0x100)
-#define BSNEAP          (0x200)
-#define BSNEAT          (0x400)
-#define BSNEA           (BSNEAP|BSNEAT)
-#define BALL		(0x7FF)
+#define BLEVEL 		(0x0001)
+#define BLUMP		(0x0002)
+#define BSOUND		(0x0004)
+#define BTEXTUR		(0x0008)
+#define BGRAPHIC	(0x0010)
+#define BSPRITE		(0x0020)
+#define BPATCH		(0x0040)
+#define BFLAT		(0x0080)
+#define BMUSIC		(0x0100)
+#define BSNEAP		(0x0200)
+#define BSNEAT		(0x0400)
+#define BSCRIPT		(0x0800)
+#define BSNEA		(BSNEAP|BSNEAT)
+#define BWALL		(0x1000)
+#define BALL		(0x7FFF)
 
 typedef Int16 SNDTYPE;
 #define SNDNONE		(0)
@@ -218,42 +219,45 @@ struct WADINFO
 
 /********************ident.c********************/
 typedef Int16 PICTYPE;
-#define PGRAPH	(2)
-#define	PWEAPN	(4)
-#define	PSPRIT	(6)
-#define	PPATCH	(8)
-#define	PFLAT	(0xA)
-#define	PLUMP	(0xC)
-#define PSNEAP  (0xd)
-#define PSNEAT  (0xe)
+#define PGRAPH	0x02
+#define	PWEAPN	0x04
+#define	PSPRIT	0x06
+#define	PPATCH	0x08
+#define	PFLAT	0x0a
+#define	PLUMP	0x0c
+#define PSNEAP  0x0d
+#define PSNEAT  0x0e
+#define PWALL   0x10
 
 typedef Int16 ENTRY;
-#define EMASK	(0xFF00)
-#define EVOID	(0)
-#define ELEVEL	(0x100)
-#define EMAP	(0x200)/*Levels (doom1) and Maps(Doom2)*/
-#define ELUMP	(0x300)
-#define ETEXTUR	(0x400)
-#define EPNAME	(0x500)/*textures*/
-#define ESOUND	(0x600)
-#define 	ESNDPC	(0x601)
-#define 	ESNDWAV (0x602)
-#define EGRAPHIC (0x700)
-#define ESPRITE	(0x800)
-#define EPATCH 	(0x900)
-#define 	EPATCH1	(0x901)
-#define 	EPATCH2	(0x902)
-#define 	EPATCH3	(0x903)
-#define EFLAT	(0xA00)
-#define 	EFLAT1	(0xA01)
-#define 	EFLAT2	(0xA02)
-#define 	EFLAT3	(0xA03)
-#define EMUSIC	(0xB00)
-#define EDATA	(0x1000)
-#define ESNEA	(0x2000)
-#define		ESNEAP   (0x2001)  /* Snea using PLAYPAL */
-#define		ESNEAT   (0x2002)  /* Snea using TITLEPAL */
-#define EZZZZ	(0x7F00)   /*unidentified entries*/
+#define EMASK		0xFF00
+#define EVOID		0x0000
+#define ELEVEL		0x0100
+#define EMAP		0x0200  /*Levels (doom1) and Maps(Doom2)*/
+#define ELUMP		0x0300
+#define ETEXTUR		0x0400
+#define EPNAME		0x0500  /*textures*/
+#define ESOUND		0x0600
+#define   ESNDPC	0x0601
+#define   ESNDWAV	0x0602
+#define EGRAPHIC	0x0700
+#define ESPRITE		0x0800
+#define EPATCH		0x0900
+#define   EPATCH1	0x0901
+#define   EPATCH2	0x0902
+#define   EPATCH3	0x0903
+#define EFLAT		0x0A00
+#define   EFLAT1	0x0A01
+#define   EFLAT2	0x0A02
+#define   EFLAT3	0x0A03
+#define EMUSIC		0x0B00
+#define EDATA		0x1000
+#define ESNEA		0x2000
+#define	  ESNEAP	0x2001  /* Snea using PLAYPAL */
+#define	  ESNEAT	0x2002  /* Snea using TITLEPAL */
+#define ESSCRIPT	0x3000  /* Strife script (SCRIPTnn) */
+#define EWALL		0x4000  /* ROTT wall (WALLSTRT/WALLSTOP) */
+#define EZZZZ		0x7F00  /*unidentified entries*/
 
 
 
@@ -291,13 +295,20 @@ typedef struct cusage_s cusage_t;
 /*
  *	Misc globals, set by command line arguments
  */
-typedef enum { PF_NORMAL, PF_ALPHA,    PF_PR                } picture_format_t;
+typedef enum { PF_NORMAL, PF_ALPHA,    PF_PR,   PF_ROTT     } picture_format_t;
 typedef enum { TF_NORMAL, TF_NAMELESS, TF_NONE, TF_STRIFE11 } texture_format_t;
 typedef enum { TL_NORMAL, TL_TEXTURES, TL_NONE              } texture_lump_t;
+typedef enum { RP_REJECT, RP_FORCE,    RP_WARN, RP_ACCEPT   } rate_policy_t;
+typedef enum { CLOBBER_YES, CLOBBER_NO, CLOBBER_ASK         } clobber_t;
 extern picture_format_t picture_format;
 extern texture_format_t input_texture_format;
 extern texture_format_t output_texture_format;
 extern texture_lump_t   texture_lump;
-extern const char *debug_ident;
-extern int old_music_ident_method;
+extern rate_policy_t    rate_policy;
+extern clobber_t        clobber;
+extern const char      *debug_ident;
+extern int              old_music_ident_method;
+extern const char      *palette_lump;
+extern const char      *logfile;
+
 

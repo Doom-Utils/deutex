@@ -2,24 +2,9 @@
 
         DeuTex/DeuSf compilation
 
-        by Olivier Montanuy <Olivier.Montanuy@wanadoo.fr>
+        by Olivier Montanuy <Olivier+Montanuy=wanadoo+fr>
 	Revised AYM 1999-08-12
-	Last update 1999-11-21
-
-
-
-        ****************************
-        * Structure of the sources *
-        ****************************
-
-DeuTex and DeuSF share the same sources.
-When compiling, you must include all sources and define one of
-those flags so that the C pre-processor knows which part to select:
-
-- DeuSF                   to compile DeuSF
-- DeuTex                  to compile DeuTex
-For a windows DLL
-- LDeuTex                 to compile DeuTex.DLL for Windoze
+	Last update 2005-08-19
 
 
         ***********************
@@ -28,8 +13,9 @@ For a windows DLL
 
 Type
 
+    ./configure
     make
-    make install   <- as root
+    make install   # as root
 
 See near the end of the file for any OS-specific details.
 
@@ -105,18 +91,22 @@ DJGPP 2.*
 
     Thanks to Udo Munk, DeuTex can now be built with DJGPP.
 
-    You need a "touch" command (there's one in v2gnu/fil316b.zip) and
-    a command named "cc" in your path, that points to "gcc.exe" (just
-    type "copy c:\djgpp\bin\gcc.exe c:\djgpp\bin\cc.exe"),
+    You need a command named "cc" in your path, that points to "gcc.exe"
+    (just type "copy c:\djgpp\bin\gcc.exe c:\djgpp\bin\cc.exe").
 
-    Certain developer targets (including "make clean") also require
-    cp, GNU find, ln, lynx, rm, tar, tr, zip and a Unix mkdir and/or
-    that the SHELL be sh (Bash, that is), but you don't need them if
-    all you want is to compile DeuTex.
+    The makefile recipes are written for Bourne-compatible shells like
+    bash. If your DJGPP installation is set up so that make executes the
+    recipes with an incompatible shell such as command.com, it won't
+    work. Make sure you have Bash or some other Bourne-compatible shell
+    installed and, if necessary, invoke make with the SHELL variable set
+    to the pathname of that shell ("make SHELL=c:\foo\bash.exe")
 
-    To compile, type
+    Some recipes also require Unix commands like cp, mv, rm, touch etc.
+    so you may have to install additional packages.
 
-	make
+    If you're feeling lucky, type
+
+	dos\builddj
 
     After deusf.exe and deutex.exe are created, copy them to a
     directory in your path.
@@ -125,21 +115,12 @@ Cygwin
 
     Thanks to Udo Munk, DeuTex can now be built with Cygwin.
 
-    You need a "touch" command (there's one in v2gnu/fil316b.zip) and
-    one must be able to invoke your compiler by calling "cc" (I
-    achieved that simply by typing "copy gcc.exe cc.exe").
+    I've not tried it myself, but it should be pretty much like
+    compiling on any Unix :
 
-    Certain developer targets (including "make clean") also require
-    cp, GNU find, ln, lynx, rm, tar, tr, zip and a Unix mkdir and/or
-    that the SHELL be sh (Bash, that is), but you don't need them if
-    all you want is to compile DeuTex.
-
-    To compile, type
-
+	./configure
 	make
-	     
-    After deusf.exe and deutex.exe are created, copy them to a
-    directory in your path.
+	make install
 
 
         ***************
@@ -150,50 +131,8 @@ Cygwin
 Use the DOS deutex version under windows, with a suitable deutex.pif
 
 .DLL
-DeuTex itself can't be compiled as a 16-bit windoze DLL (too big).
-the lbdeutex is for the visual basic shell.
-
-
-        ****************
-        * Unix SUN O/S *
-        ****************
-        by Olivier Montanuy
-
-Unix:   Sun Sparc 1, 10, 20, IPX
-gcc:    2.5.8
-The makefile provided for Unix and Linux does not compile .o
-objects. it compiles .ot for DeuTex and .os for DeuSF.
-That little trick is useful to avoid linker problems.
-type:   make
-	make install (as root)
-
-
-        ********************
-        * Silicon Graphics *
-        ********************
-        by Chuck Rossi
-
-type:   make
-	make install (as root)
-
-
-        **********************
-        * Linux              *
-        **********************
-        by Per Allansson <c91peral@und.ida.liu.se>
-	and André Majorel <amajorel@teaser.fr>
-
-Linux:  kernel 1.1.52, 2.0.34; libc 4.5.26, glibc 2.0.7
-gcc:    2.5.8, 2.7.2.3
-type:   make
-	make install (as root)
-
-
-        ******************************
-        * DEC Alpha 64 bit processor *
-        ******************************
-        by James Bonfield
-        jkb@mrc-molecular-biology.cambridge.ac.uk
+    DeuTex itself can't be compiled as a 16-bit windoze DLL (too
+    big). The lbdeutex is for the visual basic shell.
 
 
         **************
@@ -209,7 +148,7 @@ Microsoft C
 
     Might work. See the corresponding paragraphs in the DOS section.
 
-IBM C Set++ 2.1 (by mark.mathews@channel1.com)
+IBM C Set++ 2.1 (by mark+mathews=channel1+com)
 
     For DEUTEXOS.EXE you need deutexos.mak and deutexos.def
     To make DEUTEXOS.EXE type:  nmake -f deutexos.mak
@@ -245,19 +184,9 @@ The name of the compiler is in DT_CC, defined in deutex.h :
 Testing the existence of other macros, such as __MSDOS__, __GNUC__ etc.
 is discouraged. Use DT_OS and DT_CC instead.
 
-DeuTex uses specified size types Int16, Int32, UInt32, etc. Those are
-defined in deutex.h. The definitions are believed to be correct for all
-16-bit and 32-bit platforms. 64-bit platforms might require some
-tweaking there. There is an alternate set of #define directives under
-#ifdef __alpha but a clever use of limits.h and/or inttypes.h might be a
-better idea. If you're the lucky owner of a 64-bit machine, send me your
-diffs. Note that DeuTex and DeuSF check that the specified size types
-are correctly defined and warn you if they aren't.
-
-Some structures related to pictures or to DOOM assumes that no word or
-long word alignement occur.  if the entries are not put contiguously,
-DeuTex/DeuSF will not work, but there will be no warning.
+Some structures related to pictures or to DOOM assume that no word or
+long word alignement occur. If the fields are not contiguous in core,
+DeuTex and DeuSF will not work, but there will be no warning.
 
 Most of the O/S related functions are in tools.c.
-
 

@@ -4,28 +4,20 @@
  *	AYM 1999-03-06
  */
 
-
 /*
-This file is part of DeuTex.
-
-DeuTex incorporates code derived from DEU 5.21 that was put in the public
-domain in 1994 by Raphaël Quinet and Brendon Wyber.
-
-DeuTex is Copyright © 1994-1995 Olivier Montanuy,
-          Copyright © 1999-2000 André Majorel.
+This file is copyright André Majorel 1999-2005.
 
 This program is free software; you can redistribute it and/or modify it under
-the terms of the GNU General Public License as published by the Free Software
-Foundation; either version 2 of the License, or (at your option) any later
-version.
+the terms of version 2 of the GNU General Public License as published by the
+Free Software Foundation.
 
 This program is distributed in the hope that it will be useful, but WITHOUT
 ANY WARRANTY; without even the implied warranty of MERCHANTABILITY or FITNESS
 FOR A PARTICULAR PURPOSE. See the GNU General Public License for more details.
 
-You should have received a copy of the GNU General Public License along with
-this library; if not, write to the Free Software Foundation, Inc., 59 Temple
-Place, Suite 330, Boston, MA 02111-1307, USA.
+You should have received a copy of the GNU General Public License
+along with this program; if not, write to the Free Software
+Foundation, Inc., 51 Franklin Street, Fifth Floor, Boston, MA  02110-1301, USA
 */
 
 
@@ -42,8 +34,8 @@ Place, Suite 330, Boston, MA 02111-1307, USA.
  *	wad_write_i32
  *
  *	Read and write 16-bit and 32-bit signed integers, with
- *	the respect to the defined endianness. By default, all
- *	wad I/O is done in little-endian mode.
+ *	the defined endianness. By default, all wad I/O is done
+ *	in little-endian mode.
  *
  *	Return 0 on success, non-zero on failure.
  */
@@ -57,7 +49,7 @@ int (* wad_read_i32)  (FILE *, Int32 *) = fread_i32_le;
  *	set_input_wad_endianness
  *	set_output_wad_endianness
  *
- *	Defined the endianness to use for wad input and output
+ *	Define the endianness to use for wad input and output
  *	respectively. Normally, all wads are little-endian.
  */
 void set_output_wad_endianness (int big_endian)
@@ -106,5 +98,4 @@ int wad_write_name (FILE *fd, const char *name)
     putc ('\0', fd);
   return ferror (fd);
 }
-
 

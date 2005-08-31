@@ -1,0 +1,207 @@
+#!/usr/bin/perl -w
+#
+#	codes - extract message codes from DeuTex source
+#	AYM 2005-08-28
+#
+
+# This file is copyright André Majorel 2005.
+#
+# This program is free software; you can redistribute it and/or modify it under
+# the terms of version 2 of the GNU General Public License as published by the
+# Free Software Foundation.
+#
+# This program is distributed in the hope that it will be useful, but WITHOUT
+# ANY WARRANTY; without even the implied warranty of MERCHANTABILITY or FITNESS
+# FOR A PARTICULAR PURPOSE. See the GNU General Public License for more
+# details.
+#
+# You should have received a copy of the GNU General Public License along with
+# this program; if not, write to the Free Software Foundation, Inc.,
+# 51 Franklin Street, Fifth Floor, Boston, MA 02110-1301, USA.
+
+
+use strict;
+use File::Basename;
+use IO::Handle;
+
+
+sub split_args ($);
+sub err (@);
+
+
+# DeuTex functions that take a message code as argument
+my %funcs =
+(
+  'Bug'			=> { class => 'b', code => 0 },
+  'Detail'		=> { class => 'i', code => 0 },
+  'Info'		=> { class => 'i', code => 0 },
+  'LimitedEpilog'	=> { class => 'w', code => 1 },
+  'LimitedWarn'		=> { class => 'w', code => 1 },
+  'Phase'		=> { class => 'i', code => 0 },
+  'ProgError'		=> { class => 'e', code => 0 },
+  'Warning'		=> { class => 'w', code => 0 },
+  'nf_err'		=> { class => 'e', code => 0 },
+);
+
+# Used to spot duplicates
+my %codes;
+
+
+my $status = 0;
+
+foreach my $pathname (@ARGV)
+{
+  my $path = dirname $pathname;
+  my $inc = '';
+  $inc = "-I$path" if length ($path) > 0;
+
+  my $pathnameq = $pathname;
+  $pathnameq =~ s/'/'\''/g;
+
+  # Hide errno because the Glibc headers #define it to something hairy.
+  my $cmd = "sed 's/errno\\([^.]\\)/errno_\\1/g' '$pathnameq'"
+	  . " | gcc -DDeuTex $inc -E - | indent -l9999";
+  my @canonsrc = `$cmd`;
+  if (@canonsrc == 0)
+  {
+    err "$pathname: an error occurred while running indent(1)";
+    $status = 1;
+    next;
+  }
+
+  foreach my $lbuf (@canonsrc)
+  {
+    # Function call ?
+    if ($lbuf =~ /^\s*([_a-zA-Z][_a-zA-Z0-9]*)\s*\((.*)\);\s*$/)
+    {
+      next unless exists $funcs{$1};
+      my $name = $1;
+      my $args = $2;
+      my $hash = $funcs{$1};
+
+      # Extract the arguments to the function
+      my @args = split_args $args;
+
+      # Extract the message code from the arguments. Any arguments
+      # before the code are removed (cf. LimitedWarn()).
+      my $code = splice @args, 0, $hash->{code} + 1;
+      if ($code !~ s/^"([A-Z][A-Z][0-9][0-9])"$/$1/)
+      {
+	err "invalid code \"$code\"";
+	$status = 1;
+	next;
+      }
+
+      # Report duplicates
+      if (exists $codes{$code})
+      {
+	err "$pathname: code $code already used in $codes{$code}";
+      }
+      else
+      {
+	$codes{$code} = $pathname;
+      }
+
+      printf "%s %s %-13s %s\n",
+	$code, $hash->{class}, $pathname, join ("\t", @args);
+    }
+  }
+}
+
+exit $status;
+
+
+#
+#	split_args - split the arguments of a C function
+#
+sub split_args ($)
+{
+  my ($string) = @_;
+
+  my @args = ('');
+
+  my $quote = '';
+  my $backslash = 0;
+  my $paren = 0;
+  for (my $i = 0; $i < length $string; $i++)
+  {
+    my $c = substr $string, $i, 1;
+    if ($quote eq '')
+    {
+      if ($c eq "'")
+      {
+	$quote = "'";
+      }
+      elsif ($c eq '"')
+      {
+	$quote = '"';
+      }
+      elsif ($c eq '(')
+      {
+	$paren++;
+      }
+      elsif ($c eq ')')
+      {
+	$paren--;
+	if ($paren < 0)
+	{
+	  err "extra \")\" in \"$string\"";
+	  exit 1;
+	}
+      }
+      elsif ($c eq ',' && $paren == 0)
+      {
+	push @args, '';
+	$c = '';
+      }
+      elsif ($c =~ /^\s$/ && $paren == 0 && length ($args[@args - 1]) == 0)
+      {
+	$c = '';
+      }
+    }
+    elsif ($quote eq "'")
+    {
+      if ($c eq '\\' && ! $backslash)
+      {
+	$backslash = 2;
+      }
+      elsif ($c eq "'" && ! $backslash)
+      {
+	$quote = '';
+      }
+    }
+    elsif ($quote eq '"')
+    {
+      if ($c eq '\\' && ! $backslash)
+      {
+	$backslash = 2;
+      }
+      elsif ($c eq '"' && ! $backslash)
+      {
+	$quote = '';
+      }
+    }
+    else
+    {
+      err "internal error, invalid quote";
+    }
+
+    $args[@args - 1] .= $c;
+    $backslash-- if $backslash > 0;
+  }
+
+  return @args;
+}
+
+
+#
+#	err - print an error message
+#
+sub err (@)
+{
+  STDOUT->flush;
+  print STDERR "codes: ", @_, "\n";
+  return 1;
+}
+
+

@@ -131,7 +131,7 @@ Int16 Encode(UInt8  *buf, Int32 size)
    array */
 
    if(!started)
-	 { strc = buf[pos++];  // changed pos+1 to pos++
+	 { strc = buf[pos++];  /* changed pos+1 to pos++ */
      started = 1;
    }
    /* go through the array of bytes */

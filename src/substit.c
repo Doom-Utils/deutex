@@ -1,11 +1,9 @@
 /*
-This file is part of DeuTex.
+This file is Copyright © 1994-1995 Olivier Montanuy,
+             Copyright © 1999-2005 André Majorel.
 
-DeuTex incorporates code derived from DEU 5.21 that was put in the public
+It may incorporate code derived from DEU 5.21 that was put in the public
 domain in 1994 by Raphaël Quinet and Brendon Wyber.
-
-DeuTex is Copyright © 1994-1995 Olivier Montanuy,
-          Copyright © 1999-2000 André Majorel.
 
 This program is free software; you can redistribute it and/or modify it under
 the terms of the GNU General Public License as published by the Free Software
@@ -16,9 +14,9 @@ This program is distributed in the hope that it will be useful, but WITHOUT
 ANY WARRANTY; without even the implied warranty of MERCHANTABILITY or FITNESS
 FOR A PARTICULAR PURPOSE. See the GNU General Public License for more details.
 
-You should have received a copy of the GNU General Public License along with
-this library; if not, write to the Free Software Foundation, Inc., 59 Temple
-Place, Suite 330, Boston, MA 02111-1307, USA.
+You should have received a copy of the GNU General Public License
+along with this program; if not, write to the Free Software
+Foundation, Inc., 51 Franklin Street, Fifth Floor, Boston, MA  02110-1301, USA
 */
 
 
@@ -49,8 +47,8 @@ void EXE2list(FILE *out,char *doomexe,Int32 start,Int16 thres)
   iraw=0;raw= (char  *)Malloc(RAWSIZE*sizeof(char));
   istr=0;str= (char  *)Malloc((STRMAX+2)*sizeof(char));
   exe=fopen(doomexe,FOPEN_RB);
-  if(exe==NULL)ProgError("Can't open %s",doomexe);
-  if(fseek(exe,posit,SEEK_SET))ProgError("Can't seek in %s",doomexe);
+  if(exe==NULL)ProgError("XX99", "Can't open %s",doomexe);
+  if(fseek(exe,posit,SEEK_SET))ProgError("XX99", "Can't seek in %s",doomexe);
 
   TXTinit();
   for(iraw=0,remains=0;;remains--,iraw++)
@@ -73,7 +71,7 @@ void EXE2list(FILE *out,char *doomexe,Int32 start,Int16 thres)
        }
        if(posit>lastpos+SHOWPRGRS)
        { lastpos=posit;
-	 Phase("Current offset:0x%-6lx\tfound %ld strings\n",posit,found);
+	 Phase("XX99", "Current offset:0x%-6lx\tfound %ld strings",posit,found);
        }
       default:
        count=0;
@@ -104,14 +102,14 @@ void EXEsubstit(char *texin,char *doomexe,Int32 start,Int16 thres)
   anew = (char  *)Malloc((STRMAX+2)*sizeof(char));
   exe=fopen(doomexe,FOPEN_RBP); 
   if(exe==NULL)
-         ProgError("Can't open %s for writing",doomexe);
+         ProgError("XX99", "Can't open %s for writing",doomexe);
 
   while(1)
   {
     strln=STRMAX;
     anewln=STRMAX;
     if(TXTboundStrings(TXT,str,&strln,anew,&anewln)!=TRUE) break;
-    if(strln<thres)   ProgError("String too small");
+    if(strln<thres)   ProgError("XX99", "String too small");
     for(istr=anewln;istr<strln;istr++) anew[istr]=' ';
     anew[strln]=str[strln]='\0';
 #ifdef DEBUG
@@ -119,8 +117,8 @@ void EXEsubstit(char *texin,char *doomexe,Int32 start,Int16 thres)
 #endif
     lastpos = posit = start;
     if(fseek(exe,posit,SEEK_SET))
-       ProgError("Can't seek in %s",doomexe);
-    found=-1;
+       ProgError("XX99", "Can't seek in %s",doomexe);
+    found = -1;
     same=similar=FALSE;istr=0;ref=str[istr];
     for(iraw=remains=0;;remains--,iraw++,posit++)
     { if(remains==0){ remains=fread(raw,1,RAWSIZE,exe); iraw=0;}
@@ -129,14 +127,14 @@ void EXEsubstit(char *texin,char *doomexe,Int32 start,Int16 thres)
       if(c==ref)
       {  if(istr==0)     {similar=TRUE;lastpos=posit;}
 	 if(similar==TRUE){istr++;ref=str[istr];}
-	 if(istr==strln) {same=TRUE;ref=-1;}
+	 if(istr==strln) {same=TRUE;ref = -1;}
       }
       else
       { if(same==TRUE)
         { if((c=='\0')||(c=='\n'))
 	  { Detail("Found at\t0x%-6lx\t#%s#\n",lastpos,str);
 	    if(found>=0)
-	    { Warning("String defined twice: #%s#",str);
+	    { Warning("XX99", "String defined twice: #%s#",str);
 	      found=0;break;
 	    }
 	    found=lastpos;
@@ -151,11 +149,12 @@ void EXEsubstit(char *texin,char *doomexe,Int32 start,Int16 thres)
     
     if(found>0)
     { Detail("Writing at\t0x%-6lx\t#%s#\n",found,anew);
-      if(fseek(exe,found,SEEK_SET)) ProgError("Can't seek %s",doomexe);
-      if(fwrite(anew,1,strln,exe)!=strln) ProgError("Can't write %s correctly",doomexe);
+      if(fseek(exe,found,SEEK_SET)) ProgError("XX99", "Can't seek %s",doomexe);
+      if(fwrite(anew,1,strln,exe)!=strln)
+	ProgError("XX99", "Can't write %s correctly",doomexe);
     }
     else
-    Warning("Can't insert #%s#",anew);
+    Warning("XX99", "Can't insert #%s#",anew);
   }
   fclose(exe);
   Free(raw);

@@ -5,7 +5,7 @@ DeuTex incorporates code derived from DEU 5.21 that was put in the public
 domain in 1994 by Raphaël Quinet and Brendon Wyber.
 
 DeuTex is Copyright © 1994-1995 Olivier Montanuy,
-          Copyright © 1999-2000 André Majorel.
+          Copyright © 1999-2001 André Majorel.
 
 This program is free software; you can redistribute it and/or modify it under
 the terms of the GNU General Public License as published by the Free Software
@@ -23,7 +23,8 @@ Place, Suite 330, Boston, MA 02111-1307, USA.
 
 
 /*init colors before any operation*/
-void COLinit( UInt8 invR, UInt8 invG, UInt8 invB,char  *Colors,Int16 Colsz);
+void COLinit( UInt8 invR, UInt8 invG, UInt8 invB,char  *Colors,Int16 Colsz,
+    const char *pathname, const char *lumpname);
 void COLinitAlt (char *_titlepal_data, Int32 _titlepal_size);
 void COLfree(void);
 

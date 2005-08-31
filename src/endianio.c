@@ -1,6 +1,5 @@
 /*
- *	endianio.c
- *	File I/O with explicit endianness.
+ *	endianio.c - file I/O with explicit endianness
  *
  *	Those functions allow to read little-endian and
  *	big-endian integers from a file regardless of the
@@ -14,7 +13,7 @@
 
 
 /*
-This file is Copyright © 1999-2000 André Majorel.
+This file is Copyright © 1999-2005 André Majorel.
 
 This file is free software; you can redistribute it and/or modify it under
 the terms of the GNU Library General Public License as published by the Free
@@ -26,9 +25,9 @@ ANY WARRANTY; without even the implied warranty of MERCHANTABILITY or FITNESS
 FOR A PARTICULAR PURPOSE. See the GNU Library General Public License for more
 details.
 
-You should have received a copy of the GNU Library General Public License
-along with this file; if not, write to the Free Software Foundation, Inc.,
-59 Temple Place, Suite 330, Boston, MA 02111-1307, USA.
+You should have received a copy of the GNU General Public License
+along with this program; if not, write to the Free Software
+Foundation, Inc., 51 Franklin Street, Fifth Floor, Boston, MA  02110-1301, USA
 */
 
 
@@ -41,7 +40,7 @@ along with this file; if not, write to the Free Software Foundation, Inc.,
  *	Read a big-endian 16-bit signed integer	from file <fd>.
  *	Returns 0 on success, != 0 on failure.
  */
-int fread_i16_be (FILE *fd, i16 *buf)
+int fread_i16_be (FILE *fd, int16_t *buf)
 {
   *buf = (getc (fd) << 8)
         | getc (fd);
@@ -54,7 +53,7 @@ int fread_i16_be (FILE *fd, i16 *buf)
  *	Read a little-endian 16-bit signed integer from file <fd>.
  *	Returns 0 on success, != 0 on failure.
  */
-int fread_i16_le (FILE *fd, i16 *buf)
+int fread_i16_le (FILE *fd, int16_t *buf)
 {
   *buf = getc (fd)
       | (getc (fd) << 8);
@@ -67,12 +66,12 @@ int fread_i16_le (FILE *fd, i16 *buf)
  *	Read a big-endian 32-bit signed integer from file <fd>.
  *	Returns 0 on success, != 0 on failure.
  */
-int fread_i32_be (FILE *fd, i32 *buf)
+int fread_i32_be (FILE *fd, int32_t *buf)
 {
-  *buf = ((i32) getc (fd) << 24)
-       | ((i32) getc (fd) << 16)
-       | ((u16) getc (fd) << 8)
-       |        getc (fd);
+  *buf =  ((int32_t) getc (fd) << 24)
+       |  ((int32_t) getc (fd) << 16)
+       | ((uint16_t) getc (fd) << 8)
+       |             getc (fd);
   return feof (fd) || ferror (fd);
 }
 
@@ -82,12 +81,12 @@ int fread_i32_be (FILE *fd, i32 *buf)
  *	Read a little-endian 32-bit signed integer from file <fd>.
  *	Returns 0 on success, != 0 on failure.
  */
-int fread_i32_le (FILE *fd, i32 *buf)
+int fread_i32_le (FILE *fd, int32_t *buf)
 {
-  *buf =    getc (fd)
-   | ((u16) getc (fd) << 8)
-   | ((i32) getc (fd) << 16)
-   | ((i32) getc (fd) << 24);
+  *buf =         getc (fd)
+   | ((uint16_t) getc (fd) << 8)
+   |  ((int32_t) getc (fd) << 16)
+   |  ((int32_t) getc (fd) << 24);
   return feof (fd) || ferror (fd);
 }
 
@@ -97,7 +96,7 @@ int fread_i32_le (FILE *fd, i32 *buf)
  *	Read a little-endian 16-bit unsigned integer from file <fd>.
  *	Returns 0 on success, != 0 on failure.
  */
-int fread_u16_le (FILE *fd, u16 *buf)
+int fread_u16_le (FILE *fd, uint16_t *buf)
 {
   *buf = getc (fd)
       | (getc (fd) << 8);
@@ -110,7 +109,7 @@ int fread_u16_le (FILE *fd, u16 *buf)
  *	Write a little-endian 16-bit signed integer to file <fd>.
  *	Returns 0 on success, != 0 on failure.
  */
-int fwrite_i16_le (FILE *fd, i16 buf)
+int fwrite_i16_le (FILE *fd, int16_t buf)
 {
   putc (       buf & 0xff, fd);
   putc ((buf >> 8) & 0xff, fd);
@@ -123,7 +122,7 @@ int fwrite_i16_le (FILE *fd, i16 buf)
  *	Write a big-endian 16-bit signed integer to file <fd>.
  *	Returns 0 on success, != 0 on failure.
  */
-int fwrite_i16_be (FILE *fd, i16 buf)
+int fwrite_i16_be (FILE *fd, int16_t buf)
 {
   putc ((buf >> 8) & 0xff, fd);
   putc (       buf & 0xff, fd);
@@ -136,7 +135,7 @@ int fwrite_i16_be (FILE *fd, i16 buf)
  *	Write a little-endian 32-bit signed integer to file <fd>.
  *	Returns 0 on success, != 0 on failure.
  */
-int fwrite_i32_le (FILE *fd, i32 buf)
+int fwrite_i32_le (FILE *fd, int32_t buf)
 {
   putc (        buf & 0xff, fd);
   putc ((buf >>  8) & 0xff, fd);
@@ -151,7 +150,7 @@ int fwrite_i32_le (FILE *fd, i32 buf)
  *	Write a big-endian 32-bit signed integer to file <fd>.
  *	Returns 0 on success, != 0 on failure.
  */
-int fwrite_i32_be (FILE *fd, i32 buf)
+int fwrite_i32_be (FILE *fd, int32_t buf)
 {
   putc ((buf >> 24) & 0xff, fd);
   putc ((buf >> 16) & 0xff, fd);
@@ -166,7 +165,7 @@ int fwrite_i32_be (FILE *fd, i32 buf)
  *	Write a little-endian 16-bit unsigned integer to file <fd>.
  *	Returns 0 on success, != 0 on failure.
  */
-int fwrite_u16_le (FILE *fd, u16 buf)
+int fwrite_u16_le (FILE *fd, uint16_t buf)
 {
   putc (       buf & 0xff, fd);
   putc ((buf >> 8) & 0xff, fd);
