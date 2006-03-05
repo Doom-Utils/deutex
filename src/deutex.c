@@ -1118,6 +1118,17 @@ int main (int argc, char *argv_non_const[])
 	 }
        }
        if (! gotit)
+       {
+	 for (w = wads; *w != NULL; w++)
+	 {
+	   if (MakeFileName (MainWAD, "/usr/share/games/doom", "", "", *w, "wad") == TRUE)
+	   {
+	     gotit = 1;
+	     break;
+	   }
+	 }
+       }
+       if (! gotit)
 	  ProgError ("AA18",
 	      "Can't find any of doom.wad, doom2.wad, doompres.wad,"
 	      " heretic.wad, hexen.wad, strife1.wad");
