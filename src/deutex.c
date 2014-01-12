@@ -1087,6 +1087,9 @@ int main (int argc, char *argv_non_const[])
 	 "doom2",		/* Doom II */
 	 "plutonia",		/* Final Doom */
 	 "tnt",			/* Final Doom */
+	 "freedoom1",		/* Freedoom: Phase 1 */
+	 "freedoom2",		/* Freedoom: Phase 2 */
+	 "freedm"		/* FreeDM */
 	 "heretic",		/* Heretic */
 	 "hexen",		/* Hexen */
 	 "strife1",		/* Strife */
