@@ -59,7 +59,6 @@ Foundation, Inc., 51 Franklin Street, Fifth Floor, Boston, MA  02110-1301, USA
 #else
 #  define SEPARATOR "/"
 #  include <unistd.h>
-#  include <malloc.h>
 #  include <memory.h>
 #endif
 
