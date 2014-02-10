@@ -1,0 +1,5 @@
+*.o[st]
+/Makefile
+/tmp
+/deusf
+/deutex
