@@ -1,4 +1,5 @@
 *.o[st]
+*.exe
 /Makefile
 /tmp
 /deusf
