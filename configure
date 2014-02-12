@@ -40,8 +40,9 @@ INTTYPES=
 LDFLAGS=
 PREFIX=/usr/local
 
-tmpdir="$TMPDIR"
-[ -n "$tmpdir" ] || tmpdir=/tmp
+tmpdir=$(mktemp -d 2>/dev/null || exit 0)
+# Some old systems don't have mktemp
+[ -n "$tmpdir" ] || { mkdir /tmp/deutex_$$; tmpdir=/tmp/deutex_$$; }
 cbasename=${APPNAME}_$$.c
 obasename=${APPNAME}_$$.o
 ebasename=${APPNAME}_$$
@@ -528,5 +529,7 @@ echo generating Makefile
 #	Write config.h
 #
 genh
+
+rm -rf $tmpdir
 
 exit 0
