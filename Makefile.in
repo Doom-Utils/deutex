@@ -149,6 +149,8 @@ DOBJSF  = $(SRC:.c=.osd)
 DOBJTEX = $(SRC:.c=.otd)
 MSGTEX  = $(SRC:.c=.mt)
 
+.PHONY: install
+
 .SUFFIXES: .mt .os .os~ .ot .ot~ .osd .osd~ .otd .otd~ $(SUFFIXES)
 
 .c.ot: src/deutex.h
