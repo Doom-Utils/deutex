@@ -128,6 +128,7 @@ Usage:
   configure [--cc string] [--cflags string] [--ldflags strings] [--prefix path]
     [--inttypes auto|no|yes]
 EOF
+      rmdir $tmpdir
       exit 0
       ;;
 
