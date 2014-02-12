@@ -202,8 +202,10 @@ tmp/_deusf:
 	>$@
 
 install:
+	install -d -m 0755		$(BINDIR)
 	install -p -m 0755 deutex	$(BINDIR)
 	install -p -m 0755 deusf	$(BINDIR)
+	install -d -m 0755		$(MANDIR)/man6
 	install -p -m 0644 deutex.6	$(MANDIR)/man6
 	if [ -d $(MANDIR)/man6/deusf.6 ]; then rmdir $(MANDIR)/man6/deusf.6; fi
 	ln -sf deutex.6			$(MANDIR)/man6/deusf.6
