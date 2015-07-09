@@ -1089,7 +1089,7 @@ int main (int argc, char *argv_non_const[])
 	 "tnt",			/* Final Doom */
 	 "freedoom1",		/* Freedoom: Phase 1 */
 	 "freedoom2",		/* Freedoom: Phase 2 */
-	 "freedm"		/* FreeDM */
+	 "freedm",		/* FreeDM */
 	 "heretic",		/* Heretic */
 	 "hexen",		/* Hexen */
 	 "strife1",		/* Strife */
