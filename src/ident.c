@@ -1,9 +1,9 @@
 /*
-This file is Copyright © 1994-1995 Olivier Montanuy,
-             Copyright © 1999-2005 André Majorel.
+This file is Copyright Â© 1994-1995 Olivier Montanuy,
+             Copyright Â© 1999-2005 AndrÃ© Majorel.
 
 It may incorporate code derived from DEU 5.21 that was put in the public
-domain in 1994 by Raphaël Quinet and Brendon Wyber.
+domain in 1994 by RaphaÃ«l Quinet and Brendon Wyber.
 
 This program is free software; you can redistribute it and/or modify it under
 the terms of the GNU General Public License as published by the Free Software
