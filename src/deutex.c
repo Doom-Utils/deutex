@@ -469,6 +469,14 @@ void COMgif (int argc, const char *argv[])
   (void) argv;
 }
 
+void COMpng (int argc, const char *argv[])
+{
+	Picture = PICPNG;
+	Info ("AA99", "Saving pictures as PNG (.png)");
+	(void) argc;
+	(void) argv;
+}
+
 void COMbmp (int argc, const char *argv[])
 {
   Picture = PICBMP;
@@ -892,6 +900,7 @@ static comdef_t Com[]=
  {SEC,0,NULL,       NULL,	NULL,		"Graphics"},
  {OP2,0,"bmp",      COMbmp,	NULL,		"save pictures as BMP (\1.bmp\3)"},
  {OP2,0,"gif",      COMgif,	NULL,		"save pictures as GIF (\1.gif\3)"},
+ {OP2,0,"png",      COMpng,	NULL,		"save pictures as PNG (\1.png\3)"},
  {OP2,0,"ppm",      COMppm,	NULL,		"save pictures as rawbits PPM (P6, \1.ppm\3)"},
  {OP2,3,"rgb",      COMrgb,	"<r> <g> <b>",	"specify the transparent colour (default 0 47 47)"},
 #endif

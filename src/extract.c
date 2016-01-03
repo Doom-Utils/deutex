@@ -67,7 +67,9 @@ static Bool XTRbmpSave(Int16 *pinsrX,Int16 *pinsrY,struct WADDIR  *entry,
 
    if(size<8L) return FALSE;
    switch(Picture)
-   { case PICGIF: extens="GIF";break;
+   { 
+	 case PICPNG: extens="PNG";break;
+	 case PICGIF: extens="GIF";break;
      case PICBMP: extens="BMP";break;
      case PICPPM: extens="PPM";break;
      case PICTGA: extens="TGA";break;
@@ -916,7 +918,9 @@ void XTRgetEntry(const char *doomwad, const char *DataDir, const char *wadin,
   if(Found!=TRUE)
     if(Entrysz>8)
     { switch(Picture)
-      { case PICGIF: extens="GIF";break;
+      { 
+		case PICPNG: extens="PNG";break;
+		case PICGIF: extens="GIF";break;
         case PICBMP: extens="BMP";break;
         case PICPPM: extens="PPM";break;
         case PICTGA: extens="TGA";break;

@@ -31,6 +31,7 @@ Foundation, Inc., 51 Franklin Street, Fifth Floor, Boston, MA  02110-1301, USA
 #include "ident.h"
 #include "color.h"
 #include "usedidx.h"
+#include "lodepng.h"
 
 
 #ifdef DeuTex
@@ -180,7 +181,9 @@ static char *PPMtoRAW (Int16 *prawX, Int16 *prawY, char *file);
 static char *GIFtoRAW (Int16 *rawX, Int16 *rawY, char *file);
 static void RAWtoGIF (char *file, char *raw, Int16 rawX, Int16 rawY,
     struct PIXEL *doompal);
-
+static void RAWtoPNG (char *file, char *raw, Int16 rawX, Int16 rawY,
+    struct PIXEL *doompal);
+static char *PNGtoRAW(Int16 *prawX, Int16 *prawY, char *file);
 /*
 **
 **  this is only a test example
@@ -317,7 +320,10 @@ Bool PICsaveInFile (char *file, PICTYPE type, char *pic, Int32 picsz,
      ** convert to BMP/GIF/PPM
      */
      switch(Picture)
-     { case PICGIF:
+     { 
+	case PICPNG:
+	RAWtoPNG(file,raw,rawX,rawY,doompal);
+	case PICGIF:
 	RAWtoGIF(file,raw,rawX,rawY,doompal);
 	break;
        case PICBMP:
@@ -358,7 +364,11 @@ Int32 PICsaveInWAD(struct WADINFO *info,char *file,PICTYPE type,Int16 Xinsr,Int1
   */
   transparent =COLinvisible();
   switch(Picture)
-  { case PICGIF:
+  { 
+	case PICPNG:
+     raw = PNGtoRAW(&rawX,&rawY,file);
+     break;
+	case PICGIF:
      raw = GIFtoRAW(&rawX,&rawY,file);
      break;
     case PICBMP:
@@ -1242,13 +1252,28 @@ static char *PPMtoRAW (Int16 *prawX, Int16 *prawY, char *file)
 
 
 
+/**************** PNG module ***************/
+
+
+
+static char *PNGtoRAW (Int16 *rawX, Int16 *rawY, char *file)
+{
+
+	ProgError("GR32", "PNG NOT IMPLEMENTED YET!");
+	return -1;
+}
 
 
 
 
+static void RAWtoPNG (char *file, char *raw, Int16 rawX, Int16 rawY,
+    struct PIXEL *doompal )
+{
+	ProgError("GR32", "PNG NOT IMPLEMENTED YET!");
+}
 
 
-
+/**************** end PNG module ***************/
 
 
 /******************* GIF module ************************/
@@ -1313,6 +1338,8 @@ extern void compressFree(void);
 static char  *GIFreadPix(FILE *fd,Int16 Xsz,Int16 Ysz);
 static void GIFextens(FILE *fd);
 static char  *GIFintlace(char  *org,Int16 Xsz,Int16 Ysz);
+
+
 
 /*
 **  Read a Gif file
@@ -1539,6 +1566,8 @@ static char  *GIFintlace(char  *org,Int16 Xsz,Int16 Ysz)
   Free(org);
   return raw;
 }
+
+
 
 
 /*

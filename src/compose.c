@@ -121,6 +121,8 @@ static Int16 CMPOloadPic (
      res=PICPPM;
   else if(MakeFileName(file,DataDir,Dir,"",filenam,"bmp")==TRUE)
      res=PICBMP;
+  else if(MakeFileName(file,DataDir,Dir,"",filenam,"png")==TRUE)
+     res=PICPNG;
   else if(MakeFileName(file,DataDir,Dir,"",filenam,"gif")==TRUE)
   {
     static int gif_warning = 0;
