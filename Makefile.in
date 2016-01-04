@@ -81,6 +81,7 @@ HEADERS =\
 	src/gifcodec.h\
 	src/ident.h\
 	src/lists.h\
+	src/lodepng.h\
 	src/log.h\
 	src/merge.h\
 	src/mkwad.h\
@@ -128,6 +129,7 @@ SRC =\
 	src/ident.c\
 	src/listdir.c\
 	src/lists.c\
+	src/lodepng.c\
 	src/log.c\
 	src/lzw.c\
 	src/merge.c\

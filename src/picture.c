@@ -19,7 +19,7 @@ along with this program; if not, write to the Free Software
 Foundation, Inc., 51 Franklin Street, Fifth Floor, Boston, MA  02110-1301, USA
 */
 
-
+#include "lodepng.h"
 #include "deutex.h"
 #include <ctype.h>
 #include <errno.h>
@@ -31,7 +31,6 @@ Foundation, Inc., 51 Franklin Street, Fifth Floor, Boston, MA  02110-1301, USA
 #include "ident.h"
 #include "color.h"
 #include "usedidx.h"
-#include "lodepng.h"
 
 
 #ifdef DeuTex
@@ -317,7 +316,7 @@ Bool PICsaveInFile (char *file, PICTYPE type, char *pic, Int32 picsz,
      else
        doompal = COLdoomPalet();
      /*
-     ** convert to BMP/GIF/PPM
+     ** convert to BMP/GIF/PPM/PNG
      */
      switch(Picture)
      { 
@@ -1258,9 +1257,28 @@ static char *PPMtoRAW (Int16 *prawX, Int16 *prawY, char *file)
 
 static char *PNGtoRAW (Int16 *rawX, Int16 *rawY, char *file)
 {
+	unsigned error;
+	unsigned height, width;
+	unsigned char * raw;
+	int i;
+	error = lodepng_decode32_file(&raw, &width, &height, file);
+	if (error != 0)
+		ProgError("GR33", "LodePNG fucked up, %s", error);
+	
+	for ( i = 0; i < height*width*4; i += 4)
+	{
+		if (raw[i+3] == 0xFF)
+		{
+			raw[i] = 0;
+			raw[i+1] = 0xFF;
+			raw[i+2] = 0xFF;
+		}
+	}
+	
+	*rawX = width;
+	*rawY = height;
 
-	ProgError("GR32", "PNG NOT IMPLEMENTED YET!");
-	return -1;
+	return raw;
 }
 
 
@@ -1269,7 +1287,7 @@ static char *PNGtoRAW (Int16 *rawX, Int16 *rawY, char *file)
 static void RAWtoPNG (char *file, char *raw, Int16 rawX, Int16 rawY,
     struct PIXEL *doompal )
 {
-	ProgError("GR32", "PNG NOT IMPLEMENTED YET!");
+	ProgError("GR32", "PNG EXPORT NOT IMPLEMENTED YET!");
 }
 
 
