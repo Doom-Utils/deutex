@@ -1259,24 +1259,26 @@ static char *PNGtoRAW (Int16 *rawX, Int16 *rawY, char *file)
 {
 	unsigned error;
 	unsigned height, width;
-	unsigned char * raw;
+	unsigned char * out;
+  char * raw;
 	int i;
-	error = lodepng_decode32_file(&raw, &width, &height, file);
+	error = lodepng_decode32_file(&out, &width, &height, file);
 	if (error != 0)
 		ProgError("GR33", "LodePNG fucked up, %s", error);
-	
+  raw=(char  *)Malloc(((Int32)width)*((Int32)height));
 	for ( i = 0; i < height*width*4; i += 4)
 	{
-		if (raw[i+3] == 0xFF)
+		if (out[i+3] == 0x00)
 		{
-			raw[i] = 0;
-			raw[i+1] = 0xFF;
-			raw[i+2] = 0xFF;
+			out[i] = 0;
+			out[i+1] = 0xFF;
+			out[i+2] = 0xFF;
 		}
+    raw[i/4]=COLindex(out[i],out[i+1],out[i+2],0);
 	}
 	
-	*rawX = width;
-	*rawY = height;
+	*rawX = (Int16)width;
+	*rawY = (Int16)height;
 
 	return raw;
 }
