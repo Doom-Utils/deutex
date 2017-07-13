@@ -464,6 +464,10 @@ void CMPOmakePWAD(const char *doomwad,WADTYPE type, const char *PWADname,
 	    { size=WADRwriteLump(&rwad,file);
 	      Detail("CM66", "Reading music file %s", fname (file));
 	    }
+	    else if(MakeFileName(file,DataDir,"MUSICS","",filenam,"MID")==TRUE)
+	    { size=WADRwriteLump(&rwad,file);
+	      Detail("CM66", "Reading music file %s", fname (file));
+	    }
 	    else if(CMPOcopyFromWAD(&size,&rwad,DataDir,"MUSICS",name,
 		  filenam)!=TRUE)
 	      ProgError("CM67", "Can't find music %s",file);
