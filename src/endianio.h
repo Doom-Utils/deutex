@@ -19,4 +19,3 @@ int fwrite_i16_be (FILE *fd, int16_t buf);
 int fwrite_i32_le (FILE *fd, int32_t buf);
 int fwrite_i32_be (FILE *fd, int32_t buf);
 int fwrite_u16_le (FILE *fd, uint16_t buf);
-

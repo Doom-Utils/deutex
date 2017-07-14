@@ -508,4 +508,3 @@ void reset_decoder(void)
 }
 #endif /*NEWGIFD*/
 #endif /*DeuTex*/
-

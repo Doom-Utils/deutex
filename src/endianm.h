@@ -36,4 +36,3 @@ i32 peek_i32_le (const void *ptr);
 void write_i16_le (void *ptr, i16 val);
 void write_i32_be (void *ptr, i32 val);
 void write_i32_le (void *ptr, i32 val);
-

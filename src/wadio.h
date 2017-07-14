@@ -13,5 +13,3 @@ extern int (* wad_read_i16)  (FILE *, Int16 *);
 extern int (* wad_read_i32)  (FILE *, Int32 *);
 int wad_read_name (FILE *fd, char name[8]);
 int wad_write_name (FILE *fd, const char *name);
-
-

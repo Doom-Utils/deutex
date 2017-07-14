@@ -614,4 +614,3 @@ Int16 LWZReadByte(FILE *fd, Int16 flag, Int16 input_code_size)
 }
 #endif /*NEWGIFD*/
 #endif /*DeuTex*/
-

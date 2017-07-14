@@ -6,4 +6,3 @@
 
 int sscript_save (struct WADINFO *wad, Int16 n, const char *file);
 int sscript_load (void);
-
