@@ -1,7 +1,7 @@
 bin_PROGRAMS = deutex
-deutex_SOURCES = color.c deutex.h endianm.h gifcodec.h lists.c lzw.c	\
-mkwad.h sound.h text.h tools.h wadio.c color.h endianio.c extract.c	\
-ident.c lists.h merge.c picture.c sscript.c texture.c usedidx.c		\
-wadio.h compose.c endianio.h extract.h ident.h log.c merge.h		\
-picture.h sscript.h texture.h usedidx.h deutex.c endianm.c gifcodec.c	\
-listdir.c log.h mkwad.c sound.c text.c tools.c
+deutex_SOURCES = color.c color.h compose.c deutex.c deutex.h		\
+endianio.c endianio.h endianm.c endianm.h extract.c extract.h		\
+gifcodec.c gifcodec.h ident.c ident.h listdir.c lists.c lists.h lzw.c	\
+merge.c merge.h mkwad.c mkwad.h picture.c picture.h sound.c sound.h	\
+sscript.c sscript.h text.c text.h texture.c texture.h tools.c tools.h	\
+usedidx.c usedidx.h wadio.c wadio.h

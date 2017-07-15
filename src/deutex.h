@@ -235,4 +235,3 @@ extern clobber_t        clobber;
 extern const char      *debug_ident;
 extern int              old_music_ident_method;
 extern const char      *palette_lump;
-extern const char      *logfile;

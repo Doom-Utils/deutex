@@ -49,7 +49,6 @@ GNU General Public License for more details.
 #include <stdarg.h>
 #include <ctype.h>
 #include "tools.h"
-#include "log.h"
 #include "mkwad.h"
 #include "merge.h"
 #include "extract.h"
@@ -87,7 +86,6 @@ clobber_t        clobber                = CLOBBER_NO;
 const char      *debug_ident            = NULL;
 int              old_music_ident_method = 0;
 const char      *palette_lump           = "PLAYPAL";
-const char      *logfile                = "deutex.log";
 
 static char anon[1]        = { '\0' };
 
@@ -161,10 +159,6 @@ void COMverbose(int argc, const char *argv[])
 {  PrintVerbosity(argv[0][2]-'0');
    Info("AA10", "Verbosity level is %c",argv[0][2]);
    (void)argc;
-}
-
-void COMlog(int argc, const char *argv[])
-{  logfile = argv[1];
 }
 
 void COMdoom(int argc, const char *argv[])
@@ -833,7 +827,6 @@ static comdef_t Com[]=
 
  {SEC,0,NULL,       NULL,	NULL,		"Reporting"},
  {OP2,1,"di",       COMdi,	"<name>",	"debug identification of entry"},
- {OP1,1,"log",      COMlog,	"<file>",	"name of log file (default \1deutex.log\3)"},
  {OP2,0,"v0",       COMverbose,	NULL,		"set verbosity level to 0"},
  {OP2,0,"v1",       COMverbose,	NULL,		"set verbosity level to 1"},
  {OP2,0,"v2",       COMverbose,	NULL,		"set verbosity level to 2 (default)"},
@@ -933,21 +926,6 @@ int main (int argc, char *argv_non_const[])
        int c = argc - 1;
        const char **v = argv + 1;
        parse_argv (&c, &v, 2);
-     }
-
-     /* Create the log file. From now on, all calls to Detail, Phase,
-	Info, Warning, nf_err, ProgError and Bug will update the log.
-	FIXME Output() will too and I'm not sure that's right. */
-     lopen ();
-
-     /* Write the header of the log file. */
-     /* FIXME use Info */
-     lprintf ("%c AA00 %s %s\n", MSGCLASS_INFO, PACKAGE_NAME, PACKAGE_VERSION);
-     {
-       int n;
-       for (n = 1; n < argc; n++)
-	 /* FIXME use Info() */
-	 lprintf ("%c AA05 argv[%d] \"%s\"\n", MSGCLASS_INFO, n, argv[n]);
      }
 
      /* Default iwad directory */

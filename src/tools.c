@@ -26,7 +26,6 @@ GNU General Public License for more details.
 #include <errno.h>
 #include <stdarg.h>
 #include "tools.h"
-#include "log.h"
 
 #define SEPARATOR "/"
 #include <unistd.h>
@@ -500,15 +499,12 @@ void ProgError (const char *code, const char *fmt, ...)
 
    fflush (stdout_);
    fprintf(stderr_, "E %s ", code);
-   lprintf("E %s ", code);
    va_start(args, fmt);
    vfprintf(stderr_, fmt, args);
    va_end(args);
    va_start(args, fmt);
-   vlprintf(fmt, args);
    va_end(args);
    fputc('\n', stderr_);
-   lputc('\n');
    (*Action)();  /* execute error handler*/
    PrintExit();
    exit(2);
@@ -523,15 +519,12 @@ void nf_err (const char *code, const char *fmt, ...)
 
   fflush(stdout_);
   fprintf(stderr_, "%c %s ", MSGCLASS_ERR, code);
-  lprintf("%c %s ", MSGCLASS_ERR, code);
   va_start(args, fmt);
   vfprintf(stderr_, fmt, args);
   va_end(args);
   va_start(args, fmt);
-  vlprintf(fmt, args);
   va_end(args);
   fputc('\n', stderr_);
-  lputc('\n');
   fflush(stderr_);
 }
 
@@ -541,17 +534,13 @@ void Bug (const char *code, const char *fmt, ...)
 
   fflush(stdout_);
   fprintf(stdwarn_, "%c %s ", MSGCLASS_BUG, code);
-  lprintf("%c %s ", MSGCLASS_BUG, code);
   va_start(args, fmt);
   vfprintf(stderr_, fmt, args);
   va_end(args);
   va_start(args, fmt);
-  vlprintf(fmt, args);
   va_end(args);
   fputc('\n', stderr_);
-  lputc('\n');
   fputs("Please report that bug\n", stderr_);
-  lputs("Please report that bug\n");
   /* CloseWadFiles();*/
   PrintExit();
   exit(3);
@@ -563,15 +552,12 @@ void Warning (const char *code, const char *fmt, ...)
 
   fflush(stdout_);
   fprintf(stdwarn_, "%c %s ", MSGCLASS_WARN, code);
-  lprintf("%c %s ", MSGCLASS_WARN, code);
   va_start(args, fmt);
   vfprintf(stdwarn_, fmt, args);
   va_end(args);
   va_start(args, fmt);
-  vlprintf(fmt, args);
   va_end(args);
   fputc('\n', stdwarn_);
-  lputc('\n');
 }
 
 void LimitedWarn (int *left, const char *code, const char *fmt, ...)
@@ -582,15 +568,12 @@ void LimitedWarn (int *left, const char *code, const char *fmt, ...)
 
     fflush(stdout_);
     fprintf(stdwarn_, "%c %s ", MSGCLASS_WARN, code);
-    lprintf("%c %s ", MSGCLASS_WARN, code);
     va_start(args, fmt);
     vfprintf(stdwarn_, fmt, args);
     va_end(args);
     va_start(args, fmt);
-    vlprintf(fmt, args);
     va_end(args);
     fputc('\n', stdwarn_);
-    lputc('\n');
   }
   if (left != NULL)
     (*left)--;
@@ -605,16 +588,13 @@ void LimitedEpilog (int *left, const char *code, const char *fmt, ...)
     {
       va_list args;
       fprintf(stdwarn_, "%c %s ", MSGCLASS_WARN, code);
-      lprintf("%c %s ", MSGCLASS_WARN, code);
       va_start (args, fmt);
       vfprintf (stdwarn_, fmt, args);
       va_end (args);
       va_start (args, fmt);
-      vlprintf (fmt, args);
       va_end (args);
     }
     fprintf (stdwarn_, "%d warnings omitted\n", - *left);
-    lprintf ("%d warnings omitted\n", - *left);
   }
 }
 
@@ -626,7 +606,6 @@ void Output (const char *fmt, ...)
   vfprintf(stdout_, fmt, args);
   va_end(args);
   va_start(args, fmt);
-  vlprintf(fmt, args);
   va_end(args);
 }
 
@@ -637,15 +616,12 @@ void Info (const char *code, const char *fmt, ...)
     va_list args;
 
     fprintf(stdinfo_, "%c %s ", MSGCLASS_INFO, code);
-    lprintf("%c %s ", MSGCLASS_INFO, code);
     va_start(args, fmt);
     vfprintf(stdinfo_, fmt, args);
     va_end(args);
     va_start(args, fmt);
-    vlprintf(fmt, args);
     va_end(args);
     fputc('\n', stdinfo_);
-    lputc('\n');
   }
 }
 
@@ -656,15 +632,12 @@ void Phase (const char *code, const char *fmt, ...)
     va_list args;
 
     fprintf(stdinfo_, "%c %s ", MSGCLASS_INFO, code);
-    lprintf("%c %s ", MSGCLASS_INFO, code);
     va_start(args, fmt);
     vfprintf(stdinfo_, fmt, args);
     va_end(args);
     va_start(args, fmt);
-    vlprintf(fmt, args);
     va_end(args);
     fputc('\n', stdinfo_);
-    lputc('\n');
   }
 }
 
@@ -675,15 +648,12 @@ void Detail (const char *code, const char *fmt, ...)
     va_list args;
 
     fprintf (stdinfo_, "%c %s ", MSGCLASS_INFO, code);
-    lprintf ("%c %s ", MSGCLASS_INFO, code);
     va_start(args, fmt);
     vfprintf(stdinfo_, fmt, args);
     va_end(args);
     va_start(args, fmt);
-    vlprintf(fmt, args);
     va_end(args);
     fputc ('\n', stdinfo_);
-    lputc ('\n');
   }
 }
 
