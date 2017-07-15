@@ -18,6 +18,7 @@ MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
 GNU General Public License for more details.
 */
 
+#include "config.h"
 
 #define ROTT 0  /* FIXME make it a run-time option */
 
@@ -28,9 +29,6 @@ GNU General Public License for more details.
 
 #define DEUTEXNAME   "DeuTex"
 #define COMMANDNAME  "deutex"
-
-/* DeuTex version */
-extern const char deutex_version[];
 
 /* Try to guess the target OS and set DT_OS accordingly */
 #if defined __MSDOS__	/* Borland C and DJGPP define __MSDOS__ */\

@@ -181,7 +181,7 @@ void WADRopenW(struct WADINFO *info, const char *wadout,WADTYPE type,
    WADRwriteLong(info,-1);     /* no counter of dir entries */
    WADRwriteLong(info,-1);     /* no dir pointer */
    /* DeuTex notice*/
-   sprintf(signature," DeuTex %.32s %cOJM 94 ",deutex_version,0xB8);
+   sprintf(signature," " PACKAGE_NAME " %.32s %cOJM 94 ", PACKAGE_VERSION, 0xB8);
                      /********----**----**-********/
    WADRwriteBytes(info,signature,strlen(signature));
    WADRalign4(info);
