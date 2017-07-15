@@ -16,7 +16,7 @@ MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
 GNU General Public License for more details.
 */
 
-
+#include "lodepng.h"
 #include "deutex.h"
 #include <ctype.h>
 #include <errno.h>
@@ -177,7 +177,9 @@ static char *PPMtoRAW (Int16 *prawX, Int16 *prawY, char *file);
 static char *GIFtoRAW (Int16 *rawX, Int16 *rawY, char *file);
 static void RAWtoGIF (char *file, char *raw, Int16 rawX, Int16 rawY,
     struct PIXEL *doompal);
-
+static void RAWtoPNG (char *file, char *raw, Int16 rawX, Int16 rawY,
+    struct PIXEL *doompal);
+static char *PNGtoRAW(Int16 *prawX, Int16 *prawY, char *file);
 /*
 **
 **  this is only a test example
@@ -311,20 +313,24 @@ Bool PICsaveInFile (char *file, PICTYPE type, char *pic, Int32 picsz,
      else
        doompal = COLdoomPalet();
      /*
-     ** convert to BMP/GIF/PPM
+     ** convert to BMP/GIF/PPM/PNG
      */
      switch(Picture)
-     { case PICGIF:
-	RAWtoGIF(file,raw,rawX,rawY,doompal);
-	break;
-       case PICBMP:
-	RAWtoBMP(file,raw,rawX,rawY,doompal);
-	break;
-       case PICPPM:
-	RAWtoPPM(file,raw,rawX,rawY,doompal);
-	break;
+     { 
+        case PICPNG:
+          RAWtoPNG(file,raw,rawX,rawY,doompal);
+          break;
+        case PICGIF:
+          RAWtoGIF(file,raw,rawX,rawY,doompal);
+          break;
+        case PICBMP:
+          RAWtoBMP(file,raw,rawX,rawY,doompal);
+          break;
+        case PICPPM:
+          RAWtoPPM(file,raw,rawX,rawY,doompal);
+          break;
        default:
-	Bug("GW91", "Invalid picture format %d", (int) Picture);
+	      Bug("GW91", "Invalid picture format %d", (int) Picture);
      }
   }
 
@@ -355,7 +361,11 @@ Int32 PICsaveInWAD(struct WADINFO *info,char *file,PICTYPE type,Int16 Xinsr,Int1
   */
   transparent =COLinvisible();
   switch(Picture)
-  { case PICGIF:
+  { 
+	  case PICPNG:
+     raw = PNGtoRAW(&rawX,&rawY,file);
+     break;
+	  case PICGIF:
      raw = GIFtoRAW(&rawX,&rawY,file);
      break;
     case PICBMP:
@@ -1239,13 +1249,96 @@ static char *PPMtoRAW (Int16 *prawX, Int16 *prawY, char *file)
 
 
 
+/**************** PNG module ***************/
+
+
+
+static char *PNGtoRAW (Int16 *rawX, Int16 *rawY, char *file)
+{
+	unsigned error;
+	unsigned height, width;
+	unsigned char * out;
+  char * raw;
+	int i;
+
+  /* This autodetects what kind of png it is, and outputs a 32-bit RGBA raw */
+	error = lodepng_decode32_file(&out, &width, &height, file);
+	if (error != 0)
+  {
+		ProgError("GR33", "LodePNG decoding error, %s", error);
+    return 0;
+  }
+  raw=(char  *)Malloc(((Int32)width)*((Int32)height));
+
+  /* Convert 32-bit RGBA raw to 8-bit palletted raw with transparency color. */
+	for ( i = 0; i < height*width*4; i += 4)
+	{
+    /* If alpha channel is transparent, change color to the transparent 
+       color. */
+		if (out[i+3] == 0x00)
+		{
+			raw[i/4] = COLinvisible();
+		}
+    else
+    {
+      raw[i/4]=COLindex(out[i],out[i+1],out[i+2],0);
+    }
+	}
+	
+	*rawX = (Int16)width;
+	*rawY = (Int16)height;
+
+	return raw;
+}
 
 
 
 
+static void RAWtoPNG (char *file, char *raw, Int16 rawX, Int16 rawY,
+    struct PIXEL *doompal )
+{
+  unsigned error;
+  unsigned height = (unsigned) rawY;
+  unsigned width = (unsigned) rawX;
+  unsigned char * image;
+  unsigned char cur_index;
+  unsigned i;
+  image=(unsigned char *)Malloc(((Int32)rawX)*((Int32)rawY)*4);
+
+  /* Convert 8-bit palletted raw with transparency color to 32-bit RGBA raw */
+  for (i = 0; i < height*width; i++)
+  {
+    cur_index = (unsigned char)raw[i];
+    /* If pixel is transparent, set Alpha to invisible*/
+    if (cur_index == COLinvisible())
+    {
+      image[i*4] = 0x00;
+      image[i*4+1] = 0x00;
+      image[i*4+2] = 0x00;
+      image[i*4+3] = 0x00;
+    }
+    else
+    {
+      image[i*4] = doompal[cur_index].R;
+      image[i*4+1] = doompal[cur_index].G;
+      image[i*4+2] = doompal[cur_index].B;
+      image[i*4+3] = 0xFF;
+    }
+  }
+
+  /* This function takes in a 32-bit RGBA raw and automatically
+     decides what encoding to use. In our case, this will always 
+     output a PNG8 with a transparency bit. */
+  error = lodepng_encode32_file(file, image, width, height);
+  Free(image);
+  if (error != 0)
+  {
+		ProgError("GR34", "LodePNG encoding error, %s", error);
+  }
+}
 
 
-
+/**************** end PNG module ***************/
 
 
 /******************* GIF module ************************/
@@ -1310,6 +1403,8 @@ extern void compressFree(void);
 static char  *GIFreadPix(FILE *fd,Int16 Xsz,Int16 Ysz);
 static void GIFextens(FILE *fd);
 static char  *GIFintlace(char  *org,Int16 Xsz,Int16 Ysz);
+
+
 
 /*
 **  Read a Gif file
@@ -1536,6 +1631,8 @@ static char  *GIFintlace(char  *org,Int16 Xsz,Int16 Ysz)
   Free(org);
   return raw;
 }
+
+
 
 
 /*
