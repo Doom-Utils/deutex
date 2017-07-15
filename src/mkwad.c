@@ -767,7 +767,7 @@ int32_t WADRprepareAppend(const char *wadres,struct WADINFO *rwad,
 { int32_t ewadstart;
   int32_t rwadsize;
   int32_t time;
-  time=GetFileTime(wadres);
+  time=Get_File_Time(wadres);
   /* append to the Result WAD*/
    WADRopenA(rwad,wadres);
   /*get original size*/

@@ -222,7 +222,7 @@ void HDRrestoreWAD(const char *wadres)
   /*restore original size*/
   WADRchsize(&rwad,rwadstart+rwadsize);
   WADRclose(&rwad);
-  SetFileTime(wadres,time);
+  Set_File_Time(wadres,time);
   Output("Restoration of %s should be successful\n", fname (wadres));
 }
 /**************** End WAD restoration **********************/

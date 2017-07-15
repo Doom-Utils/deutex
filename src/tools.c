@@ -39,6 +39,10 @@ GNU General Public License for more details.
 #include <sys/types.h>
 #include <sys/stat.h>
 
+#ifdef _WIN32
+#define WIN32_LEAN_AND_MEAN
+#include <windows.h>
+#endif
 
 static const char hex_digit[16] = "0123456789ABCDEF";
 
@@ -98,7 +102,7 @@ void Unlink(const char *file)
 /*
 ** Get a file time stamp. (date of last modification)
 */
-int32_t GetFileTime(const char *path)
+int32_t Get_File_Time(const char *path)
 { int32_t time;
   struct stat statbuf;
   stat(path,&statbuf);
@@ -108,7 +112,7 @@ int32_t GetFileTime(const char *path)
 /*
 ** Set a file time stamp.
 */
-void SetFileTime(const char *path, int32_t time)
+void Set_File_Time(const char *path, int32_t time)
 {
   struct utimbuf stime;
   stime.modtime=stime.actime=time;
@@ -205,7 +209,11 @@ static void NameDir(char file[128], const char *path, const char *dir, const
 void MakeDir(char file[128], const char *path, const char *dir, const char
     *sdir)
 {  NameDir(file,path,dir,sdir);
+#ifdef _WIN32
+   CreateDirectory(file, NULL);
+#else
    mkdir(file,(mode_t)S_IRWXU); /*read write exec owner*/
+#endif
 }
 
 /*

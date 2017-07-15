@@ -69,8 +69,8 @@ bool MakeFileName(char file[128], const char *path, const char *dir, const
     char *sdir, const char *name, const char *extens);
 void GetNameOfWAD(char name[8], const char *path);
 int16_t Chsize(int handle,int32_t newsize);
-int32_t GetFileTime(const char *path);
-void SetFileTime(const char *path, int32_t time);
+int32_t Get_File_Time(const char *path);
+void Set_File_Time(const char *path, int32_t time);
 void Unlink(const char *file);
 void Memcpy (void  *dest,const void  *src, long n);
 void Memset (void  *dest,char car, long n);
