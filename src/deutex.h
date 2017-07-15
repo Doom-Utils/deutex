@@ -26,8 +26,6 @@ GNU General Public License for more details.
 /*use old GIF decoder, new one is down*/
 #define NEWGIFD 0
 
-#include "config.h"
-
 #define DEUTEXNAME   "DeuTex"
 #define COMMANDNAME  "deutex"
 
@@ -79,9 +77,7 @@ extern const char deutex_version[];
 #endif
 
 /* Fixed-size types */
-#ifdef HAVE_INTTYPES
-#  include <inttypes.h>
-#endif
+#include <inttypes.h>
 
 typedef int8_t   Int8;
 typedef int16_t  Int16;

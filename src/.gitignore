@@ -1,1 +1,4 @@
-config.h
+*.o
+*.exe
+deutex
+.deps
