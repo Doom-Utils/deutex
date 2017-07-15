@@ -184,12 +184,7 @@ void HDRrestoreWAD(const char *wadres)
   if(peek_i32_le (&HDRdir[4].start)!=FALSE)
   { /*extract the PWAD*/
     sprintf(ewadfile,"%.8s.WAD",ewadname);
-#if DT_OS == 'd'
-#elif DT_OS == 'o'
     ToLowerCase(ewadfile);
-#else
-    ToLowerCase(ewadfile);
-#endif
     fp=fopen(ewadfile,FOPEN_RB);
     if(fp!=NULL)
     { fclose(fp);

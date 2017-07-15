@@ -174,15 +174,7 @@ void XTRlistDir(const char *doomwad, const char *wadin, NTRYB select)
 
 
 
-#if DT_OS == 'o'
-#  if DT_CC = 'b'
-int _USERENTRY XTRdirCmp(const void *d1,const void *d2)
-#  else
-int _Optlink XTRdirCmp(const void *d1,const void *d2)
-#  endif
-#else
 int XTRdirCmp(const void *d1,const void *d2)
-#endif
 {  Int32  res;
 	struct WADDIR *dir1=(struct WADDIR *)d1;
 	struct WADDIR *dir2=(struct WADDIR *)d2;

@@ -447,11 +447,7 @@ Int16 Yinsr;             /*insertion point*/
 ** out:  Int32 picsz;           size of DoomPIC
 **       char pic[picsz];      buffer for DoomPIC
 */
-#if DT_OS == 'd'
-#define OPTIMEM 1 /*DOS: alloc < 64k if possible*/
-#else
 #define OPTIMEM 0
-#endif
 static char *RAWtoPIC(Int32 *ppicsz, char  *raw, Int16 rawX, Int16 rawY,
     Int16 Xinsr,Int16 Yinsr, char transparent)
 {  Int16 x,y;

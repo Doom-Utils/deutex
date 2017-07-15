@@ -27,50 +27,6 @@ GNU General Public License for more details.
 /*use old GIF decoder, new one is down*/
 #define NEWGIFD 0
 
-/* Try to guess the target OS and set DT_OS accordingly */
-#if defined __MSDOS__	/* Borland C and DJGPP define __MSDOS__ */\
- || defined MSDOS	/* Microsoft C defines MSDOS */
-#  define DT_OS 'd'
-#elif defined __OS2__	/* IBM C Set++ and Borland C define __OS2__ ? */\
-  || defined OS2	/* Microsoft C defines OS2 (I think) */
-#  define DT_OS 'o'
-#else			/* None of the above. Assume Unix. */
-#  define DT_OS 'u'
-#endif
-
-/* Try to guess the compiler and set DT_CC accordingly */
-#if defined __BORLANDC__
-#  define DT_CC 'b'	/* Borland C */
-#elif defined __CYGWIN__ || defined __CYGWIN32__
-#  define DT_CC 'c'	/* GCC/EGCS with Cygwin */
-#elif defined __DJGPP__
-#  define DT_CC 'd'	/* DJGPP */
-#elif defined __GNUC__
-#  define DT_CC 'g'	/* GCC/EGCS */
-#elif defined MSDOS || defined _MSC_VER
-#  define DT_CC 'm'	/* Microsoft C */
-#elif defined __OS2__ && ! defined __BORLANDC__
-#  define DT_CC 'i'	/* IBM C Set++ */
-#else
-#  define DT_CC '?'	/* Unknown compiler */
-#endif
-
-/* For real-mode 16-bit compilers, the huge memory model is
-   required. */
-#if DT_OS == 'd' && DT_CC == 'b'
-#  if ! defined __HUGE__
-#    error Please compile in  memory model (-mh)
-#  endif
-#  error Sorry, BC has no way to make pointers huge by default.\
- Try compiling with DJGPP instead.
-#elif DT_OS == 'd' && DT_CC == 'm'
-#  if ! defined M_I86HM
-#    error Please compile in  memory model (-AH)
-#  endif
-#elif DT_OS == 'o' && DT_CC == 'i'  /* Not sure about this one */
-   /* Do nothing */
-#endif
-
 /* Fixed-size types */
 #include <inttypes.h>
 

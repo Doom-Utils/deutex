@@ -877,24 +877,6 @@ int main (int argc, char *argv_non_const[])
      }
    }
 
-#ifdef DT_ALPHA
-   printf (
-     "+-----------------------------------------------------------+\n"
-     "|  THIS IS ALPHA SOFTWARE. DON'T EXPECT IT TO COMPILE OR    |\n"
-     "|  RUN SMOOTHLY. DON'T EXPECT THE DOCUMENTATION TO BE       |\n"
-     "|  ACCURATE OR UP TO DATE. THERE MIGHT BE SERIOUS BUGS.     |\n"
-     "|  MAKE BACKUP COPIES OF YOUR DATA.                         |\n"
-     "+-----------------------------------------------------------+\n\n");
-#endif
-#ifdef DT_PRIVATE
-   printf (
-     "\t+------------------------------------+\n"
-     "\t|   THIS RELEASE OF DEUTEX IS NOT    |\n"
-     "\t|  INTENDED FOR PUBLIC CONSUMPTION.  |\n"
-     "\t|     DO NOT FURTHER DISTRIBUTE.     |\n"
-     "\t+------------------------------------+\n\n");
-#endif
-
    /* Sanity checks */
    check_types ();
 
@@ -903,16 +885,8 @@ int main (int argc, char *argv_non_const[])
    */
    WadInfOk=FALSE;
    George=FALSE;
-#if DT_OS == 'd'
-   Picture    = PICBMP;
-   Sound      = SNDWAV;
-#elif DT_OS == 'o'
-   Picture    = PICBMP;
-   Sound      = SNDWAV;
-#else   /*Unix*/
    Picture    = PICPPM;
    Sound      = SNDAU;
-#endif
    trnR=0;trnG=47;trnB=47;
    fullSND    = FALSE;
    WSafe      = TRUE;
@@ -922,10 +896,8 @@ int main (int argc, char *argv_non_const[])
 
    ProgErrorCancel();/*no error handler defined*/
 
-#if defined __OS2__ || defined (__GNUC__)
    /*setbuf(stdout,(char *)NULL);*/
    setvbuf(stdout,NULL,_IOLBF,BUFSIZ);
-#endif   /*OS2*/
    /*
    ** print on screen or file?
    */

@@ -28,43 +28,11 @@ GNU General Public License for more details.
 #include "tools.h"
 #include "log.h"
 
-/*MSDOS*/
-#if DT_OS == 'd'
-#  define SEPARATOR "\\"
-#  if DT_CC == 'd'		/* DJGPP for DOS */
-#    include <unistd.h>
-#    include <malloc.h>
-#    include <dos.h>
-#    include <dir.h>
-#    include <io.h>
-#  elif DT_CC == 'b'		/* Borland C for DOS */
-#    include <alloc.h>
-#    include <dir.h>
-#    include <io.h>
-#  else				/* Other compiler (MSC ?) for DOS */
-#    include <malloc.h>
-#    include <direct.h>
-#    include <io.h>
-#  endif
-/*OS/2*/
-#elif DT_OS == 'o'
-#  define SEPARATOR "\\"
-#  include <malloc.h>
-#  include <direct.h>
-#  include <io.h>
-/*UNIX*/
-#else
-#  define SEPARATOR "/"
-#  include <unistd.h>
-#  include <memory.h>
-#endif
+#define SEPARATOR "/"
+#include <unistd.h>
+#include <memory.h>
 
-#if DT_OS == 'o' && DT_CC == 'i'\
- || DT_OS == 'd' && DT_CC == 'm'
-#  include <sys/utime.h>
-#else
-#  include <utime.h>
-#endif
+#include <utime.h>
 
 #include <time.h>
 #include <stdarg.h>
@@ -118,23 +86,7 @@ void check_types (void)
 */
 Int16 Chsize(int handle,Int32 newsize)
 {
-#if DT_OS == 'd'
-#  if DT_CC == 'd'
   return (Int16)ftruncate(handle, newsize);
-#  elif DT_CC == 'b' || DT_CC == 'm'
-  return (Int16)chsize(handle,newsize);
-#  else
-#    error Chsize unimplemented
-#  endif
-#elif DT_OS == 'o'
-#  if DT_CC == 'b'
-   return (Int16)chsize(handle,newsize);
-#  else
-   return (Int16)_chsize(handle,newsize);
-#  endif
-#else
-  return (Int16)ftruncate(handle, newsize);
-#endif
 }
 
 /*
@@ -161,11 +113,7 @@ void SetFileTime(const char *path, Int32 time)
 {
   struct utimbuf stime;
   stime.modtime=stime.actime=time;
-#if DT_OS == 'o' && DT_CC != 'b'
-  _utime(path, &stime);
-#else
   utime(path, &stime);
-#endif
 }
 /*
 ** Copy memory
@@ -173,18 +121,7 @@ void SetFileTime(const char *path, Int32 time)
 void Memcpy(void  *dest,const void  *src, long n)
 { if(n<0) Bug("MM21", "MovInf"); /*move inf to zero*/
   if(n==0)return;
-#if DT_OS == 'd'
-#  if DT_CC == 'd'
   memcpy((char  *)dest,(char  *)src,(size_t)n);
-#  else
-  if(n>0x10000L) Bug("MM22", "MovSup"); /*DOS limit: not more than 0x10000*/
-  _fmemcpy(dest,src,(size_t)n);
-#  endif
-#elif DT_OS == 'o'
-  memcpy((char  *)dest,(char  *)src,(size_t)n);
-#else
-  memcpy((char  *)dest,(char  *)src,(size_t)n);
-#endif
 }
 /*
 ** Set memory
@@ -192,18 +129,7 @@ void Memcpy(void  *dest,const void  *src, long n)
 void Memset(void  *dest,char car, long n)
 { if(n<0) Bug("MM11", "MStInf"); /*set inf to zero*/
   if(n==0)return;
-#if DT_OS == 'd'
-#  if DT_CC == 'd'
   memset(dest,car,(size_t)n);
-#  else
-   if(n>0x10000L) Bug("MM12", "MStSup"); /*DOS limit: not more than 0x10000*/
-  _fmemset(dest,car,(size_t)n);
-#  endif
-#elif DT_OS == 'o'
-  memset(dest,car,(size_t)n);
-#else
-  memset(dest,car,(size_t)n);
-#endif
 }
 /*
 ** Allocate memory
@@ -219,14 +145,10 @@ void  *Malloc (long size)
    {  Warning("MM02", "Attempt to allocate %ld bytes",size);
       size=1;
    }
-#if DT_OS == 'd' && DT_CC == 'b'
-   ret = farmalloc( size);
-#else
    if ((size_t) size != size)
       ProgError ("MM03",
 	"Tried to allocate %ld b but couldn't; use another compiler", size);
    ret = malloc((size_t) size);
-#endif
    if (ret==NULL)
       ProgError("MM04", "Out of memory (needed %ld bytes)", size);
    return ret;
@@ -241,14 +163,10 @@ void  *Realloc (void  *old, long size)
    {  Warning("MM05", "Attempt to allocate %ld bytes",size);
       size=1;
    }
-#if DT_OS == 'd' && DT_CC == 'b'
-   ret = farrealloc( old, size);
-#else
    if ((size_t) size != size)
       ProgError ("MM06",
 	"Tried to realloc %ld b but couldn't; use another compiler", size);
    ret = realloc( old, (size_t)size);
-#endif
    if (ret==NULL)
       ProgError("MM07", "Out of memory (needed %ld bytes)", size);
    return ret;
@@ -258,11 +176,7 @@ void  *Realloc (void  *old, long size)
 */
 void Free( void  *ptr)
 {
-#if DT_OS == 'd' && DT_CC == 'b'
-   farfree (ptr);
-#else
    free (ptr);
-#endif
 }
 /*****************************************************/
 /*
@@ -292,23 +206,7 @@ static void NameDir(char file[128], const char *path, const char *dir, const
 void MakeDir(char file[128], const char *path, const char *dir, const char
     *sdir)
 {  NameDir(file,path,dir,sdir);
-#if DT_OS == 'd'
-#  if DT_CC == 'd'
-   mkdir(file,0); /*2nd argument not used in DOS*/
-#  elif DT_CC == 'b' || DT_CC == 'm'
-   mkdir(file);
-#  else
-#    error MakeDir unimplemented
-#  endif
-#elif DT_OS == 'o'
-#  if DT_CC == 'b'
-   mkdir(file);
-#  else
-   _mkdir(file);
-#  endif
-#else
    mkdir(file,(mode_t)S_IRWXU); /*read write exec owner*/
-#endif
 }
 
 /*
@@ -552,9 +450,6 @@ static FILE *Stdinfo; /*infos*/
 
 void PrintInit(Bool asfile)
 {
-#if DT_OS == 'o'
-   setbuf(stdout,(char *)NULL);
-#endif
   /*clear a previous call*/
   PrintExit();
   /* choose */

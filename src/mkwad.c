@@ -19,19 +19,6 @@ GNU General Public License for more details.
 
 #include "deutex.h"
 
-
-/****MSDOS****/
-#if DT_OS == 'd'
-#  include <io.h>
-/****OS/2****/
-#elif DT_OS == 'o'
-#  include <io.h>
-#  if DT_CC != 'b'
-#    define filelength _filelength
-#  endif
-/****UNIX****/
-#else
-#endif
 #include <sys/types.h>
 #include <sys/stat.h>
 #include <time.h>
@@ -784,17 +771,7 @@ Int32 WADRprepareAppend(const char *wadres,struct WADINFO *rwad,
   /* append to the Result WAD*/
    WADRopenA(rwad,wadres);
   /*get original size*/
-#if DT_OS == 'd'
-#  if DT_CC == 'd'
    rwadsize=rwad->maxpos;
-#  else
-   rwadsize=filelength(fileno(rwad->fd));
-#  endif
-#elif DT_OS == 'o'
-   rwadsize=filelength(fileno(rwad->fd));
-#else
-   rwadsize=rwad->maxpos;
-#endif
    /*last warning*/
    Output("The WAD file %s will be modified, but it can be restored with:\n",wadres);
    Output("%s -res %s\n", PACKAGE, wadres);
