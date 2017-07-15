@@ -28,7 +28,7 @@ GNU General Public License for more details.
 #include "ident.h"
 #include "color.h"
 #include "usedidx.h"
-
+#include <png.h>
 
 static int wall_to_raw (char *data, int32_t datasz, const char *name);
 
@@ -169,7 +169,9 @@ static char *PPMtoRAW (int16_t *prawX, int16_t *prawY, char *file);
 static char *GIFtoRAW (int16_t *rawX, int16_t *rawY, char *file);
 static void RAWtoGIF (char *file, char *raw, int16_t rawX, int16_t rawY,
     struct PIXEL *doompal);
-
+static void RAWtoPNG (char *file, char *raw, int16_t rawX, int16_t rawY,
+    struct PIXEL *doompal);
+static char *PNGtoRAW(int16_t *prawX, int16_t *prawY, char *file);
 /*
 **
 **  this is only a test example
@@ -303,20 +305,24 @@ bool PICsaveInFile (char *file, PICTYPE type, char *pic, int32_t picsz,
      else
        doompal = COLdoomPalet();
      /*
-     ** convert to BMP/GIF/PPM
+     ** convert to BMP/GIF/PPM/PNG
      */
      switch(Picture)
-     { case PICGIF:
-	RAWtoGIF(file,raw,rawX,rawY,doompal);
-	break;
-       case PICBMP:
-	RAWtoBMP(file,raw,rawX,rawY,doompal);
-	break;
-       case PICPPM:
-	RAWtoPPM(file,raw,rawX,rawY,doompal);
-	break;
+     { 
+        case PICPNG:
+          RAWtoPNG(file,raw,rawX,rawY,doompal);
+          break;
+        case PICGIF:
+          RAWtoGIF(file,raw,rawX,rawY,doompal);
+          break;
+        case PICBMP:
+          RAWtoBMP(file,raw,rawX,rawY,doompal);
+          break;
+        case PICPPM:
+          RAWtoPPM(file,raw,rawX,rawY,doompal);
+          break;
        default:
-	Bug("GW91", "Invalid picture format %d", (int) Picture);
+	      Bug("GW91", "Invalid picture format %d", (int) Picture);
      }
   }
 
@@ -347,7 +353,11 @@ int32_t PICsaveInWAD(struct WADINFO *info,char *file,PICTYPE type,int16_t Xinsr,
   */
   transparent =COLinvisible();
   switch(Picture)
-  { case PICGIF:
+  { 
+	  case PICPNG:
+     raw = PNGtoRAW(&rawX,&rawY,file);
+     break;
+	  case PICGIF:
      raw = GIFtoRAW(&rawX,&rawY,file);
      break;
     case PICBMP:
@@ -1227,13 +1237,99 @@ static char *PPMtoRAW (int16_t *prawX, int16_t *prawY, char *file)
 
 
 
+/**************** PNG module ***************/
+
+
+
+static char *PNGtoRAW (int16_t *rawX, int16_t *rawY, char *file)
+{
+  char * raw;
+	int i;
+  png_image image;
+  memset(&image, 0, (sizeof image));
+  image.version = PNG_IMAGE_VERSION;
+  if (png_image_begin_read_from_file(&image, file))
+  {
+      png_bytep buffer;
+      image.format = PNG_FORMAT_RGBA;
+      buffer = malloc(PNG_IMAGE_SIZE(image));
+      if (buffer != NULL &&
+        png_image_finish_read(&image, NULL/*background*/, buffer,
+            0/*row_stride*/, NULL))
+      {
+          *rawX = (int16_t)image.width;
+          *rawY = (int16_t)image.height;
+          raw=(char  *)malloc(((int32_t)image.height)*((int32_t)image.width));
+          /* Convert 32-bit RGBA raw to 8-bit palletted raw with transparency color. */
+          for ( i = 0; i < image.width*image.height*4; i += 4)
+          {
+            /* If alpha channel is transparent, change color to the transparent 
+              color. */
+            if (buffer[i+3] == 0x00)
+            {
+              raw[i/4] = COLinvisible();
+            }
+            else
+            {
+              raw[i/4]=COLindex(buffer[i],buffer[i+1],buffer[i+2],0);
+            }
+          }
+          Free(buffer);
+          return raw;
+      }
+      else
+      {
+        ProgError("GR33", "libPNG decoding error");
+        return 0;
+      }
+  }
+}
 
 
 
 
+static void RAWtoPNG (char *file, char *raw, int16_t rawX, int16_t rawY,
+    struct PIXEL *doompal )
+{
+  int i;
+  png_image image;
+  png_bytep colormap;
+  memset(&image, 0, (sizeof image));
+  image.version = PNG_IMAGE_VERSION;
+  image.opaque = NULL;
+  image.width= (png_uint_32)rawX;
+  image.height= (png_uint_32)rawY;
+  image.format=PNG_FORMAT_RGBA_COLORMAP;
+  image.colormap_entries=256;
+  colormap = malloc(PNG_IMAGE_COLORMAP_SIZE(image));
+  /* Convert the palette into a proper RGBA colormap */
+  for (i = 0; i < 256; i++)
+  {
+    /* If color is invisible, set Alpha to transparent*/
+    if (i == COLinvisible())
+    {
+      colormap[i*4] = (png_byte)0x00;
+      colormap[i*4+1] = (png_byte)0x00;
+      colormap[i*4+2] = (png_byte)0x00;
+      colormap[i*4+3] = (png_byte)0x00;
+    }
+    else
+    {
+      colormap[i*4] = (png_byte)doompal[i].R;
+      colormap[i*4+1] = (png_byte)doompal[i].G;
+      colormap[i*4+2] = (png_byte)doompal[i].B;
+      colormap[i*4+3] = (png_byte)0xFF;
+    }
+  }
+ if (!png_image_write_to_file(&image, file, 0, raw, 0, colormap))
+ {
+  	ProgError("GR34", "libPNG encoding error");
+ }
+ Free(colormap);
+}
 
 
-
+/**************** end PNG module ***************/
 
 
 /******************* GIF module ************************/
