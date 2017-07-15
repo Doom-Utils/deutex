@@ -1,0 +1,460 @@
+@PACKAGE@(6)
+=========
+:doctype: manpage
+
+NAME
+----
+@PACKAGE@ - do things with wad files
+
+SYNOPSIS
+--------
+*@PACKAGE@* *-?*|*-h*|*-help*|*--help*
+
+*@PACKAGE@* *--version*
+
+*@PACKAGE@* *-man*
+
+*@PACKAGE@* ['OPTIONS'] *-add* 'incomplete.wad' 'out.wad'
+
+*@PACKAGE@* ['OPTIONS'] *-af* 'flats.wad'
+
+*@PACKAGE@* ['OPTIONS'] *-append* 'incomplete.wad'
+
+*@PACKAGE@* ['OPTIONS'] *-as* 'sprite.wad'
+
+*@PACKAGE@* ['OPTIONS'] *-check* 'in.wad'
+
+*@PACKAGE@* ['OPTIONS'] *-debug* ['in.gif']
+
+*@PACKAGE@* ['OPTIONS'] *-get* 'entry' ['in.wad']
+
+*@PACKAGE@* ['OPTIONS'] *-join* 'incomplete.wad' 'in.wad'
+
+*@PACKAGE@* ['OPTIONS'] *-make* ['dirctivs.txt'] 'out.wad'
+
+*@PACKAGE@* ['OPTIONS'] *-merge* 'in.wad'
+
+*@PACKAGE@* ['OPTIONS'] *-pkgfx* ['in.wad' ['out.txt']]
+
+*@PACKAGE@* ['OPTIONS'] *-pknormal* ['in.wad' ['out.txt']]
+
+*@PACKAGE@* ['OPTIONS'] *-restor*
+
+*@PACKAGE@* ['OPTIONS'] *-usedidx* ['in.wad']
+
+*@PACKAGE@* ['OPTIONS'] *-usedtex* ['in.wad']
+
+*@PACKAGE@* ['OPTIONS'] *-unused* 'in.wad'
+
+*@PACKAGE@* ['OPTIONS'] *-wadir* ['in.wad']
+
+*@PACKAGE@* ['OPTIONS'] *-xtract* 'in.wad' ['dirctivs.txt']
+
+DESCRIPTION
+-----------
+@PACKAGE_NAME@ is a wad composer for Doom, Heretic, Hexen and Strife.
+It can be used to extract the lumps of a wad and save them as
+individual files or the reverse, and much more.
+
+When extracting a lump to a file, it does not just copy the raw data,
+it converts it to an appropriate format (such as PPM for graphics, Sun
+audio for samples, etc.).  Conversely, when it reads files for
+inclusion in pwads, it does the necessary conversions (for example,
+from PPM to Doom picture format).
+
+Decomposing a wad
+~~~~~~~~~~~~~~~~~
+To decompose a wad (i.e. extract its contents), use the *-extract*
+(a.k.a. *-xtract*) command.  When decomposing a wad, @PACKAGE_NAME@
+creates one file for each lump.  The files are created in one of the
+following subdirectories of the working directory: *flats/*, *lumps/*,
+*musics/*, *patches/*, *sounds/*, *sprites/*, *textures/*.  The
+decomposing process also creates a very important file, *wadinfo.txt*,
+which will be used later when composing.
+
+To extract the contents of the Doom II iwad,
+
+    @PACKAGE@ -doom2 /path/to/doom2.wad -xtract
+
+To extract the contents of a Doom II pwad named mywad.wad,
+
+    @PACKAGE@ -doom2 /path/to/doom2.wad -xtract mywad.wad
+
+To extract only the sprites,
+
+    @PACKAGE@ -doom2 /path/to/doom2.wad -sprites -xtract
+
+To extract only the sounds and save them as .voc,
+
+    @PACKAGE@ -doom2 /path/to/doom2.wad -sounds -voc -xtract
+
+Composing (building) a wad
+~~~~~~~~~~~~~~~~~~~~~~~~~~
+Composing is the symmetrical process.  It's done with the three
+commands *-build*, *-create* and *-make*, that are equivalent.  Using
+*wadinfo.txt* and the files in *flats/*, *lumps/*, *musics/*,
+*patches/*, *sounds/*, *sprites/* and *textures/*, @PACKAGE_NAME@
+creates a new wad.
+
+To create a new pwad named mywad.wad,
+
+      @PACKAGE@ -doom2 /path/to/doom2.wad -make mywad.wad
+
+To create a new iwad named mytc.wad,
+
+      @PACKAGE@ -doom2 /path/to/doom2.wad -iwad -make mytc.wad
+
+Other operations
+~~~~~~~~~~~~~~~~
+@PACKAGE_NAME@ has many (too many?) other commands like *-join*,
+*-merge*, *-usedtex* etc.
+
+OPTIONS
+-------
+Modal options not requiring an iwad
+~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+*-?*, *-h*, *-help*, *--help*::
+Print list of options.
+
+*-man*::
+Print list of options in troff format.
+
+*-syntax*::
+Print the syntax of wad creation directives.
+
+*--version*::
+Print version number and exit immediately.
+
+*-unused* 'in.wad'::
+Find unused spaces in a wad.
+
+Modal options requiring an iwad
+~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+*-add* 'in.wad' 'out.wad'::
+Copy sp & fl of iwad and 'in.wad' to 'out.wad'.
+
+*-af* 'flats.wad'::
+Append all floors/ceilings to the wad.
+
+*-append* 'io.wad'::
+Add sprites & flats of iwad to io.wad.
+
+*-as* 'sprite.wad'::
+Append all sprites to the wad.
+
+*-build*|*-create*|*-make* ['in.txt'] 'out.wad'::
+Make a pwad.
+
+*-check*|*-test* 'in.wad'::
+Check the textures.
+
+*-debug* ['file']::
+Debug color conversion.
+
+*-extract*|*-xtract* ['in.wad' ['out.txt']]::
+Extract some/all entries from a wad.
+
+*-get* 'entry' ['in.wad']::
+Get a wad entry from main wad or in.wad.
+
+*-join* 'incomplete.wad' 'in.wad'::
+Append sprites & flats of Doom to a pwad.
+
+*-merge* 'in.wad'::
+Merge doom.wad and a pwad.
+
+*-pkgfx* ['in.wad' ['out.txt']]::
+Detect identical graphics.
+
+*-pknormal* ['in.wad' ['out.txt']]::
+Detect identical normal.
+
+*-restore*::
+Restore doom.wad and the pwad.
+
+*-usedidx* ['in.wad']::
+Color index usage statistics.
+
+*-usedtex* ['in.wad']::
+List textures used in all levels.
+
+*-wadir* ['in.wad']::
+List and identify entries in a wad.
+
+General options
+~~~~~~~~~~~~~~~
+*-overwrite*::
+Overwrite all.
+
+*-dir* 'dir'::
+Extraction directory (default `.`).
+
+Iwad
+~~~~
+*-doom* 'dir'::
+Path to Doom iwad.
+
+*-doom2* 'dir'::
+Path to Doom II iwad.
+
+*-doom02* 'dir'::
+Path to Doom alpha 0.2 iwad.
+
+*-doom04* 'dir'::
+Path to Doom alpha 0.4 iwad.
+
+*-doom05* 'dir'::
+Path to Doom alpha 0.5 iwad.
+
+*-doompr* 'dir'::
+Path to Doom PR pre-beta iwad.
+
+*-heretic* 'dir'::
+Path to Heretic iwad.
+
+*-hexen* 'dir'::
+Path to Hexen iwad.
+
+*-strife* 'dir'::
+Path to Strife iwad.
+
+*-strife10* 'dir'::
+Path to Strife 1.0 iwad.
+
+Wad options
+~~~~~~~~~~~
+*-be*::
+Assume all wads are big endian (default LE).
+
+*-deu*::
+Add 64k of junk for DEU 5.21 compatibility.
+
+*-george*|*-s_end*::
+Use *S_END* for sprites, not *SS_END*.
+
+*-ibe*::
+Input wads are big endian (default LE).
+
+*-ile*::
+Input wads are little endian (default).
+
+*-ipf* 'code'::
+Picture format (*alpha*, *normal*, *pr*, *rott*; default normal).
+
+*-itf* 'code'::
+Input texture format (*nameless*, *none*, *normal*, *strife11*;
+default normal).
+
+*-itl* 'code'::
+Texture lump (*none*, *normal*, *textures*; default normal).
+
+*-iwad*::
+Compose iwad, not pwad.
+
+*-le*::
+Assume all wads are little endian (default).
+
+*-musid*::
+Use old music identification method.
+
+*-obe*::
+Create big endian wads (default LE).
+
+*-ole*::
+Create little endian wads (default).
+
+*-otf* 'code'::
+Output texture format (*nameless*, *none*, *normal*, *strife11*;
+default normal).
+
+*-tf* 'code'::
+Texture format (*nameless*, *none*, *normal*, *strife11*; default
+normal).
+
+Lump selection
+~~~~~~~~~~~~~~
+*-flats*::
+Select flats.
+
+*-graphics*::
+Select graphics.
+
+*-levels*::
+Select levels.
+
+*-lumps*::
+Select lumps.
+
+*-musics*::
+Select musics.
+
+*-patches*::
+Select patches.
+
+*-scripts*::
+Select Strife scripts.
+
+*-sneas*::
+Select sneas (sneaps and sneats).
+
+*-sneaps*::
+Select sneaps.
+
+*-sneats*::
+Select sneats.
+
+*-sounds*::
+Select sounds.
+
+*-sprites*::
+Select sprites.
+
+*-textures*::
+Select textures.
+
+Graphics
+~~~~~~~~
+*-bmp*::
+Save pictures as BMP (*.bmp*).
+
+*-gif*::
+Save pictures as GIF (*.gif*).
+
+*-ppm*::
+Save pictures as rawbits PPM (P6, *.ppm*).
+
+*-rgb* 'r' 'g' 'b'::
+Specify the transparent colour (default 0 47 47).
+
+Sound
+~~~~~
+*-au*::
+Save sounds as Sun audio (*.au*).
+
+*-fullsnd*::
+Save sounds beyond declared length.
+
+*-rate* 'code'::
+Policy for != 11025 Hz (*reject*, *force*, *warn*, *accept*; default warn).
+
+*-voc*::
+Save sounds as voc (*.voc*).
+
+*-wav*::
+Save sounds as WAVE (*.wav*).
+
+Reporting
+~~~~~~~~~
+*-di* 'name'::
+Debug identification of entry.
+
+*-v0*|*-v1*|*-v2*|*-v3*|*-v4*|*-v5*::
+Set verbosity level, default 2.
+
+DIAGNOSTICS
+-----------
+All messages are identified by a unique code.  Some messages are
+identical; the code is useful to distinguish them.  All codes have
+four characters: two letters and two digits.  The letters identify the
+part of the code where the message comes from, the digits give the
+message number within that area.  In general, numbers are assigned so
+that messages that come from parts of the code that are executed
+earlier have lower numbers.
+
+FILES
+-----
+'dir'*/flats/*::
+When extracting, flats are saved to this directory.  When composing,
+flats are read from this directory.
+
+'dir'*/graphics/*::
+When extracting, graphics are saved to this directory.  When
+composing, graphics are read from this directory.
+
+'dir'*/levels/*::
+When extracting, levels are saved to this directory.  When composing,
+levels are read from this directory.
+
+'dir'*/lumps/*::
+When extracting, lumps are saved to this directory.  When composing,
+lumps are read from this directory.
+
+'dir'*/musics/*::
+When extracting, musics are saved to this directory.  When composing,
+musics are read from this directory.
+
+'dir'*/patches/*::
+When extracting, patches are saved to this directory.  When composing,
+patches are read from this directory.
+
+'dir'*/scripts/*::
+When extracting, Strife scripts are saved to this directory.  When
+composing, Strife scripts are read from this directory.
+
+'dir'*/sneaps/*::
+When extracting, Doom alpha sneaps are saved to this directory.  When
+composing, Doom alpha sneaps are read from this directory.
+
+'dir'*/sneats/*::
+When extracting, Doom alpha sneats are saved to this directory.  When
+composing, Doom alpha sneats are read from this directory.
+
+'dir'*/sounds/*::
+When extracting, sounds are saved to this directory.  When composing,
+sounds are read from this directory.
+
+'dir'*/sprites/*::
+When extracting, sprites are saved to this directory.  When composing,
+sprites are read from this directory.
+
+'dir'*/textures/texture1.txt*::
+The *TEXTURE1* lump (all but Doom alpha 0.4 and 0.5).
+
+'dir'*/textures/texture2.txt*::
+The *TEXTURE2* lump (all commercial iwads except Doom 2).
+
+'dir'*/textures/textures.txt*::
+The *TEXTURES* lump (Doom alpha 0.4 and 0.5).
+
+'dir'*/wadinfo.txt*::
+The default master file.
+
+ENVIRONMENT
+-----------
+*DOOMWADDIR*::
+The directory where the iwad resides. The value of this environment
+variable is overridden by *-main*, *-doom* and friends.
+
+COPYRIGHT
+---------
+@PACKAGE_NAME@ is copyright © 1994-1995 Olivier Montanuy, copyright ©
+1999-2005 André Majorel, copyright © 2006-2017 contributors to
+@PACKAGE_NAME@.
+
+Most of this program is under the GNU General Public License version
+2, but some of it is available under other licenses.  This program is
+distributed in the hope that it will be useful, but WITHOUT ANY
+WARRANTY; without even the implied warranty of MERCHANTABILITY or
+FITNESS FOR A PARTICULAR PURPOSE.  See LICENSE for specific
+information and copyright notices.  All trademarks are property of
+their owners.
+
+AUTHORS
+-------
+The original author of @PACKAGE_NAME@ is Olivier Montanuy.  From 1994
+to 1996, @PACKAGE_NAME@ was maintained by Olivier Montanuy with help
+from Per Allansson, James Bonfield, Sharon Bowles, Mark Mathews, and
+Chuck Rossi.  The original manual was written by Kevin McGrail.
+
+From version 4.0 (1999) through 4.4.902 (2005), the maintainer was
+André Majorel (http://www.teaser.fr/~amajorel).
+
+The project has since been maintained by a loose collaboration of
+authors primarily as part of the Debian project and Freedoom project.
+They include Jon Download, Simon Howard, Mike Swanson, RjY, Ayub
+Ahmed, and Nick Zatkovich.
+
+REPORTING BUGS
+--------------
+Please report bugs to the issue tracker at
+https://github.com/Doom-Utils/deutex.

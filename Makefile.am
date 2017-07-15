@@ -1,1 +1,1 @@
-SUBDIRS = src
+SUBDIRS = man src
