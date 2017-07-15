@@ -501,7 +501,6 @@ char *WADRreadEntry2 (struct WADINFO *info, Int16 n, Int32 *psize)
   return buffer;
 }
 
-#if defined DeuTex
 /*
 **  copy data from WAD to file
 */
@@ -533,7 +532,6 @@ void WADRsaveEntry(struct WADINFO *info,Int16 n, const char *file)
    if (fclose(fd))
      ProgError ("WR90", "%s: %s", fname (file), strerror (errno));
 }
-#endif /*DeuTex*/
 
 /******************** Write ************************/
 
@@ -676,7 +674,6 @@ Int32 WADRwriteWADbytes(struct WADINFO *info,struct WADINFO *src,Int32 start,Int
 
 
 
-#if defined DeuTex
 /*
 ** copy lump from file into WAD
 ** returns size
@@ -771,7 +768,6 @@ void WADRwriteWADlevel(struct WADINFO *info, const char *file, const char *level
   WADRwriteWADlevelParts(info,&src,N, 9999);
   WADRclose(&src);
 }
-#endif  /*DeuTex*/
 
 /*
 ** replace dir of rwad by dir of newwad

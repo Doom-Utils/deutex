@@ -11,7 +11,6 @@
 #include "deutex.h" /*for types. equivalent of deu.h*/
 
 
-#if defined DeuTex /*deutex shit*/
 #if NEWGIFE || NEWGIFD
 #include <stdio.h>
 #include <string.h>
@@ -507,4 +506,3 @@ void reset_decoder(void)
   newc = oldc;
 }
 #endif /*NEWGIFD*/
-#endif /*DeuTex*/

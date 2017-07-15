@@ -173,8 +173,6 @@ void XTRlistDir(const char *doomwad, const char *wadin, NTRYB select)
 }
 
 
-#if defined(DeuTex)
-
 
 #if DT_OS == 'o'
 #  if DT_CC = 'b'
@@ -246,7 +244,6 @@ void XTRvoidSpacesInWAD(const char *wadin)
 	Output(" Total wasted bytes\t%ld\n",wtotal);
 	WADRclose(&pwad);
 }
-#endif
 
 
 struct SIDEDEF
@@ -519,7 +516,6 @@ void XTRstructureTest(const char *doomwad,const char *wadin)
 
 
 
-#if defined(DeuTex)
 /*
 ** Test a PWAD (-usedtex)
 **
@@ -540,10 +536,7 @@ void XTRtextureUsed(const char *wadin)
   TXUfree();
   WADRclose(&pwad);
 }
-#endif
 
-
-#if defined(DeuTex)
 
 /*
 ** Detect duplicate entries (-packgfx, -packnorm)
@@ -620,4 +613,3 @@ void XTRcompakWAD(const char *DataDir,const char *wadin, const char *texout,
    Free(btst);
    Free(psame);
 }
-#endif /*DeuTex*/

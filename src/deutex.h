@@ -25,29 +25,11 @@ GNU General Public License for more details.
 #define NEWGIFE 0
 /*use old GIF decoder, new one is down*/
 #define NEWGIFD 0
-/************ Important defines *************
-#define DeuTex  for DOS .EXE  Unix Linux OS/2
-#define DeuSF   for DOS .EXE  Unix Linux OS/2
-*********************************************/
 
 #include "config.h"
 
-#if defined DeuTex
-#if defined DeuSF
-/*DeuTex and DeuSF are mutualy exclusive*/
-#error You cant compile DeuTex and DeuSF at the same time
-#else /*compiling DeuTex*/
 #define DEUTEXNAME   "DeuTex"
 #define COMMANDNAME  "deutex"
-#endif
-#else /*compiling DeuSF*/
-#if defined DeuSF
-#define DEUTEXNAME   "DeuSF"
-#define COMMANDNAME  "deusf"
-#else /*one of DeuTex or DeuSF must be defined*/
-#error Please define one of DeuTex or DeuSF (with -DDeuTex or -DDeuSF)
-#endif
-#endif
 
 /* DeuTex version */
 extern const char deutex_version[];

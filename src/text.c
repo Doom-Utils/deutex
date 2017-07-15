@@ -19,7 +19,7 @@ GNU General Public License for more details.
 
 /*
 ** This code should contain all the tricky O/S related
-** functions. If you're porting DeuTex/DeuSF, look here!
+** functions. If you're porting DeuTex, look here!
 */
 
 #include "deutex.h"
@@ -27,9 +27,6 @@ GNU General Public License for more details.
 #include "tools.h"
 #include "text.h"
 #include <ctype.h>
-
-/*compile only for DeuTex*/
-#if defined DeuTex
 
 /* A special instance of struct TXTFILE that is treated by the
    TXT*() output functions as the equivalent of /dev/null.
@@ -505,5 +502,3 @@ void TXTaddEmptyLine (struct TXTFILE *TXT)
     Bug ("TW41", "TxtAdL");
   putc ('\n', TXT->fp);
 }
-
-#endif /*DeuTex*/

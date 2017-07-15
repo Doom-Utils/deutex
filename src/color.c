@@ -27,9 +27,6 @@ GNU General Public License for more details.
 #include "color.h"
 
 
-/*compile only for DeuTex*/
-#if defined DeuTex
-
 #ifdef QUANTHASH
 /*************** COL module: quantisation ************/
 /*
@@ -497,5 +494,3 @@ struct PIXEL *COLaltPalet(void)
 /*unused!*/   return e;
 /*unused!*/}
 #endif /*QUANTSLOW*/
-
-#endif /*DeuTex*/

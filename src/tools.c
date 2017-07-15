@@ -19,7 +19,7 @@ GNU General Public License for more details.
 
 /*
 ** This code should contain all the tricky O/S related
-** functions. If you're porting DeuTex/DeuSF, look here!
+** functions. If you're porting DeuTex, look here!
 */
 
 #include "deutex.h"

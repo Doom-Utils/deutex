@@ -25,9 +25,6 @@ GNU General Public License for more details.
 #include "sound.h"
 #include "text.h"
 
-/*compile only for DeuTex*/
-#if defined DeuTex
-
 
 /*********************** WAVE *********************/
 
@@ -539,5 +536,3 @@ Int32 SNDcopyPCSoundInWAD(struct WADINFO *info,char *file)
   TXTcloseR(Txt);
   return size;
 }
-
-#endif /*DeuTex*/

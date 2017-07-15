@@ -30,10 +30,7 @@ GNU General Public License for more details.
 #include "usedidx.h"
 
 
-#ifdef DeuTex
 static int wall_to_raw (char *data, Int32 datasz, const char *name);
-#endif
-
 
 /*
  *	parse_pic_header
@@ -137,11 +134,6 @@ int parse_pic_header (
    h->data = p;
    return 0;  /* Success */
 }
-
-
-/*compile only for DeuTex*/
-#if defined DeuTex
-
 
 
 /* BMP,GIF,DoomPIC conversion
@@ -1605,5 +1597,3 @@ static void RAWtoGIF (char *file, char *raw, Int16 rawX, Int16 rawY,
      ProgError ("GW11", "%s: %s", fname (file), strerror (errno));
 }
 /******************* End GIF module ************************/
-
-#endif /*DeuTex*/

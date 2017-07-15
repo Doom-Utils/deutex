@@ -40,9 +40,6 @@
 #include "deutex.h"
 #include "tools.h"
 
-/*compile only for DeuTex*/
-#if defined DeuTex
-
 
 #if NEWGIFE && NEWGIFD
 /*nothing, for new gif encoder*/
@@ -613,4 +610,3 @@ Int16 LWZReadByte(FILE *fd, Int16 flag, Int16 input_code_size)
    return code;
 }
 #endif /*NEWGIFD*/
-#endif /*DeuTex*/

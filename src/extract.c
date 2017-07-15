@@ -31,23 +31,12 @@ GNU General Public License for more details.
 #include "usedidx.h"
 
 
-/*compile only for DeuTex*/
-#if defined DeuTex
-
 /************** Begin XTRACT WAD module **************/
 /*
 ** here we go for some real indecent programming. sorry
 */
 
 extern char file[128];
-
-/* DEBUG */
-#if 0
-static void stop (void)
-{
-  ;
-}
-#endif
 
 /*
 ** try to save entry as BitMap .BMP
@@ -961,6 +950,3 @@ void XTRgetEntry(const char *doomwad, const char *DataDir, const char *wadin,
   Free(Entry);
   WADRclose(&pwad);
 }
-
-
-#endif /*DeuTex*/

@@ -1,4 +1,4 @@
-# Makefile of DeuTex/DeuSF
+# Makefile of DeuTex
 # by Per Allansson, Olivier Montanuy and André Majorel
 #
 # Platform-specific notes:
@@ -32,7 +32,7 @@ DISTDIR       = deutex-$(VERSION)
 DISTDIRDOS    = dtex`tr -cd '[0-9]' <VERSION`
 DISTFILES     = $(DOC_SRC) $(HEADERS) $(MISCFILES) $(MISCSRC)\
 		$(SCRIPTS) $(SRC)
-DISTFILESBIN  = $(MISCFILES) deutex.exe deusf.exe
+DISTFILESBIN  = $(MISCFILES) deutex.exe
 
 DOC_SRC =\
 	docsrc/README\
@@ -135,7 +135,6 @@ SRC =\
 	src/picture.c\
 	src/sound.c\
 	src/sscript.c\
-	src/substit.c\
 	src/text.c\
 	src/texture.c\
 	src/tools.c\
@@ -154,33 +153,22 @@ MSGTEX  = $(SRC:.c=.mt)
 .SUFFIXES: .mt .os .os~ .ot .ot~ .osd .osd~ .otd .otd~ $(SUFFIXES)
 
 .c.ot: src/deutex.h
-	$(CC) $(CFLAGS) $(DEFINES) -DDeuTex -o $@ -c $<
-
-.c.os: src/deutex.h
-	$(CC) $(CFLAGS) $(DEFINES) -DDeuSF  -o $@ -c $<
+	$(CC) $(CFLAGS) $(DEFINES) -o $@ -c $<
 
 .c.otd: src/deutex.h
-	$(DCC) $(DCFLAGS) $(DEFINES) -DDeuTex -o $@ -c $<
-
-.c.osd: src/deutex.h
-	$(DCC) $(DCFLAGS) $(DEFINES) -DDeuSF  -o $@ -c $<
+	$(DCC) $(DCFLAGS) $(DEFINES) -o $@ -c $<
 
 .c.mt: src/deutex.h
 	scripts/codes $< >$@. && mv $@. $@
 
-all: deutex deusf
+all: deutex
 
 deutex: $(OBJTEX) tmp/_deutex
 	$(CC) $(LDFLAGS) -o deutex $(OBJTEX) -lm
 
-deusf: $(OBJSF) tmp/_deusf
-	$(CC) $(LDFLAGS) -o deusf $(OBJSF) -lm
-
-dall: ddeutex ddeusf
+dall: ddeutex
 
 ddt: ddeutex
-
-dds: ddeusf
 
 
 ddeutex: $(DOBJTEX)
@@ -188,34 +176,21 @@ ddeutex: $(DOBJTEX)
 	@# Force next "make deutex" to relink
 	(sleep 1; mkdir -p tmp; >tmp/_deutex) &
 
-ddeusf: $(DOBJSF)
-	$(DCC) $(DLDFLAGS) -lm -o deusf $(DOBJSF) 
-	@# Force next "make deusf" to relink
-	(sleep 1; mkdir -p tmp; >tmp/_deusf) &
-
 tmp/_deutex:
-	[ -d tmp ] || mkdir tmp
-	>$@
-
-tmp/_deusf:
 	[ -d tmp ] || mkdir tmp
 	>$@
 
 install:
 	install -d -m 0755		$(BINDIR)
 	install -p -m 0755 deutex	$(BINDIR)
-	install -p -m 0755 deusf	$(BINDIR)
 	install -d -m 0755		$(MANDIR)/man6
 	install -p -m 0644 deutex.6	$(MANDIR)/man6
-	if [ -d $(MANDIR)/man6/deusf.6 ]; then rmdir $(MANDIR)/man6/deusf.6; fi
-	ln -sf deutex.6			$(MANDIR)/man6/deusf.6
 
 src/version.c: VERSION
 	printf "const char deutex_version[] = \"%s\";\n" $(VERSION) >$@
 
-strip: deutex deusf
+strip: deutex
 	strip deutex
-	strip deusf
 
 msg: msgtex
 
@@ -318,8 +293,8 @@ dostmp1/todo.txt: unixtmp1/TODO
 	touch -r unixtmp1/TODO $@
 
 clean:
-	rm -f $(OBJTEX) $(OBJSF) $(DOBJTEX) $(DOBJSF) deutex deusf
-	rm -f deutex.exe deusf.exe
+	rm -f $(OBJTEX) $(OBJSF) $(DOBJTEX) $(DOBJSF) deutex
+	rm -f deutex.exe
 
 # dist - make the distribution archive for Unix (.tar.gz)
 dist: $(DISTFILES) $(DDOCUNIX)
@@ -368,21 +343,19 @@ save:
 # help - display list of interesting targets
 help:
 	@echo "Targets for end users:"
-	@echo "  [all]       Build DeuTex and DeuSF"
-	@echo "  install     Install DeuTex, DeuSF and the doc"
+	@echo "  [all]       Build DeuTex"
+	@echo "  install     Install DeuTex and the doc"
 	@echo
 	@echo "Targets for developers:"
 	@echo "  doc         Just the doc"
-	@echo "  dall        Alias for ddeutex + ddeusf"
+	@echo "  dall        Alias for ddeutex"
 	@echo "  ddt         Alias for ddeutex"
-	@echo "  dds         Alias for ddeusf"
 	@echo "  ddeutex     Debug version of DeuTex -> ./deutex"
-	@echo "  ddeusf      Debug version of DeuSF  -> ./deusf"
 	@echo "  dist        Source dist. (Unix)     -> ./deutex-VERSION.tar.gz"
 	@echo "  distdos     Source dist. (DOS)      -> ./dtexVERSION.zip"
 	@echo "  distbindos  Binary-only dist. (DOS) -> ./deutex-VERSION.bin.dos.zip"
 	@echo "  save        Backup archive          -> ../deutex-YYYYMMDD.tar.gz"
-	@echo "  strip       Strip ./deutex and ./deusf"
+	@echo "  strip       Strip ./deutex"
 	@echo "  test        Run all tests (long)"
 	@echo "  clean       Remove executables and object files"
 

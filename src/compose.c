@@ -28,9 +28,6 @@ GNU General Public License for more details.
 #include "sound.h"
 #include "text.h"
 
-/*compile only for DeuTex*/
-#if defined DeuTex
-
 static void AddSomeJunk(const char *file);
 /************Begin Tex2Ascii module *************************
 **
@@ -709,6 +706,3 @@ static void AddSomeJunk(const char *file)
 
 }
 /**************** End Hack the IWAD *******************************/
-
-
-#endif /*DeuTex*/

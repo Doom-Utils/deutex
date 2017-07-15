@@ -161,8 +161,6 @@ Int32 PNMwritePNAMEtoWAD(struct WADINFO *info)
 
 
 
-/*compile only for DeuTex*/
-
 /********** TEXU  texture entry compilation ***********/
 
 struct TEXTUR {char Name[8]; Int16 szX; Int16 szY; Int16 Npatches;};
@@ -609,7 +607,6 @@ void TXUlistTex(void)
    }                                                
 }
 
-#if defined DeuTex
 /*
 ** write texture as text file
 */
@@ -713,6 +710,3 @@ void TXUreadTexFile(const char *file,Bool Redefn)
    TXTcloseR(TXT);
 }
 /***************End TEXTURE module*********************/
-
-
-#endif /*DeuTex*/
