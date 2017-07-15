@@ -27,9 +27,6 @@ GNU General Public License for more details.
 /*use old GIF decoder, new one is down*/
 #define NEWGIFD 0
 
-#define DEUTEXNAME   "DeuTex"
-#define COMMANDNAME  "deutex"
-
 /* Try to guess the target OS and set DT_OS accordingly */
 #if defined __MSDOS__	/* Borland C and DJGPP define __MSDOS__ */\
  || defined MSDOS	/* Microsoft C defines MSDOS */

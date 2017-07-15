@@ -970,7 +970,7 @@ int main (int argc, char *argv_non_const[])
 
      /* Write the header of the log file. */
      /* FIXME use Info */
-     lprintf ("%c AA00 %s %s\n", MSGCLASS_INFO, DEUTEXNAME, PACKAGE_VERSION);
+     lprintf ("%c AA00 %s %s\n", MSGCLASS_INFO, PACKAGE_NAME, PACKAGE_VERSION);
      {
        int n;
        for (n = 1; n < argc; n++)
@@ -1189,7 +1189,7 @@ void COMhelp(int argc, const char *argv[])
   size_t width2 = 22;
   int section = 0;
 
-  printf ("Help for %s:\n", DEUTEXNAME);
+  printf ("Help for %s:\n", PACKAGE_NAME);
   opt_widths ();
   for (d = Com; d->type != END; d++)
   {
@@ -1262,7 +1262,7 @@ void COMvers (int argc, const char *argv[])
 {
   (void) argc;
   (void) argv;
-  printf ("%s %.32s\n", DEUTEXNAME, PACKAGE_VERSION);
+  printf ("%s %.32s\n", PACKAGE_NAME, PACKAGE_VERSION);
   exit (0);
 }
 

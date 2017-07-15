@@ -797,7 +797,7 @@ Int32 WADRprepareAppend(const char *wadres,struct WADINFO *rwad,
 #endif
    /*last warning*/
    Output("The WAD file %s will be modified, but it can be restored with:\n",wadres);
-   Output("%s -res %s\n",COMMANDNAME,wadres);
+   Output("%s -res %s\n", PACKAGE, wadres);
    Output("Restoration may fail if you modified the WAD with another tool.\n");
    Output("In case of failure, you can salvage your WAD by:\n");
    /* Assuming wad is little endian... */
