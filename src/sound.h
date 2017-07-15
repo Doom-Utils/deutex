@@ -23,9 +23,9 @@ Place, Suite 330, Boston, MA 02111-1307, USA.
 
 
 /********************* sound.c *******************/
-void SNDsaveSound(char *file,char  *buffer,Int32 size,SNDTYPE Sound,
-    Bool fullSND, const char *name);
-Int32 SNDcopyInWAD(struct WADINFO *info,char *file,SNDTYPE Sound);
+void SNDsaveSound(char *file,char  *buffer,int32_t size,SNDTYPE Sound,
+    bool fullSND, const char *name);
+int32_t SNDcopyInWAD(struct WADINFO *info,char *file,SNDTYPE Sound);
 void SNDsavePCSound(const char *name, const char *file, const char *buffer,
-    Int32 size);
-Int32 SNDcopyPCSoundInWAD(struct WADINFO *info,char *file);
+    int32_t size);
+int32_t SNDcopyPCSoundInWAD(struct WADINFO *info,char *file);

@@ -49,7 +49,7 @@ const int WADR_PIPO=8;
 
 /************ begin   WAD module ***********/
 
-void WADRopenPipo(struct WADINFO *info,Int32 ntry)
+void WADRopenPipo(struct WADINFO *info,int32_t ntry)
 {  /*directory */
    if((info->ok&WADR_RDWR)) Bug("WR80", "WadPpk");
    info->ok=WADR_PIPO;
@@ -61,9 +61,9 @@ void WADRopenPipo(struct WADINFO *info,Int32 ntry)
    info->wposit=info->maxpos;
 }
 
-struct WADDIR  *WADRclosePipo(struct WADINFO *info,Int32  *ntry)
+struct WADDIR  *WADRclosePipo(struct WADINFO *info,int32_t  *ntry)
 {  if((info->ok!=WADR_PIPO)) Bug("WR84", "WadPpc");
-   info->ok=FALSE;
+   info->ok=false;
    if(info->ntry<0)info->ntry=0;
    info->dir=(struct WADDIR  *)
              Realloc(info->dir,(info->ntry)*sizeof(struct WADDIR));
@@ -71,11 +71,11 @@ struct WADDIR  *WADRclosePipo(struct WADINFO *info,Int32  *ntry)
    return info->dir;
 }
 
-Int32 WADRdirAddPipo(struct WADINFO *info,Int32 start,Int32 size, const char
+int32_t WADRdirAddPipo(struct WADINFO *info,int32_t start,int32_t size, const char
     *entry)
-{ Int16 n;
+{ int16_t n;
   if(info->ok!=WADR_PIPO) Bug("WR82", "WadDaP");
-  n=(Int16)info->ntry; /*position of new entry*/
+  n=(int16_t)info->ntry; /*position of new entry*/
   if(n<0) Bug("WR83", "WadDa2");
   if(n<info->maxdir) /*can add to the dir*/
   { info->ntry++; /*new dir size*/
@@ -88,8 +88,8 @@ Int32 WADRdirAddPipo(struct WADINFO *info,Int32 start,Int32 size, const char
 
 void WADRopenR(struct WADINFO *info, const char *wadin)
 {  /*directory */
-   Int32 ntry,dirpos;
-   Int16 n;
+   int32_t ntry,dirpos;
+   int16_t n;
    struct WADDIR dir;
    if((info->ok&WADR_RDWR)) Bug("WR01", "%s: WadOpr", fname (wadin));
    info->fd=fopen(wadin,FOPEN_RB);
@@ -206,12 +206,12 @@ void WADRopenA(struct WADINFO *info, const char *wadinout)
 ** update maxdir and maxpos
 ** returns entry ref
 */
-Int32 WADRdirAddEntry(struct WADINFO *info,Int32 start,Int32 size, const char
+int32_t WADRdirAddEntry(struct WADINFO *info,int32_t start,int32_t size, const char
     *entry)
-{ Int16 n;
-  Int32 sz;
+{ int16_t n;
+  int32_t sz;
   if(!(info->ok&(WADR_RDWR))) Bug("WW40", "%s: WadDAE", fname (info->filename));
-  n=(Int16)info->ntry; /*position of new entry*/
+  n=(int16_t)info->ntry; /*position of new entry*/
   if(n>=info->maxdir) /*shall we move the dir?*/
   { info->maxdir+=MAXPWADDIR;
     info->dir=(struct WADDIR  *)Realloc((char  *)info->dir,(info->maxdir)*sizeof(struct WADDIR));
@@ -231,9 +231,9 @@ Int32 WADRdirAddEntry(struct WADINFO *info,Int32 start,Int32 size, const char
 ** then update the number of  entries and dir pointer
 */
 void WADRwriteDir(struct WADINFO *info, int verbose)
-{  Int16 n;
+{  int16_t n;
    if(!(info->ok&WADR_WRITE)) Bug("WW20", "%s: WadWD", fname (info->filename));
-   WADRalign4(info);      /*align entry on Int32 word*/
+   WADRalign4(info);      /*align entry on int32_t word*/
    info->dirpos=info->wposit; /*current position*/
    /* write the new WAD directory*/
    for(n=0;n<info->ntry;n++)
@@ -246,7 +246,7 @@ void WADRwriteDir(struct WADINFO *info, int verbose)
    }
    /* fix up the directory start information */
    WADRsetDirRef(info,info->ntry,info->dirpos);
-   n=(Int16)( info->dirpos+(sizeof(struct WADDIR)*info->ntry));
+   n=(int16_t)( info->dirpos+(sizeof(struct WADDIR)*info->ntry));
    if(n>info->maxpos) info->maxpos=n;
    if (verbose)
      Phase("WW28", "%s: wad is complete, %ld entries, %ld bytes",
@@ -255,15 +255,15 @@ void WADRwriteDir(struct WADINFO *info, int verbose)
 
 /***************** Wad structure *******************/
 
-void WADRsetDirRef(struct WADINFO *info,Int32 ntry,Int32 dirpos)
+void WADRsetDirRef(struct WADINFO *info,int32_t ntry,int32_t dirpos)
 {
 #if 0
-  struct { Int32 ntry;Int32 dirpos;} Head;
+  struct { int32_t ntry;int32_t dirpos;} Head;
 #endif
    if(!(info->ok&WADR_WRITE))Bug("WW24", "%s: WadSDR", fname (info->filename));
 #if 0
-   Head.ntry=BE_Int32(ntry);
-   Head.dirpos=BE_Int32(dirpos);
+   Head.ntry=BE_int32_t(ntry);
+   Head.dirpos=BE_int32_t(dirpos);
 #endif
    WADRseek(info,4);
    if (wad_write_i32 (info->fd, ntry)
@@ -282,7 +282,7 @@ void WADRsetDirRef(struct WADINFO *info,Int32 ntry,Int32 dirpos)
    info->dirpos=dirpos;
 }
 
-void WADRchsize(struct WADINFO *info,Int32 fsize)
+void WADRchsize(struct WADINFO *info,int32_t fsize)
 { if(!(info->ok&WADR_WRITE)) Bug("WW93", "WadcSz");
   if(Chsize(fileno(info->fd),fsize)!=0)
     ProgError("WW95", "%s: %s", fname (info->filename), strerror (errno));
@@ -292,10 +292,10 @@ void WADRchsize(struct WADINFO *info,Int32 fsize)
 }
 
 #if 0
-Bool WADRchsize2(struct WADINFO *info,Int32 fsize)
+bool WADRchsize2(struct WADINFO *info,int32_t fsize)
 { if(!(info->ok&WADR_WRITE)) Bug("XX99", "WadcSz");
-  if(Chsize(fileno(info->fd),fsize)!=0) return FALSE;
-  return TRUE;
+  if(Chsize(fileno(info->fd),fsize)!=0) return false;
+  return true;
 }
 #endif
 
@@ -304,7 +304,7 @@ Bool WADRchsize2(struct WADINFO *info,Int32 fsize)
 
 
 
-void WADRseek(struct WADINFO *info,Int32 position)
+void WADRseek(struct WADINFO *info,int32_t position)
 {
    long ofs;
    if(!(info->ok&WADR_RDWR)) Bug("WR31", "WadSk");
@@ -382,8 +382,8 @@ iolen_t WADRreadBytes (struct WADINFO *info, char *buffer, iolen_t nbytes)
   return nbytes;
 }
 
-Int16 WADRreadShort(struct WADINFO *info)
-{ Int16 res;
+int16_t WADRreadShort(struct WADINFO *info)
+{ int16_t res;
   long ofs = ftell (info->fd);
   if (!(info->ok&WADR_READ)) Bug("WR51", "WadRdS");
   if (wad_read_i16 (info->fd, &res))
@@ -394,8 +394,8 @@ Int16 WADRreadShort(struct WADINFO *info)
    return res;
 }
 
-Int32 WADRreadLong(struct WADINFO *info)
-{ Int32 res;
+int32_t WADRreadLong(struct WADINFO *info)
+{ int32_t res;
   long ofs = ftell (info->fd);
   if (!(info->ok&WADR_READ)) Bug("WR61", "WadRdL");
   if (wad_read_i32 (info->fd, &res))
@@ -408,14 +408,14 @@ Int32 WADRreadLong(struct WADINFO *info)
 
 void  WADRclose(struct WADINFO *info)
 {  if(!(info->ok&WADR_RDWR)) Bug("WR97", "WadClo");
-   info->ok=FALSE;
+   info->ok=false;
    Free (info->filename);
    Free (info->dir);
    fclose (info->fd);
 }
 
-Int16 WADRfindEntry(struct WADINFO *info, const char *entry)
-{ Int16 i;
+int16_t WADRfindEntry(struct WADINFO *info, const char *entry)
+{ int16_t i;
   static char name[8];
   struct WADDIR  *dir;
   if(!(info->ok&WADR_RDWR)) Bug("WR91", "WadFE");
@@ -430,9 +430,9 @@ Int16 WADRfindEntry(struct WADINFO *info, const char *entry)
 /*
 ** load data in buffer
 */
-char  *WADRreadEntry(struct WADINFO *info,Int16 n,Int32 *psize)
+char  *WADRreadEntry(struct WADINFO *info,int16_t n,int32_t *psize)
 { char  *buffer;
-  Int32 start,size;
+  int32_t start,size;
   if(!(info->ok&WADR_READ)) Bug("WR71", "WadRE");
   if(n>=(info->ntry))Bug("WR73", "WadRE>");
   start = info->dir[n].start;
@@ -457,7 +457,7 @@ char  *WADRreadEntry(struct WADINFO *info,Int16 n,Int32 *psize)
  *	If the lump is shorter than *psize, it's _not_ an error.
  *	Return the actual number of bytes read in *psize.
  */
-char *WADRreadEntry2 (struct WADINFO *info, Int16 n, Int32 *psize)
+char *WADRreadEntry2 (struct WADINFO *info, int16_t n, int32_t *psize)
 {
   char *buffer;
   long   start;
@@ -491,10 +491,10 @@ char *WADRreadEntry2 (struct WADINFO *info, Int16 n, Int32 *psize)
 /*
 **  copy data from WAD to file
 */
-void WADRsaveEntry(struct WADINFO *info,Int16 n, const char *file)
-{  Int32 wsize,sz=0;
+void WADRsaveEntry(struct WADINFO *info,int16_t n, const char *file)
+{  int32_t wsize,sz=0;
    char  *buffer;
-   Int32 start,size;
+   int32_t start,size;
    FILE *fd;
    if(!(info->ok&WADR_READ)) Bug("WR86", "WadSE");
    if(n>=(info->ntry))Bug("WR87", "WadSE>");
@@ -522,7 +522,7 @@ void WADRsaveEntry(struct WADINFO *info,Int16 n, const char *file)
 
 /******************** Write ************************/
 
-void WADRsetLong(struct WADINFO *info,Int32 pos,Int32 val)
+void WADRsetLong(struct WADINFO *info,int32_t pos,int32_t val)
 {
   if(!(info->ok&WADR_WRITE))		Bug("WW56", "WadStL");
   if(pos>(info->maxpos))		Bug("WW57", "WadSL>");
@@ -535,7 +535,7 @@ void WADRsetLong(struct WADINFO *info,Int32 pos,Int32 val)
     ProgError ("WW59", "%s: write error", fnameofs (info->filename, pos));
 }
 
-void WADRsetShort(struct WADINFO *info,Int32 pos,Int16 val)
+void WADRsetShort(struct WADINFO *info,int32_t pos,int16_t val)
 {
   if(!(info->ok&WADR_WRITE))		Bug("WW51", "WadStS");
   if(pos>(info->maxpos))		Bug("WW52", "WadSS>");
@@ -561,7 +561,7 @@ static void WADRcheckWritePos(struct WADINFO *info)
 	strerror (errno));
 }
 
-static Int32 WADRwriteBlock(struct WADINFO *info,char  *data,Int32 sz)
+static int32_t WADRwriteBlock(struct WADINFO *info,char  *data,int32_t sz)
 { if(fwrite(data,(size_t)sz,1,info->fd) != 1)
     ProgError("WW65",  "%s: write error", fname (info->filename));
   info->wposit += sz;
@@ -573,14 +573,14 @@ static Int32 WADRwriteBlock(struct WADINFO *info,char  *data,Int32 sz)
 ** align, give position
 */
 void WADRalign4(struct WADINFO *info)
-{ Int16 remain;
+{ int16_t remain;
   static char buffer[] ={0,0x24,0x6,0x68};
   WADRcheckWritePos(info);
-  remain = (Int16)(info->wposit&0x03);   /*0 to 3*/
+  remain = (int16_t)(info->wposit&0x03);   /*0 to 3*/
   if(remain>0) WADRwriteBytes(info,buffer,4-remain);
 }
 /*must be equal to ftell*/
-Int32 WADRposition(struct WADINFO *info)
+int32_t WADRposition(struct WADINFO *info)
 { WADRcheckWritePos(info);
   return info->wposit;
 }
@@ -588,7 +588,7 @@ Int32 WADRposition(struct WADINFO *info)
 /*
 ** write
 */
-Int32 WADRwriteLong(struct WADINFO *info,Int32 val)
+int32_t WADRwriteLong(struct WADINFO *info,int32_t val)
 {
   WADRcheckWritePos(info);
   if (wad_write_i32 (info->fd, val))
@@ -599,7 +599,7 @@ Int32 WADRwriteLong(struct WADINFO *info,Int32 val)
   return sizeof val;
 }
 
-Int32 WADRwriteShort(struct WADINFO *info,Int16 val)
+int32_t WADRwriteShort(struct WADINFO *info,int16_t val)
 {
   WADRcheckWritePos(info);
   if (wad_write_i16 (info->fd, val))
@@ -610,8 +610,8 @@ Int32 WADRwriteShort(struct WADINFO *info,Int16 val)
   return sizeof val;
 }
 
-Int32 WADRwriteBytes(struct WADINFO *info,char  *data,Int32 size)
-{ Int32 wsize,sz=0;
+int32_t WADRwriteBytes(struct WADINFO *info,char  *data,int32_t size)
+{ int32_t wsize,sz=0;
   WADRcheckWritePos(info);
   if(size<=0) Bug("WW71", "WadWb<");
   for(wsize=0;wsize<size;)
@@ -621,15 +621,15 @@ Int32 WADRwriteBytes(struct WADINFO *info,char  *data,Int32 size)
   return wsize;
 }
 
-static Int32 WADRwriteBlock2(struct WADINFO *info,char  *data,Int32 sz)
+static int32_t WADRwriteBlock2(struct WADINFO *info,char  *data,int32_t sz)
 { if(fwrite(data,(size_t)sz,1,info->fd) != 1)return -1;
   info->wposit += sz;
   if(info->maxpos<info->wposit)info->maxpos=info->wposit;
   return sz;
 }
 
-Int32 WADRwriteBytes2(struct WADINFO *info,char  *data,Int32 size)
-{ Int32 wsize,sz=0;
+int32_t WADRwriteBytes2(struct WADINFO *info,char  *data,int32_t size)
+{ int32_t wsize,sz=0;
   WADRcheckWritePos(info);
   if(size<=0) Bug("WW73", "WadWb<");
   for(wsize=0;wsize<size;)
@@ -644,8 +644,8 @@ Int32 WADRwriteBytes2(struct WADINFO *info,char  *data,Int32 size)
 /*
 **  copy data from SOURCE WAD to WAD
 */
-Int32 WADRwriteWADbytes(struct WADINFO *info,struct WADINFO *src,Int32 start,Int32 size)
-{  Int32 wsize,sz=0;
+int32_t WADRwriteWADbytes(struct WADINFO *info,struct WADINFO *src,int32_t start,int32_t size)
+{  int32_t wsize,sz=0;
    char  *data;
    data = (char  *)Malloc( MEMORYCACHE);
    WADRseek(src,start);
@@ -665,8 +665,8 @@ Int32 WADRwriteWADbytes(struct WADINFO *info,struct WADINFO *src,Int32 start,Int
 ** copy lump from file into WAD
 ** returns size
 */
-Int32 WADRwriteLump(struct WADINFO *info, const char *file)
-{  Int32      size,sz=0;
+int32_t WADRwriteLump(struct WADINFO *info, const char *file)
+{  int32_t      size,sz=0;
    FILE      *fd;
    char  *data;
    WADRcheckWritePos(info);
@@ -687,7 +687,7 @@ Int32 WADRwriteLump(struct WADINFO *info, const char *file)
    return size;
 }
 
-Int32 WADRwriteWADentry(struct WADINFO *info,struct WADINFO *src,Int16 n)
+int32_t WADRwriteWADentry(struct WADINFO *info,struct WADINFO *src,int16_t n)
 {  if(n>(src->ntry)) Bug("WW77", "WadWW>");
    return WADRwriteWADbytes(info,src,src->dir[n].start,src->dir[n].size);
 }
@@ -695,10 +695,10 @@ Int32 WADRwriteWADentry(struct WADINFO *info,struct WADINFO *src,Int16 n)
 /*
 ** copy level parts
 */
-void WADRwriteWADlevelParts(struct WADINFO *info,struct WADINFO *src,Int16 N,
+void WADRwriteWADlevelParts(struct WADINFO *info,struct WADINFO *src,int16_t N,
     size_t nlumps)
-{ Int32 start,size;
-  Int16 n;
+{ int32_t start,size;
+  int16_t n;
 
   for (n = N + 1; n < src->ntry && n < N + nlumps; n++)
   {
@@ -715,8 +715,8 @@ void WADRwriteWADlevelParts(struct WADINFO *info,struct WADINFO *src,Int16 N,
 ** if level name not found, then take the first level...
 */
 void WADRwriteWADlevel(struct WADINFO *info, const char *file, const char *level)
-{ Int16 N,l;
-  Int32 pos;
+{ int16_t N,l;
+  int32_t pos;
   /*char Level[8];*/
   struct WADINFO src;
   if(IDENTlevel(level)<0)ProgError("WW79", "Bad level name %s",level);
@@ -761,12 +761,12 @@ void WADRwriteWADlevel(struct WADINFO *info, const char *file, const char *level
 ** prepare to write at the end of rwad
 ** open for append
 */
-Int32 WADRprepareAppend(const char *wadres,struct WADINFO *rwad,
-     struct WADDIR  *NewDir,Int32 NewNtry,
-     Int32 *dirpos,Int32 *ntry, Int32 *size)
-{ Int32 ewadstart;
-  Int32 rwadsize;
-  Int32 time;
+int32_t WADRprepareAppend(const char *wadres,struct WADINFO *rwad,
+     struct WADDIR  *NewDir,int32_t NewNtry,
+     int32_t *dirpos,int32_t *ntry, int32_t *size)
+{ int32_t ewadstart;
+  int32_t rwadsize;
+  int32_t time;
   time=GetFileTime(wadres);
   /* append to the Result WAD*/
    WADRopenA(rwad,wadres);

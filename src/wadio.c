@@ -37,10 +37,10 @@ GNU General Public License for more details.
  *
  *	Return 0 on success, non-zero on failure.
  */
-int (* wad_write_i16) (FILE *, Int16)   = fwrite_i16_le;
-int (* wad_write_i32) (FILE *, Int32)   = fwrite_i32_le;
-int (* wad_read_i16)  (FILE *, Int16 *) = fread_i16_le;
-int (* wad_read_i32)  (FILE *, Int32 *) = fread_i32_le;
+int (* wad_write_i16) (FILE *, int16_t)   = fwrite_i16_le;
+int (* wad_write_i32) (FILE *, int32_t)   = fwrite_i32_le;
+int (* wad_read_i16)  (FILE *, int16_t *) = fread_i16_le;
+int (* wad_read_i32)  (FILE *, int32_t *) = fread_i32_le;
 
 
 /*

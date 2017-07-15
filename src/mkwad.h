@@ -20,9 +20,9 @@ GNU General Public License for more details.
 
 
 /*for merging directories*/
-void WADRopenPipo(struct WADINFO *info,Int32 ntry);
-struct WADDIR *WADRclosePipo(struct WADINFO *info,Int32  *ntry);
-Int32 WADRdirAddPipo(struct WADINFO *info,Int32 start,Int32 size,const char
+void WADRopenPipo(struct WADINFO *info,int32_t ntry);
+struct WADDIR *WADRclosePipo(struct WADINFO *info,int32_t  *ntry);
+int32_t WADRdirAddPipo(struct WADINFO *info,int32_t start,int32_t size,const char
     *entry);
 
 /*Open a WAD file for read*/
@@ -37,53 +37,53 @@ void WADRclose(struct WADINFO *info);
 
 /*WAD file structure*/
 /*set position of internal WAD directory*/
-void WADRsetDirRef(struct WADINFO *info,Int32 ntry,Int32 dirpos);
+void WADRsetDirRef(struct WADINFO *info,int32_t ntry,int32_t dirpos);
 /*change size of a WAD*/
-void WADRchsize(struct WADINFO *info,Int32 fsize);
+void WADRchsize(struct WADINFO *info,int32_t fsize);
 /*increase size of WAD, do not update position*/
-Bool WADRchsize2(struct WADINFO *info,Int32 fsize);
+bool WADRchsize2(struct WADINFO *info,int32_t fsize);
 
 
 /*composition of internal WAD directory*/
 /*add an entry to the directory*/
-Int32 WADRdirAddEntry(struct WADINFO *info,Int32 start,Int32 size, const char
+int32_t WADRdirAddEntry(struct WADINFO *info,int32_t start,int32_t size, const char
     *name);
 /*write the directory (and set it's position)*/
 void  WADRwriteDir(struct WADINFO *info, int verbose);
 /*find an entry in the directory*/
-Int16 WADRfindEntry(struct WADINFO *info, const char *entry);  /*-1 or index of entry in directory*/
+int16_t WADRfindEntry(struct WADINFO *info, const char *entry);  /*-1 or index of entry in directory*/
 
 /*set data in a WAD (write position doesn't change)*/
-void WADRsetLong(struct WADINFO *info,Int32 pos,Int32 val);
-void WADRsetShort(struct WADINFO *info,Int32 pos,Int16 val);
+void WADRsetLong(struct WADINFO *info,int32_t pos,int32_t val);
+void WADRsetShort(struct WADINFO *info,int32_t pos,int16_t val);
 /*align on long*/
 void  WADRalign4(struct WADINFO *info);   /*align on long word, for next entry*/
 /*tell position of pointer*/
-Int32 WADRposition(struct WADINFO *info); /*current position*/
+int32_t WADRposition(struct WADINFO *info); /*current position*/
 /*write date (write position increase)*/
-Int32 WADRwriteLong(struct WADINFO *info,Int32 val);
-Int32 WADRwriteShort(struct WADINFO *info,Int16 val);
-Int32 WADRwriteBytes(struct WADINFO *info,char *data,Int32 size);
-Int32 WADRwriteBytes2(struct WADINFO *info,char *data,Int32 size);
-Int32 WADRwriteLump(struct WADINFO *info,const char *file);
-Int32 WADRwriteWADbytes(struct WADINFO *info,struct WADINFO *src,Int32 start,Int32 size);
-Int32 WADRwriteWADentry(struct WADINFO *info,struct WADINFO *src,Int16 n);
-void WADRwriteWADlevelParts(struct WADINFO *info,struct WADINFO *src,Int16 n,
+int32_t WADRwriteLong(struct WADINFO *info,int32_t val);
+int32_t WADRwriteShort(struct WADINFO *info,int16_t val);
+int32_t WADRwriteBytes(struct WADINFO *info,char *data,int32_t size);
+int32_t WADRwriteBytes2(struct WADINFO *info,char *data,int32_t size);
+int32_t WADRwriteLump(struct WADINFO *info,const char *file);
+int32_t WADRwriteWADbytes(struct WADINFO *info,struct WADINFO *src,int32_t start,int32_t size);
+int32_t WADRwriteWADentry(struct WADINFO *info,struct WADINFO *src,int16_t n);
+void WADRwriteWADlevelParts(struct WADINFO *info,struct WADINFO *src,int16_t n,
     size_t nlumps);
 void WADRwriteWADlevel(struct WADINFO *info,const char *file,const char
     *level);
 
 /*read data*/
-void WADRseek(struct WADINFO *info,Int32 position);
+void WADRseek(struct WADINFO *info,int32_t position);
 iolen_t WADRreadBytes(struct WADINFO *info,char *buffer,iolen_t nbytes);
 iolen_t WADRreadBytes(struct WADINFO *info,char *buffer,iolen_t nbytes);
-Int16 WADRreadShort(struct WADINFO *info);
-Int32 WADRreadLong(struct WADINFO *info);
-char *WADRreadEntry(struct WADINFO *info,Int16 N,Int32 *psize);
-char *WADRreadEntry2 (struct WADINFO *info, Int16 n, Int32 *psize);
-void WADRsaveEntry(struct WADINFO *info,Int16 N, const char *file);
+int16_t WADRreadShort(struct WADINFO *info);
+int32_t WADRreadLong(struct WADINFO *info);
+char *WADRreadEntry(struct WADINFO *info,int16_t N,int32_t *psize);
+char *WADRreadEntry2 (struct WADINFO *info, int16_t n, int32_t *psize);
+void WADRsaveEntry(struct WADINFO *info,int16_t N, const char *file);
 
 /*make some preparations before appending data to an existing WAD*/
 /*so that it can be restored later*/
-Int32 WADRprepareAppend(const char *wadres,struct WADINFO *rwad,struct WADDIR
-     *NewDir,Int32 NewNtry, Int32 *dirpos,Int32 *ntry, Int32 *size);
+int32_t WADRprepareAppend(const char *wadres,struct WADINFO *rwad,struct WADDIR
+     *NewDir,int32_t NewNtry, int32_t *dirpos,int32_t *ntry, int32_t *size);

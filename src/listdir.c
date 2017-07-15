@@ -45,16 +45,16 @@ static char *IdentView(char view)
  *	XTRlistDir - implementation of -wadir
  */
 void XTRlistDir(const char *doomwad, const char *wadin, NTRYB select)
-{  Int16 n;
+{  int16_t n;
    static struct WADINFO pwad;
    static struct WADINFO iwad;
    static char buffer[128];
    ENTRY  *iden;
    ENTRY type;
-   Int32 ntry;
+   int32_t ntry;
    struct WADDIR  *dir;
    char *typ;
-   Int16 pnm;char  *Pnam;Int32 Pnamsz=0;
+   int16_t pnm;char  *Pnam;int32_t Pnamsz=0;
 
    /*open iwad,get iwad directory*/
    iwad.ok=0;
@@ -75,7 +75,7 @@ void XTRlistDir(const char *doomwad, const char *wadin, NTRYB select)
    else
    { iwad.ok=0;
      WADRopenR(&iwad,doomwad);
-     iden=IDENTentriesIWAD(&iwad, Pnam, Pnamsz,FALSE);
+     iden=IDENTentriesIWAD(&iwad, Pnam, Pnamsz,false);
      ntry= iwad.ntry;
      dir=  iwad.dir;
    }
@@ -175,7 +175,7 @@ void XTRlistDir(const char *doomwad, const char *wadin, NTRYB select)
 
 
 int XTRdirCmp(const void *d1,const void *d2)
-{  Int32  res;
+{  int32_t  res;
 	struct WADDIR *dir1=(struct WADDIR *)d1;
 	struct WADDIR *dir2=(struct WADDIR *)d2;
 	res= (dir1->start)-(dir2->start);
@@ -188,12 +188,12 @@ int XTRdirCmp(const void *d1,const void *d2)
 }
 
 void XTRvoidSpacesInWAD(const char *wadin)
-{  Int16 n;
+{  int16_t n;
 	static struct WADINFO pwad;
-	Int32 ntry;
+	int32_t ntry;
 	struct WADDIR  *dir;
-	Int32 startpos,lastpos,ll,diff,wtotal;
-	Int32 w3,w20,w100,w1000,w10000,w100000;
+	int32_t startpos,lastpos,ll,diff,wtotal;
+	int32_t w3,w20,w100,w1000,w10000,w100000;
 	wtotal=w3=w20=w100=w1000=w10000=w100000=0;
 
 	pwad.ok=0;
@@ -239,19 +239,19 @@ void XTRvoidSpacesInWAD(const char *wadin)
 
 
 struct SIDEDEF
-{  Int16 ofsx;      /* X offset for texture */
-	Int16 ofsy;      /* Y offset for texture */
+{  int16_t ofsx;      /* X offset for texture */
+	int16_t ofsy;      /* Y offset for texture */
 	char  Above[8];  /* texture name for the part above */
 	char  Below[8];  /* texture name for the part below */
    char  Center[8]; /* texture name for the regular part */
-	Int16 Sector;    /* adjacent sector */
+	int16_t Sector;    /* adjacent sector */
 };
 
 /*
 ** Check a level
 ** Assumes TEXTURES are already read somewhere.
 */                            
-void CheckTexture(char  *tex,Bool IsDef)
+void CheckTexture(char  *tex,bool IsDef)
 { int n;
   char Name[8];
   for(n=0;n<8;n++)
@@ -262,11 +262,11 @@ void CheckTexture(char  *tex,Bool IsDef)
   switch(Name[0])
   { case '-': case '\0': break;
     default:
-    if(IsDef==TRUE) /*if we only wish to declare the tex*/
+    if(IsDef==true) /*if we only wish to declare the tex*/
     { TXUfakeTex(Name);
     }
     else
-    { if(TXUexist(Name)==FALSE)
+    { if(TXUexist(Name)==false)
         Output("Warning: undefined sidedef %s\n", lump_name (Name));
     }
   }
@@ -274,12 +274,12 @@ void CheckTexture(char  *tex,Bool IsDef)
 
 /*
 **check textures
-** IsDef=TRUE if we just wish to declare textures
+** IsDef=true if we just wish to declare textures
 */
-void CheckSideDefs(struct WADINFO *pwad,Int32 start,Int32 size,Bool IsDef)
+void CheckSideDefs(struct WADINFO *pwad,int32_t start,int32_t size,bool IsDef)
 { struct SIDEDEF  *sid;
   struct SIDEDEF  *side;
-  Int32 s;
+  int32_t s;
   sid = (struct SIDEDEF  *)Malloc(size);
   WADRseek(pwad,start);
   WADRreadBytes(pwad,(char  *)sid,size);
@@ -292,9 +292,9 @@ void CheckSideDefs(struct WADINFO *pwad,Int32 start,Int32 size,Bool IsDef)
   Free(sid);
 }
 
-void CheckLevels(struct WADINFO *pwad, Bool IsDef)
-{ Int16 lev,lin,id,top;
-  Int32 ntry=pwad->ntry;
+void CheckLevels(struct WADINFO *pwad, bool IsDef)
+{ int16_t lev,lin,id,top;
+  int32_t ntry=pwad->ntry;
   struct WADDIR  *pdir=pwad->dir;
   for(lev=0;lev<ntry;lev++)
   { id=IDENTlevel(pdir[lev].name);
@@ -319,13 +319,13 @@ void CheckLevels(struct WADINFO *pwad, Bool IsDef)
 void XTRstructureTest(const char *doomwad,const char *wadin)
 { static struct WADINFO pwad,iwad;
   char  *Pnames;
-  Int16 p,pnm,nbPatchs;
-  Int32 size;
-  static struct PICH{Int16 Xsz;Int16 Ysz;} pich;
-  Int16  *PszX;
+  int16_t p,pnm,nbPatchs;
+  int32_t size;
+  static struct PICH{int16_t Xsz;int16_t Ysz;} pich;
+  int16_t  *PszX;
   static char name[8];
   char  *buffer;
-  Int16 cs,ce;
+  int16_t cs,ce;
 
   /*read PNAME in wad, if defined*/
   Phase("LS21", "Reading WADs");
@@ -356,7 +356,7 @@ void XTRstructureTest(const char *doomwad,const char *wadin)
   */
   Phase("LS27", "Checking Patches");
   nbPatchs=PNMgetNbOfPatch();
-  PszX=(Int16  *)Malloc(nbPatchs*sizeof(Int16));
+  PszX=(int16_t  *)Malloc(nbPatchs*sizeof(int16_t));
   for(p=0;p<nbPatchs;p++)                /*for all patches*/
   { PNMgetPatchName(name,p);
     pnm=WADRfindEntry(&pwad,name);
@@ -387,7 +387,7 @@ void XTRstructureTest(const char *doomwad,const char *wadin)
     WADRseek(&pwad,e->start);
     WADRreadBytes(&pwad,buffer,e->size);
     TXUinit();
-    TXUreadTEXTURE(e->name, buffer, e->size, NULL, 0, TRUE);
+    TXUreadTEXTURE(e->name, buffer, e->size, NULL, 0, true);
     Free(buffer);
     /*for each textures, check what is covered */
     Phase("LS31", "Checking TEXTURE1");
@@ -402,7 +402,7 @@ void XTRstructureTest(const char *doomwad,const char *wadin)
     WADRseek(&pwad,e->start);
     WADRreadBytes(&pwad,buffer,e->size);
     TXUinit();
-    TXUreadTEXTURE(e->name, buffer, e->size, NULL, 0, TRUE);
+    TXUreadTEXTURE(e->name, buffer, e->size, NULL, 0, true);
     Free(buffer);
     /*for each textures, check what is covered */
     Phase("LS33", "Checking TEXTURE2");
@@ -423,7 +423,7 @@ void XTRstructureTest(const char *doomwad,const char *wadin)
      buffer=(char  *)Malloc(e->size);
      WADRseek(&pwad,e->start);
      WADRreadBytes(&pwad,buffer,e->size);
-     TXUreadTEXTURE(e->name, buffer, e->size, NULL, 0, TRUE);
+     TXUreadTEXTURE(e->name, buffer, e->size, NULL, 0, true);
      Free(buffer);
   }
   else
@@ -434,7 +434,7 @@ void XTRstructureTest(const char *doomwad,const char *wadin)
        buffer=(char  *)Malloc(e->size);
        WADRseek(&iwad,e->start);
        WADRreadBytes(&iwad,buffer,e->size);
-       TXUreadTEXTURE(e->name, buffer, e->size, NULL, 0, TRUE);
+       TXUreadTEXTURE(e->name, buffer, e->size, NULL, 0, true);
        Free(buffer);
      }
   }
@@ -445,7 +445,7 @@ void XTRstructureTest(const char *doomwad,const char *wadin)
      buffer=(char  *)Malloc(e->size);
      WADRseek(&pwad,e->start);
      WADRreadBytes(&pwad,buffer,e->size);
-     TXUreadTEXTURE(e->name, buffer, e->size, NULL, 0, TRUE);
+     TXUreadTEXTURE(e->name, buffer, e->size, NULL, 0, true);
      Free(buffer);
   }
   else
@@ -456,11 +456,11 @@ void XTRstructureTest(const char *doomwad,const char *wadin)
        buffer=(char  *)Malloc(e->size);
        WADRseek(&iwad,e->start);
        WADRreadBytes(&iwad,buffer,e->size);
-       TXUreadTEXTURE(e->name, buffer, e->size, NULL, 0, TRUE);
+       TXUreadTEXTURE(e->name, buffer, e->size, NULL, 0, true);
        Free(buffer);
      }
   }
-  CheckLevels(&pwad,FALSE);
+  CheckLevels(&pwad,false);
   TXUfree();
   PNMfree();
   WADRclose(&iwad);
@@ -522,7 +522,7 @@ void XTRtextureUsed(const char *wadin)
   ** list all textures composing walls
   */
   TXUinit();
-  CheckLevels(&pwad,TRUE);
+  CheckLevels(&pwad,true);
   Output("List of textures used in %s\n\n",wadin);
   TXUlistTex();
   TXUfree();
@@ -532,29 +532,29 @@ void XTRtextureUsed(const char *wadin)
 
 /*
 ** Detect duplicate entries (-packgfx, -packnorm)
-** ShowIdx = TRUE if we also output the indexes
+** ShowIdx = true if we also output the indexes
 **
 ** Optimise for speed with a CRC-based check
 */
 void XTRcompakWAD(const char *DataDir,const char *wadin, const char *texout,
-    Bool ShowIdx)
+    bool ShowIdx)
 {  static struct WADINFO pwad;
    struct WADDIR  *pdir;
-   Int16 pnb;
-   Int16 p,bas,tst,ofsx,ofsy;
-   Int32 size,rsize,sz;
-   Bool  *psame;
+   int16_t pnb;
+   int16_t p,bas,tst,ofsx,ofsy;
+   int32_t size,rsize,sz;
+   bool  *psame;
    FILE *out;
    char  *bbas;
    char  *btst;
    Phase("LS60", "Detecting duplicate entries in WAD %s", fname (wadin));
    pwad.ok=0;
    WADRopenR(&pwad,wadin);
-   pnb=(Int16)pwad.ntry;
+   pnb=(int16_t)pwad.ntry;
    pdir=pwad.dir;
-   psame=(Bool  *)Malloc(pnb*sizeof(Bool));
+   psame=(bool  *)Malloc(pnb*sizeof(bool));
    for(p=0;p<pnb;p++)
-   { psame[p]=FALSE;}
+   { psame[p]=false;}
    if(texout==NULL)
      MakeFileName(file,DataDir,"","","WADINFOP","TXT");
    else
@@ -564,11 +564,11 @@ void XTRcompakWAD(const char *DataDir,const char *wadin, const char *texout,
    bbas=(char  *)Malloc(MEMORYCACHE);
    btst=(char  *)Malloc(MEMORYCACHE);
    for(bas=0;bas<pnb;bas++)
-     if(psame[bas]==FALSE) /*skip already treated*/
+     if(psame[bas]==false) /*skip already treated*/
        { size=pdir[bas].size;
          if(pdir[bas].start<=8)continue;
          if(size<1)continue;
-         if((size>=8)&&(ShowIdx==TRUE))
+         if((size>=8)&&(ShowIdx==true))
          { WADRseek(&pwad,pdir[bas].start);
            WADRreadBytes(&pwad,bbas,8);
            ofsx=((bbas[5]<<8)&0xFF00)+(bbas[4]&0xFF);
@@ -594,7 +594,7 @@ void XTRcompakWAD(const char *DataDir,const char *wadin, const char *texout,
              if(p<sz)break;
            }
            if(rsize==size) /*entry identical to reference*/
-              { psame[tst]=TRUE;
+              { psame[tst]=true;
              fprintf(out,"%-8.8s\t*\n",pdir[tst].name);
            }
          }

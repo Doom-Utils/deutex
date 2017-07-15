@@ -35,8 +35,8 @@ GNU General Public License for more details.
 ** list of distinct entries types
 */
 struct ELIST
-{ Int16 Top;     /*num of entries allocated for list*/
-  Int16 Pos;     /*current top position*/
+{ int16_t Top;     /*num of entries allocated for list*/
+  int16_t Pos;     /*current top position*/
   struct WADDIR  *Lst;
 };
 static struct ELIST LISlmp;
@@ -57,8 +57,8 @@ static void LISinitLists(void)
 /*
 ** count the number of entry types
 */
-static void LIScountTypes(ENTRY  *ids,Int16 nb)
-{  Int16 i;
+static void LIScountTypes(ENTRY  *ids,int16_t nb)
+{  int16_t i;
    for(i=0;i<nb;i++)
    {  switch(ids[i]&EMASK)
       { case EPNAME:  case ETEXTUR:
@@ -96,52 +96,52 @@ static void LISfreeLists(void)
 ** Delete unwanted sprites
 **
 */
-static Bool LISunwantedPhase(char pv[2],char phase, char view,Bool AllViews)
-{ if(pv[0]!=phase) return FALSE;
-  if(pv[1]==view) return TRUE;   /*delete phase if equal*/
+static bool LISunwantedPhase(char pv[2],char phase, char view,bool AllViews)
+{ if(pv[0]!=phase) return false;
+  if(pv[1]==view) return true;   /*delete phase if equal*/
   switch(pv[1])
   { /*view 0 unwanted if any other view exist*/
     case '0':
-    return (AllViews==TRUE)? TRUE:FALSE;
+    return (AllViews==true)? true:false;
     /*view unwanted if view 0 exist*/
     case '1': case '2':case '3':case '4':
     case '5': case '6':case '7':case '8':
-    return (AllViews==TRUE)? FALSE:TRUE;
+    return (AllViews==true)? false:true;
   }
-  return FALSE;
+  return false;
 }
-static Bool LISdeleteSprite(char root[8],char phase,char view)
+static bool LISdeleteSprite(char root[8],char phase,char view)
 {
-  Int16 l,sz;
-  Bool Okay=FALSE;
-  Bool AllViews;
+  int16_t l,sz;
+  bool Okay=false;
+  bool AllViews;
   switch(view)
   { case '0':
-       AllViews=FALSE;break;
+       AllViews=false;break;
     case '1': case '2':case '3':case '4':
     case '5': case '6':case '7':case '8':
-       AllViews=TRUE;break;
+       AllViews=true;break;
     case '\0':
     default:   /*Artifacts*/
-     return FALSE;
+     return false;
   }
   /*root: only the 4 first char are to be tested*/
   for(l=LISspr.Pos-1;l>=0;l--)
   {
     if(strncmp(LISspr.Lst[l].name,root,4)==0)
     { /*2nd unwanted: replace by 0*/
-      if(LISunwantedPhase(&(LISspr.Lst[l].name[6]),phase,view,AllViews)==TRUE)
+      if(LISunwantedPhase(&(LISspr.Lst[l].name[6]),phase,view,AllViews)==true)
       { LISspr.Lst[l].name[6]='\0';
 	LISspr.Lst[l].name[7]='\0';
-	Okay=TRUE;
+	Okay=true;
       }
       /*1st unwanted: replace by second*/
-      if(LISunwantedPhase(&(LISspr.Lst[l].name[4]),phase,view,AllViews)==TRUE)
+      if(LISunwantedPhase(&(LISspr.Lst[l].name[4]),phase,view,AllViews)==true)
       { LISspr.Lst[l].name[4]=LISspr.Lst[l].name[6];
 	LISspr.Lst[l].name[5]=LISspr.Lst[l].name[7];
 	LISspr.Lst[l].name[6]='\0';
 	LISspr.Lst[l].name[7]='\0';
-	Okay=TRUE;
+	Okay=true;
       }
       /*neither 1st nor second wanted: delete*/
       if(LISspr.Lst[l].name[4]=='\0')
@@ -149,7 +149,7 @@ static Bool LISdeleteSprite(char root[8],char phase,char view)
 	if(sz>0)
 	  Memcpy(&(LISspr.Lst[l]),&(LISspr.Lst[l+1]),(sz)*sizeof(struct WADDIR));
 	LISspr.Pos--;
-	Okay=TRUE;
+	Okay=true;
       }
     }
   }
@@ -158,9 +158,9 @@ static Bool LISdeleteSprite(char root[8],char phase,char view)
 /*
 ** list management. very basic. no hash table.
 */
-static void LISaddMission(struct WADDIR  *dir, Int16 found)
+static void LISaddMission(struct WADDIR  *dir, int16_t found)
 {
-	Int16 l=0,dummy=0;
+	int16_t l=0,dummy=0;
 	/*check*/
 	if(LISlmp.Pos>=LISlmp.Top)
 	  Bug("LI03", "LisTsm"); /*level list too small*/
@@ -190,14 +190,14 @@ static void LISadd(struct ELIST *L,struct WADDIR  *dir)
 ** Find in list, and replace if exist
 **
 */
-static Bool LISfindRplc(struct ELIST *L,struct WADDIR  *dir)
-{ Int16 l;
+static bool LISfindRplc(struct ELIST *L,struct WADDIR  *dir)
+{ int16_t l;
   for(l=0;l<(L->Pos);l++)
     if(strncmp(L->Lst[l].name,dir[0].name,8)==0)
     { Memcpy(&(L->Lst[l]),&(dir[0]),sizeof(struct WADDIR));
-      return TRUE;
+      return true;
     }
-  return FALSE;  /*not found*/
+  return false;  /*not found*/
 }
 /* Substitute In List
 ** if entry exist, it is substituted, else added at the end of list
@@ -206,7 +206,7 @@ static Bool LISfindRplc(struct ELIST *L,struct WADDIR  *dir)
 */
 static void LISsubstit(struct ELIST *L,struct WADDIR  *dir)
 { /* SUBSTIT in List */
-  if(LISfindRplc(L,dir)==TRUE) return;
+  if(LISfindRplc(L,dir)==true) return;
   Warning("LI09", "Entry %s might be ignored by the game",
       lump_name (dir[0].name));
   LISadd(L,dir);
@@ -216,7 +216,7 @@ static void LISsubstit(struct ELIST *L,struct WADDIR  *dir)
 ** suitable for PATCH and FLATS  (to define new animations)
 */
 static void LISmove(struct ELIST *L,struct WADDIR  *dir)
-{ Int16 l,sz;
+{ int16_t l,sz;
   for(l=0;l<(L->Pos);l++)
     if(strncmp(L->Lst[l].name,dir[0].name,8)==0)
     { /*entry already exist. destroy it*/
@@ -232,11 +232,11 @@ static void LISmove(struct ELIST *L,struct WADDIR  *dir)
  ** an IWAD sprite entry
  ** suitable for SPRITES only
  */ /***/
-static void LISaddSprite(struct WADDIR  *dir,Bool Warn)
-{ Bool Okay=FALSE;
-  /*warn:  FALSE= no warning. TRUE = warn.*/
+static void LISaddSprite(struct WADDIR  *dir,bool Warn)
+{ bool Okay=false;
+  /*warn:  false= no warning. true = warn.*/
   /* If entry already exists, replace it*/
-  if(LISfindRplc(&LISspr,dir)==TRUE) return;
+  if(LISfindRplc(&LISspr,dir)==true) return;
   /* Entry does not exist. Check that this sprite
   ** viewpoint doesn't obsolete other sprite viewpoints.
   */
@@ -245,7 +245,7 @@ static void LISaddSprite(struct WADDIR  *dir,Bool Warn)
     if(dir[0].name[6]!='\0')
     Okay|=LISdeleteSprite(dir[0].name,dir[0].name[6],dir[0].name[7]);
   }
-  if((Okay==FALSE)&&(Warn==TRUE))
+  if((Okay==false)&&(Warn==true))
   { Warning("LI11", "Entry %s might be ignored by the game",
       lump_name (dir[0].name));
   }
@@ -255,8 +255,8 @@ static void LISaddSprite(struct WADDIR  *dir,Bool Warn)
 ** create a new directory list
 **
 */
-static void LISmakeNewDir(struct WADINFO *nwad,Int16 S_END,Int16 P_END,Int16 F_END,Int16 Pn,Int16 Fn)
-{  Int16 n;
+static void LISmakeNewDir(struct WADINFO *nwad,int16_t S_END,int16_t P_END,int16_t F_END,int16_t Pn,int16_t Fn)
+{  int16_t n;
    struct WADDIR  *dir;
    /*levels,lumps, graphics into new dir*/
    if(LISlmp.Pos>0)
@@ -331,27 +331,27 @@ static void LISmakeNewDir(struct WADINFO *nwad,Int16 S_END,Int16 P_END,Int16 F_E
 **
 **
 */
-struct WADDIR  *LISmergeDir(Int32 *pNtry,Bool Append,Bool Complain,NTRYB select,
-	struct WADINFO *iwad,ENTRY  *iiden,Int32 iwadflag,
-	struct WADINFO *pwad,ENTRY  *piden,Int32 pwadflag)
+struct WADDIR  *LISmergeDir(int32_t *pNtry,bool Append,bool Complain,NTRYB select,
+	struct WADINFO *iwad,ENTRY  *iiden,int32_t iwadflag,
+	struct WADINFO *pwad,ENTRY  *piden,int32_t pwadflag)
 {
    struct WADDIR  *idir;
    struct WADDIR  *pdir;
    struct WADINFO nwad;
-   Int16  inb,	pnb;
-   Int16  i,p,found;
+   int16_t  inb,	pnb;
+   int16_t  i,p,found;
    struct WADINFO *refwad;
    ENTRY type;
-   Int16 Pn=0;/*0=nothing 1=P1_ 2=P2_ 3=P3_*/
-   Int16 Fn=0;/*0=nothing 1=F1_ 2=F2_ 3=F3_*/
-   Bool NoSprite=FALSE; /*no sprites declared. seek in graphics*/
-   Int16 S_END=X_NONE;
-   Int16 F_END=X_NONE;
-   Int16 P_END=X_NONE;
+   int16_t Pn=0;/*0=nothing 1=P1_ 2=P2_ 3=P3_*/
+   int16_t Fn=0;/*0=nothing 1=F1_ 2=F2_ 3=F3_*/
+   bool NoSprite=false; /*no sprites declared. seek in graphics*/
+   int16_t S_END=X_NONE;
+   int16_t F_END=X_NONE;
+   int16_t P_END=X_NONE;
    /*
    ** select Sprites markers  (tricky hack!)
    */
-   refwad = ((Append!=TRUE)||(select&BSPRITE))? iwad : pwad;
+   refwad = ((Append!=true)||(select&BSPRITE))? iwad : pwad;
    if(WADRfindEntry(refwad,"S_END")>=0)/*full sprite list is here*/
    { S_END|=X_END;
    }
@@ -360,13 +360,13 @@ struct WADDIR  *LISmergeDir(Int32 *pNtry,Bool Append,Bool Complain,NTRYB select,
    }
    if(!(select&BSPRITE))
    { if(S_END & X_END) /*sprites already appended. keep it so.*/
-     { Complain=FALSE;
+     { Complain=false;
      }
    }
    /*
    ** select Patches markers  (tricky hack!)
    */
-   refwad = (Append!=TRUE)? iwad : pwad;
+   refwad = (Append!=true)? iwad : pwad;
    if(WADRfindEntry(refwad,"P_END")>=0)/*full patch list is here*/
    { P_END|=X_END;
      if(WADRfindEntry(refwad,"P3_END")>=0) Pn=3;
@@ -379,7 +379,7 @@ struct WADDIR  *LISmergeDir(Int32 *pNtry,Bool Append,Bool Complain,NTRYB select,
    /*
    ** select Flats markers  (tricky hack!)
    */
-   refwad = ((Append!=TRUE)||(select&BFLAT))? iwad : pwad;
+   refwad = ((Append!=true)||(select&BFLAT))? iwad : pwad;
    if(WADRfindEntry(refwad,"F_END")>=0) /*full flat list is here*/
    { F_END|=X_END;
      if(WADRfindEntry(refwad,"F3_END")>=0) Fn=3;
@@ -391,24 +391,24 @@ struct WADDIR  *LISmergeDir(Int32 *pNtry,Bool Append,Bool Complain,NTRYB select,
    }
    if(!(select&BFLAT))
    { if(F_END & X_END) /*flats already appended. keep it so.*/
-     { Complain=FALSE;
+     { Complain=false;
      }
    }
    /*
    ** make lists of types lists
    */
-   inb= (Int16)iwad->ntry;
-   pnb= (Int16)pwad->ntry;
+   inb= (int16_t)iwad->ntry;
+   pnb= (int16_t)pwad->ntry;
    idir=iwad->dir;
    pdir=pwad->dir;
    /*alloc memory for a fake new wad*/
    nwad.ok=0;
-   WADRopenPipo(&nwad,(Int32)inb+(Int32)pnb+40);
+   WADRopenPipo(&nwad,(int32_t)inb+(int32_t)pnb+40);
    /*init lists*/
    LISinitLists();
    /*identify the elements and count types*/
-   LIScountTypes(iiden,(Int16)iwad->ntry);
-   LIScountTypes(piden,(Int16)pwad->ntry);
+   LIScountTypes(iiden,(int16_t)iwad->ntry);
+   LIScountTypes(piden,(int16_t)pwad->ntry);
    LISallocLists();
    /* distribute IWAD enties*/
    for(i=0;i<inb;i++)
@@ -419,7 +419,7 @@ struct WADDIR  *LISmergeDir(Int32 *pNtry,Bool Append,Bool Complain,NTRYB select,
      switch(type&EMASK)
      {
        case ELEVEL:    case EMAP:
-	 if(Append==FALSE) /*APPEND doesn't need old enties*/
+	 if(Append==false) /*APPEND doesn't need old enties*/
 	 { if(select&BLEVEL)
 	   { for(found=1;found<11;found++)
 	     { if(iiden[i+found]!=iiden[i])break;
@@ -433,13 +433,13 @@ struct WADDIR  *LISmergeDir(Int32 *pNtry,Bool Append,Bool Complain,NTRYB select,
        case ETEXTUR: case EPNAME:
        case EMUSIC:  case ESOUND:
        case EDATA:
-	 if(Append==FALSE)  /*APPEND doesn't need old enties*/
+	 if(Append==false)  /*APPEND doesn't need old enties*/
 	 { LISadd(&LISlmp,&(idir[i]));
 	 }
 	 break;
        case EPATCH:
-	 /*if(AllPat!=TRUE) type=ELUMP;*/
-	 if(Append==FALSE)  /*APPEND doesn't need old enties*/
+	 /*if(AllPat!=true) type=ELUMP;*/
+	 if(Append==false)  /*APPEND doesn't need old enties*/
 	 { if(select&BPATCH)
 	   { LISadd(&LISpat,&(idir[i]));
 	   }
@@ -473,10 +473,10 @@ struct WADDIR  *LISmergeDir(Int32 *pNtry,Bool Append,Bool Complain,NTRYB select,
    ** detect the absence of sprites
    */
    if(select&BSPRITE)
-   { NoSprite=TRUE;  /*if no sprites, graphics could be sprites*/
+   { NoSprite=true;  /*if no sprites, graphics could be sprites*/
      for(p=0;p<pnb;p++)
      { if((piden[p] & EMASK)==ESPRITE)
-       { NoSprite=FALSE;break; /*don't bother searching*/
+       { NoSprite=false;break; /*don't bother searching*/
        }
      }
    }
@@ -499,42 +499,42 @@ struct WADDIR  *LISmergeDir(Int32 *pNtry,Bool Append,Bool Complain,NTRYB select,
 	 break;
        case EDATA:
        case ELUMP:
-	 { if((Append!=TRUE)&&(Complain==TRUE))
+	 { if((Append!=true)&&(Complain==true))
 	     LISsubstit(&LISlmp,&(pdir[p]));  /*warn if missing*/
 	   else
 	     LISmove(&LISlmp,&(pdir[p]));      /*no warning needed*/
 	 }
 	 break;
        case ETEXTUR: case EPNAME:
-	 { if((Append!=TRUE)&&(Complain==TRUE))
+	 { if((Append!=true)&&(Complain==true))
 	     LISsubstit(&LISlmp,&(pdir[p]));  /*warn if missing*/
 	   else
 	     LISmove(&LISlmp,&(pdir[p]));      /*no warning needed*/
 	 }
 	 break;
        case ESOUND:
-	 { if((Append!=TRUE)&&(Complain==TRUE))
+	 { if((Append!=true)&&(Complain==true))
 	     LISsubstit(&LISlmp,&(pdir[p]));  /*warn if missing*/
 	   else
 	     LISmove(&LISlmp,&(pdir[p]));      /*no warning needed*/
 	 }
 	 break;
        case EMUSIC:
-	 { if((Append!=TRUE)&&(Complain==TRUE))
+	 { if((Append!=true)&&(Complain==true))
 	     LISsubstit(&LISlmp,&(pdir[p]));  /*warn if missing*/
 	   else
 	     LISmove(&LISlmp,&(pdir[p]));      /*no warning needed*/
 	 }
 	 break;
        case EGRAPHIC:
-	 { if(NoSprite==TRUE) /*special: look for sprites identfied as graphics*/
-	   { if(LISfindRplc(&LISspr,&(pdir[p]))==FALSE)
+	 { if(NoSprite==true) /*special: look for sprites identfied as graphics*/
+	   { if(LISfindRplc(&LISspr,&(pdir[p]))==false)
 	     { /*not a sprite. add in lumps*/
 	       LISmove(&LISlmp,&(pdir[p]));
 	     }
 	   }
 	   else /*normal*/
-	   { if((Append!=TRUE)&&(Complain==TRUE))
+	   { if((Append!=true)&&(Complain==true))
 	       LISsubstit(&LISlmp,&(pdir[p]));	/*warn if missing*/
 	     else
 	       LISmove(&LISlmp,&(pdir[p]));	 /*no warning needed*/

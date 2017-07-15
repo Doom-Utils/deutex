@@ -36,17 +36,17 @@ GNU General Public License for more details.
 ** old references
 **
 */
-static const Int32    HDRdirSz=5*sizeof(struct WADDIR);
+static const int32_t    HDRdirSz=5*sizeof(struct WADDIR);
 static struct WADDIR HDRdir[6];
 /*
 **  Take some entries from a WAD
 */
 static void HDRplunderWad(struct WADINFO *rwad,struct WADINFO *ewad)
 { char  *data;
-  Int32 wsize,sz=0;
-  Int32 ostart,osize;
-  Int16 n;
-  Int32 oldfilesz;
+  int32_t wsize,sz=0;
+  int32_t ostart,osize;
+  int16_t n;
+  int32_t oldfilesz;
   /*
   ** calculate required size
   */
@@ -89,12 +89,12 @@ static void HDRplunderWad(struct WADINFO *rwad,struct WADINFO *ewad)
 /*
 ** Copy a WAD, and link to it's entries
 */
-static Int32 HDRinsertWad(struct WADINFO *rwad,struct WADINFO *ewad,Int32 *pesize)
+static int32_t HDRinsertWad(struct WADINFO *rwad,struct WADINFO *ewad,int32_t *pesize)
 { char  *data;
-  Int32 wsize,sz=0;
-  Int32 estart,esize;
-  Int16 n;
-  Int32 oldfilesz;
+  int32_t wsize,sz=0;
+  int32_t estart,esize;
+  int16_t n;
+  int32_t oldfilesz;
   /*
   ** calculate required size
   */
@@ -135,16 +135,16 @@ static Int32 HDRinsertWad(struct WADINFO *rwad,struct WADINFO *ewad,Int32 *pesiz
 /******************* WAD restoration **********************/
 void HDRrestoreWAD(const char *wadres)
 { struct WADINFO rwad;
-  Int32 dirpos,ntry,n;
-  Int32 rwadstart=0,rwadsize=0;
-  Int32 ewadstart=0,ewadsize=0;
+  int32_t dirpos,ntry,n;
+  int32_t rwadstart=0,rwadsize=0;
+  int32_t ewadstart=0,ewadsize=0;
   static char ewadname[8];
   static char ewadfile[40];
   char  *data;
-  Int32      size=0,wsize=0,sz=0;
-  Int32 time;
+  int32_t      size=0,wsize=0,sz=0;
+  int32_t time;
   FILE *fp;
-  Bool Fail;
+  bool Fail;
   Phase("ME22", "Attempting to restore wad %s", fname (wadres));
   /*open DOOM.WAD*/
   rwad.ok=0;
@@ -154,23 +154,23 @@ void HDRrestoreWAD(const char *wadres)
   dirpos = rwad.dirpos - HDRdirSz;
   WADRseek(&rwad,dirpos);
   WADRreadBytes(&rwad,(char  *)HDRdir,HDRdirSz);
-  Fail=FALSE;
-  if(peek_i32_le (&HDRdir[0].start) != 0x24061968L)  Fail=TRUE;
-  if(peek_i32_le (&HDRdir[0].size)  != 666L)         Fail=TRUE;
-  if(strncmp(HDRdir[0].name,"IZNOGOOD",8)!=0)       Fail=TRUE;
-  if(Fail != FALSE)
+  Fail=false;
+  if(peek_i32_le (&HDRdir[0].start) != 0x24061968L)  Fail=true;
+  if(peek_i32_le (&HDRdir[0].size)  != 666L)         Fail=true;
+  if(strncmp(HDRdir[0].name,"IZNOGOOD",8)!=0)       Fail=true;
+  if(Fail != false)
   { if((n=WADRfindEntry(&rwad,"_DEUTEX_"))>=0)
       if(rwad.dir[n].size>=HDRdirSz)
 	{ dirpos=rwad.dir[n].start;
 	  WADRseek(&rwad,dirpos);
 	  WADRreadBytes(&rwad,(char  *)HDRdir,HDRdirSz);
-	  Fail=FALSE;
-	  if(peek_i32_le (&HDRdir[0].start) != 0x24061968L)  Fail=TRUE;
-	  if(peek_i32_le (&HDRdir[0].size)  != 666L)         Fail=TRUE;
-	  if(strncmp(HDRdir[0].name,"IZNOGOOD",8)!=0) Fail=TRUE;
+	  Fail=false;
+	  if(peek_i32_le (&HDRdir[0].start) != 0x24061968L)  Fail=true;
+	  if(peek_i32_le (&HDRdir[0].size)  != 666L)         Fail=true;
+	  if(strncmp(HDRdir[0].name,"IZNOGOOD",8)!=0) Fail=true;
 	}
   }
-  if(Fail != FALSE) ProgError("ME25", "Not a modified WAD");
+  if(Fail != false) ProgError("ME25", "Not a modified WAD");
   Phase("ME28", "Restoration infos seem correct");
   dirpos = peek_i32_le (&HDRdir[1].start);
   ntry   = peek_i32_le (&HDRdir[1].size);
@@ -181,7 +181,7 @@ void HDRrestoreWAD(const char *wadres)
   Normalise(ewadname,HDRdir[3].name);   /*name of WAD inside*/
   /*original file time*/
   time   = peek_i32_le (&HDRdir[4].size);
-  if(peek_i32_le (&HDRdir[4].start)!=FALSE)
+  if(peek_i32_le (&HDRdir[4].start)!=false)
   { /*extract the PWAD*/
     sprintf(ewadfile,"%.8s.WAD",ewadname);
     ToLowerCase(ewadfile);
@@ -228,11 +228,11 @@ void HDRrestoreWAD(const char *wadres)
 /**************** End WAD restoration **********************/
 
 
-static void HDRsetDir(struct WADINFO *rwad,Bool IsIwad,Bool Restore,
-        Int32 time,Int32 dirpos,Int32 ntry,Int32 rsize,
-        Int32 estart,Int32 esize,const char *wadext)
+static void HDRsetDir(struct WADINFO *rwad,bool IsIwad,bool Restore,
+        int32_t time,int32_t dirpos,int32_t ntry,int32_t rsize,
+        int32_t estart,int32_t esize,const char *wadext)
 { static char name[8];
-  Int32 pos;
+  int32_t pos;
         /*Set the old references */
   Phase("ME43", "Writing new wad directory");
   write_i32_le (&HDRdir[0].start, 0x24061968L);
@@ -241,7 +241,7 @@ static void HDRsetDir(struct WADINFO *rwad,Bool IsIwad,Bool Restore,
         /*Set original WAD DIRECTORY*/
   write_i32_le (&HDRdir[1].start, dirpos);
   write_i32_le (&HDRdir[1].size,  ntry);
-  Normalise(HDRdir[1].name,(IsIwad==TRUE)?"DOOM_DIR":"PWAD_DIR");
+  Normalise(HDRdir[1].name,(IsIwad==true)?"DOOM_DIR":"PWAD_DIR");
   /*Store original WAD size and start*/
   write_i32_le (&HDRdir[2].start, 0);
   write_i32_le (&HDRdir[2].size,  rsize);
@@ -257,7 +257,7 @@ static void HDRsetDir(struct WADINFO *rwad,Bool IsIwad,Bool Restore,
   Normalise(HDRdir[4].name,"TIME");
   /*save position of old ref if no previous _DEUTEX_ */
   WADRalign4(rwad);
-  pos=(Int32)WADRfindEntry(rwad,"_DEUTEX_");
+  pos=(int32_t)WADRfindEntry(rwad,"_DEUTEX_");
   if(pos<0)
   { pos=WADRposition(rwad);/*BC++ 4.5 bug*/
          WADRdirAddEntry(rwad,pos,HDRdirSz,"_DEUTEX_");
@@ -291,9 +291,9 @@ void PSTmergeWAD(const char *doomwad,const char *wadin,NTRYB select)
   static struct WADINFO pwad;
   ENTRY  *iiden;      /*identify entry in IWAD*/
   ENTRY  *piden;      /*identify entry in PWAD*/
-  Int16 pnm;char  *Pnam;Int32 Pnamsz=0;
-  Int32 dirpos,ntry,isize,pstart,psize,time;
-  struct WADDIR  *NewDir;Int32 NewNtry;
+  int16_t pnm;char  *Pnam;int32_t Pnamsz=0;
+  int32_t dirpos,ntry,isize,pstart,psize,time;
+  struct WADDIR  *NewDir;int32_t NewNtry;
   Phase("ME46", "Attempting to merge iwad %s and pwad %s",
       fname (doomwad), wadin);
   /*open iwad,get iwad directory*/
@@ -304,7 +304,7 @@ void PSTmergeWAD(const char *doomwad,const char *wadin,NTRYB select)
   if(pnm<0) ProgError("ME49", "Can't find PNAMES in iwad");
   Pnam=WADRreadEntry(&iwad,pnm,&Pnamsz);
   /* identify iwad*/
-  iiden=IDENTentriesIWAD(&iwad, Pnam, Pnamsz,TRUE);
+  iiden=IDENTentriesIWAD(&iwad, Pnam, Pnamsz,true);
   /* get pwad directory, and identify*/
   pwad.ok=0;
   WADRopenR(&pwad,wadin);
@@ -313,14 +313,14 @@ void PSTmergeWAD(const char *doomwad,const char *wadin,NTRYB select)
   Free(Pnam);
   /*where to put pwad? at pwadstart*/
   /* merge the two directories */
-  NewDir=LISmergeDir(&NewNtry,FALSE,TRUE,select,&iwad,iiden,0,&pwad,piden,
+  NewDir=LISmergeDir(&NewNtry,false,true,select,&iwad,iiden,0,&pwad,piden,
       EXTERNAL);
   /* prepare for append*/
   time=WADRprepareAppend(doomwad,&iwad,NewDir,NewNtry,&dirpos,&ntry,&isize);
   /* complete IWAD with PWAD, restorable*/
   pstart=HDRinsertWad(&iwad,&pwad,&psize);
   /* set directory */
-  HDRsetDir(&iwad,TRUE,TRUE,time,dirpos,ntry,isize,pstart,psize,wadin);
+  HDRsetDir(&iwad,true,true,time,dirpos,ntry,isize,pstart,psize,wadin);
   /* close */
   WADRclose(&pwad);
   WADRclose(&iwad);
@@ -356,9 +356,9 @@ void ADDappendSpriteFloor(const char *doomwad, const char *wadres,NTRYB select)
   struct WADINFO pwad;
   ENTRY  *iiden;      /*identify entry in IWAD*/
   ENTRY  *piden;      /*identify entry in PWAD*/
-  Int16 pnm;char  *Pnam;Int32 Pnamsz;
-  Int32 dirpos,ntry,psize,time;
-  struct WADDIR  *NewDir;Int32 NewNtry;
+  int16_t pnm;char  *Pnam;int32_t Pnamsz;
+  int32_t dirpos,ntry,psize,time;
+  struct WADDIR  *NewDir;int32_t NewNtry;
   Phase("ME52", "Appending sprites and/or flats");
   Phase("ME52", " from iwad %s", fname (doomwad));
   Phase("ME52", " to   pwad %s", fname (wadres));
@@ -370,7 +370,7 @@ void ADDappendSpriteFloor(const char *doomwad, const char *wadres,NTRYB select)
   if(pnm<0) ProgError("ME61", "Can't find PNAMES in iwad");
   Pnam=WADRreadEntry(&iwad,pnm,&Pnamsz);
   /* identify iwad*/
-  iiden=IDENTentriesIWAD(&iwad, Pnam, Pnamsz,TRUE);
+  iiden=IDENTentriesIWAD(&iwad, Pnam, Pnamsz,true);
   /* get pwad directory, and identify*/
   pwad.ok=0;
   WADRopenR(&pwad,wadres);
@@ -378,13 +378,13 @@ void ADDappendSpriteFloor(const char *doomwad, const char *wadres,NTRYB select)
   /**/
   Free(Pnam);
   /* merge the two directories */
-  NewDir=LISmergeDir(&NewNtry,TRUE,TRUE,select,&iwad,iiden,EXTERNAL,&pwad,piden,0);
+  NewDir=LISmergeDir(&NewNtry,true,true,select,&iwad,iiden,EXTERNAL,&pwad,piden,0);
   /* prepare for append*/
   time=WADRprepareAppend(wadres,&pwad,NewDir,NewNtry,&dirpos,&ntry,&psize);
   /* append DOOM sprites to PWAD*/
   HDRplunderWad(&pwad,&iwad);
   /* set dir */
-  HDRsetDir(&pwad,FALSE,FALSE,time,dirpos,ntry,psize,-1,-1,doomwad);
+  HDRsetDir(&pwad,false,false,time,dirpos,ntry,psize,-1,-1,doomwad);
   /* close */
   WADRclose(&iwad);
   WADRclose(&pwad);
@@ -404,13 +404,13 @@ void ADDjoinWads(const char *doomwad, const char *wadres, const char
   struct WADINFO rwad;
   ENTRY  *eiden;      /*identify entry in IWAD*/
   ENTRY  *riden;      /*identify entry in PWAD*/
-  Int16 entry;char  *Entry;Int32 EntrySz;
-  Int16 pnm;char  *Patch;Int32 PatchSz;
-  Int32 start,size;
-  Int16 etexu,rtexu;
-  struct WADDIR  *NewDir;Int32 NewNtry;
-  Bool TexuMrg = FALSE;
-  Int32 dirpos,ntry,rsize,estart,esize,time;
+  int16_t entry;char  *Entry;int32_t EntrySz;
+  int16_t pnm;char  *Patch;int32_t PatchSz;
+  int32_t start,size;
+  int16_t etexu,rtexu;
+  struct WADDIR  *NewDir;int32_t NewNtry;
+  bool TexuMrg = false;
+  int32_t dirpos,ntry,rsize,estart,esize,time;
   Phase("ME64", "Merging pwad %s", fname (wadext));
   Phase("ME64", " into pwad %s", fname (wadres));
   /* get iwad directory, and identify */
@@ -434,7 +434,7 @@ void ADDjoinWads(const char *doomwad, const char *wadres, const char
   etexu=WADRfindEntry(&ewad,"TEXTURE1");
   rtexu=WADRfindEntry(&rwad,"TEXTURE1");
   if((etexu>=0)&&(rtexu>=0))
-  { TexuMrg=TRUE;
+  { TexuMrg=true;
     iwad.ok=0;
     WADRopenR(&iwad,doomwad);
     /*find PNAMES in IWAD and init*/
@@ -447,7 +447,7 @@ void ADDjoinWads(const char *doomwad, const char *wadres, const char
     TXUinit();
   }
   WADRclose(&iwad);
-  if(TexuMrg==TRUE)
+  if(TexuMrg==true)
   { /*add TEXTURE1 from rwad*/
     Phase("ME76", "  With TEXTURE1 from %s", fname (wadres));
     PatchSz=0;Patch=NULL;
@@ -458,7 +458,7 @@ void ADDjoinWads(const char *doomwad, const char *wadres, const char
       Patch=WADRreadEntry(&rwad,pnm,&PatchSz);
     }
     Entry=WADRreadEntry(&rwad,rtexu,&EntrySz);
-    TXUreadTEXTURE(rwad.dir[pnm].name, Entry, EntrySz, Patch, PatchSz, TRUE);
+    TXUreadTEXTURE(rwad.dir[pnm].name, Entry, EntrySz, Patch, PatchSz, true);
     if(PatchSz!=0)Free(Patch);
     Free(Entry);
     riden[rtexu]=EVOID; /* forget r texu*/
@@ -472,19 +472,19 @@ void ADDjoinWads(const char *doomwad, const char *wadres, const char
       Patch=WADRreadEntry(&ewad,pnm,&PatchSz);
     }
     Entry=WADRreadEntry(&ewad,etexu,&EntrySz);
-    TXUreadTEXTURE(ewad.dir[pnm].name, Entry, EntrySz, Patch, PatchSz, FALSE);
+    TXUreadTEXTURE(ewad.dir[pnm].name, Entry, EntrySz, Patch, PatchSz, false);
     if(PatchSz!=0)Free(Patch);
     Free(Entry);
     eiden[etexu]=EVOID; /* forget e texu*/
   }
   /* merge the two directories, all entries */
-  NewDir=LISmergeDir(&NewNtry,FALSE,FALSE,select,&rwad,riden,0,&ewad,eiden,EXTERNAL);
+  NewDir=LISmergeDir(&NewNtry,false,false,select,&rwad,riden,0,&ewad,eiden,EXTERNAL);
   /* prepare for append*/
   time=WADRprepareAppend(wadres,&rwad,NewDir,NewNtry,&dirpos,&ntry,&rsize);
   /* append PWAD into PWAD, restorable */
   estart=HDRinsertWad(&rwad,&ewad,&esize);
   /* append texu/pname*/
-  if(TexuMrg==TRUE)
+  if(TexuMrg==true)
   { WADRalign4(&rwad);
     start=WADRposition(&rwad);
     size=TXUwriteTEXTUREtoWAD(&rwad);
@@ -498,7 +498,7 @@ void ADDjoinWads(const char *doomwad, const char *wadres, const char
   }
 
   /* set directory */
-  HDRsetDir(&rwad,FALSE,TRUE,time,dirpos,ntry,rsize,estart,esize,wadext);
+  HDRsetDir(&rwad,false,true,time,dirpos,ntry,rsize,estart,esize,wadext);
   /*end*/
   WADRclose(&rwad);
   WADRclose(&ewad);
@@ -536,12 +536,12 @@ void ADDallSpriteFloor(const char *wadout, const char *doomwad, const char
   struct WADINFO iwad;
   struct WADINFO pwad;
   struct WADINFO rwad;
-  Int16 n;
+  int16_t n;
   ENTRY  *iiden;      /*identify entry in IWAD*/
   ENTRY  *piden;      /*identify entry in PWAD*/
-  Int32 start,size,ostart,osize;
-  Int16 pnm;char  *Pnam;Int32 Pnamsz;
-  struct WADDIR  *NewDir;Int32 NewNtry;
+  int32_t start,size,ostart,osize;
+  int16_t pnm;char  *Pnam;int32_t Pnamsz;
+  struct WADDIR  *NewDir;int32_t NewNtry;
 
   Phase("ME88", "Copying sprites and/or flats");
   Phase("ME88", " from iwad %s", fname (doomwad));
@@ -555,7 +555,7 @@ void ADDallSpriteFloor(const char *wadout, const char *doomwad, const char
   if(pnm<0) ProgError("ME91", "Can't find PNAMES in main WAD");
   Pnam=WADRreadEntry(&iwad,pnm,&Pnamsz);
   /* identify iwad*/
-  iiden=IDENTentriesIWAD(&iwad, Pnam, Pnamsz,TRUE);
+  iiden=IDENTentriesIWAD(&iwad, Pnam, Pnamsz,true);
   /* get pwad directory, and identify*/
   pwad.ok=0;
   WADRopenR(&pwad,wadres);
@@ -565,7 +565,7 @@ void ADDallSpriteFloor(const char *wadout, const char *doomwad, const char
   /*where to put pwad? at pwadstart*/
   if((iwad.maxpos|pwad.maxpos)&EXTERNAL )Bug("ME94", "AddExt");
   /* merge the two directories */
-  NewDir=LISmergeDir(&NewNtry,TRUE,TRUE,select,&iwad,iiden,EXTERNAL,&pwad,piden,0);
+  NewDir=LISmergeDir(&NewNtry,true,true,select,&iwad,iiden,EXTERNAL,&pwad,piden,0);
   /* create a new PWAD*/
   rwad.ok=0;
   WADRopenW(&rwad,wadout,PWAD, 1);

@@ -20,9 +20,9 @@ GNU General Public License for more details.
 
 
 /*function to merge two WAD directories (complex)*/
-struct WADDIR  *LISmergeDir(Int32 *pNtry,
-    Bool OnlySF,
-    Bool Complain,
+struct WADDIR  *LISmergeDir(int32_t *pNtry,
+    bool OnlySF,
+    bool Complain,
     NTRYB select,
-    struct WADINFO *iwad, ENTRY  *iiden, Int32 iwadflag,
-    struct WADINFO *pwad,ENTRY  *piden,Int32 pwadflag);
+    struct WADINFO *iwad, ENTRY  *iiden, int32_t iwadflag,
+    struct WADINFO *pwad,ENTRY  *piden,int32_t pwadflag);

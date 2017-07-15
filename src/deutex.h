@@ -27,19 +27,10 @@ GNU General Public License for more details.
 /*use old GIF decoder, new one is down*/
 #define NEWGIFD 0
 
-/* Fixed-size types */
-#include <inttypes.h>
-
-typedef int8_t   Int8;
-typedef int16_t  Int16;
-typedef int32_t  Int32;
-typedef uint8_t  UInt8;
-typedef uint16_t UInt16;
-typedef uint32_t UInt32;
-
-
-#include <stdlib.h>
+#include <stdbool.h>
+#include <stdint.h>
 #include <stdio.h>
+#include <stdlib.h>
 #include <string.h>
 
 /* fopen() modes */
@@ -64,10 +55,6 @@ typedef unsigned long iolen_t;
 /*indicate an extern WAD entry*/
 #define EXTERNAL  (0x80000000L)
 
-typedef Int16 Bool;
-#define TRUE			1
-#define FALSE			0
-
 
 /* Wad magic numbers */
 #define IWADMAGIC     	0x5749  /* little-endian 16-bit int for "IW" */
@@ -75,7 +62,7 @@ typedef Int16 Bool;
 #define WADMAGIC	0x4441  /* little-endian 16-bit int for "AD" */
 
 /*type of WAD files. correspond to 1st half of name*/
-typedef Int16 WADTYPE;
+typedef int16_t WADTYPE;
 #define IWAD (IWADMAGIC)
 #define PWAD (PWADMAGIC)
 
@@ -84,7 +71,7 @@ typedef Int16 WADTYPE;
 
 /************ deutex.c ************/
 /* Entry selection Bits*/
-typedef Int16 NTRYB;
+typedef int16_t NTRYB;
 #define BLEVEL 		(0x0001)
 #define BLUMP		(0x0002)
 #define BSOUND		(0x0004)
@@ -101,12 +88,12 @@ typedef Int16 NTRYB;
 #define BWALL		(0x1000)
 #define BALL		(0x7FFF)
 
-typedef Int16 SNDTYPE;
+typedef int16_t SNDTYPE;
 #define SNDNONE		(0)
 #define SNDAU		(1)
 #define SNDWAV		(2)
 #define SNDVOC		(3)
-typedef Int16 IMGTYPE;
+typedef int16_t IMGTYPE;
 #define PICNONE		(0)
 #define PICBMP		(1)
 #define PICGIF		(2)
@@ -122,29 +109,29 @@ typedef Int16 IMGTYPE;
 /****************** mkwad.c ********************/
 /*wad directory*/
 struct WADDIR           /*same as in doom*/
-{ Int32 start;           /*start of entry*/
-  Int32 size;            /*size of entry*/
+{ int32_t start;           /*start of entry*/
+  int32_t size;            /*size of entry*/
   char name[8];        /*name of entry*/
 };
 
 struct WADINFO
-{ Int32 ntry;            /*entries in dir*/
-  Int32 dirpos;          /*position of dir*/
+{ int32_t ntry;            /*entries in dir*/
+  int32_t dirpos;          /*position of dir*/
   struct WADDIR  *dir;   /*directory */
-  Int32 maxdir;		/*max nb of entry in dir*/
-  Int32 wposit;		/*position for write*/
-  Int32 maxpos;		/*farther referenced byte in WAD*/
+  int32_t maxdir;		/*max nb of entry in dir*/
+  int32_t wposit;		/*position for write*/
+  int32_t maxpos;		/*farther referenced byte in WAD*/
   FILE *fd;	        /* File pointer */
   char *filename;	/* Pointer on block malloc'd by WADRopen*() and
 			   free'd by WADRclose() and containing the name
 			   of the file. */
-  Bool ok;		/*security ok&1=read ok&2=write*/
+  bool ok;		/*security ok&1=read ok&2=write*/
 };
 
 
 
 /********************ident.c********************/
-typedef Int16 PICTYPE;
+typedef int16_t PICTYPE;
 #define PGRAPH	0x02
 #define	PWEAPN	0x04
 #define	PSPRIT	0x06
@@ -155,7 +142,7 @@ typedef Int16 PICTYPE;
 #define PSNEAT  0x0e
 #define PWALL   0x10
 
-typedef Int16 ENTRY;
+typedef int16_t ENTRY;
 #define EMASK		0xFF00
 #define EVOID		0x0000
 #define ELEVEL		0x0100
@@ -191,22 +178,22 @@ typedef Int16 ENTRY;
 
 
 /*deutex.c: misc*/
-Bool LetsHaveFunBaby(long guesswhat);
+bool LetsHaveFunBaby(long guesswhat);
 /*compose.c: TEXTURE list*/
 /*compose.c: TEXTURE insertion...rather, WAD composition*/
 void CMPOmakePWAD(const char *doomwad,WADTYPE type, const char *PWADname,
 			 const char *DataDir, const char *texin,NTRYB select,
-			 char trnR, char trnG, char trnB,Bool George);
+			 char trnR, char trnG, char trnB,bool George);
 /*substit.c: DOOM.EXE string substitution*/
-void EXE2list(FILE *out,char *doomexe,Int32 start,Int16 thres);
-void EXEsubstit(const char *texin,const char *doomexe,Int32 start,Int16 thres);
+void EXE2list(FILE *out,char *doomexe,int32_t start,int16_t thres);
+void EXEsubstit(const char *texin,const char *doomexe,int32_t start,int16_t thres);
 
 void XTRlistDir(const char *doomwad,const char *wadin,NTRYB select);
 
 void XTRvoidSpacesInWAD(const char *wadin);
 
 void XTRcompakWAD(const char *DataDir, const char *wadin, const char
-    *texout,Bool ShowIdx);
+    *texout,bool ShowIdx);
 void XTRstructureTest(const char *doomwad, const char *wadin);
 void XTRtextureUsed(const char *wadin);
 

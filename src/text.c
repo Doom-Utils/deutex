@@ -36,23 +36,23 @@ struct TXTFILE TXTdummy;
 
 /*****************************************************/
 
-const Int16 SPACE    = 0x2;
-const Int16 NEWLINE  = 0x4;
-const Int16 COMMENT  = 0x8;
-const Int16 SECTION  = 0x10;  /*ok for SECTION header*/
-const Int16 NAME     = 0x20;  /*valid as a name identifier*/
-const Int16 NUMBER   = 0x40;  /*valid for a number*/
-const Int16 STPATCH  = 0x80;  /*start of patch?*/
-const Int16 EXESTRNG = 0x100; /*valid in #string# */
-const Int16 BOUNDARY = 0x200; /*#*/
-const Int16 STEQUAL  = 0x400; /*=*/
-static Int16  TXTval[256];
-static Bool TXTok=FALSE;
+const int16_t SPACE    = 0x2;
+const int16_t NEWLINE  = 0x4;
+const int16_t COMMENT  = 0x8;
+const int16_t SECTION  = 0x10;  /*ok for SECTION header*/
+const int16_t NAME     = 0x20;  /*valid as a name identifier*/
+const int16_t NUMBER   = 0x40;  /*valid for a number*/
+const int16_t STPATCH  = 0x80;  /*start of patch?*/
+const int16_t EXESTRNG = 0x100; /*valid in #string# */
+const int16_t BOUNDARY = 0x200; /*#*/
+const int16_t STEQUAL  = 0x400; /*=*/
+static int16_t  TXTval[256];
+static bool TXTok=false;
 
 
 
 void TXTinit(void)
-{ Int16 n,val;
+{ int16_t n,val;
   for(n=0;n<256;n++)
     { val=0;
       switch(n)
@@ -91,11 +91,11 @@ void TXTinit(void)
 	val |= NAME;
       TXTval[n]=val;
     }
-  TXTok=TRUE;
+  TXTok=true;
 }
 void TXTcloseR(struct TXTFILE *TXT)
 { 
-  if(TXTok!=TRUE) Bug("TR91", "TxtClo");
+  if(TXTok!=true) Bug("TR91", "TxtClo");
   fclose(TXT->fp);
   Free(TXT);
 }
@@ -105,7 +105,7 @@ struct TXTFILE *TXTopenR(const char *file, int silent)
   struct TXTFILE *TXT;
   size_t pathname_len;
   /*characters*/
-  if(TXTok!=TRUE)  TXTinit();
+  if(TXTok!=true)  TXTinit();
   
   pathname_len = strlen (file);
   TXT = (struct TXTFILE *)Malloc(sizeof(struct TXTFILE) + pathname_len);
@@ -127,48 +127,48 @@ struct TXTFILE *TXTopenR(const char *file, int silent)
   return TXT;
 }
 
-static Bool TXTgetc(struct TXTFILE *TXT,Int16 *c,Int16 *val)
-{ Int16 cc=(Int16)getc(TXT->fp );
+static bool TXTgetc(struct TXTFILE *TXT,int16_t *c,int16_t *val)
+{ int16_t cc=(int16_t)getc(TXT->fp );
   TXT->LastChar=cc;
-  if(cc==EOF) return FALSE;
+  if(cc==EOF) return false;
   *c = cc = (cc&0xFF);
   *val=TXTval[cc];
   if(TXTval[cc]&NEWLINE) TXT->Lines++;
-  return TRUE;
+  return true;
 }
 static void TXTungetc(struct TXTFILE *TXT)
-{ Int16 cc=TXT->LastChar;
+{ int16_t cc=TXT->LastChar;
   cc = (cc&0xFF);
   ungetc(cc,TXT->fp);
   if(TXTval[cc]&NEWLINE) TXT->Lines--;
 }
 /*skip lines beginning with # or ; */
-Bool TXTskipComment(struct TXTFILE *TXT)
-{ Int16 c=0,val=0; Bool comment;
-  for(comment=FALSE;;)
-  { if(TXTgetc(TXT,&c,&val)!=TRUE)return FALSE;
+bool TXTskipComment(struct TXTFILE *TXT)
+{ int16_t c=0,val=0; bool comment;
+  for(comment=false;;)
+  { if(TXTgetc(TXT,&c,&val)!=true)return false;
     if(val & NEWLINE)        /*eat newlines*/
-       { comment=FALSE; continue;}
+       { comment=false; continue;}
     if(val & COMMENT)        /*eat commentaries*/
-       { comment=TRUE;  continue;}   
+       { comment=true;  continue;}   
     if(val & SPACE)          /*eat space*/
        { continue;}
-    if(comment==FALSE)
-       { TXTungetc(TXT);return TRUE;}
+    if(comment==false)
+       { TXTungetc(TXT);return true;}
   }
 }
 /* find '*' */
-static Bool TXTcheckStartPatch(struct TXTFILE *TXT)
-{ Int16 c=0, val=0;
-  if(TXTgetc(TXT,&c,&val)!=TRUE) return FALSE;
-  if(val & STPATCH) return TRUE;
-  TXTungetc(TXT); return FALSE;
+static bool TXTcheckStartPatch(struct TXTFILE *TXT)
+{ int16_t c=0, val=0;
+  if(TXTgetc(TXT,&c,&val)!=true) return false;
+  if(val & STPATCH) return true;
+  TXTungetc(TXT); return false;
 }
 /*read string, skip space before, stop space/\n*/
-static Bool TXTread(struct TXTFILE *TXT,char name[8],Int16 valid)
-{  Int16 c=0,val=0,n=0;
+static bool TXTread(struct TXTFILE *TXT,char name[8],int16_t valid)
+{  int16_t c=0,val=0,n=0;
    while(1)
-   { if(TXTgetc(TXT,&c,&val)!=TRUE)return FALSE;
+   { if(TXTgetc(TXT,&c,&val)!=true)return false;
      if(val & NEWLINE) continue;
      if(val & SPACE)   continue;
      if(val & valid) break;
@@ -177,7 +177,7 @@ static Bool TXTread(struct TXTFILE *TXT,char name[8],Int16 valid)
    }
    name[0]=(char)c;
    for(n=1; n<256; n++ )
-   { if(TXTgetc(TXT,&c,&val)!=TRUE) break;  
+   { if(TXTgetc(TXT,&c,&val)!=true) break;  
      if(val&SPACE)
      { TXTungetc(TXT);break;}
      if(!(val&valid))
@@ -186,53 +186,53 @@ static Bool TXTread(struct TXTFILE *TXT,char name[8],Int16 valid)
      if(n<8) name[n]=(char)c;
    }
    if(n<8)name[n]='\0';
-   return TRUE;
+   return true;
 }
-Int16 TXTreadShort(struct TXTFILE *TXT)
+int16_t TXTreadShort(struct TXTFILE *TXT)
 { static char buffer[9];
   TXTread(TXT,buffer,NUMBER);
   buffer[8]='\0';
-  return (Int16)atoi(buffer);
+  return (int16_t)atoi(buffer);
 }
-static Bool TXTboundSection(struct TXTFILE *TXT);
-static Bool TXTreadIdent(struct TXTFILE *TXT,char name[8])
-{ if(TXTok!=TRUE) Bug("TR21", "%s: TxtRid", fname (TXT->pathname));
-  if(TXTskipComment(TXT)==FALSE) return FALSE;
+static bool TXTboundSection(struct TXTFILE *TXT);
+static bool TXTreadIdent(struct TXTFILE *TXT,char name[8])
+{ if(TXTok!=true) Bug("TR21", "%s: TxtRid", fname (TXT->pathname));
+  if(TXTskipComment(TXT)==false) return false;
   /*check end of section*/
   if((TXT->Lines)>(TXT->SectionEnd))
-  { if(TXTboundSection(TXT)==FALSE)
-      return FALSE;   /*no other section*/
+  { if(TXTboundSection(TXT)==false)
+      return false;   /*no other section*/
   }
-  if(TXTread(TXT,name,NAME|NUMBER)!=TRUE)
+  if(TXTread(TXT,name,NAME|NUMBER)!=true)
     ProgError("TR23", "%s(%ld): expected identifier or \"END:\"",
 	TXT->pathname, (long) TXT->Lines);
   Normalise(name,name);
-  return TRUE;
+  return true;
 }
 
 /*
 ** STPATCH is also used to indicate repetition
 */
-static Bool TXTreadOptionalRepeat(struct TXTFILE *TXT)
-{ Int16 c=0,val=0;
+static bool TXTreadOptionalRepeat(struct TXTFILE *TXT)
+{ int16_t c=0,val=0;
   while(1)
-  {  if(TXTgetc(TXT,&c,&val)!=TRUE) return FALSE;
+  {  if(TXTgetc(TXT,&c,&val)!=true) return false;
      if(!(val & NEWLINE))
      { if(val & STPATCH) break;  /*look for STPATCH*/
        if(val & SPACE) continue; /*skip space*/
      }
      TXTungetc(TXT);
-     return FALSE;
+     return false;
   }
-  return TRUE;               /*found*/
+  return true;               /*found*/
 }
 /*
 ** STEQUAL is used to indicate alternate name
 */
 static void TXTreadOptionalName(struct TXTFILE *TXT,char name[8])
-{ Int16 c=0,val=0;
+{ int16_t c=0,val=0;
   while(1)
-  {  if(TXTgetc(TXT,&c,&val)!=TRUE) return;
+  {  if(TXTgetc(TXT,&c,&val)!=true) return;
      if(!(val & NEWLINE))
      { if(val & STEQUAL) continue; /*skip '='*/
        if(val & SPACE) continue; /*skip space*/
@@ -242,7 +242,7 @@ static void TXTreadOptionalName(struct TXTFILE *TXT,char name[8])
      return; /*name is NOT modified*/
   }
   TXTungetc(TXT);
-  if(TXTread(TXT,name,NAME|NUMBER)!=TRUE)
+  if(TXTread(TXT,name,NAME|NUMBER)!=true)
   { ProgError("TR32", "%s(%ld): invalid optional name",
       TXT->pathname, (long) TXT->Lines);
   }
@@ -251,11 +251,11 @@ static void TXTreadOptionalName(struct TXTFILE *TXT,char name[8])
 ** Read integer if exist before NEWLINE,
 ** but don't eat NEWLINE
 */
-static Int16 TXTreadOptionalShort(struct TXTFILE *TXT)
+static int16_t TXTreadOptionalShort(struct TXTFILE *TXT)
 { static char name[9];
-  Int16 n,c=0,val=0;
+  int16_t n,c=0,val=0;
   while(1)
-  { if(TXTgetc(TXT,&c,&val)!=TRUE)return INVALIDINT;
+  { if(TXTgetc(TXT,&c,&val)!=true)return INVALIDINT;
     if(!(val & NEWLINE))
     { if(val & SPACE)   continue; /*skip space*/
       if(val & STEQUAL) continue; /*skip '='*/
@@ -266,7 +266,7 @@ static Int16 TXTreadOptionalShort(struct TXTFILE *TXT)
    }
    name[0]=(char)c;
    for(n=1; n<256; n++ )
-   { if(TXTgetc(TXT,&c,&val)!=TRUE) break;
+   { if(TXTgetc(TXT,&c,&val)!=true) break;
      if(val&NEWLINE) {TXTungetc(TXT);break;}
      if(val&SPACE)break;
      if(!(val&NUMBER))
@@ -276,7 +276,7 @@ static Int16 TXTreadOptionalShort(struct TXTFILE *TXT)
    }
    if(n<8)name[n]='\0';
    name[8]='\0';
-   return (Int16)atoi(name);
+   return (int16_t)atoi(name);
 }
 
 /* read Blocks of the form
@@ -284,20 +284,20 @@ static Int16 TXTreadOptionalShort(struct TXTFILE *TXT)
 ** identifier   ... anything ...
 ** identifier   ... anything ...
 */
-static Bool TXTfindSection(struct TXTFILE *TXT,Bool Match)
-{ Int16 c=0,val=0,n;
+static bool TXTfindSection(struct TXTFILE *TXT,bool Match)
+{ int16_t c=0,val=0,n;
   char buffer[8];
   while(1)
-  { if(TXTskipComment(TXT)!=TRUE) return FALSE;
-    if(TXTgetc(TXT,&c,&val)!=TRUE)return FALSE;
+  { if(TXTskipComment(TXT)!=true) return false;
+    if(TXTgetc(TXT,&c,&val)!=true)return false;
     if(c=='[')
     { for(n=0;n<256;n++)
-      { if(TXTgetc(TXT,&c,&val)!=TRUE) return FALSE;
+      { if(TXTgetc(TXT,&c,&val)!=true) return false;
 	if(c==']')
 	{ if(n<8)buffer[n]='\0';
-	  if(Match==FALSE) return TRUE;/*any section is ok*/
+	  if(Match==false) return true;/*any section is ok*/
 	  Normalise(buffer,buffer);        /*the right section?*/
-	  if(strncmp(buffer,TXT->Section,8)==0) return TRUE;
+	  if(strncmp(buffer,TXT->Section,8)==0) return true;
 	  break; 			   /*not the right section*/
 	}
 	if(!(val & (NAME|NUMBER))) break;  /*not a section*/
@@ -305,7 +305,7 @@ static Bool TXTfindSection(struct TXTFILE *TXT,Bool Match)
       }
     }
     while(1) /*look for end of line*/
-    { if(TXTgetc(TXT,&c,&val)!=TRUE)return FALSE;
+    { if(TXTgetc(TXT,&c,&val)!=true)return false;
       if(val & NEWLINE) break;
     }
   }
@@ -313,13 +313,13 @@ static Bool TXTfindSection(struct TXTFILE *TXT,Bool Match)
 /*
 ** find the section boundaries, from current position in file
 */
-static Bool TXTboundSection(struct TXTFILE *TXT)
-{ Int16 c=0,val=0;
-  if(TXTfindSection(TXT,TRUE)!=TRUE) return FALSE;
+static bool TXTboundSection(struct TXTFILE *TXT)
+{ int16_t c=0,val=0;
+  if(TXTfindSection(TXT,true)!=true) return false;
   TXT->SectionStart=TXT->Lines+1;
   /*check that we don't read twice the same section*/
   if(TXT->SectionEnd>TXT->SectionStart) Bug("TR51", "TxtBdS");
-  if(TXTfindSection(TXT,FALSE)==TRUE)
+  if(TXTfindSection(TXT,false)==true)
     TXT->SectionEnd=TXT->Lines-1;
   else
     TXT->SectionEnd=TXT->Lines;
@@ -327,13 +327,13 @@ static Bool TXTboundSection(struct TXTFILE *TXT)
   fseek(TXT->fp,0,SEEK_SET);
   TXT->Lines	   =1;/*start in line 1*/
   while(TXT->Lines<TXT->SectionStart)
-  { if(TXTgetc(TXT,&c,&val)!=TRUE)return FALSE;
+  { if(TXTgetc(TXT,&c,&val)!=true)return false;
   }
-  return TRUE;
+  return true;
 }
-Bool TXTseekSection(struct TXTFILE *TXT,const char *section)
+bool TXTseekSection(struct TXTFILE *TXT,const char *section)
 {
-  if(TXTok!=TRUE) Bug("TR61", "TxtSks");
+  if(TXTok!=true) Bug("TR61", "TxtSks");
   /*seek begin of file*/
   TXT->SectionStart=0;
   TXT->SectionEnd  =0;
@@ -348,68 +348,68 @@ Bool TXTseekSection(struct TXTFILE *TXT,const char *section)
 
 
 /*read a texture definition*/
-/*return FALSE if read End*/
-Bool TXTreadTexDef(struct TXTFILE *TXT,char name[8],Int16 *szx,Int16 *szy)
-{ if(TXTok!=TRUE) Bug("TR71", "TxtTxd");
-  if(TXTskipComment(TXT)==FALSE) return FALSE; /*End*/
-  if(TXTread(TXT,name,NAME|NUMBER)!=TRUE)
+/*return false if read End*/
+bool TXTreadTexDef(struct TXTFILE *TXT,char name[8],int16_t *szx,int16_t *szy)
+{ if(TXTok!=true) Bug("TR71", "TxtTxd");
+  if(TXTskipComment(TXT)==false) return false; /*End*/
+  if(TXTread(TXT,name,NAME|NUMBER)!=true)
     ProgError("TR73", "%s(%ld): expecting identifier",
 	fname (TXT->pathname), (long) TXT->Lines);
   Normalise(name,name);
   *szx=TXTreadShort(TXT);
   *szy=TXTreadShort(TXT);
-  return TRUE;
+  return true;
 }
-/*read a patch def.  Return FALSE if could not find '*' */
-Bool TXTreadPatchDef(struct TXTFILE *TXT,char name[8],Int16 *ofsx,Int16 *ofsy)
-{ if(TXTok!=TRUE) Bug("TR81", "TxtRpd");
-  if(TXTskipComment(TXT)==FALSE) return FALSE;
-  if(TXTcheckStartPatch(TXT)!=TRUE) return FALSE; /*not a patch line*/
-  if(TXTread(TXT,name,NAME|NUMBER)!=TRUE)
+/*read a patch def.  Return false if could not find '*' */
+bool TXTreadPatchDef(struct TXTFILE *TXT,char name[8],int16_t *ofsx,int16_t *ofsy)
+{ if(TXTok!=true) Bug("TR81", "TxtRpd");
+  if(TXTskipComment(TXT)==false) return false;
+  if(TXTcheckStartPatch(TXT)!=true) return false; /*not a patch line*/
+  if(TXTread(TXT,name,NAME|NUMBER)!=true)
 	   ProgError("TR83", "%s(%ld): expecting identifier",
 	       fname (TXT->pathname), (long) TXT->Lines);
   Normalise(name,name);
   *ofsx=TXTreadShort(TXT);
   *ofsy=TXTreadShort(TXT);
-  return TRUE;
+  return true;
 }
 /*
-**TXTentryParse(name,filenam,&X,&Y,&Repeat,TXT,TRUE)
+**TXTentryParse(name,filenam,&X,&Y,&Repeat,TXT,true)
 */
-Bool TXTentryParse(char *name,char *filenam,Int16 *x,Int16 *y,Bool
-    *repeat, struct TXTFILE *TXT, Bool XY)
-{ Int16 c=0,val=0; Bool comment;
-  Int16 xx=INVALIDINT,yy=INVALIDINT;
-  if(TXTreadIdent(TXT,name)!=TRUE) return FALSE;
+bool TXTentryParse(char *name,char *filenam,int16_t *x,int16_t *y,bool
+    *repeat, struct TXTFILE *TXT, bool XY)
+{ int16_t c=0,val=0; bool comment;
+  int16_t xx=INVALIDINT,yy=INVALIDINT;
+  if(TXTreadIdent(TXT,name)!=true) return false;
   /* skip the equal*/
-  if(TXTgetc(TXT,&c,&val)!=TRUE) return FALSE;
+  if(TXTgetc(TXT,&c,&val)!=true) return false;
   if(c!='=') TXTungetc(TXT);
   /* read integer*/
-  if(XY==TRUE)
+  if(XY==true)
   { xx=TXTreadOptionalShort(TXT);
     yy=TXTreadOptionalShort(TXT);
   }
   Normalise(filenam,name);
   TXTreadOptionalName(TXT,filenam);
-  if(XY==TRUE)
+  if(XY==true)
   { if(xx==INVALIDINT) xx=TXTreadOptionalShort(TXT);
     if(yy==INVALIDINT) yy=TXTreadOptionalShort(TXT);
   }
   *repeat= TXTreadOptionalRepeat(TXT);
   *x=xx;
   *y=yy;
-  for(comment=FALSE;;)
-  { if(TXTgetc(TXT,&c,&val)!=TRUE)break;
+  for(comment=false;;)
+  { if(TXTgetc(TXT,&c,&val)!=true)break;
     if(val & NEWLINE) break;
     if(val & COMMENT)        /*eat commentaries*/
-       { comment=TRUE;  continue;}
+       { comment=true;  continue;}
     if(val & SPACE)          /*eat space*/
        { continue;}
-    if(comment==FALSE)
+    if(comment==false)
        ProgError("TR87", "%s(%ld): bad entry format",
 	   fname (TXT->pathname), (long) TXT->Lines);
   }
-  return TRUE;
+  return true;
 }
 
 
@@ -428,7 +428,7 @@ struct TXTFILE *TXTopenW(const char *file) /*open, and init if needed*/
   size_t pathname_len;
 
   /*characters*/
-  if(TXTok!=TRUE)  TXTinit();
+  if(TXTok!=true)  TXTinit();
   pathname_len = strlen (file);
   TXT = (struct TXTFILE *)Malloc(sizeof(struct TXTFILE) + pathname_len);
   /*some inits */
@@ -454,7 +454,7 @@ void TXTcloseW(struct TXTFILE *TXT)
 {
   if (TXT == &TXTdummy)
      return;
-  if(TXTok!=TRUE) Bug("TW91", "TxtClo");
+  if(TXTok!=true) Bug("TW91", "TxtClo");
   fclose(TXT->fp);
   Free(TXT);
 }
@@ -466,22 +466,22 @@ void TXTaddSection(struct TXTFILE *TXT,const char *def)
 { 
   if (TXT == &TXTdummy)
      return;
-  if(TXTok!=TRUE) Bug("TW11", "TxtAdS");
+  if(TXTok!=true) Bug("TW11", "TxtAdS");
   fprintf(TXT->fp,"[%.8s]\n",def);
 }
 
-void TXTaddEntry(struct TXTFILE *TXT,const char *name,const char *filenam,Int16 x,Int16 y,Bool repeat, Bool XY)
+void TXTaddEntry(struct TXTFILE *TXT,const char *name,const char *filenam,int16_t x,int16_t y,bool repeat, bool XY)
 { 
   if (TXT == &TXTdummy)
      return;
-  if(TXTok!=TRUE) Bug("TW21", "TxtAdE");
+  if(TXTok!=true) Bug("TW21", "TxtAdE");
   fprintf(TXT->fp,"%.8s",name);
 /* fprintf(TXT->fp,"%.8s=",name);*/
   if(filenam!=NULL)
     fprintf(TXT->fp,"\t%.8s",filenam);
-  if(XY==TRUE)
+  if(XY==true)
     fprintf(TXT->fp,"\t%d\t%d",x,y);
-  if(repeat==TRUE)
+  if(repeat==true)
     fprintf(TXT->fp,"\t*");
   fprintf(TXT->fp,"\n");
 }
@@ -490,7 +490,7 @@ void TXTaddComment(struct TXTFILE *TXT,const char *text)
 { 
   if (TXT == &TXTdummy)
      return;
-   if(TXTok!=TRUE) Bug("TW31", "TxtAdC");
+   if(TXTok!=true) Bug("TW31", "TxtAdC");
   fprintf(TXT->fp,"# %.256s\n",text);
 }
 
@@ -498,7 +498,7 @@ void TXTaddEmptyLine (struct TXTFILE *TXT)
 {
   if (TXT == &TXTdummy)
      return;
-  if (TXTok != TRUE)
+  if (TXTok != true)
     Bug ("TW41", "TxtAdL");
   putc ('\n', TXT->fp);
 }

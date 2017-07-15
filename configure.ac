@@ -1,6 +1,7 @@
 AC_INIT([DeuTex], [4.5.0-alpha])
 AM_INIT_AUTOMAKE([foreign])
 AC_PROG_CC
+AC_PROG_CC_C99
 
 AM_SILENT_RULES([yes])
 CFLAGS="-Wall -Wdeclaration-after-statement -Wredundant-decls -O2"

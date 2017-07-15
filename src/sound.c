@@ -30,32 +30,32 @@ GNU General Public License for more details.
 
 static struct RIFFHEAD
 { char  riff[4];
-  Int32 length;
+  int32_t length;
   char 	wave[4];
 } headr;
 static struct CHUNK
 { char name[4];
-  Int32 size;
+  int32_t size;
 } headc;
 static struct WAVEFMT/*format*/
 { char fmt[4];      /* "fmt " */
-  Int32 fmtsize;    /*0x10*/
-  Int16 tag;        /*format tag. 1=PCM*/
-  Int16 channel;    /*1*/
-  Int32 smplrate;
-  Int32 bytescnd;   /*average bytes per second*/
-  Int16 align;      /*block alignment, in bytes*/
-  Int16 nbits;      /*specific to PCM format*/
+  int32_t fmtsize;    /*0x10*/
+  int16_t tag;        /*format tag. 1=PCM*/
+  int16_t channel;    /*1*/
+  int32_t smplrate;
+  int32_t bytescnd;   /*average bytes per second*/
+  int16_t align;      /*block alignment, in bytes*/
+  int16_t nbits;      /*specific to PCM format*/
 }headf;
 static struct WAVEDATA /*data*/
 {  char data[4];    /* "data" */
-   Int32 datasize;
+   int32_t datasize;
 }headw;
 
-static void SNDsaveWave(char *file,char  *buffer,Int32 size,Int32 speed)
+static void SNDsaveWave(char *file,char  *buffer,int32_t size,int32_t speed)
 {
   FILE *fp;
-  Int32 wsize,sz=0;
+  int32_t wsize,sz=0;
   fp=fopen(file,FOPEN_WB);
   if(fp==NULL)
   { ProgError("RW10", "%s: %s", fname (file), strerror (errno));
@@ -85,10 +85,10 @@ static void SNDsaveWave(char *file,char  *buffer,Int32 size,Int32 speed)
   fclose(fp);
 }
 
-char  *SNDloadWaveFile(char *file, Int32 *psize, Int32 *pspeed)
+char  *SNDloadWaveFile(char *file, int32_t *psize, int32_t *pspeed)
 { FILE *fp;
-  Int32 wsize,sz=0,smplrate,datasize;
-  Int32 chunk;
+  int32_t wsize,sz=0,smplrate,datasize;
+  int32_t chunk;
   char  *data;
   fp=fopen(file,FOPEN_RB);
   if(fp==NULL)
@@ -159,19 +159,19 @@ char  *SNDloadWaveFile(char *file, Int32 *psize, Int32 *pspeed)
 /***************** AU **********************/
 struct AUHEAD
 { char snd[4];    /* ".snd" */
-  Int32 dataloc;  /* Always big endian */
-  Int32 datasize; /* Always big endian */
-  Int32 format;	  /* Always big endian */
-  Int32 smplrate; /* Always big endian */
-  Int32 channel;  /* Always big endian */
+  int32_t dataloc;  /* Always big endian */
+  int32_t datasize; /* Always big endian */
+  int32_t format;	  /* Always big endian */
+  int32_t smplrate; /* Always big endian */
+  int32_t channel;  /* Always big endian */
   char  info[4];
 };
 static struct AUHEAD heada;
 /*char data[datasize] as signed char*/
 
-static void SNDsaveAu(char *file,char  *buffer,Int32 size,Int32 speed)
+static void SNDsaveAu(char *file,char  *buffer,int32_t size,int32_t speed)
 { FILE *fp;
-  Int32 i,wsize,sz=0;
+  int32_t i,wsize,sz=0;
   fp=fopen(file,FOPEN_WB);
   if(fp==NULL)
     ProgError("AW10", "%s: %s", fname (file), strerror (errno));
@@ -196,9 +196,9 @@ static void SNDsaveAu(char *file,char  *buffer,Int32 size,Int32 speed)
     fclose(fp);
 }
 
-char *SNDloadAuFile(char *file, Int32 *psize, Int32 *pspeed)
+char *SNDloadAuFile(char *file, int32_t *psize, int32_t *pspeed)
 { FILE *fp;
-  Int32 wsize,sz=0,i,smplrate,datasize;
+  int32_t wsize,sz=0,i,smplrate,datasize;
   char *data;
   fp=fopen(file,FOPEN_RB);
   if(fp==NULL)
@@ -259,9 +259,9 @@ static struct VOCBLOCK1
   char  cmprs;  /*0=no compression*/
 }blockv;
 
-static void SNDsaveVoc(char *file,char  *buffer,Int32 size,Int32 speed)
+static void SNDsaveVoc(char *file,char  *buffer,int32_t size,int32_t speed)
 { FILE *fp;
-  Int32 wsize,sz=0;
+  int32_t wsize,sz=0;
   fp=fopen(file,FOPEN_WB);
   if(fp==NULL)
     ProgError("VW10", "%s: %s", fname (file), strerror (errno));
@@ -292,9 +292,9 @@ static void SNDsaveVoc(char *file,char  *buffer,Int32 size,Int32 speed)
   fclose(fp);
 }
 
-char  *SNDloadVocFile(char *file, Int32 *psize, Int32 *pspeed)
+char  *SNDloadVocFile(char *file, int32_t *psize, int32_t *pspeed)
 { FILE *fp;
-  Int32 wsize,sz=0,smplrate,datasize;
+  int32_t wsize,sz=0,smplrate,datasize;
   char  *data;
   fp=fopen(file,FOPEN_RB);
   if(fp==NULL)
@@ -338,17 +338,17 @@ char  *SNDloadVocFile(char *file, Int32 *psize, Int32 *pspeed)
 
 
 /**************** generic sound *******************/
-void SNDsaveSound (char *file, char *buffer, Int32 size, SNDTYPE format,
-    Bool fullsnd, const char *name)
+void SNDsaveSound (char *file, char *buffer, int32_t size, SNDTYPE format,
+    bool fullsnd, const char *name)
 {
   char  *data;
-  Int32  datasize;
-  Int32  phys_size;
-  Int16  type;
-  Int16  headsize;
-  UInt16 rate;
+  int32_t  datasize;
+  int32_t  phys_size;
+  int16_t  type;
+  int16_t  headsize;
+  uint16_t rate;
 
-  headsize = sizeof (Int16) + sizeof (Int16) + sizeof (Int32);
+  headsize = sizeof (int16_t) + sizeof (int16_t) + sizeof (int32_t);
   if (size < headsize)
   {
     Warning ("SD10", "Sound %s: lump has no header, skipping",
@@ -376,7 +376,7 @@ void SNDsaveSound (char *file, char *buffer, Int32 size, SNDTYPE format,
 
   else if (datasize < phys_size)
   {
-    if (fullsnd == TRUE)       /* Save entire lump */
+    if (fullsnd == true)       /* Save entire lump */
       datasize = phys_size;
     else
     {
@@ -396,11 +396,11 @@ void SNDsaveSound (char *file, char *buffer, Int32 size, SNDTYPE format,
 }
 
 
-Int32 SNDcopyInWAD (struct WADINFO *info, char *file, SNDTYPE format)
+int32_t SNDcopyInWAD (struct WADINFO *info, char *file, SNDTYPE format)
 {
-  Int32  size = 0;
-  Int32  datasize;
-  Int32  rate;
+  int32_t  size = 0;
+  int32_t  datasize;
+  int32_t  rate;
   char  *data = NULL;
   long   wadrate;
 
@@ -430,7 +430,7 @@ Int32 SNDcopyInWAD (struct WADINFO *info, char *file, SNDTYPE format)
 	  double ratio = 11025.0 / rate;
 	  long s;
 
-	  datasize = (Int32) (ratio * datasize) + 1;
+	  datasize = (int32_t) (ratio * datasize) + 1;
 	  for (s = 0; s < datasize; s++)
 	    data[s] = data[(size_t) (s / ratio + 0.5)];
 	}
@@ -446,7 +446,7 @@ Int32 SNDcopyInWAD (struct WADINFO *info, char *file, SNDTYPE format)
 	  double ratio = 11025.0 / rate;
 	  long s;
 
-	  datasize = (Int32) (ratio * datasize) + 1;
+	  datasize = (int32_t) (ratio * datasize) + 1;
 	  data = (char *) Realloc (data, datasize);
 	  for (s = datasize - 1; s >= 0; s--)
 	    data[s] = data[(size_t) (s / ratio + 0.5)];
@@ -484,17 +484,17 @@ Int32 SNDcopyInWAD (struct WADINFO *info, char *file, SNDTYPE format)
 
 
 void SNDsavePCSound(const char *lumpname, const char *file, const char *buffer,
-    Int32 size)
+    int32_t size)
 { FILE *fp;
   const char *data;
-  Int16 datasize,type,headsize;
-  Int16 i;
-  headsize = sizeof(Int16)+sizeof(Int16);
+  int16_t datasize,type,headsize;
+  int16_t i;
+  headsize = sizeof(int16_t)+sizeof(int16_t);
   if(size<headsize)
     ProgError("KW10", "FIXME: wrong size", fname (file));
   type     = peek_i16_le (buffer);
   datasize = peek_i16_le (buffer + 2);
-  data= buffer+(sizeof(Int16)+sizeof(Int16));
+  data= buffer+(sizeof(int16_t)+sizeof(int16_t));
   if(type!=0)
     Bug("KW11", "FIXME: not a PC sound", fname (file));
   if(size<datasize+headsize)
@@ -512,10 +512,10 @@ void SNDsavePCSound(const char *lumpname, const char *file, const char *buffer,
     ProgError("KW14", "%s: %s", fname (file), strerror (errno));
 }
 
-Int32 SNDcopyPCSoundInWAD(struct WADINFO *info,char *file)
+int32_t SNDcopyPCSoundInWAD(struct WADINFO *info,char *file)
 { struct TXTFILE *Txt;
-  Int32 size,datasizepos;
-  Int16 datasize,s;
+  int32_t size,datasizepos;
+  int16_t datasize,s;
   char c;
   Txt=TXTopenR(file, 1);
   if (Txt == NULL)
@@ -524,7 +524,7 @@ Int32 SNDcopyPCSoundInWAD(struct WADINFO *info,char *file)
   datasizepos=WADRposition(info);
   size+=WADRwriteShort(info,-1);
   datasize=0;
-  while(TXTskipComment(Txt)!=FALSE)
+  while(TXTskipComment(Txt)!=false)
   { s=TXTreadShort(Txt);
     if((s<0)||(s>255))
       ProgError("KR11", "%s: number out of bounds [0-255]", fname (file));

@@ -20,11 +20,11 @@ GNU General Public License for more details.
 
 
 /* first call COLinit();*/
-Bool PICsaveInFile (char *file, PICTYPE type, char *pic, Int32 picsz,
-    Int16 *pXinsr, Int16 *pYinsr, IMGTYPE Picture, const char *name,
+bool PICsaveInFile (char *file, PICTYPE type, char *pic, int32_t picsz,
+    int16_t *pXinsr, int16_t *pYinsr, IMGTYPE Picture, const char *name,
     cusage_t *cusage);
-Int32 PICsaveInWAD(struct WADINFO *info,char *file,PICTYPE type,Int16
-    Xinsr,Int16 Yinsr,IMGTYPE Picture);
+int32_t PICsaveInWAD(struct WADINFO *info,char *file,PICTYPE type,int16_t
+    Xinsr,int16_t Yinsr,IMGTYPE Picture);
 /* last call COLfree();*/
 
 
@@ -40,10 +40,10 @@ void BMPtoGIF(char *file,char *bmpdir,char *name);
  */
 typedef struct
 {
-  Int16 width;			/* Width of picture */
-  Int16 height;			/* Height of picture */
-  Int16 xofs;			/* X-offset of picture */
-  Int16 yofs;			/* Y-offset of picture */
+  int16_t width;			/* Width of picture */
+  int16_t height;			/* Height of picture */
+  int16_t xofs;			/* X-offset of picture */
+  int16_t yofs;			/* Y-offset of picture */
   const void *colofs;		/* Pointer on array of column offsets */
   const unsigned char *data;	/* Pointer on column data */
   size_t colofs_size;		/* Size of a column offset in bytes (2 or 4) */

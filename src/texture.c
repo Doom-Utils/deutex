@@ -49,17 +49,17 @@ PNM
 
 /***************Begin PNAME module*****************/
 static struct   PNMP{char name[8];}  *PNMpatchs;
-static Int16    PNMtop;
-static Int16        PNMmax;
-static Int16    PNMknown;
-static Bool        PNMok = FALSE;
+static int16_t    PNMtop;
+static int16_t        PNMmax;
+static int16_t    PNMknown;
+static bool        PNMok = false;
 
 
 
-void PNMinit(char  *buffer,Int32 size)
-{  Int16 n,i;
+void PNMinit(char  *buffer,int32_t size)
+{  int16_t n,i;
    char picname[8];
-   Int32 pnames;
+   int32_t pnames;
    /*find the number of entries in PNAME*/
    pnames=0;
    if(size>4L)
@@ -68,9 +68,9 @@ void PNMinit(char  *buffer,Int32 size)
      if(size<(4L+8L*pnames)) ProgError("PA02", "PNAMES has wrong size");
    }
    /*initialise*/
-   PNMmax=(Int16)(pnames+NEWPATCHS);
+   PNMmax=(int16_t)(pnames+NEWPATCHS);
    PNMpatchs=(struct PNMP  *)Malloc(PNMmax*sizeof(struct PNMP));
-   PNMtop=(Int16)pnames;
+   PNMtop=(int16_t)pnames;
    PNMknown=0;
    /*Read patches*/
    if(pnames<=0)return;
@@ -79,16 +79,16 @@ void PNMinit(char  *buffer,Int32 size)
      Normalise(PNMpatchs[n].name,picname);
    }
    PNMknown=PNMtop;
-   PNMok=TRUE;
+   PNMok=true;
 }
 /*
 ** check if PNAME exists (ident.c)
 */
-Int16 PNMindexOfPatch(char  *patch)
-{ Int16 idx;
+int16_t PNMindexOfPatch(char  *patch)
+{ int16_t idx;
   char name[8];
   Normalise(name,patch);
-  if(PNMok!=TRUE)
+  if(PNMok!=true)
     return -1;
   /*check index already exists*/
   for(idx=0;idx<PNMtop;idx++)
@@ -99,10 +99,10 @@ Int16 PNMindexOfPatch(char  *patch)
 /* Try to locate a Patch, from name
 ** if it doesn't exist, add it to the list
 */
-static Int16 PNMgetPatchIndex(char  *patch)
-{ Int16 idx;
+static int16_t PNMgetPatchIndex(char  *patch)
+{ int16_t idx;
   char name[8];
-  if(PNMok!=TRUE)Bug("PA90", "PNMok");
+  if(PNMok!=true)Bug("PA90", "PNMok");
   Normalise(name,patch);
   idx=PNMindexOfPatch(patch);
   if(idx<0) /*No, it's a new patch, then*/
@@ -119,8 +119,8 @@ static Int16 PNMgetPatchIndex(char  *patch)
 /*
 ** get name from index
 */
-void PNMgetPatchName(char name[8],Int16 index)
-{ if(PNMok!=TRUE)Bug("PA91", "PNMok");
+void PNMgetPatchName(char name[8],int16_t index)
+{ if(PNMok!=true)Bug("PA91", "PNMok");
   if(index>=PNMtop) Bug("PA92", "PnmGP>");
   Normalise(name,PNMpatchs[index].name);
 }
@@ -129,25 +129,25 @@ void PNMgetPatchName(char name[8],Int16 index)
 ** Insert in directory all the entries which are not
 ** referenced in DOOM.WAD
 */
-Int16  PNMgetNbOfPatch(void)
+int16_t  PNMgetNbOfPatch(void)
 {    return PNMtop;
 } 
-Bool PNMisNew(Int16 idx)
-{  if(PNMok!=TRUE)Bug("PA93", "PNMok");
+bool PNMisNew(int16_t idx)
+{  if(PNMok!=true)Bug("PA93", "PNMok");
    if(idx>=PNMtop)Bug("PA94", "PnmIN>");
    /*check if patch was added after initial definition*/
-   if(idx>=PNMknown) return TRUE;
-   return FALSE;
+   if(idx>=PNMknown) return true;
+   return false;
 }
 void PNMfree(void)
-{  PNMok=FALSE;
+{  PNMok=false;
    Free(PNMpatchs);
 }
 /********Write PNAME entry in WAD********/
-Int32 PNMwritePNAMEtoWAD(struct WADINFO *info)
-{  Int16 idx; Int32 size =0;
+int32_t PNMwritePNAMEtoWAD(struct WADINFO *info)
+{  int16_t idx; int32_t size =0;
    char buffer[8];
-   if(PNMok!=TRUE)Bug("PA95", "PNMok");
+   if(PNMok!=true)Bug("PA95", "PNMok");
    /*Write the Number of entries*/
    size+=WADRwriteLong(info,PNMtop);
    /*Then write the names , '\0' padded*/
@@ -163,21 +163,21 @@ Int32 PNMwritePNAMEtoWAD(struct WADINFO *info)
 
 /********** TEXU  texture entry compilation ***********/
 
-struct TEXTUR {char Name[8]; Int16 szX; Int16 szY; Int16 Npatches;};
-struct PATCH {Int16 Pindex; Int16 ofsX; Int16 ofsY;};
+struct TEXTUR {char Name[8]; int16_t szX; int16_t szY; int16_t Npatches;};
+struct PATCH {int16_t Pindex; int16_t ofsX; int16_t ofsY;};
 /*IMPLICIT: if Name[0] = '\0', then texture was deleted*/
 
 /*Textures: name, size*/
 struct TEXTUR *TXUtex;
-  Int16 TXUtexCur;  /*currently edited in TEXUtex*/
-  Int16 TXUtexTop; /*top of in TEXUtex*/
-  Int16 TXUtexMax;
+  int16_t TXUtexCur;  /*currently edited in TEXUtex*/
+  int16_t TXUtexTop; /*top of in TEXUtex*/
+  int16_t TXUtexMax;
 /*Textures: patches composing textures*/
 struct PATCH *TXUpat;
   long TXUpatTop; /*top of TEXUpat */
   long TXUpatMax;
 
-Bool TXUok=FALSE;
+bool TXUok=false;
 
 void TXUinit(void)
 {  TXUtexMax=NEWTEXTURES;
@@ -186,12 +186,12 @@ void TXUinit(void)
    TXUpatMax=NEWPATCHESDEF;
    TXUpatTop=0;
    TXUpat= (struct PATCH *) Malloc(TXUpatMax*sizeof(struct PATCH));
-   TXUok=TRUE;
+   TXUok=true;
 }
 
-static void TXUdefineCurTex(char name[8],Int16 X,Int16 Y,Bool Redefn)
+static void TXUdefineCurTex(char name[8],int16_t X,int16_t Y,bool Redefn)
 {  int t;
-   if(TXUok!=TRUE) Bug("TX89", "TXUok");
+   if(TXUok!=true) Bug("TX89", "TXUok");
    TXUtexCur=TXUtexTop;             /*set current entry*/
    TXUtexTop+=1;                     /*find a free position*/
    if(TXUtexTop>=TXUtexMax)
@@ -205,7 +205,7 @@ static void TXUdefineCurTex(char name[8],Int16 X,Int16 Y,Bool Redefn)
    /*check if we redefine other textures, and overide them.*/
    for(t=0;t<TXUtexCur;t++)
    { if(strncmp(TXUtex[t].Name,name,8)==0)
-         { if(Redefn==TRUE)
+         { if(Redefn==true)
            { TXUtex[t].Name[0]='\0';
              Detail("TX90", "Warning: texture %s is redefined",
 		 lump_name (name));
@@ -217,10 +217,10 @@ static void TXUdefineCurTex(char name[8],Int16 X,Int16 Y,Bool Redefn)
          }
    }
 }
-static void TXUaddPatchToCurTex(Int16 pindex,Int16 ofsX,Int16 ofsY)
+static void TXUaddPatchToCurTex(int16_t pindex,int16_t ofsX,int16_t ofsY)
 {
    char pname[8];
-   if(TXUok!=TRUE)                 Bug("TX91", "TXUok");
+   if(TXUok!=true)                 Bug("TX91", "TXUok");
    if(TXUpatTop>=TXUpatMax)
    {  TXUpatMax+=NEWPATCHESDEF;
       TXUpat=(struct PATCH *) Realloc(TXUpat,TXUpatMax*sizeof(struct PATCH));
@@ -234,28 +234,28 @@ static void TXUaddPatchToCurTex(Int16 pindex,Int16 ofsX,Int16 ofsY)
    TXUpatTop+=1;
 }
 void TXUfree(void)
-{  if(TXUok!=TRUE) Bug("TX93", "TXUok");
+{  if(TXUok!=true) Bug("TX93", "TXUok");
    Free(TXUpat);
    Free(TXUtex);
-   TXUok=FALSE;
+   TXUok=false;
 }
 
-Bool TXUexist(char *Name)
+bool TXUexist(char *Name)
 {  int t;
-   if(TXUok!=TRUE) Bug("TX94", "TXUok");
+   if(TXUok!=true) Bug("TX94", "TXUok");
    for(t=0;t<TXUtexTop;t++)
    { if(strncmp(TXUtex[t].Name,Name,8)==0)
-       return TRUE;
+       return true;
    }
-   return FALSE;
+   return false;
 }
 
 /*
 ** find the number of real textures
 */
-static Int32 TXUrealTexture(void)
-{ Int16 t;
-  Int32 NbOfTex=0; /*real top of texs*/
+static int32_t TXUrealTexture(void)
+{ int16_t t;
+  int32_t NbOfTex=0; /*real top of texs*/
   for(t=0; t<TXUtexTop; t++)
   { if(TXUtex[t].Npatches<1)
     { Warning("TX10", "Ignored empty texture %s", lump_name (TXUtex[t].Name));
@@ -267,12 +267,12 @@ static Int32 TXUrealTexture(void)
 }
 
 /********** TEXTURE entry in WAD ********/
-Int32 TXUwriteTEXTUREtoWAD(struct WADINFO *info)
-{  Int16 t,tt,p,pat;
-   Int32 size,ofsTble;
-   Int32 NbOfTex;
+int32_t TXUwriteTEXTUREtoWAD(struct WADINFO *info)
+{  int16_t t,tt,p,pat;
+   int32_t size,ofsTble;
+   int32_t NbOfTex;
 
-   if(TXUok!=TRUE) Bug("TX95", "TXUok");
+   if(TXUok!=true) Bug("TX95", "TXUok");
    if(TXUtexTop<1) Bug("TX96", "TxuNTx");
    /*count real textures*/
    NbOfTex=TXUrealTexture();
@@ -331,19 +331,19 @@ Int32 TXUwriteTEXTUREtoWAD(struct WADINFO *info)
 void TXUreadTEXTURE(
   const char *texture1_name,
   const char *Data,
-  Int32 DataSz,
+  int32_t DataSz,
   const char *Patch,
-  Int32 PatchSz,
-  Bool Redefn
+  int32_t PatchSz,
+  bool Redefn
 )
-{ Int32 Pos,  Numtex, Numpat, dummy;
+{ int32_t Pos,  Numtex, Numpat, dummy;
   /* texture data*/
-  Int16 t,p,i, Xsize, Ysize; /* size x and y  */
+  int16_t t,p,i, Xsize, Ysize; /* size x and y  */
   /* nb of patches used to build it */
   /* patch inside a texture */
-  Int16 Xofs, Yofs,Pindex;         /* x,y coordinate in texture space*/
+  int16_t Xofs, Yofs,Pindex;         /* x,y coordinate in texture space*/
   /* patch name index in PNAMES table */
-  Int32  MaxPindex;
+  int32_t  MaxPindex;
   static char tname[8];     /*texture name*/
   static char pname[8];     /*patch name*/
   size_t header_size		= 0;
@@ -487,12 +487,12 @@ void TXUreadTEXTURE(
   }
 }
 
-Bool TXUcheckTex(Int16 npatch,Int16  *PszX)
-{  Int16 t,tt,p,pat,col,top,found;
-   Int16 bit,C,b;        /*bit test*/
-   Int16 Meduza;
-   Bool Res=TRUE;
-   if(TXUok!=TRUE) Bug("TX23", "TXUok");
+bool TXUcheckTex(int16_t npatch,int16_t  *PszX)
+{  int16_t t,tt,p,pat,col,top,found;
+   int16_t bit,C,b;        /*bit test*/
+   int16_t Meduza;
+   bool Res=true;
+   if(TXUok!=true) Bug("TX23", "TXUok");
    Output("Checking textures\n");
    if(TXUtexTop<1) Bug("TX24", "TxuNTx");
    /* FIXME assign a code to this message */
@@ -501,7 +501,7 @@ Bool TXUcheckTex(Int16 npatch,Int16  *PszX)
    { if(TXUtex[t].Npatches<1)
      /* FIXME assign a code to this message */
      { Output("Warning: Texture %s is empty\n", lump_name (TXUtex[t].Name));
-       Res=FALSE;
+       Res=false;
      }
      top=pat+TXUtex[t].Npatches;
      if(top>TXUpatTop) Bug("TX25", "TxuP>D");
@@ -512,7 +512,7 @@ Bool TXUcheckTex(Int16 npatch,Int16  *PszX)
      if(C>1)
      { Output("Warning: Width of %s is not a power of 2\n",
 	 lump_name (TXUtex[t].Name)); /* FIXME assign a code to this message */
-       Res=FALSE;
+       Res=false;
      }
      /*
      ** check height
@@ -520,7 +520,7 @@ Bool TXUcheckTex(Int16 npatch,Int16  *PszX)
      if(TXUtex[t].szY>128)
      { Output("Warning: Height of %s is more than 128\n",
 	 lump_name (TXUtex[t].Name)); /* FIXME assign a code to this message */
-       Res=FALSE;
+       Res=false;
      }
      /*
      ** check patch for:
@@ -530,14 +530,14 @@ Bool TXUcheckTex(Int16 npatch,Int16  *PszX)
      Meduza=0;
      for(col=0;col<TXUtex[t].szX;col++)
      { if(Meduza<2)Meduza=0; /*no Meduza effect found yet*/
-       found=FALSE;
+       found=false;
        for(p=0; p<(TXUtex[t].Npatches); p++)
        { if(TXUpat[pat+p].Pindex>=npatch)
              Bug("TX26", "~TxuP>D");
          if(col>=TXUpat[pat+p].ofsX)
          { top=PszX[TXUpat[pat+p].Pindex]+TXUpat[pat+p].ofsX;
            if(col<top)
-           { found=TRUE;
+           { found=true;
              if(Meduza>=2)
                break; /*two patches on same column. Meduza effect*/
              else
@@ -545,11 +545,11 @@ Bool TXUcheckTex(Int16 npatch,Int16  *PszX)
            }
          }
        }
-       if(found==FALSE)
+       if(found==false)
        { /* FIXME assign a code to this message */
 	 Output("Warning: Empty column %d in texture %s\n",
 	   col, lump_name (TXUtex[t].Name));
-         Res=FALSE;
+         Res=false;
        }
      }
      if(Meduza>=2)  /*there is a colum with two patches*/
@@ -568,7 +568,7 @@ Bool TXUcheckTex(Int16 npatch,Int16  *PszX)
        { /* FIXME assign a code to this message */
 	 Output("Warning: texture %s is duplicated\n",
 	   lump_name (TXUtex[t].Name));
-         Res=FALSE;
+         Res=false;
        }
    }
    return Res;
@@ -581,9 +581,9 @@ Bool TXUcheckTex(Int16 npatch,Int16  *PszX)
 ** textures in order to list textures in levels
 */
 void TXUfakeTex(char Name[8])
-{  if(TXUok!=TRUE) Bug("TX27", "TXUok");
+{  if(TXUok!=true) Bug("TX27", "TXUok");
    /*if already exist*/
-   if(TXUexist(Name)==TRUE) return;
+   if(TXUexist(Name)==true) return;
    TXUtexCur=TXUtexTop;              /*set current entry*/
    TXUtexTop+=1;                     /*find a free position*/
    if(TXUtexTop>=TXUtexMax)
@@ -599,8 +599,8 @@ void TXUfakeTex(char Name[8])
 ** list the names of the textures defined
 */
 void TXUlistTex(void)
-{  Int16 t;
-   if(TXUok!=TRUE) Bug("TX28", "TXUok");
+{  int16_t t;
+   if(TXUok!=true) Bug("TX28", "TXUok");
    for (t= 0; t <TXUtexTop; t++)
    { if(TXUtex[t].Name[0]!='\0') 
        Output("%s\n", lump_name (TXUtex[t].Name)); 
@@ -611,11 +611,11 @@ void TXUlistTex(void)
 ** write texture as text file
 */
 void TXUwriteTexFile(const char *file)
-{  Int16 t,p,pat,top;
+{  int16_t t,p,pat,top;
    char pname[8];
    FILE *out;
 
-   if(TXUok!=TRUE)         Bug("TX29", "TXUok");
+   if(TXUok!=true)         Bug("TX29", "TXUok");
    if(TXUtexTop<1)         Bug("TX30", "TxunTx");
 
    out=fopen(file,FOPEN_WT);
@@ -646,18 +646,18 @@ void TXUwriteTexFile(const char *file)
 ** read texture as text file
 **
 */
-void TXUreadTexFile(const char *file,Bool Redefn)
-{  Int16 Pindex;
-   Int16 xsize=0,ysize=0,ofsx=0,ofsy=0;
+void TXUreadTexFile(const char *file,bool Redefn)
+{  int16_t Pindex;
+   int16_t xsize=0,ysize=0,ofsx=0,ofsy=0;
    char tname[8];  
    char pname[8];
-   Int16 t,bit,C,b;    /*to check Xsize*/
+   int16_t t,bit,C,b;    /*to check Xsize*/
    struct TXTFILE *TXT;
    TXT=TXTopenR(file, 0);
-/*   if(TXTbeginBloc(TXT,"TEXTURES")!=TRUE)ProgError("TX34", "Invalid texture file format: %s",file);
+/*   if(TXTbeginBloc(TXT,"TEXTURES")!=true)ProgError("TX34", "Invalid texture file format: %s",file);
 */
    for(t=0;t<MAXTEXTURES;t++)
-   { if(TXTreadTexDef(TXT,tname,&xsize,&ysize)==FALSE) break;
+   { if(TXTreadTexDef(TXT,tname,&xsize,&ysize)==false) break;
      /* check X size */
      if(xsize<0)
        ProgError("TX35", "Texture %s: width %d < 0",
@@ -687,7 +687,7 @@ void TXUreadTexFile(const char *file,Bool Redefn)
      {
        long npat = 0;
 
-       while (TXTreadPatchDef(TXT,pname,&ofsx,&ofsy) == TRUE)
+       while (TXTreadPatchDef(TXT,pname,&ofsx,&ofsy) == true)
        {
 	 if (npat == MAX_PATCHES)
 	   Warning("TX42",

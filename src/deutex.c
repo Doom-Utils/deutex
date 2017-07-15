@@ -41,8 +41,8 @@ GNU General Public License for more details.
 */
 
 
-#define VERBOSE_COMMENT                TRUE
-#define AUTO_BUG_INSERT                TRUE
+#define VERBOSE_COMMENT                true
+#define AUTO_BUG_INSERT                true
 
 #include "deutex.h"
 #include <limits.h>
@@ -69,13 +69,13 @@ static const char *DataDir=NULL;
 static const char *DoomDir=NULL;
 static char MainWAD[128];	/* name of the main wad file */
 static char WadInf[128];	/* name of the wadinfo file */
-static Bool WadInfOk;
-Int16 HowMuchJunk;		/* junk to add*/
+static bool WadInfOk;
+int16_t HowMuchJunk;		/* junk to add*/
 static IMGTYPE Picture;		/* save as PPM, BMP or GIF ? */
 static SNDTYPE Sound;		/* save as WAV, VOC or AU ? */
-static Bool fullSND;
-static Bool WSafe;
-static Bool George;
+static bool fullSND;
+static bool WSafe;
+static bool George;
 char trnR,trnG,trnB;
 picture_format_t picture_format         = PF_NORMAL;
 texture_format_t input_texture_format   = TF_NORMAL;
@@ -117,12 +117,12 @@ void COMitl (int argc, const char *argv[]);
 */
 void COMwintxn(int argc, const char *argv[])
 {  const char *num;
-   PrintInit(TRUE);                /*-out*/
+   PrintInit(true);                /*-out*/
    PrintVerbosity(3);                /*-v3*/
    DoomDir=argv[1];                /*doom*/
    DataDir=argv[2];                /*data*/
    MakeFileName(WadInf,DataDir,"","",argv[3],"TXT");
-   WadInfOk=TRUE;
+   WadInfOk=true;
    Select|= atoi(argv[4]);        /*select*/
    num = argv[5];                /*colour*/
    if(strlen(num)<6) ProgError("AA24", "Invalid colour \"%.128s\"", num);
@@ -135,7 +135,7 @@ void COMwintxn(int argc, const char *argv[])
 }
 
 void COMwintxm(int argc, const char *argv[])
-{  PrintInit(TRUE);                /*-out*/
+{  PrintInit(true);                /*-out*/
    PrintVerbosity(3);                /*-v3*/
    DoomDir=argv[1];                /*doom*/
    DataDir=".";
@@ -145,7 +145,7 @@ void COMwintxm(int argc, const char *argv[])
 }
 
 void COMwintex(int argc, const char *argv[])
-{  PrintInit(TRUE);                /*-out*/
+{  PrintInit(true);                /*-out*/
    PrintVerbosity(3);                /*-v3*/
    DoomDir=NULL;
    strncpy(MainWAD,argv[1],128);/*main*/
@@ -333,7 +333,7 @@ void COMscripts(int argc, const char *argv[])
 }
 
 void COMgeorge(int argc, const char *argv[])
-{ George=TRUE;
+{ George=true;
   Info("AA32", "Using S_END for sprites");
   (void)argc;(void)argv;
 }
@@ -346,15 +346,15 @@ void COMdebug(int argc, const char *argv[])
 {
 #include "color.h"
   static struct WADINFO iwad;
-  Int16 pnm;
-  char  *Colors; Int32 Pnamsz=0;
+  int16_t pnm;
+  char  *Colors; int32_t Pnamsz=0;
   iwad.ok=0;
   WADRopenR(&iwad,MainWAD);
   pnm=WADRfindEntry(&iwad,palette_lump);
   if(pnm<0)
     ProgError("GD04", "Can't find %s in Main WAD", lump_name (palette_lump));
   Colors=WADRreadEntry(&iwad,pnm,&Pnamsz);
-  COLinit(trnR,trnG,trnB,Colors,(Int16)Pnamsz, iwad.filename, palette_lump);
+  COLinit(trnR,trnG,trnB,Colors,(int16_t)Pnamsz, iwad.filename, palette_lump);
   Free(Colors);
   WADRclose(&iwad);
   PicDebug(file,DataDir,(argc<2)? "test":argv[1]);
@@ -391,7 +391,7 @@ void COMdir(int argc, const char *argv[])
 }
 
 void COMfullsnd(int argc, const char *argv[])
-{ fullSND=TRUE;
+{ fullSND=true;
   Info("AA46", "Saving sounds beyond declared length");
   (void)argc;(void)argv;
 }
@@ -414,7 +414,7 @@ void COMrate(int argc, const char *argv[])
 
 void COMstroy (int argc, const char *argv[])
 {
-  WSafe = FALSE;
+  WSafe = false;
   Info ("AA28", "Overwrite existing files");
   (void) argc;
   (void) argv;
@@ -622,7 +622,7 @@ void COMiwad(int argc, const char *argv[])
 
 void COMmake(int argc, const char *argv[])
 { const char *wadinf,*wadout;
-  if(WadInfOk==FALSE)
+  if(WadInfOk==false)
   { MakeFileName(WadInf,DataDir,"","","WADINFO","TXT");
   }
   if(argc<=2){wadinf=WadInf;wadout=argv[1];}
@@ -633,7 +633,7 @@ void COMmake(int argc, const char *argv[])
 
 void COMxtra(int argc, const char *argv[])
 { const char *wadinf, *wadin;
-  if(WadInfOk==FALSE)
+  if(WadInfOk==false)
   { MakeFileName(WadInf,DataDir,"","","WADINFO","TXT");
   }
   if(argc<=1){wadin=MainWAD;}else{wadin=argv[1];}
@@ -647,11 +647,11 @@ void COMget(int argc, const char *argv[])
 }
 
 void COMpackNorm(int argc, const char *argv[])
-{ XTRcompakWAD(DataDir,(argc>1)? argv[1]: MainWAD,(argc>2)? argv[2]:NULL,FALSE);
+{ XTRcompakWAD(DataDir,(argc>1)? argv[1]: MainWAD,(argc>2)? argv[2]:NULL,false);
 }
 
 void COMpackGfx(int argc, const char *argv[])
-{ XTRcompakWAD(DataDir,(argc>1)? argv[1]: MainWAD,(argc>2)? argv[2]:NULL,TRUE);
+{ XTRcompakWAD(DataDir,(argc>1)? argv[1]: MainWAD,(argc>2)? argv[2]:NULL,true);
 }
 
 void COMvoid(int argc, const char *argv[])
@@ -666,7 +666,7 @@ void COMusedtex(int argc, const char *argv[])
 void COMusedidx(int argc, const char *argv[])
 { const char *wadinf, *wadin;
   cusage_t *cusage = NULL;
-  if(WadInfOk==FALSE)
+  if(WadInfOk==false)
   { MakeFileName(WadInf,DataDir,"","","WADINFO","TXT");  /* Not used anyway */
   }
   if(argc<=1){wadin=MainWAD;}else{wadin=argv[1];}
@@ -876,13 +876,13 @@ int main (int argc, char *argv_non_const[])
    /*
    ** default parameters
    */
-   WadInfOk=FALSE;
-   George=FALSE;
+   WadInfOk=false;
+   George=false;
    Picture    = PICPPM;
    Sound      = SNDAU;
    trnR=0;trnG=47;trnB=47;
-   fullSND    = FALSE;
-   WSafe      = TRUE;
+   fullSND    = false;
+   WSafe      = true;
    HowMuchJunk= 0;
    Select     = 0;
    Type       = PWAD;
@@ -894,7 +894,7 @@ int main (int argc, char *argv_non_const[])
    /*
    ** print on screen or file?
    */
-   PrintInit(FALSE);
+   PrintInit(false);
    PrintVerbosity(2);
 
    /* Do a second pass through argv to catch options like --help that
@@ -968,7 +968,7 @@ int main (int argc, char *argv_non_const[])
        const char **w;
        for (w = wads; *w != NULL; w++)
        {
-	 if (MakeFileName (MainWAD, ".", "", "", *w, "wad") == TRUE)
+	 if (MakeFileName (MainWAD, ".", "", "", *w, "wad") == true)
 	 {
 	   gotit = 1;
 	   break;
@@ -978,7 +978,7 @@ int main (int argc, char *argv_non_const[])
        {
 	 for (w = wads; *w != NULL; w++)
 	 {
-	   if (MakeFileName (MainWAD, DoomDir, "", "", *w, "wad") == TRUE)
+	   if (MakeFileName (MainWAD, DoomDir, "", "", *w, "wad") == true)
 	   {
 	     gotit = 1;
 	     break;
@@ -989,7 +989,7 @@ int main (int argc, char *argv_non_const[])
        {
 	 for (w = wads; *w != NULL; w++)
 	 {
-	   if (MakeFileName (MainWAD, "/usr/share/games/doom", "", "", *w, "wad") == TRUE)
+	   if (MakeFileName (MainWAD, "/usr/share/games/doom", "", "", *w, "wad") == true)
 	   {
 	     gotit = 1;
 	     break;
@@ -1001,18 +1001,18 @@ int main (int argc, char *argv_non_const[])
 	      "Can't find any of doom.wad, doom2.wad, doompres.wad,"
 	      " heretic.wad, hexen.wad, strife1.wad");
 #if 0
-       if(    MakeFileName(MainWAD,DoomDir,"","","doompres","wad")!=TRUE
-	   && MakeFileName(MainWAD,DoomDir,"","","doom",    "wad")!=TRUE
-	   && MakeFileName(MainWAD,DoomDir,"","","doom2",   "wad")!=TRUE
-	   && MakeFileName(MainWAD,DoomDir,"","","heretic", "wad")!=TRUE
-	   && MakeFileName(MainWAD,DoomDir,"","","hexen",   "wad")!=TRUE
-	   && MakeFileName(MainWAD,DoomDir,"","","strife1", "wad")!=TRUE
-	   && MakeFileName(MainWAD,".",    "","","doompres","wad")!=TRUE
-	   && MakeFileName(MainWAD,".",    "","","doom",    "wad")!=TRUE
-	   && MakeFileName(MainWAD,".",    "","","doom2",   "wad")!=TRUE
-	   && MakeFileName(MainWAD,".",    "","","heretic", "wad")!=TRUE
-	   && MakeFileName(MainWAD,".",    "","","hexen",   "wad")!=TRUE
-	   && MakeFileName(MainWAD,".",    "","","strife1", "wad")!=TRUE)
+       if(    MakeFileName(MainWAD,DoomDir,"","","doompres","wad")!=true
+	   && MakeFileName(MainWAD,DoomDir,"","","doom",    "wad")!=true
+	   && MakeFileName(MainWAD,DoomDir,"","","doom2",   "wad")!=true
+	   && MakeFileName(MainWAD,DoomDir,"","","heretic", "wad")!=true
+	   && MakeFileName(MainWAD,DoomDir,"","","hexen",   "wad")!=true
+	   && MakeFileName(MainWAD,DoomDir,"","","strife1", "wad")!=true
+	   && MakeFileName(MainWAD,".",    "","","doompres","wad")!=true
+	   && MakeFileName(MainWAD,".",    "","","doom",    "wad")!=true
+	   && MakeFileName(MainWAD,".",    "","","doom2",   "wad")!=true
+	   && MakeFileName(MainWAD,".",    "","","heretic", "wad")!=true
+	   && MakeFileName(MainWAD,".",    "","","hexen",   "wad")!=true
+	   && MakeFileName(MainWAD,".",    "","","strife1", "wad")!=true)
 	 ;
 #endif
      }

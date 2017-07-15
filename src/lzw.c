@@ -52,15 +52,15 @@
 #define HSIZE  5003            /* 80% occupancy */
 
 typedef char   char_type;
-typedef Int16  code_int;  /*  2**BITS values  of type int, and also -1 */
-typedef Int32   count_int;
+typedef int16_t  code_int;  /*  2**BITS values  of type int, and also -1 */
+typedef int32_t   count_int;
 
 
 
-/*static Int16	table[2][(1<<BITS)];*/
-static Int16 *table[2];
-/*static Int16	stack[(1<<(BITS))*2];*/
-static Int16 *stack;
+/*static int16_t	table[2][(1<<BITS)];*/
+static int16_t *table[2];
+/*static int16_t	stack[(1<<(BITS))*2];*/
+static int16_t *stack;
 #endif
 
 
@@ -68,9 +68,9 @@ static Int16 *stack;
 #else
 void decompressInit(void)
 {  
-   table[0]=(Int16 *)Malloc(sizeof(Int16)*(1<<BITS));
-   table[1]=(Int16 *)Malloc(sizeof(Int16)*(1<<BITS));
-   stack=(Int16 *)Malloc(sizeof(Int16)*(1<<BITS)*2);
+   table[0]=(int16_t *)Malloc(sizeof(int16_t)*(1<<BITS));
+   table[1]=(int16_t *)Malloc(sizeof(int16_t)*(1<<BITS));
+   stack=(int16_t *)Malloc(sizeof(int16_t)*(1<<BITS)*2);
 }
 void decompressFree(void)
 {  
@@ -85,12 +85,12 @@ void decompressFree(void)
 #else
 /*static count_int htab [HSIZE];*/
 static count_int *htab=NULL;
-/*static unsigned Int16 codetab [HSIZE];*/
-static UInt16 *codetab=NULL;
+/*static unsigned int16_t codetab [HSIZE];*/
+static uint16_t *codetab=NULL;
 void compressInit(void)
 {  
    htab    =(count_int *)Malloc(sizeof(count_int)*HSIZE);
-   codetab =(UInt16 *)Malloc(sizeof(Int16)*HSIZE);
+   codetab =(uint16_t *)Malloc(sizeof(int16_t)*HSIZE);
 }
 void compressFree(void)
 {
@@ -102,7 +102,7 @@ static void output ( code_int code );
 static void cl_block ( void );
 static void cl_hash ( count_int hsize );
 static void char_init ( void );
-static void char_out ( Int16 c );
+static void char_out ( int16_t c );
 static void flush_char ( void );
 #endif
 
@@ -153,8 +153,8 @@ static void flush_char ( void );
 
 #if NEWGIFE
 #else
-static Int16 n_bits;                      /* number of bits/code */
-static Int16 maxbits;                	/* user settable max # bits/code */
+static int16_t n_bits;                      /* number of bits/code */
+static int16_t maxbits;                	/* user settable max # bits/code */
 static code_int maxcode;                /* maximum code, given n_bits */
 static code_int maxmaxcode; 		/* should NEVER generate this code */
 # define MAXCODE(n_bits)        	(((code_int) 1 << (n_bits)) - 1)
@@ -164,8 +164,8 @@ static code_int maxmaxcode; 		/* should NEVER generate this code */
 
 static code_int hsize;                 	/* for dynamic table sizing */
 
-static UInt32 cur_accum;
-static Int16 cur_bits;
+static uint32_t cur_accum;
+static int16_t cur_bits;
 
 /*
  * To save much memory, we overlay the table used by compress() with those
@@ -186,9 +186,9 @@ static code_int free_ent;              /* first unused entry */
  * block compression parameters -- after all codes are used up,
  * and compression rate changes, start over.
  */
-static Int16 clear_flg;
-static Int32 in_count;            /* length of input */
-static Int32 out_count;           /* # of codes output (for debugging) */
+static int16_t clear_flg;
+static int32_t in_count;            /* length of input */
+static int32_t out_count;           /* # of codes output (for debugging) */
 
 /*
  * compress stdin to stdout
@@ -206,21 +206,21 @@ static Int32 out_count;           /* # of codes output (for debugging) */
  * questions about this implementation to ames!jaw.
  */
 
-static Int16 g_init_bits;
+static int16_t g_init_bits;
 static FILE* g_outfile;
 
-static Int16 ClearCode;
-static Int16 EOFCode;
+static int16_t ClearCode;
+static int16_t EOFCode;
 
-void compress( Int16 init_bits, FILE *outfile, code_int (*ReadValue)(void))
+void compress( int16_t init_bits, FILE *outfile, code_int (*ReadValue)(void))
 {
-    register Int32 fcode;
+    register int32_t fcode;
     register code_int i /* = 0 */;
-    register Int16 c;
+    register int16_t c;
     register code_int ent;
     register code_int disp;
     register code_int hsize_reg;
-    register Int16 hshift;
+    register int16_t hshift;
 
     /*
      * Set up the globals:  g_init_bits - initial number of bits
@@ -241,8 +241,8 @@ void compress( Int16 init_bits, FILE *outfile, code_int (*ReadValue)(void))
     cur_accum = 0;
     cur_bits  = 0;
 
-    ClearCode = (Int16)(1 << (init_bits - 1));
-    EOFCode = (Int16)(ClearCode + 1);
+    ClearCode = (int16_t)(1 << (init_bits - 1));
+    EOFCode = (int16_t)(ClearCode + 1);
     free_ent = (code_int)(ClearCode + 2);
 
     char_init();
@@ -250,9 +250,9 @@ void compress( Int16 init_bits, FILE *outfile, code_int (*ReadValue)(void))
     ent = ReadValue();
 
     hshift = 0;
-    for ( fcode = (Int32) hsize;  fcode < 65536L; fcode *= 2L )
+    for ( fcode = (int32_t) hsize;  fcode < 65536L; fcode *= 2L )
       hshift++;
-    hshift = (Int16)(8 - hshift);      /* set hash code range bound */
+    hshift = (int16_t)(8 - hshift);      /* set hash code range bound */
 
     hsize_reg = hsize;
     cl_hash( (count_int) hsize_reg);            /* clear hash table */
@@ -262,14 +262,14 @@ void compress( Int16 init_bits, FILE *outfile, code_int (*ReadValue)(void))
 
     while ((c = ReadValue()) != EOF )
     {  ++in_count;
-       fcode = (Int32) (((Int32) c << maxbits) + ent);
+       fcode = (int32_t) (((int32_t) c << maxbits) + ent);
        i = (code_int)(((code_int)c << hshift) ^ ent);    /* xor hashing */
 
        if ( HashTabOf (i) == fcode )
        { ent = CodeTabOf (i);
          continue;
        }
-       else if ( (Int32)HashTabOf (i) < 0 )      /* empty slot */
+       else if ( (int32_t)HashTabOf (i) < 0 )      /* empty slot */
             goto nomatch;
        disp = (code_int)(hsize_reg - i);          /* secondary hash (after G. Knott) */
        if ( i == 0 )  disp = 1;
@@ -280,7 +280,7 @@ probe:
        {  ent = CodeTabOf (i);
           continue;
        }
-       if( (Int32)HashTabOf (i) > 0 ) goto probe;
+       if( (int32_t)HashTabOf (i) > 0 ) goto probe;
 nomatch:
        output ( (code_int) ent );
        out_count++;
@@ -307,18 +307,18 @@ nomatch:
  * Output the given code.
  * Inputs:
  *      code:   A n_bits-bit integer.  If == -1, then EOF.  This assumes
- *              that n_bits =< (Int32)wordsize - 1.
+ *              that n_bits =< (int32_t)wordsize - 1.
  * Outputs:
  *      Outputs code to the file.
  * Assumptions:
- *      Chars are 8 bits Int32.
+ *      Chars are 8 bits int32_t.
  * Algorithm:
  *      Maintain a BITS character long buffer (so that 8 codes will
  * fit in it exactly).  Use the VAX insv instruction to insert each
  * code in turn.  When the buffer fills up empty it and start over.
  */
 
-static UInt32 masks[] = { 0x0000, 0x0001, 0x0003, 0x0007, 0x000F,
+static uint32_t masks[] = { 0x0000, 0x0001, 0x0003, 0x0007, 0x000F,
                                   0x001F, 0x003F, 0x007F, 0x00FF,
                                   0x01FF, 0x03FF, 0x07FF, 0x0FFF,
                                   0x1FFF, 0x3FFF, 0x7FFF, 0xFFFF };
@@ -327,12 +327,12 @@ static void output( code_int  code)
 {
     cur_accum &= masks[ cur_bits ];
     if( cur_bits > 0 )
-      cur_accum |= ((Int32)code << cur_bits);
+      cur_accum |= ((int32_t)code << cur_bits);
     else
       cur_accum = code;
     cur_bits += n_bits;
     while( cur_bits >= 8 )
-    { char_out( (UInt16)(cur_accum & 0xff) );
+    { char_out( (uint16_t)(cur_accum & 0xff) );
       cur_accum >>= 8;
       cur_bits -= 8;
     }
@@ -357,7 +357,7 @@ static void output( code_int  code)
    if( code == EOFCode )
    { /* At EOF, write the rest of the buffer.*/
      while( cur_bits > 0 )
-     { char_out( (UInt16)(cur_accum & 0xff) );
+     { char_out( (uint16_t)(cur_accum & 0xff) );
        cur_accum >>= 8;
        cur_bits -= 8;
      }
@@ -378,8 +378,8 @@ static void cl_block ()             /* table clear for block compress */
 
 static void cl_hash(register count_int hsize)          /* reset code table */
 { count_int *htab_p = htab+(int)hsize;
-  register Int32 i;
-  register Int32 m1 = -1;
+  register int32_t i;
+  register int32_t m1 = -1;
   i = hsize - 16;
   do
   {  /* might use Sys V memset(3) here */
@@ -415,7 +415,7 @@ static void cl_hash(register count_int hsize)          /* reset code table */
 /*
  * Number of characters so far in this 'packet'
  */
-static Int16 a_count;
+static int16_t a_count;
 
 /*
  * Set up the 'byte output' routine
@@ -433,7 +433,7 @@ static char accum[ 256 ];
  * Add a character to the end of the current packet, and if it is 254
  * characters, flush the packet to disk.
  */
-static void char_out( Int16 c)
+static void char_out( int16_t c)
 {  accum[ a_count++ ] = (char)c;
    if( a_count >= 254 )
                 flush_char();
@@ -464,36 +464,36 @@ static void flush_char()
 
 #if NEWGIFD
 #else
-#define TRUE 1
-#define FALSE 0
+#define true 1
+#define false 0
 #define	ReadOK(file,buffer,len)	(fread(buffer, len, 1, file) == 1)
 
-static Int16 ZeroDataBlock = FALSE;
+static int16_t ZeroDataBlock = false;
 
-Int16 GetDataBlock(FILE *fd, unsigned char 	*buf)
+int16_t GetDataBlock(FILE *fd, unsigned char 	*buf)
 { unsigned char	count;
   if (! ReadOK(fd,&count,1))
   { /* pm_message("error in getting DataBlock size" ); */
     return -1;
   }
-  ZeroDataBlock = (count == 0)? TRUE :FALSE;
+  ZeroDataBlock = (count == 0)? true :false;
   if ((count != 0) && (! ReadOK(fd, buf, count)))
   { /* pm_message("error in reading DataBlock" ); */
     return -1;
   }
-  return (Int16)(count&0xFF);
+  return (int16_t)(count&0xFF);
 }
 
-Int16 GetCode(FILE *fd, Int16 code_size, Int16 flag)
+int16_t GetCode(FILE *fd, int16_t code_size, int16_t flag)
 {  static unsigned char	buf[280];
-   static Int16		curbit, lastbit, done, last_byte;
-   Int16			i, j, ret;
+   static int16_t		curbit, lastbit, done, last_byte;
+   int16_t			i, j, ret;
    unsigned char		count;
 
    if (flag)
    { curbit = 0;
      lastbit = 0;
-     done = FALSE;
+     done = false;
      return 0;
    }
 
@@ -505,10 +505,10 @@ Int16 GetCode(FILE *fd, Int16 code_size, Int16 flag)
      buf[0] = buf[last_byte-2];
      buf[1] = buf[last_byte-1];
      if ((count = (unsigned char)GetDataBlock(fd, buf+(2) )) == 0)
-			done = TRUE;
-     last_byte = (Int16)(2 + count);
-     curbit = (Int16)((curbit - lastbit) + 16);
-     lastbit = (Int16)((2+count)*8) ;
+			done = true;
+     last_byte = (int16_t)(2 + count);
+     curbit = (int16_t)((curbit - lastbit) + 16);
+     lastbit = (int16_t)((2+count)*8) ;
    }
 
    ret = 0;
@@ -518,24 +518,24 @@ Int16 GetCode(FILE *fd, Int16 code_size, Int16 flag)
    return ret;
 }
 
-Int16 LWZReadByte(FILE *fd, Int16 flag, Int16 input_code_size)
-{  static Int16	fresh = FALSE;
-   Int16		code, incode;
-   register Int16	i;
-   static Int16	code_size, set_code_size;
-   static Int16	max_code, max_code_size;
-   static Int16	firstcode, oldcode;
-   static Int16	clear_code, end_code;
-   static Int16      *sp;
+int16_t LWZReadByte(FILE *fd, int16_t flag, int16_t input_code_size)
+{  static int16_t	fresh = false;
+   int16_t		code, incode;
+   register int16_t	i;
+   static int16_t	code_size, set_code_size;
+   static int16_t	max_code, max_code_size;
+   static int16_t	firstcode, oldcode;
+   static int16_t	clear_code, end_code;
+   static int16_t      *sp;
    if (flag)
    { set_code_size = input_code_size;
-     code_size = (Int16)(set_code_size+1);
-     clear_code = (Int16)(1 << set_code_size) ;
-     end_code = (Int16)(clear_code + 1);
-     max_code_size = (Int16)(2*clear_code);
-     max_code = (Int16)(clear_code+2);
-     GetCode(fd, 0, TRUE);
-     fresh = TRUE;
+     code_size = (int16_t)(set_code_size+1);
+     clear_code = (int16_t)(1 << set_code_size) ;
+     end_code = (int16_t)(clear_code + 1);
+     max_code_size = (int16_t)(2*clear_code);
+     max_code = (int16_t)(clear_code+2);
+     GetCode(fd, 0, true);
+     fresh = true;
      for (i = 0; i < clear_code; ++i)
      { table[0][i] = 0;
        table[1][i] = i;
@@ -546,15 +546,15 @@ Int16 LWZReadByte(FILE *fd, Int16 flag, Int16 input_code_size)
      return 0;
    }
    else if (fresh)
-   { fresh = FALSE;
+   { fresh = false;
      do
-     {  firstcode = oldcode = GetCode(fd, code_size, FALSE);
+     {  firstcode = oldcode = GetCode(fd, code_size, false);
      } while (firstcode == clear_code);
      return firstcode;
    }
    if (sp > stack) return *--sp;
 
-   while ((code = GetCode(fd, code_size, FALSE)) >= 0)
+   while ((code = GetCode(fd, code_size, false)) >= 0)
    { if (code == clear_code)
      { for (i = 0; i < clear_code; ++i)
        { table[0][i] = 0;
@@ -562,15 +562,15 @@ Int16 LWZReadByte(FILE *fd, Int16 flag, Int16 input_code_size)
        }
        for (; i < (1<<BITS); ++i)
          table[0][i] = table[1][i] = 0;
-       code_size = (Int16)(set_code_size+1);
-       max_code_size = (Int16)(2*clear_code);
-       max_code = (Int16)(clear_code+2);
+       code_size = (int16_t)(set_code_size+1);
+       max_code_size = (int16_t)(2*clear_code);
+       max_code = (int16_t)(clear_code+2);
        sp = stack;
-       firstcode = oldcode = GetCode(fd, code_size, FALSE);
+       firstcode = oldcode = GetCode(fd, code_size, false);
        return firstcode;
      }
      else if (code == end_code)
-     {  Int16		count;
+     {  int16_t		count;
 	unsigned char	buf[260];
 
 	if (ZeroDataBlock) return -2;

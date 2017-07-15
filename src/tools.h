@@ -38,8 +38,8 @@ char *lump_name (const char *name);
 char *short_dump (const char *data, size_t size);
 const char *quotechar (char c);
 
-void PrintInit(Bool asFile);
-void PrintVerbosity(Int16 level);
+void PrintInit(bool asFile);
+void PrintVerbosity(int16_t level);
 void PrintExit(void);
 
 void ProgErrorCancel(void);
@@ -65,12 +65,12 @@ void Detail (const char *code, const char *fmt, ...); /*technical details*/
 void ToLowerCase(char *file);
 void MakeDir(char file[128], const char *path, const char *dir, const char
     *sdir);
-Bool MakeFileName(char file[128], const char *path, const char *dir, const
+bool MakeFileName(char file[128], const char *path, const char *dir, const
     char *sdir, const char *name, const char *extens);
 void GetNameOfWAD(char name[8], const char *path);
-Int16 Chsize(int handle,Int32 newsize);
-Int32 GetFileTime(const char *path);
-void SetFileTime(const char *path, Int32 time);
+int16_t Chsize(int handle,int32_t newsize);
+int32_t GetFileTime(const char *path);
+void SetFileTime(const char *path, int32_t time);
 void Unlink(const char *file);
 void Memcpy (void  *dest,const void  *src, long n);
 void Memset (void  *dest,char car, long n);

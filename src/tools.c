@@ -57,12 +57,12 @@ typedef struct
 
 static const type_check_t type_checks[] =
 {
-  { "Int8",   1, sizeof (Int8)   },
-  { "Int16",  2, sizeof (Int16)  },
-  { "Int32",  4, sizeof (Int32)  },
-  { "UInt8",  1, sizeof (UInt8)  },
-  { "UInt16", 2, sizeof (UInt16) },
-  { "UInt32", 4, sizeof (UInt32) }
+  { "int8_t",   1, sizeof (int8_t)   },
+  { "int16_t",  2, sizeof (int16_t)  },
+  { "int32_t",  4, sizeof (int32_t)  },
+  { "uint8_t",  1, sizeof (uint8_t)  },
+  { "uint16_t", 2, sizeof (uint16_t) },
+  { "uint32_t", 4, sizeof (uint32_t) }
 };
 
 void check_types (void)
@@ -83,9 +83,9 @@ void check_types (void)
 ** Resize a file
 ** returns   0 if okay    -1 if failed.
 */
-Int16 Chsize(int handle,Int32 newsize)
+int16_t Chsize(int handle,int32_t newsize)
 {
-  return (Int16)ftruncate(handle, newsize);
+  return (int16_t)ftruncate(handle, newsize);
 }
 
 /*
@@ -98,8 +98,8 @@ void Unlink(const char *file)
 /*
 ** Get a file time stamp. (date of last modification)
 */
-Int32 GetFileTime(const char *path)
-{ Int32 time;
+int32_t GetFileTime(const char *path)
+{ int32_t time;
   struct stat statbuf;
   stat(path,&statbuf);
   time =statbuf.st_ctime;
@@ -108,7 +108,7 @@ Int32 GetFileTime(const char *path)
 /*
 ** Set a file time stamp.
 */
-void SetFileTime(const char *path, Int32 time)
+void SetFileTime(const char *path, int32_t time)
 {
   struct utimbuf stime;
   stime.modtime=stime.actime=time;
@@ -182,9 +182,9 @@ void Free( void  *ptr)
 ** Use only lower case file names
 */
 void ToLowerCase(char *file)
-{ Int16 i;
+{ int16_t i;
   for(i=0;(i<128)&&(file[i]!='\0');i++)
-         file[i]=tolower((((Int16)file[i])&0xFF));
+         file[i]=tolower((((int16_t)file[i])&0xFF));
 }
 
 static void NameDir(char file[128], const char *path, const char *dir, const
@@ -210,9 +210,9 @@ void MakeDir(char file[128], const char *path, const char *dir, const char
 
 /*
 ** Create a file name, by concatenation
-** returns TRUE if file exists FALSE otherwise
+** returns true if file exists false otherwise
 */
-Bool MakeFileName(char file[128], const char *path, const char *dir, const
+bool MakeFileName(char file[128], const char *path, const char *dir, const
     char *sdir, const char *name, const char *extens)
 {  FILE *fp;
    char name2[8];  /* AYM 1999-01-13: keep checker happy */
@@ -253,16 +253,16 @@ Bool MakeFileName(char file[128], const char *path, const char *dir, const
    if(fp!=NULL)
    { fclose(fp);  /* AYM 1999-01-??: fclose() used to be called even if
 		     fopen() had returned NULL! It gave beautiful segfaults. */
-     return TRUE;
+     return true;
    }
-   return FALSE;
+   return false;
 }
 /*
 ** Get the root name of a WAD file
 */
 void GetNameOfWAD(char name[8], const char *path)
-{ Int16 n, nam,len;
-  len=(Int16)strlen(path);
+{ int16_t n, nam,len;
+  len=(int16_t)strlen(path);
   /*find end of DOS or Unix path*/
   for(nam=n=0;n<len;n++)
     switch(path[n])
@@ -289,10 +289,10 @@ void GetNameOfWAD(char name[8], const char *path)
 
 /* convert 8 byte string to upper case, 0 padded*/
 void Normalise(char dest[8], const char *src)  /*strupr*/
-{ Int16 n;Bool pad=FALSE; char c='A';
+{ int16_t n;bool pad=false; char c='A';
   for(n=0;n<8;n++)
-  { c= (pad==TRUE)? '\0': src[n];
-	 if(c=='\0')   pad=TRUE;
+  { c= (pad==true)? '\0': src[n];
+	 if(c=='\0')   pad=true;
 	 else c=(isprint(c))? toupper(c) : '*';
 	 dest[n] = c;}
 }
@@ -435,8 +435,8 @@ const char *quotechar (char c)
 /*
 ** Output and Error handling
 */
-static Bool asFile=FALSE;
-static Int16 Verbosity=2;
+static bool asFile=false;
+static int16_t Verbosity=2;
 static FILE *Stdout;  /*command output*/
 static FILE *Stderr;  /*errors*/
 static FILE *Stdwarn;  /*warningss*/
@@ -447,12 +447,12 @@ static FILE *Stdinfo; /*infos*/
 #define stdout_  (Stdout  != NULL ? Stdout  : stdout)
 #define stdwarn_ (Stdwarn != NULL ? Stdwarn : stderr)
 
-void PrintInit(Bool asfile)
+void PrintInit(bool asfile)
 {
   /*clear a previous call*/
   PrintExit();
   /* choose */
-  if(asfile==TRUE)
+  if(asfile==true)
   { if((Stdout=fopen("output.txt",FOPEN_WT))==NULL)
         ProgError ("DI10", "output.txt: %s", strerror (errno));
     if((Stderr=fopen("error.txt",FOPEN_WT))==NULL)
@@ -470,11 +470,11 @@ void PrintInit(Bool asfile)
   }
   asFile=asfile;
 }
-void PrintVerbosity(Int16 level)
+void PrintVerbosity(int16_t level)
 { Verbosity=(level<0)? 0: (level>4)? 4:level;
 }
 void PrintExit(void)
-{ if(asFile==TRUE)
+{ if(asFile==true)
   { fclose(Stdout);
     fclose(Stderr);
     /*fclose(Stdinfo);*/
@@ -658,7 +658,7 @@ void Detail (const char *code, const char *fmt, ...)
 }
 
 #if 0
-Int16 NbP=0;
+int16_t NbP=0;
 void Progress(void)
 { NbP++;
   if(NbP&0xF==0) fprintf(stdinfo_,".");

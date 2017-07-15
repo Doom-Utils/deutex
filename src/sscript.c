@@ -50,11 +50,11 @@ static int mem_is_zero (const char *buf, size_t buf_size);
 /*
  *	sscript_save - save a script lump to file
  */
-int sscript_save (struct WADINFO *wad, Int16 n, const char *file)
+int sscript_save (struct WADINFO *wad, int16_t n, const char *file)
 {
   FILE *fp = NULL;
   unsigned char *data = NULL;
-  Int32 size = 0;
+  int32_t size = 0;
   const char *lumpname = wad->dir[n].name;
 
   data = (unsigned char *) WADRreadEntry (wad, n, &size);

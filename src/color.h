@@ -20,16 +20,16 @@ GNU General Public License for more details.
 
 
 /*init colors before any operation*/
-void COLinit( UInt8 invR, UInt8 invG, UInt8 invB,char  *Colors,Int16 Colsz,
+void COLinit( uint8_t invR, uint8_t invG, uint8_t invB,char  *Colors,int16_t Colsz,
     const char *pathname, const char *lumpname);
-void COLinitAlt (char *_titlepal_data, Int32 _titlepal_size);
+void COLinitAlt (char *_titlepal_data, int32_t _titlepal_size);
 void COLfree(void);
 
 
 /*cross reference for picture.c only*/
-struct PIXEL{ UInt8 R; UInt8 G; UInt8 B;};
-UInt8 COLindex(UInt8 R, UInt8 G, UInt8 B,UInt8 idx);
-UInt8 COLinvisible(void);
+struct PIXEL{ uint8_t R; uint8_t G; uint8_t B;};
+uint8_t COLindex(uint8_t R, uint8_t G, uint8_t B,uint8_t idx);
+uint8_t COLinvisible(void);
 struct PIXEL *COLdoomPalet(void);
 struct PIXEL *COLaltPalet(void);
 /*end of cross reference for picture.c*/

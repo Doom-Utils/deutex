@@ -24,10 +24,10 @@ GNU General Public License for more details.
 */
 struct TXTFILE
 { FILE *fp;
-  Int16 Lines;
-  Int16 LastChar;
-  Int16 SectionStart;
-  Int16 SectionEnd;
+  int16_t Lines;
+  int16_t LastChar;
+  int16_t SectionStart;
+  int16_t SectionEnd;
   char Section[8];
   char pathname[1];
 };
@@ -46,19 +46,19 @@ void   TXTcloseR(struct TXTFILE *TXT);
 /*
 ** To read entries
 */
-Bool   TXTskipComment(struct TXTFILE *TXT);
-Bool   TXTseekSection(struct TXTFILE *TXT,const char *def);
-Bool   TXTentryParse(char *name,char *filenam,Int16 *x,Int16
-    *y,Bool *repeat, struct TXTFILE *TXT, Bool XY);
+bool   TXTskipComment(struct TXTFILE *TXT);
+bool   TXTseekSection(struct TXTFILE *TXT,const char *def);
+bool   TXTentryParse(char *name,char *filenam,int16_t *x,int16_t
+    *y,bool *repeat, struct TXTFILE *TXT, bool XY);
 /*
 ** To read textures
 */
-Bool   TXTreadTexDef(struct TXTFILE *TXT,char name[8],Int16 *szx,Int16 *szy);
-Bool   TXTreadPatchDef(struct TXTFILE *TXT,char name[8],Int16 *ofsx,Int16 *ofsy);
+bool   TXTreadTexDef(struct TXTFILE *TXT,char name[8],int16_t *szx,int16_t *szy);
+bool   TXTreadPatchDef(struct TXTFILE *TXT,char name[8],int16_t *ofsx,int16_t *ofsy);
 /*
 ** To read PC sounds
 */
-Int16  TXTreadShort(struct TXTFILE *TXT);
+int16_t  TXTreadShort(struct TXTFILE *TXT);
 
 
 /*
@@ -71,7 +71,7 @@ void   TXTcloseW(struct TXTFILE *TXT);
 */
 void TXTaddSection(struct TXTFILE *TXT,const char *def);
 void TXTaddEntry(struct TXTFILE *TXT,const char *name,const char
-    *filenam,Int16 x,Int16 y,Bool repeat, Bool XY);
+    *filenam,int16_t x,int16_t y,bool repeat, bool XY);
 void TXTaddComment(struct TXTFILE *TXT,const char *text);
 void TXTaddEmptyLine (struct TXTFILE *TXT);
 

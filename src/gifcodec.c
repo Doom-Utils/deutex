@@ -35,43 +35,43 @@
 
 
 static void Enc_clear(void);
-static void putCode(Int16 code);
-static Int16 flush(void);
-static Int16 findStr(Int16 pfx, Int16 sfx);
-static void putCode(Int16 code);
-static Int16 putbyte(Int16 byt);
+static void putCode(int16_t code);
+static int16_t flush(void);
+static int16_t findStr(int16_t pfx, int16_t sfx);
+static void putCode(int16_t code);
+static int16_t putbyte(int16_t byt);
 
 
-static UInt8 buffer[255]; /* the write buffer */
+static uint8_t buffer[255]; /* the write buffer */
 
 
 /*
   tables
 */
-static Int16   *codes; /* the code entry column of the table */
-static Int16   *prefix; /* the prefix entry column of the table */
-static Int16   *suffix; /* the suffix entry column of the table  */
+static int16_t   *codes; /* the code entry column of the table */
+static int16_t   *prefix; /* the prefix entry column of the table */
+static int16_t   *suffix; /* the suffix entry column of the table  */
 /*
   codes
 */
-static Int16   clrc; /* the value of the clearcode (the minsize + 1)  */
-static Int16   endc; /* the value of the endcode (the minsize + 2)  */
+static int16_t   clrc; /* the value of the clearcode (the minsize + 1)  */
+static int16_t   endc; /* the value of the endcode (the minsize + 2)  */
 /*
   control
 */
-static Int16   nroots;   /* how many codes are already in use = bitlength of the pixels*/
+static int16_t   nroots;   /* how many codes are already in use = bitlength of the pixels*/
 		         /* 1 << pixelsize */
-static Int16   minsize;  /* the minimum size for the first code (the highest value for the bitlength of the pixels*/
-static Int16   cursize;  /* the current bitlength being used in the codes */
-static Int16   maxsize;  /* the maximum bitlength that can be used (8) */
+static int16_t   minsize;  /* the minimum size for the first code (the highest value for the bitlength of the pixels*/
+static int16_t   cursize;  /* the current bitlength being used in the codes */
+static int16_t   maxsize;  /* the maximum bitlength that can be used (8) */
 
-static Int16   curcode;  /* the next entry value that is available */
-static Int16   maxcode;  /*  the maximum entry value of the table */
-static Int16   bytecode; /* last code read or written */
-static Int16   bytemask; /* mask for bytecode */
-static Int16   nbytes;   /* COD the number of bytes that have been written */
+static int16_t   curcode;  /* the next entry value that is available */
+static int16_t   maxcode;  /*  the maximum entry value of the table */
+static int16_t   bytecode; /* last code read or written */
+static int16_t   bytemask; /* mask for bytecode */
+static int16_t   nbytes;   /* COD the number of bytes that have been written */
                          /* DEC bytes in buffer       */
-static Int16   nbits;    /* COD the number of bits being used in the highest empty slot */
+static int16_t   nbits;    /* COD the number of bits being used in the highest empty slot */
 			 /* DEC current element width */
 
 #endif /*NEWGIFE NEWGIFD*/
@@ -82,17 +82,17 @@ static Int16   nbits;    /* COD the number of bits being used in the highest emp
 */
 #if NEWGIFE
 FILE* outfile; /* the file to be written to  */
-static Int16   chrc; /* COD  the current byte being read */
-static Int16   strc; /* COD  the number of the last entry to have a match */
-static Int16   started;  /* a boolean variable used to see if this is the first string */
+static int16_t   chrc; /* COD  the current byte being read */
+static int16_t   strc; /* COD  the number of the last entry to have a match */
+static int16_t   started;  /* a boolean variable used to see if this is the first string */
 
 /* Initializes all the variables (yup, all them up there!) */
 
-Int16 InitEncoder(FILE* out, Int16 bpp)
+int16_t InitEncoder(FILE* out, int16_t bpp)
 {
-  codes  = (Int16 *) malloc(sizeof(Int16)*HASHSIZE);
-  prefix = (Int16 *) malloc(sizeof(Int16)*HASHSIZE);
-  suffix = (Int16 *) malloc(sizeof(Int16)*HASHSIZE);
+  codes  = (int16_t *) malloc(sizeof(int16_t)*HASHSIZE);
+  prefix = (int16_t *) malloc(sizeof(int16_t)*HASHSIZE);
+  suffix = (int16_t *) malloc(sizeof(int16_t)*HASHSIZE);
   if((codes == NULL) || (prefix == NULL) || (suffix == NULL))
     return BAD_ALLOC;
 
@@ -111,7 +111,7 @@ Int16 InitEncoder(FILE* out, Int16 bpp)
   putCode(clrc);
   return OK;
 }
-Int16 ExitEncoder(void)
+int16_t ExitEncoder(void)
 { flush();
   free(codes);
   free(prefix);
@@ -121,9 +121,9 @@ Int16 ExitEncoder(void)
 /* Encodes one string of bytes and writes to the current file pointer */
 /* I will comment this part heavily to illustrate the process...      */
 
-Int16 Encode(UInt8  *buf, Int32 size)
+int16_t Encode(uint8_t  *buf, int32_t size)
 {
-   Int16 pos = 0, index;
+   int16_t pos = 0, index;
 
    /* if this is the first table to be used, setup some variables we 
       need such as the table's first entry: the first byte in the 
@@ -185,7 +185,7 @@ Int16 Encode(UInt8  *buf, Int32 size)
 
 /* close the table: */
 
-Int16 flush(void)
+int16_t flush(void)
 {
    putCode(endc); /* put an endcode in the file */
    if(bytemask != 1) /* if the last string was less than 256 bytes */
@@ -206,10 +206,10 @@ Int16 flush(void)
 /* put the code in.  This is tricky because we use an int and we might have
 	 a code that is only using 7 or less bits, we must compensate */
 
-void putCode(Int16 code)
+void putCode(int16_t code)
 {
-   Int16 mask = 1;
-   Int16 n = nbits;
+   int16_t mask = 1;
+   int16_t n = nbits;
    while(n-- >0)
    {
      if(code & mask) bytecode |= bytemask;
@@ -227,7 +227,7 @@ void putCode(Int16 code)
 
 void Enc_clear(void)
 {
-  Int16 i;
+  int16_t i;
   cursize = minsize;
   nbits = cursize;
   curcode = endc + 1;
@@ -237,10 +237,10 @@ void Enc_clear(void)
 
 /* see if a code and byte combo are already in the table */
 
-Int16 findStr(Int16 pfx, Int16 sfx)
+int16_t findStr(int16_t pfx, int16_t sfx)
 {
-  Int16 i = (sfx << HASHBITS) ^ pfx; /* don't ask... */
-  Int16 di = (i==0) ? 1: HASHSIZE - i; /* oy! */
+  int16_t i = (sfx << HASHBITS) ^ pfx; /* don't ask... */
+  int16_t di = (i==0) ? 1: HASHSIZE - i; /* oy! */
   while(1) /* uhh... don't stop? */
   {
     if(codes[i] == EMPTY)  break;/* are we at the end of the list? */    
@@ -257,7 +257,7 @@ Int16 findStr(Int16 pfx, Int16 sfx)
    This coding by block is valid. it was tested OK.
 */
 
-Int16 putbyte(Int16 byt)
+int16_t putbyte(int16_t byt)
 {
   buffer[nbytes] = byt; /* adding the byte to the buffer */
   nbytes++;
@@ -285,29 +285,29 @@ Int16 putbyte(Int16 byt)
 #if NEWGIFD
 #define MAX_BUF_SIZE 100
 
-static Int16  bitcode;   /* DEC last bit code read */
-static Int16  bitmask;   /* DEC mask for bitcode  */
-static Int16  curbyte;   /* DEC index of current byte */
-static Int16  capacity;  /* DEC 1 << 12  */
-static Int16  rwbytes;   /* DEC bytes per scan line */
+static int16_t  bitcode;   /* DEC last bit code read */
+static int16_t  bitmask;   /* DEC mask for bitcode  */
+static int16_t  curbyte;   /* DEC index of current byte */
+static int16_t  capacity;  /* DEC 1 << 12  */
+static int16_t  rwbytes;   /* DEC bytes per scan line */
 static FILE  *ifile;     /* input file */
-static Int16  stkp;      /* stack pointer */
-static UInt8 *stack;
-static UInt8 *bytes;
-static Int16  newc;  /* DEC  new code */
-static Int16  oldc;  /* DEC  old code */
+static int16_t  stkp;      /* stack pointer */
+static uint8_t *stack;
+static uint8_t *bytes;
+static int16_t  newc;  /* DEC  new code */
+static int16_t  oldc;  /* DEC  old code */
 /*! David
   suffix is now an INT16, not a unsigned char as before
   cond was unused
 */
 
 void reset_decoder(void);
-Int16 getcode( void );
-Int16 getbyte( void );
+int16_t getcode( void );
+int16_t getbyte( void );
 
 
 /*            Decoder( ), iCodeStream( infile, cobits+1 )*/
-Int16 InitDecoder( FILE* infile, Int16 codebits, Int16 rowsize)
+int16_t InitDecoder( FILE* infile, int16_t codebits, int16_t rowsize)
 {  minsize  = codebits + 1;
    maxsize  = 12;
    nroots   = 1 << codebits; /*cobits=8*/
@@ -321,10 +321,10 @@ Int16 InitDecoder( FILE* infile, Int16 codebits, Int16 rowsize)
    bitcode  = 0;
    bitmask  = 0x01;
 
-   prefix   = (Int16*) malloc(capacity);
-   suffix   = (Int16*) malloc(capacity);
-   stack    = (UInt8*) malloc(capacity);
-   bytes    = (UInt8*) malloc(rwbytes);
+   prefix   = (int16_t*) malloc(capacity);
+   suffix   = (int16_t*) malloc(capacity);
+   stack    = (uint8_t*) malloc(capacity);
+   bytes    = (uint8_t*) malloc(rwbytes);
    if( (prefix==NULL) || (suffix==NULL) || (stack==NULL) || (bytes==NULL) )
       return BAD_ALLOC;
    reset_decoder();
@@ -340,7 +340,7 @@ void ExitDecoder()
   free(bytes);
 }
 
-Int16 push( Int16 s )
+int16_t push( int16_t s )
 { if( stkp < capacity )
   {
      stack[stkp++] = s;
@@ -349,9 +349,9 @@ Int16 push( Int16 s )
   return OVERFLOW;
 }
 
-Int16 Decode(UInt8  *buf, Int16 npxls )
-{ Int16 nb = 0;
-  Int16 cond, code;
+int16_t Decode(uint8_t  *buf, int16_t npxls )
+{ int16_t nb = 0;
+  int16_t cond, code;
   /* empty stack into scan line buffer */
   while( (stkp > 0) && (nb < rwbytes) )
     bytes[nb++] = stack[--stkp];
@@ -439,7 +439,7 @@ Int16 Decode(UInt8  *buf, Int16 npxls )
 
 void Dec_clear(void)
 {
-  Int16 i;
+  int16_t i;
   cursize = minsize;
   nbits = cursize;
   clrc = nroots;
@@ -456,8 +456,8 @@ void Dec_clear(void)
 
 
 
-Int16 getcode( void )
-{ Int16 n;
+int16_t getcode( void )
+{ int16_t n;
   bitcode = 0;
   bitmask = 1;
 /*! David, one only write that kind of stuff at the IOCCC.
@@ -479,7 +479,7 @@ Int16 getcode( void )
 /*
   get a byte block
 */
-Int16 getbyte( void )
+int16_t getbyte( void )
 {
   if( curbyte >= nbytes ) /*need a new block*/
   {

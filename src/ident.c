@@ -89,7 +89,7 @@ int IDENTlevelPart (const char *name)
   return -1;
 }
 
-Int16 IDENTlevel(const char *buffer)
+int16_t IDENTlevel(const char *buffer)
 {
   if (buffer[0] == 'E'
       && buffer[1] >= '1' && buffer[1] <= '9'
@@ -117,7 +117,7 @@ Int16 IDENTlevel(const char *buffer)
       && buffer[2]=='P'
       && buffer[3]>='0' && buffer[3]<='9'
       && buffer[4]>='0' && buffer[4]<='9')
-    return (Int16)((buffer[3]&0xF)*10)+(buffer[4]&0xF);
+    return (int16_t)((buffer[3]&0xF)*10)+(buffer[4]&0xF);
 
   return -1;
 }
@@ -125,7 +125,7 @@ Int16 IDENTlevel(const char *buffer)
 /*
 ** calculate default insertion point
 */
-Int16 IDENTinsrX(PICTYPE type,Int16 insrX,Int16 szx)
+int16_t IDENTinsrX(PICTYPE type,int16_t insrX,int16_t szx)
 {
   if(insrX!=INVALIDINT)
     if(insrX > -4096)
@@ -135,24 +135,24 @@ Int16 IDENTinsrX(PICTYPE type,Int16 insrX,Int16 szx)
   switch(type)
   {
     case PPATCH:       /*mid, lower-5 ????*/
-      return (Int16)(szx/2);
+      return (int16_t)(szx/2);
     case PSPRIT:      /*mid, lower-5*/
-      return (Int16)(szx/2);
+      return (int16_t)(szx/2);
     case PWEAPN:      /*absolute, in 320*200*/
-      return (Int16)(-(320-szx)/2);   /* -160+X??*/
+      return (int16_t)(-(320-szx)/2);   /* -160+X??*/
     case PFLAT:       /*no insertion point*/
     case PLUMP:       /*no insertion point*/
     case PWALL:       /*no insertion point*/
-      return (Int16)0;
+      return (int16_t)0;
     case PGRAPH:    /*0,0 by default*/
-      return (Int16)0;
+      return (int16_t)0;
     default:
       Bug("FB25", "Idinx (%d)", (int) type);
   }
-  return (Int16)0;
+  return (int16_t)0;
 }
 
-Int16 IDENTinsrY(PICTYPE type,Int16 insrY,Int16 szy)
+int16_t IDENTinsrY(PICTYPE type,int16_t insrY,int16_t szy)
 { 
   if(insrY!=INVALIDINT)
     if(insrY > -4096)
@@ -162,17 +162,17 @@ Int16 IDENTinsrY(PICTYPE type,Int16 insrY,Int16 szy)
   switch(type)
   {
     case PPATCH:       /*mid, lower-5 ????*/
-      return (Int16)(szy-5);
+      return (int16_t)(szy-5);
     case PSPRIT:      /*mid, lower-5*/
-      return (Int16)(szy-5);
+      return (int16_t)(szy-5);
     case PWEAPN:      /*absolute, in 320*200*/
-      return (Int16)(-(200-szy));
+      return (int16_t)(-(200-szy));
     case PFLAT:       /*no insertion point*/
     case PLUMP:       /*no insertion point*/
     case PWALL:       /*no insertion point*/
-      return (Int16)0;
+      return (int16_t)0;
     case PGRAPH:    /*0,0 by default*/
-      return (Int16)0;
+      return (int16_t)0;
     default:
       Bug("FB35", "Idiny (%d)", (int) type);
   }
@@ -186,15 +186,15 @@ Int16 IDENTinsrY(PICTYPE type,Int16 insrY,Int16 szy)
  *	and return the probability that it contained a picture,
  *	from 0 to 100.
  */
-int IDENTgraphic(struct WADINFO *info,Int16 n)
+int IDENTgraphic(struct WADINFO *info,int16_t n)
 {
-  Int32 start=info->dir[n].start;
-  Int32 size=info->dir[n].size;
+  int32_t start=info->dir[n].start;
+  int32_t size=info->dir[n].size;
   unsigned char *buf;
   pic_head_t h;
   int x;
   int bad_order = 0;
-  Int32 ofs_prev = 0xdeadbeef;
+  int32_t ofs_prev = 0xdeadbeef;
 
   /* Slurp the whole lump. */
   buf = Malloc (size);
@@ -212,13 +212,13 @@ int IDENTgraphic(struct WADINFO *info,Int16 n)
   bad_order = 0;
   for (x = 0; x < h.width; x++)
   {
-    Int32 ofs = 0xdeadbeef;
+    int32_t ofs = 0xdeadbeef;
     
     /* Cut and pasted from picture.c. Bleagh. */
     if (h.colofs_size == 4)
     {
-       Int32 o;
-       read_i32_le (((const Int32 *) h.colofs) + x, &o);
+       int32_t o;
+       read_i32_le (((const int32_t *) h.colofs) + x, &o);
        ofs = o;
     }
     else if (h.colofs_size == 2)
@@ -229,8 +229,8 @@ int IDENTgraphic(struct WADINFO *info,Int16 n)
 	  Doom PR treat the offset as signed, which is why some
 	  textures appear with tutti-frutti on the right. -- AYM
 	  1999-09-18 */
-       UInt16 o;
-       read_i16_le (((const Int16 *) h.colofs) + x, (Int16 *) &o);
+       uint16_t o;
+       read_i16_le (((const int16_t *) h.colofs) + x, (int16_t *) &o);
        ofs = o;
     }
     else
@@ -254,7 +254,7 @@ int IDENTgraphic(struct WADINFO *info,Int16 n)
        but it passes all the other tests of picturehood. */
     if (x > 0)
     {
-      Int32 delta_ofs = ofs - ofs_prev;
+      int32_t delta_ofs = ofs - ofs_prev;
       if (delta_ofs < 1)
 	bad_order++;
     }
@@ -285,7 +285,7 @@ int IDENTgraphic(struct WADINFO *info,Int16 n)
  *	next WxH bytes contain the bitmap for columns 1, 5, 9,
  *	etc., and so on. No transparency.
  */
-int IDENTsnea (struct WADINFO *info, Int16 n)
+int IDENTsnea (struct WADINFO *info, int16_t n)
 {
   unsigned char width;
   unsigned char height;
@@ -307,7 +307,7 @@ int IDENTsnea (struct WADINFO *info, Int16 n)
 */
 static void IDENTdirSet (ENTRY *ids, struct WADINFO *info, const char *name,
   ENTRY ident)
-{ Int16 n;
+{ int16_t n;
   n=WADRfindEntry(info,name);
   if(n>=0)   /*found it?*/
     if(n<(info->ntry))
@@ -346,9 +346,9 @@ static void IDENTsetType (ENTRY *ids, struct WADINFO *info, int n,
 **
 ** Precond: ids contains EZZZZ for unidentified entries
 */
-static void IDENTdirSprites(ENTRY  *ids,struct WADINFO *info,Bool Check)
-{ Int16 s_end,s_start;
-  Int16 n;
+static void IDENTdirSprites(ENTRY  *ids,struct WADINFO *info,bool Check)
+{ int16_t s_end,s_start;
+  int16_t n;
 
   ident_func = "IDENTdirSprites";
   /*
@@ -370,7 +370,7 @@ static void IDENTdirSprites(ENTRY  *ids,struct WADINFO *info,Bool Check)
   { for(n=s_end-1;n>=0;n--)
     { if(ids[n]!=EZZZZ) break; /*last sprite*/
       if(info->dir[n].size<8) break; /*last sprite*/
-      if(Check==TRUE)
+      if(Check==true)
       {  
 	if (IDENTgraphic(info,n) == 0)
 	  break;
@@ -400,8 +400,8 @@ static void IDENTdirSprites(ENTRY  *ids,struct WADINFO *info,Bool Check)
 ** Precond: ids contains EZZZZ for unidentified entries
 */
 static void IDENTdirFlats(ENTRY  *ids,struct WADINFO *info)
-{ Int16 f_end,f_start;
-  Int16 n;
+{ int16_t f_end,f_start;
+  int16_t n;
 
   ident_func = "IDENTdirFlats";
   /*
@@ -462,9 +462,9 @@ static void IDENTdirFlats(ENTRY  *ids,struct WADINFO *info)
  */
 static void IDENTdirWalls(ENTRY *ids, struct WADINFO *info)
 {
-  Int16 w_start, w_end;
-  Int16 n;
-  const Int32 WALL_SIZE = 4096;
+  int16_t w_start, w_end;
+  int16_t n;
+  const int32_t WALL_SIZE = 4096;
 
   ident_func = "IDENTdirWalls";
   w_start = WADRfindEntry (info, "WALLSTRT");
@@ -521,9 +521,9 @@ static void IDENTdirLumps(ENTRY  *ids,struct WADINFO *info)
 }
 
 
-static void IDENTdirPatches(ENTRY  *ids,struct WADINFO *info, char  *Pnam, Int32 Pnamsz,Bool Check)
-{ Int16 p_end,p_start;
-  Int16 n,p;
+static void IDENTdirPatches(ENTRY  *ids,struct WADINFO *info, char  *Pnam, int32_t Pnamsz,bool Check)
+{ int16_t p_end,p_start;
+  int16_t n,p;
   char  *Pnames;
 
   ident_func = "IDENTdirPatches";
@@ -581,7 +581,7 @@ static void IDENTdirPatches(ENTRY  *ids,struct WADINFO *info, char  *Pnam, Int32
   ** check for lost patches
   **
   */
-  if(Check==TRUE)
+  if(Check==true)
   { /*checkif PNAMES is redefined*/
     n=WADRfindEntry(info,"PNAMES");
     if(n>=0)
@@ -615,7 +615,7 @@ static void IDENTdirPatches(ENTRY  *ids,struct WADINFO *info, char  *Pnam, Int32
 ** Ident unreferenced graphics
 */
 static void IDENTdirGraphics(ENTRY  *ids,struct WADINFO *info)
-{ Int16 n;
+{ int16_t n;
   ident_func = "IDENTdirGraphics";
 #if 0
   /* Not true for Doom alpha */
@@ -646,8 +646,8 @@ static void IDENTdirGraphics(ENTRY  *ids,struct WADINFO *info)
   }
 }
 
-static void IDENTdirGraphics2(ENTRY  *ids,struct WADINFO *info,Bool Check)
-{  Int16 n;
+static void IDENTdirGraphics2(ENTRY  *ids,struct WADINFO *info,bool Check)
+{  int16_t n;
   ident_func = "IDENTdirGraphics2";
   for(n=0;n<info->ntry;n++)
   { if(ids[n]==EZZZZ)
@@ -661,7 +661,7 @@ static void IDENTdirGraphics2(ENTRY  *ids,struct WADINFO *info,Bool Check)
 	else if(strncmp(info->dir[n].name,"ST",2)==0)
 	{ IDENTsetType (ids, info, n, EGRAPHIC);
 	}
-	else if(Check==TRUE)
+	else if(Check==true)
 	{
 	  int is_picture = IDENTgraphic (info, n);
 	  int is_snea    = IDENTsnea    (info, n);
@@ -701,7 +701,7 @@ static void IDENTdirGraphics2(ENTRY  *ids,struct WADINFO *info,Bool Check)
  *	not make sense for other games than Strife.
  */
 static void IDENTdirSscripts(ENTRY  *ids,struct WADINFO *info)
-{ Int16 n;
+{ int16_t n;
   ident_func = "IDENTdirSscripts";
 
   for(n=0;n<info->ntry;n++)
@@ -722,14 +722,14 @@ static void IDENTdirSscripts(ENTRY  *ids,struct WADINFO *info)
 /*
 ** Ident PC sounds
 */
-static void IDENTdirPCSounds(ENTRY  *ids,struct WADINFO *info,Bool Check)
-{ Int16 n;
+static void IDENTdirPCSounds(ENTRY  *ids,struct WADINFO *info,bool Check)
+{ int16_t n;
   ident_func = "IDENTdirPCSounds";
   for(n=0;n<info->ntry;n++)
   { if(ids[n]==EZZZZ)
     { if(info->dir[n].size>4) /*works only for DOOM, not HERETIC*/
 	if(strncmp(info->dir[n].name,"DP",2)==0)
-	{ if(Check==TRUE)
+	{ if(Check==true)
 	  { WADRseek(info,info->dir[n].start);
 	    if(WADRreadShort(info)==0x0)
 	      IDENTsetType (ids, info, n, ESNDPC);
@@ -743,8 +743,8 @@ static void IDENTdirPCSounds(ENTRY  *ids,struct WADINFO *info,Bool Check)
 /*
  *	IDENTdirMusics
  */
-static void IDENTdirMusics(ENTRY  *ids,struct WADINFO *info,Bool Check)
-{ Int16 n;
+static void IDENTdirMusics(ENTRY  *ids,struct WADINFO *info,bool Check)
+{ int16_t n;
   ident_func = "IDENTdirMusics";
   for(n=0;n<info->ntry;n++)
   { if(ids[n]==EZZZZ)
@@ -758,7 +758,7 @@ static void IDENTdirMusics(ENTRY  *ids,struct WADINFO *info,Bool Check)
 	  && (strncmp(info->dir[n].name,"D_",2) == 0
 	   || strncmp(info->dir[n].name,"MUS_",4) == 0))
 	{
-	  if (Check != TRUE)
+	  if (Check != true)
 	  {
 	    IDENTsetType (ids, info, n, EMUSIC);
 	  }
@@ -793,9 +793,9 @@ static void IDENTdirMusics(ENTRY  *ids,struct WADINFO *info,Bool Check)
 /*
 ** Ident sounds
 */
-static void IDENTdirSounds(ENTRY  *ids,struct WADINFO *info, Bool Doom)
+static void IDENTdirSounds(ENTRY  *ids,struct WADINFO *info, bool Doom)
 {
-  Int16 n;
+  int16_t n;
 
   ident_func = "IDENTdirSounds";
   for(n=0;n<info->ntry;n++)
@@ -806,7 +806,7 @@ static void IDENTdirSounds(ENTRY  *ids,struct WADINFO *info, Bool Doom)
 	if(strncmp(info->dir[n].name,"DS",2)==0)
 	{ IDENTsetType (ids, info, n, ESNDWAV);
 	}
-	else if(Doom==FALSE)
+	else if(Doom==false)
 	{ WADRseek(info,info->dir[n].start);
 	  if(WADRreadShort(info)==0x3)
 	    if(WADRreadShort(info)==0x2B11)
@@ -823,7 +823,7 @@ static void IDENTdirSounds(ENTRY  *ids,struct WADINFO *info, Bool Doom)
  *	This function is more complicated than I'd like it to be.
  */
 static void IDENTdirLevels (ENTRY *ids, struct WADINFO *info)
-{ Int16 n,l;
+{ int16_t n,l;
   char name[8];
   char level_name[8];
   ENTRY level=EVOID;
@@ -994,38 +994,38 @@ static void IDENTdirLevels (ENTRY *ids, struct WADINFO *info)
 
 /*
 ** IWAD: we assume all is correct
-** if Fast = TRUE then sounds and most graphics are reported as lumps
+** if Fast = true then sounds and most graphics are reported as lumps
 ** (this is for merge. no problem. bad identification only to be feared in PWAD)
 */
-ENTRY *IDENTentriesIWAD (struct WADINFO *info,char  *Pnam, Int32 Pnamsz,
-  Bool Fast)
-{ Int16 n;
-  Bool Doom=FALSE;
+ENTRY *IDENTentriesIWAD (struct WADINFO *info,char  *Pnam, int32_t Pnamsz,
+  bool Fast)
+{ int16_t n;
+  bool Doom=false;
   ENTRY  *ids;
   Phase("ID50", "IWAD entry identification...");
-  if(info->ok!=TRUE)Bug("ID51", "IdnOeI");
+  if(info->ok!=true)Bug("ID51", "IdnOeI");
   ids=(ENTRY  *)Malloc((info->ntry)*sizeof(ENTRY));
   if(WADRfindEntry(info,"ENDTEXT")<0)              /*Not Heretic*/
-    if(WADRfindEntry(info,"ENDOOM")>=0) Doom=TRUE;
+    if(WADRfindEntry(info,"ENDOOM")>=0) Doom=true;
   /*
   ** identify for IWAD
   */
   for(n=0;n<info->ntry;n++)
     ids[n]=EZZZZ;
   IDENTdirLumps(ids,info);         /*fast*/
-  IDENTdirSprites(ids,info,FALSE); /*fast*/
+  IDENTdirSprites(ids,info,false); /*fast*/
   IDENTdirFlats(ids,info);         /*fast*/
   if (ROTT)
     IDENTdirWalls(ids,info);
   IDENTdirLevels(ids,info);        /*fast*/
-  IDENTdirMusics(ids,info,FALSE);  /*fast*/
-  IDENTdirPCSounds(ids,info,FALSE);/*fast*/
-  IDENTdirPatches(ids,info,Pnam,Pnamsz,FALSE); /*fast*/
+  IDENTdirMusics(ids,info,false);  /*fast*/
+  IDENTdirPCSounds(ids,info,false);/*fast*/
+  IDENTdirPatches(ids,info,Pnam,Pnamsz,false); /*fast*/
   IDENTdirGraphics(ids,info);      /*fast*/
   IDENTdirSscripts(ids,info);  /* FIXME Should not be called if not Strife ! */
-  if(Fast!=TRUE)
+  if(Fast!=true)
   { IDENTdirSounds(ids,info,Doom);   /*slow!*/
-    IDENTdirGraphics2(ids,info,TRUE);/*slow!*/
+    IDENTdirGraphics2(ids,info,true);/*slow!*/
   }
   /* unidentified entries are considered LUMPs*/
   ident_func = "IDENTentriesIWAD";
@@ -1055,11 +1055,11 @@ ENTRY *IDENTentriesIWAD (struct WADINFO *info,char  *Pnam, Int32 Pnamsz,
 
 
 
-ENTRY *IDENTentriesPWAD(struct WADINFO *info,char  *Pnam, Int32 Pnamsz)
-{ Int16 n;
+ENTRY *IDENTentriesPWAD(struct WADINFO *info,char  *Pnam, int32_t Pnamsz)
+{ int16_t n;
   ENTRY  *ids;
   Phase("ID10", "PWAD entry identification...");
-  if(info->ok!=TRUE)Bug("ID11", "IdnOeP");
+  if(info->ok!=true)Bug("ID11", "IdnOeP");
   ids=(ENTRY  *)Malloc((info->ntry)*sizeof(ENTRY));
   /*
   ** identify for PWAD
@@ -1073,7 +1073,7 @@ ENTRY *IDENTentriesPWAD(struct WADINFO *info,char  *Pnam, Int32 Pnamsz)
 #ifdef DEBUG
   Phase("ID18", "Sprites...");
 #endif
-  IDENTdirSprites(ids,info,TRUE);
+  IDENTdirSprites(ids,info,true);
 #ifdef DEBUG
   Phase("ID21", "Flats...");
 #endif
@@ -1092,15 +1092,15 @@ ENTRY *IDENTentriesPWAD(struct WADINFO *info,char  *Pnam, Int32 Pnamsz)
 #ifdef DEBUG
   Phase("ID30", "Musics...");
 #endif
-  IDENTdirMusics(ids,info,TRUE);
+  IDENTdirMusics(ids,info,true);
 #ifdef DEBUG
   Phase("ID33", "PCsnd...");
 #endif
-  IDENTdirPCSounds(ids,info,TRUE);
+  IDENTdirPCSounds(ids,info,true);
 #ifdef DEBUG
   Phase("ID36", "Patches...");
 #endif
-  IDENTdirPatches(ids,info,Pnam,Pnamsz,TRUE);
+  IDENTdirPatches(ids,info,Pnam,Pnamsz,true);
 #ifdef DEBUG
   Phase("ID39", "Graphics(1)...");
 #endif
@@ -1112,11 +1112,11 @@ ENTRY *IDENTentriesPWAD(struct WADINFO *info,char  *Pnam, Int32 Pnamsz)
 #ifdef DEBUG
   Phase("ID45", "Sounds...");
 #endif
-  IDENTdirSounds(ids,info,FALSE);
+  IDENTdirSounds(ids,info,false);
 #ifdef DEBUG
   Phase("ID48", "Graphics(2)...");
 #endif
-  IDENTdirGraphics2(ids,info,TRUE);
+  IDENTdirGraphics2(ids,info,true);
   ident_func = "IDENTentriesPWAD";
   for(n=0;n<info->ntry;n++)
   { if(ids[n]==EZZZZ)

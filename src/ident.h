@@ -22,15 +22,15 @@ GNU General Public License for more details.
 /* DOOM specifics*/
 
 /* Entry Identification */
-ENTRY  *IDENTentriesIWAD(struct WADINFO *wad,char  *Pnam,Int32 Pnamsz,Bool Fast);
-ENTRY  *IDENTentriesPWAD(struct WADINFO *wad,char  *Pnam,Int32 Pnamsz);
-Int16 IDENTlevel(const char *buffer);
+ENTRY  *IDENTentriesIWAD(struct WADINFO *wad,char  *Pnam,int32_t Pnamsz,bool Fast);
+ENTRY  *IDENTentriesPWAD(struct WADINFO *wad,char  *Pnam,int32_t Pnamsz);
+int16_t IDENTlevel(const char *buffer);
 /* Level Part Identification */
 int   IDENTlevelPart(const char *name);
 /* Insertion point determination*/
-Int16 IDENTinsrY(PICTYPE type,Int16 insrY,Int16 szy);
-Int16 IDENTinsrX(PICTYPE type,Int16 insrX,Int16 szx);
-ENTRY IDENTsneap (struct WADINFO *info, Int16 n);
+int16_t IDENTinsrY(PICTYPE type,int16_t insrY,int16_t szy);
+int16_t IDENTinsrX(PICTYPE type,int16_t insrX,int16_t szx);
+ENTRY IDENTsneap (struct WADINFO *info, int16_t n);
 
 const char *entry_type_name    (ENTRY type);  /* For EFLATS, return "flat" */
 const char *entry_type_plural  (ENTRY type);  /* For EFLATS, return "flats" */
