@@ -37,7 +37,7 @@ HAVE_INTTYPES=
 unset HAVE_INTTYPES
 HAVE_SNPRINTF=
 INTTYPES=
-LDFLAGS=
+LDFLAGS="-lpng -lz"
 PREFIX=/usr/local
 
 tmpdir=$(mktemp -d 2>/dev/null || exit 0)

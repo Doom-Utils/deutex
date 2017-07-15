@@ -1,6 +1,9 @@
 *.o[st]
+*.otd
 *.exe
 /Makefile
 /tmp
 /deusf
 /deutex
+.DS_Store
+.vscode/

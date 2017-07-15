@@ -17,7 +17,7 @@
 # Compiled by developers
 DCFLAGS  = -g -Wall -Wpointer-arith -Wstrict-prototypes -pg
 DCC      = gcc
-DLDFLAGS = -g -pg
+DLDFLAGS = -g -pg -lpng -lz
 
 #DEFINES = -DDT_ALPHA -DDT_PRIVATE
 #DEFINES = -DDT_PRIVATE
