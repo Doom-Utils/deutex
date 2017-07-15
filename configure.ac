@@ -4,7 +4,6 @@ AC_PROG_CC
 AC_PROG_CC_C99
 
 AM_SILENT_RULES([yes])
-CFLAGS="-Wall -Wdeclaration-after-statement -Wredundant-decls -O2"
 
 AC_CONFIG_HEADERS([config.h])
 AC_CONFIG_FILES([
