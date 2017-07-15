@@ -125,7 +125,7 @@ struct WADINFO
   char *filename;	/* Pointer on block malloc'd by WADRopen*() and
 			   free'd by WADRclose() and containing the name
 			   of the file. */
-  bool ok;		/*security ok&1=read ok&2=write*/
+  char ok;		/*security ok&1=read ok&2=write*/
 };
 
 
