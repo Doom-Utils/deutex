@@ -36,7 +36,7 @@ SYNOPSIS
 
 *@PACKAGE@* ['OPTIONS'] *-pknormal* ['in.wad' ['out.txt']]
 
-*@PACKAGE@* ['OPTIONS'] *-restor*
+*@PACKAGE@* ['OPTIONS'] *-restore*
 
 *@PACKAGE@* ['OPTIONS'] *-usedidx* ['in.wad']
 
