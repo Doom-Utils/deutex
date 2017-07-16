@@ -12,8 +12,6 @@ SYNOPSIS
 
 *@PACKAGE@* *--version*
 
-*@PACKAGE@* *-man*
-
 *@PACKAGE@* ['OPTIONS'] *-add* 'incomplete.wad' 'out.wad'
 
 *@PACKAGE@* ['OPTIONS'] *-af* 'flats.wad'
@@ -115,9 +113,6 @@ Modal options not requiring an iwad
 ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
 *-?*, *-h*, *-help*, *--help*::
 Print list of options.
-
-*-man*::
-Print list of options in troff format.
 
 *-syntax*::
 Print the syntax of wad creation directives.
