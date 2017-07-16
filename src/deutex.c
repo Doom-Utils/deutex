@@ -878,10 +878,10 @@ int main (int argc, char *argv_non_const[])
    */
    WadInfOk=false;
    George=false;
-   Picture    = PICPPM;
-   Sound      = SNDAU;
+   Picture    = PICBMP;
+   Sound      = SNDWAV;
    trnR=0;trnG=47;trnB=47;
-   fullSND    = false;
+   fullSND    = true;
    WSafe      = true;
    HowMuchJunk= 0;
    Select     = 0;
