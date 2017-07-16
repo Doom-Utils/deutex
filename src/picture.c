@@ -112,7 +112,7 @@ int parse_pic_header (
    if (h->height < 1)
       FAIL1 ("height < 1 (%d)", (int) h->height);
 
-   /* Array of column offsets. Column data. */ 
+   /* Array of column offsets. Column data. */
    h->colofs = p;
    p += (long) h->colofs_size * h->width;
    if (p > buf_end)
@@ -271,7 +271,7 @@ bool PICsaveInFile (char *file, PICTYPE type, char *pic, int32_t picsz,
      ** convert to BMP/GIF/PPM/PNG
      */
      switch(Picture)
-     { 
+     {
         case PICPNG:
           RAWtoPNG(file,raw,rawX,rawY,doompal);
           break;
@@ -316,7 +316,7 @@ int32_t PICsaveInWAD(struct WADINFO *info,char *file,PICTYPE type,int16_t Xinsr,
   */
   transparent =COLinvisible();
   switch(Picture)
-  { 
+  {
 	  case PICPNG:
      raw = PNGtoRAW(&rawX,&rawY,file);
      break;
@@ -636,7 +636,7 @@ static char *PICtoRAW(int16_t *prawX,int16_t *prawY,int16_t *pXinsr,int16_t *pYi
 	    Doom PR treat the offset as signed, which is why some
 	    textures appear with tutti-frutti on the right. -- AYM
 	    1999-09-18 */
-	 uint16_t ofs; 
+	 uint16_t ofs;
 	 read_i16_le (((const int16_t *) offsets) + x, (int16_t *) &ofs);
 	 post = (const unsigned char *) (pic + ofs);
       }
@@ -682,7 +682,7 @@ static char *PICtoRAW(int16_t *prawX,int16_t *prawY,int16_t *pXinsr,int16_t *pYi
 	   LimitedWarn (&nw,
 	    "PI13",
 	    "Picture %s(%d): post starts past EOL, skipping rest of column",
-	       lump_name (name), (int) x); 
+	       lump_name (name), (int) x);
 	   goto done_with_column;
 	}
 	/* Read the header of the post */
@@ -776,8 +776,9 @@ static char *snea_to_raw (int16_t *prawX, int16_t *prawY, int16_t *pXinsr,
       r -= pixels - 1;
   }
 
-  if (cusage != NULL)
-    usedidx_rectangle (raw, pixels, name, cusage);
+  if (cusage != NULL) {
+      usedidx_rectangle (raw, pixels, name, cusage);
+  }
 
   *prawX = width;
   *prawY = height;
@@ -1226,7 +1227,7 @@ static char *PNGtoRAW (int16_t *rawX, int16_t *rawY, char *file)
           /* Convert 32-bit RGBA raw to 8-bit palletted raw with transparency color. */
           for ( i = 0; i < image.width*image.height*4; i += 4)
           {
-            /* If alpha channel is transparent, change color to the transparent 
+            /* If alpha channel is transparent, change color to the transparent
               color. */
             if (buffer[i+3] == 0x00)
             {

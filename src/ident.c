@@ -190,7 +190,7 @@ int IDENTgraphic(struct WADINFO *info,int16_t n)
 {
   int32_t start=info->dir[n].start;
   int32_t size=info->dir[n].size;
-  unsigned char *buf;
+  char *buf;
   pic_head_t h;
   int x;
   int bad_order = 0;
@@ -287,8 +287,8 @@ int IDENTgraphic(struct WADINFO *info,int16_t n)
  */
 int IDENTsnea (struct WADINFO *info, int16_t n)
 {
-  unsigned char width;
-  unsigned char height;
+  char width;
+  char height;
 
   if (info->dir[n].size < 2)
     return 0;

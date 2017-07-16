@@ -215,12 +215,14 @@ void COLinit( uint8_t invR, uint8_t invG, uint8_t invB,char  *Colors, int16_t Co
    const char *name = NULL;
    /*int16_t R,G,B;*/
    if(COLok!=false) Bug("PL02", "COLok");
-   if(Colsz< 256*sizeof(struct PIXEL))
-     if (lumpname == NULL)
-       ProgError ("PL03", "%s: wrong size for PLAYPAL", fname (pathname));
-     else
-       ProgError ("PL04", "%s: %s: wrong size for PLAYPAL",
-	   fname (pathname), lump_name (lumpname));
+   if(Colsz< 256*sizeof(struct PIXEL)) {
+       if (lumpname == NULL) {
+           ProgError ("PL03", "%s: wrong size for PLAYPAL", fname (pathname));
+       } else {
+           ProgError ("PL04", "%s: %s: wrong size for PLAYPAL",
+                      fname (pathname), lump_name (lumpname));
+       }
+   }
    COLok=true;
    COLpal= (struct PIXEL  *)Malloc(256*sizeof(struct PIXEL));
    for(i=0;i< NCOLOURS;i++)

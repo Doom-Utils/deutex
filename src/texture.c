@@ -290,16 +290,16 @@ int32_t TXUwriteTEXTUREtoWAD(struct WADINFO *info)
        tt++;
        /*write the begining of texture definition*/
        fseek (info->fd, info->wposit, SEEK_SET);  /* Ugly */
-       if (output_texture_format != TF_NAMELESS)
-         wad_write_name (info->fd, TXUtex[t].Name); size += 8;
+       if (output_texture_format != TF_NAMELESS) {
+           wad_write_name (info->fd, TXUtex[t].Name); size += 8;
+       }
        wad_write_i16  (info->fd, 0);              size += 2;
        wad_write_i16  (info->fd, 0);              size += 2;
        wad_write_i16  (info->fd, TXUtex[t].szX);  size += 2;
        wad_write_i16  (info->fd, TXUtex[t].szY);  size += 2;
-       if (output_texture_format != TF_STRIFE11)
-       {
-	 wad_write_i16 (info->fd, 0); size += 2;
-	 wad_write_i16 (info->fd, 0); size += 2;
+       if (output_texture_format != TF_STRIFE11) {
+           wad_write_i16 (info->fd, 0); size += 2;
+           wad_write_i16 (info->fd, 0); size += 2;
        }
        wad_write_i16  (info->fd, TXUtex[t].Npatches); size += 2;
        for(p=0; p<(TXUtex[t].Npatches); p++)

@@ -283,13 +283,19 @@ void GetNameOfWAD(char name[8], const char *path)
     }
   /*find root name*/
   /* FIXME AYM 1999-06-09: Do we really have to truncate to 8 ? */
-  for(n=0;n<8;n++)
-    switch(path[nam+n])
-    { case '.': case '\0': case '\n':
-      name[n]='\0'; return;
-      default:   name[n]=toupper(path[nam+n]); break;
-    }
-    return;
+  for (n = 0; n < 8; n++) {
+      switch (path[nam + n]) {
+      case '.':
+      case '\0':
+      case '\n':
+          name[n] = '\0';
+          return;
+      default:
+          name[n] = toupper(path[nam + n]);
+          break;
+      }
+  }
+  return;
 }
 
 

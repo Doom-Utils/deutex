@@ -332,17 +332,19 @@ iolen_t WADRreadBytes (struct WADINFO *info, char *buffer, iolen_t nbytes)
 {
   long    ofs    = ftell (info->fd);
   iolen_t result = WADRreadBytes2 (info, buffer, nbytes);
-  if (result != nbytes)
-    if (ferror (info->fd))
-      ProgError ("WR43", "%s: read error (got %lu/%lu bytes)",
-	  fnameofs (info->filename, ofs),
-	  (unsigned long) result,
-	  (unsigned long) nbytes);
-    else
-      ProgError ("WR45", "%s: unexpected EOF (got %lu/%lu bytes)",
-	  fnameofs (info->filename, ofs),
-	  (unsigned long) result,
-	  (unsigned long) nbytes);
+  if (result != nbytes) {
+      if (ferror (info->fd)) {
+          ProgError ("WR43", "%s: read error (got %lu/%lu bytes)",
+                     fnameofs (info->filename, ofs),
+                     (unsigned long) result,
+                     (unsigned long) nbytes);
+      } else {
+          ProgError ("WR45", "%s: unexpected EOF (got %lu/%lu bytes)",
+                     fnameofs (info->filename, ofs),
+                     (unsigned long) result,
+                     (unsigned long) nbytes);
+      }
+  }
 
   return nbytes;
 }
@@ -351,23 +353,27 @@ int16_t WADRreadShort(struct WADINFO *info)
 { int16_t res;
   long ofs = ftell (info->fd);
   if (!(info->ok&WADR_READ)) Bug("WR51", "WadRdS");
-  if (wad_read_i16 (info->fd, &res))
-    if (ferror (info->fd))
-      ProgError ("WR53", "%s: read error", fnameofs (info->filename, ofs));
-    else
-      ProgError ("WR55", "%s: unexpected EOF", fnameofs (info->filename, ofs));
-   return res;
+  if (wad_read_i16 (info->fd, &res)) {
+      if (ferror (info->fd)) {
+          ProgError ("WR53", "%s: read error", fnameofs (info->filename, ofs));
+      } else {
+          ProgError ("WR55", "%s: unexpected EOF", fnameofs (info->filename, ofs));
+      }
+  }
+  return res;
 }
 
 int32_t WADRreadLong(struct WADINFO *info)
 { int32_t res;
   long ofs = ftell (info->fd);
   if (!(info->ok&WADR_READ)) Bug("WR61", "WadRdL");
-  if (wad_read_i32 (info->fd, &res))
-    if (ferror (info->fd))
-      ProgError ("WR63", "%s: read error", fnameofs (info->filename, ofs));
-    else
-      ProgError ("WR65", "%s: unexpected EOF", fnameofs (info->filename, ofs));
+  if (wad_read_i32 (info->fd, &res)) {
+      if (ferror (info->fd)) {
+          ProgError ("WR63", "%s: read error", fnameofs (info->filename, ofs));
+      } else {
+          ProgError ("WR65", "%s: unexpected EOF", fnameofs (info->filename, ofs));
+      }
+  }
   return res;
 }
 
@@ -384,10 +390,11 @@ int16_t WADRfindEntry(struct WADINFO *info, const char *entry)
   static char name[8];
   struct WADDIR  *dir;
   if(!(info->ok&WADR_RDWR)) Bug("WR91", "WadFE");
-  for(i=0,dir=info->dir;i<info->ntry;i++,dir+=1)
-  { Normalise(name,dir->name);
-    if(strncmp(name,entry,8)==0)
-        return i;
+  for(i = 0, dir = info->dir; i < info->ntry; i++, dir += 1) {
+      Normalise(name,dir->name);
+      if(strncmp(name,entry,8)==0) {
+          return i;
+      }
   }
   return -1;
 }
@@ -431,17 +438,19 @@ char *WADRreadEntry2 (struct WADINFO *info, int16_t n, int32_t *psize)
   buffer = Malloc (size);
   WADRseek (info, start);
   actual_size = WADRreadBytes2 (info, buffer, size);
-  if (actual_size < size)
-    if (ferror (info->fd))
-      ProgError ("WR78", "%s: Lump %s: read error at byte %ld",
-	  fnameofs (info->filename, start + actual_size),
-	  lump_name (info->dir[n].name),
-	  (long) actual_size);
-    else
-      ProgError ("WR79", "%s: Lump %s: unexpected EOF at byte %ld",
-	  fnameofs (info->filename, start + actual_size),
-	  lump_name (info->dir[n].name),
-	  (long) actual_size);
+  if (actual_size < size) {
+      if (ferror (info->fd)) {
+          ProgError ("WR78", "%s: Lump %s: read error at byte %ld",
+                     fnameofs (info->filename, start + actual_size),
+                     lump_name (info->dir[n].name),
+                     (long) actual_size);
+      } else {
+          ProgError ("WR79", "%s: Lump %s: unexpected EOF at byte %ld",
+                     fnameofs (info->filename, start + actual_size),
+                     lump_name (info->dir[n].name),
+                     (long) actual_size);
+      }
+  }
   *psize = actual_size;
   return buffer;
 }

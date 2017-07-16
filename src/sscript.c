@@ -41,9 +41,7 @@ enum field_type_t
 
 
 static void dump_field (FILE *fp, const unsigned char *buf, unsigned long *ofs,
-    enum field_type_t type, const char *desc);
-static void dump_junk (FILE *fp, const unsigned char *buf, unsigned long *ofs,
-    size_t nbytes, const char *desc);
+                        enum field_type_t type, const char *desc);
 static int mem_is_zero (const char *buf, size_t buf_size);
 
 
@@ -80,9 +78,6 @@ int sscript_save (struct WADINFO *wad, int16_t n, const char *file)
       int o;
 
       fputc ('\n', fp);
-#ifdef SHOW_OFFSETS
-	fprintf (fp, "/* %05lXh */ ", ofs);
-#endif
       fprintf (fp, "page %d {\n", p);
       dump_field (fp, data, &ofs, FT_I32,  "    unknown0   ");
       dump_field (fp, data, &ofs, FT_I32,  "    unknown1   ");
@@ -106,9 +101,6 @@ int sscript_save (struct WADINFO *wad, int16_t n, const char *file)
 
 	/* Else, decode it */
 	fputc ('\n', fp);
-#ifdef SHOW_OFFSETS
-	fprintf (fp, "/* %05lXh */ ", ofs);
-#endif
 	fprintf (fp, "    option %d {\n", o);
 	dump_field (fp, data, &ofs, FT_I32,  "        whata   ");
 	dump_field (fp, data, &ofs, FT_I32,  "        whatb   ");
@@ -122,15 +114,9 @@ int sscript_save (struct WADINFO *wad, int16_t n, const char *file)
 	dump_field (fp, data, &ofs, FT_I32,  "        whath   ");
 	dump_field (fp, data, &ofs, FT_I32,  "        whati   ");
 	dump_field (fp, data, &ofs, FT_S80,  "        failure ");
-#ifdef SHOW_OFFSETS
-	fprintf (fp, "/* %05lXh */ ", ofs);
-#endif
         fputs ("    }\n", fp);
       }
 
-#ifdef SHOW_OFFSETS
-      fprintf (fp, "/* %05lXh */ ", ofs);
-#endif
       fputs ("}\n", fp);
       /* Sanity check */
       if (ofs % PAGESZ)
@@ -165,9 +151,6 @@ int sscript_load (void)
 static void dump_field (FILE *fp, const unsigned char *buf, unsigned long *ofs,
     enum field_type_t type, const char *desc)
 {
-#ifdef SHOW_OFFSETS
-  fprintf (fp, "/* %05lXh */ ", (unsigned long) *ofs);
-#endif
   fprintf (fp, "%-10s ", desc);
   if (type == FT_I32)
   {
@@ -210,46 +193,14 @@ static void dump_field (FILE *fp, const unsigned char *buf, unsigned long *ofs,
   fputs (";\n", fp);
 }
 
-
-/*
- *	dump_junk - dump 32-bit little-endian integer at buf
- */
-static void dump_junk (FILE *fp, const unsigned char *buf, unsigned long *ofs,
-    size_t nbytes, const char *desc)
-{
-  int n;
-  const int BPL = 16;
-
-  for (n = 0; n < nbytes; n++)
-  {
-    if (n % BPL == 0)
-    {
-#ifdef SHOW_OFFSETS
-      fprintf (fp, "/* %05lXh */ ", (unsigned long) *ofs);
-#endif
-      if (n == 0)
-	fprintf (fp, "%-10s `", desc);
-      else
-	fprintf (fp, "%-10s  ", "");
-    }
-    else
-      putc (' ', fp);
-    fprintf (fp, "%02X", buf[*ofs + n]);
-    if (n + 1 >= nbytes)
-      fputs ("`;\n", fp);
-    else if (n % BPL == BPL - 1)
-      putc ('\n', fp);
-  }
-  *ofs += nbytes;
-}
-
-
 static int mem_is_zero (const char *buf, size_t buf_size)
 {
   int n;
 
-  for (n = 0; n < buf_size; n++)
-    if (buf[n] != '\0')
-      return 0;
+  for (n = 0; n < buf_size; n++) {
+      if (buf[n] != '\0') {
+          return 0;
+      }
+  }
   return 1;
 }
