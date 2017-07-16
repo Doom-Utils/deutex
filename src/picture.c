@@ -485,7 +485,8 @@ static char *RAWtoPIC(int32_t *ppicsz, char  *raw, int16_t rawX, int16_t rawY,
       pix=raw[rawpos];
       /* Start new post ? */
       if(pix!=transparent)
-      { /* End current post and start new one if either :
+      { 
+  /* End current post and start new one if either :
 	   - more than 255 consecutive non-transparent
 	     pixels (a post cannot be longer than 255
 	     pixels)
@@ -493,7 +494,7 @@ static char *RAWtoPIC(int32_t *ppicsz, char  *raw, int16_t rawX, int16_t rawY,
 	     start Y-offset for a post is 254, a new post
 	     should be started when we reach that position.
 	 */
-	if((setcount==256 || y==254) && lastpix!=transparent)
+	if((setcount==128 || setcount==256 || y==254) && lastpix!=transparent)
 	{ /*printf ("setcount=%d y=%d lastpix=%02X pix=%02X\n",
 	    (int) setcount, (int) y, (int) lastpix, (int) pix);*/
 	  if (setcount==256)
