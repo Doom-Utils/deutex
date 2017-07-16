@@ -37,7 +37,7 @@ History
 -------
 
 DeuTex began life as a fork of Doom Editing Utilities (known as DEU
-for short) by Oliver Montanuy in 1994, expunging the graphical user
+for short) by Olivier Montanuy in 1994, expunging the graphical user
 interface in favor of command line and scriptable usage scenarios.
 Originally written for DOS, its primary home is now Unix systems, and
 is a fundamental piece to building
@@ -51,7 +51,7 @@ the second like “tech” (not “tex”!), owing from its namesake.
 Copyright
 ---------
 
-Copyright © 1994-1996 Oliver Montanuy, © 1999-2005 André Majorel, ©
+Copyright © 1994-1996 Olivier Montanuy, © 1999-2005 André Majorel, ©
 2006-2017 contributors to the DeuTex project.
 
 This program is free software; you can redistribute it and/or modify
