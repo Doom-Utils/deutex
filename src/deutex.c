@@ -987,6 +987,7 @@ int main (int argc, char *argv_non_const[])
        }
        if (! gotit)
        {
+#ifndef _WIN32
 	 for (w = wads; *w != NULL; w++)
 	 {
 	   if (MakeFileName (MainWAD, "/usr/share/games/doom", "", "", *w, "wad") == true)
@@ -995,6 +996,7 @@ int main (int argc, char *argv_non_const[])
 	     break;
 	   }
 	 }
+#endif
        }
        if (! gotit)
 	  ProgError ("AA18",
