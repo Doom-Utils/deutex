@@ -9,6 +9,8 @@ AM_SILENT_RULES([yes])
 AC_CHECK_PROG([ASCIIDOC], [a2x], [yes])
 AM_CONDITIONAL([ASCIIDOC], [test x$ASCIIDOC = xyes])
 
+PKG_CHECK_MODULES([PNG], [libpng16])
+
 AC_CONFIG_HEADERS([config.h])
 AC_CONFIG_FILES([
     Makefile

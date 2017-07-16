@@ -1,3 +1,0 @@
-language: c
-compiler: gcc
-script: ./bootstrap && ./configure && make

@@ -17,3 +17,5 @@ Makefile.in
 *~
 \#*\#
 .\#*
+.DS_Store
+.vscode
