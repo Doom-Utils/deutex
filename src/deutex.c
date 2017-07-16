@@ -41,9 +41,6 @@ GNU General Public License for more details.
 */
 
 
-#define VERBOSE_COMMENT                true
-#define AUTO_BUG_INSERT                true
-
 #include "deutex.h"
 #include <limits.h>
 #include <stdarg.h>

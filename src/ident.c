@@ -971,56 +971,20 @@ ENTRY *IDENTentriesPWAD(struct WADINFO *info,char  *Pnam, int32_t Pnamsz)
   */
   for(n=0;n<info->ntry;n++)
     ids[n]=EZZZZ;
-#ifdef DEBUG
-  Phase("ID15", "Lumps...");
-#endif
   IDENTdirLumps(ids,info);
-#ifdef DEBUG
-  Phase("ID18", "Sprites...");
-#endif
   IDENTdirSprites(ids,info,true);
-#ifdef DEBUG
-  Phase("ID21", "Flats...");
-#endif
   IDENTdirFlats(ids,info);
   if (ROTT)
   {
-#ifdef DEBUG
-    Phase ("ID24", "Walls...");
-#endif
     IDENTdirWalls(ids,info);
   }
-#ifdef DEBUG
-  Phase("ID27", "Levels...");
-#endif
   IDENTdirLevels(ids,info);
-#ifdef DEBUG
-  Phase("ID30", "Musics...");
-#endif
   IDENTdirMusics(ids,info,true);
-#ifdef DEBUG
-  Phase("ID33", "PCsnd...");
-#endif
   IDENTdirPCSounds(ids,info,true);
-#ifdef DEBUG
-  Phase("ID36", "Patches...");
-#endif
   IDENTdirPatches(ids,info,Pnam,Pnamsz,true);
-#ifdef DEBUG
-  Phase("ID39", "Graphics(1)...");
-#endif
   IDENTdirGraphics(ids,info);
-#ifdef DEBUG
-  Phase("ID42", "Scripts...");
-#endif
   IDENTdirSscripts(ids,info);  /* FIXME Should not be called if not Strife ! */
-#ifdef DEBUG
-  Phase("ID45", "Sounds...");
-#endif
   IDENTdirSounds(ids,info,false);
-#ifdef DEBUG
-  Phase("ID48", "Graphics(2)...");
-#endif
   IDENTdirGraphics2(ids,info,true);
   ident_func = "IDENTentriesPWAD";
   for(n=0;n<info->ntry;n++)

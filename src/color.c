@@ -17,18 +17,12 @@ GNU General Public License for more details.
 */
 
 
-/*select your quantisation method*/
-/*#define QUANTSLOW*/
-#define QUANTHASH
-
 
 #include "deutex.h"
 #include "tools.h"
 #include "color.h"
 
 
-#ifdef QUANTHASH
-/*************** COL module: quantisation ************/
 /*
 ** hash table
 **
@@ -69,7 +63,6 @@ const int COLsame = 3;
  *
  *	Return a number between 0 (closest) and 24384 (farthest).
  */
-#if 1
 int16_t COLdiff( uint8_t R,  uint8_t G,  uint8_t B, uint8_t idx)
 {
    register struct PIXEL  *pixel = &COLpal[(int16_t)(idx&0xFF)];
@@ -87,17 +80,6 @@ int16_t COLdiff( uint8_t R,  uint8_t G,  uint8_t B, uint8_t idx)
    if(e<0) return 0x7FFF;
    return e;
 }
-#else
-#define COLdiff(r, g, b, idx)\
-(									\
- (									\
-     ((long) (r) - COLpal[idx].R) * ((long) (r) - COLpal[idx].R)	\
-   + ((long) (g) - COLpal[idx].G) * ((long) (g) - COLpal[idx].G)	\
-   + ((long) (b) - COLpal[idx].B) * ((long) (b) - COLpal[idx].B)	\
- )									\
- >> 3									\
-)
-#endif
 
 static uint8_t COLpalMatch( uint8_t R, uint8_t G, uint8_t B)
 {  int16_t i,test,min=0x7FFF;
@@ -138,28 +120,6 @@ int16_t Hash(uint8_t r,uint8_t g,uint8_t b)
   return  (int16_t) res;
 }
 
-/*
-void COLhashPrint(void)
-{ int16_t idx,i;
-  uint8_t res;
-  uint8_t buff[64];
-  int16_t count=0;
-  for(idx=0;idx<HashSz;idx+=64)
-  { for(i=0;i<64;i++)
-    { res=COLhash[(idx+i)&HashMask];
-      if(res==COLinvisib)
-      buff[i]=' ';
-      else
-      { buff[i]=('0'+(res&0x3F));
-		count++;
-	  }
-	}
-   fprintf(COLfp,"[%.32s]\n",buff);
-  }
-   fprintf(COLfp,"\nHash used %d out of %d\n",count,HashSz);
-}
-*/
-
 /*original colors*/
 static void COLputColHash(int16_t index,uint8_t R,uint8_t G,uint8_t B)
 { int16_t count,idx,nextidx;
@@ -188,15 +148,6 @@ static uint8_t COLgetIndexHash(uint8_t R,uint8_t G,uint8_t B)
 	}
 	else if (COLdiff(R,G,B,res)<COLsame)
 	{
-/*
-	  if(count>2)
-	  { if(res==COLhash[(nextidx-1)&HashMask])
-	  fprintf(COLfp,"multi %d in %d\n",(int)res,nextidx);
-	idx=((int16_t)res)&0xFF;
-	fprintf(COLfp,"%d\t%d\t%d\t*\n",(int)(R-COLpal[idx].R),(int)(G-COLpal[idx].G),(int)(B-COLpal[idx].B));
-
-	  }
-*/
 	  return res;
 	}
   }
@@ -327,8 +278,6 @@ uint8_t COLindex( uint8_t R, uint8_t G, uint8_t B, uint8_t index)
    return  (uint8_t)i;
 }
 
-#endif /*QUANTHASH*/
-
 
 
 /*
@@ -382,112 +331,3 @@ struct PIXEL *COLaltPalet(void)
 
   return COLpalAlt;
 }
-
-
-#ifdef QUANTSLOW
-/*unused!*//*************** COL module: quantisation ************/
-           /*
-           ** implemented as the most stupid  color quantisation
-           ** ever to be seen on this sector of the galaxy
-           **
-           */
-/*unused!*/
-/*unused!*/
-/*unused!*/static struct PIXEL  *COLpal;
-/*unused!*/static struct PIXEL COLinv;
-/*unused!*/static  uint8_t COLinvisib;
-/*unused!*/static bool COLok=false;
-/*unused!*/
-/*unused!*/
-/*unused!*/
-/*unused!*/void COLinit( uint8_t invR, uint8_t invG, uint8_t invB,uint8_t  *Colors, int16_t Colsz)
-/*unused!*/{  int16_t i;
-/*unused!*/   uint8_t r,g,b;
-/*unused!*/
-/*unused!*/   if(COLok!=false) Bug("XX99", "COLok");
-/*unused!*/   if(Colsz< 256*sizeof(struct PIXEL)) Bug("XX99", "Color entry too small");
-/*unused!*/   COLok=true;
-/*unused!*/   COLpal= (struct PIXEL  *)Malloc(256*sizeof(struct PIXEL));
-              /*
-              ** possible bug: the color corresponding to the
-              ** CYAN is assumed to be the second one with 0 0 0
-              ** this is because CYAN is supressed.
-              */
-/*unused!*/   for(i=0;i<256;i++)
-/*unused!*/   { r=Colors[i*3+0];
-/*unused!*/     g=Colors[i*3+1];
-/*unused!*/     b=Colors[i*3+2];
-/*unused!*/     COLpal[i].R=r;
-/*unused!*/     COLpal[i].G=g;
-/*unused!*/     COLpal[i].B=b;
-/*unused!*/     if(r==0)if(g==0)if(b==0)
-/*unused!*/       COLinvisib=( uint8_t)(i&0xFF);
-/*unused!*/   }
-/*unused!*/   if(COLinvisib!=(uint8_t)0xF7)Warning("XX99", "Strange PLAYPAL invisible color");
-/*unused!*/   if(COLinvisib==0)ProgError("XX99", "PLAYPAL is not correct");
-	      /*
-	      ** correction to doom palette
-	      */
-/*unused!*/   i=((int16_t)COLinvisib)&0xFF;
-/*unused!*/   COLinv.R=COLpal[i].R=invR;
-/*unused!*/   COLinv.G=COLpal[i].G=invG;
-/*unused!*/   COLinv.B=COLpal[i].B=invB;
-/*unused!*/}
-/*unused!*/ uint8_t COLinvisible(void)
-/*unused!*/{ if(COLok!=true) Bug("XX99", "COLok");
-/*unused!*/  return COLinvisib;
-/*unused!*/}
-/*unused!*/
-/*unused!*/struct PIXEL  *COLdoomPalet(void)
-/*unused!*/{ if(COLok!=true) Bug("XX99", "COLok");
-/*unused!*/  return COLpal;
-/*unused!*/}
-/*unused!*/
-/*unused!*/
-/*unused!*/
-/*unused!*/int16_t COLdiff( uint8_t r, uint8_t g, uint8_t b, uint8_t idx);
-/*unused!*/uint8_t COLindex( uint8_t R, uint8_t G, uint8_t B,uint8_t index)
-/*unused!*/{  int16_t i;
-/*unused!*/   int16_t test,min=0x7FFF;
-/*unused!*/   uint8_t  idx,idxmin;
-/*unused!*/   if(COLok!=true) Bug("XX99", "COLok");
-/*unused!*/
-/*unused!*/   if(R==COLinv.R)if(G==COLinv.G)if(B==COLinv.B) return COLinvisib;
-/*unused!*/   /*check for DOOM palette*/
-/*unused!*/   i= ((int16_t)index)&0xFF;
-/*unused!*/   if(R==COLpal[i].R)
-/*unused!*/	if(G==COLpal[i].G)
-/*unused!*/		if(B==COLpal[i].B)
-/*unused!*/                	return index;
-/*unused!*/   /*Best color match: slow*/
-/*unused!*/   idx=(uint8_t)0;
-/*unused!*/   for(i=0;i<256;i++)
-/*unused!*/   {  if(idx!=COLinvisib)
-/*unused!*/      { test=COLdiff(R,G,B,idx);
-/*unused!*/        if(test<min) {min=test;idxmin=idx;}
-/*unused!*/      }
-/*unused!*/      if(min==0)  break;
-/*unused!*/      idx ++;
-/*unused!*/   }
-/*unused!*/   return idxmin;
-/*unused!*/}
-/*unused!*/void COLfree(void)
-/*unused!*/{ if(COLok!=true) Bug("XX99", "COLok");
-/*unused!*/  COLok=false;
-/*unused!*/  Free(COLpal);
-/*unused!*/}
-/*unused!*/
-/*unused!*/
-/*unused!*/ int16_t COLdiff( uint8_t r,  uint8_t g,  uint8_t b, uint8_t  idx)
-/*unused!*/{  int16_t d;
-/*unused!*/   int16_t e=0;
-/*unused!*/   int16_t index = (int16_t)(idx&0xFF);
-/*unused!*/   d= ((int16_t)r) - ((int16_t) COLpal[index].R);
-/*unused!*/   e+= (d>0)? d:-d;
-/*unused!*/   d= ((int16_t)g) - ((int16_t) COLpal[index].G);
-/*unused!*/   e+= (d>0)? d:-d;
-/*unused!*/   d= ((int16_t)b) - ((int16_t) COLpal[index].B);
-/*unused!*/   e+= (d>0)? d:-d;
-/*unused!*/   return e;
-/*unused!*/}
-#endif /*QUANTSLOW*/

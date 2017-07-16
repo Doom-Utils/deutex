@@ -162,7 +162,6 @@ static char *PNGtoRAW(int16_t *prawX, int16_t *prawY, char *file);
 **  this is only a test example
 **  GIF->BMP
 */
-#if 1
 void PicDebug(char *file,const char *bmpdir, const char *name)
 {  char  *raw;
    int16_t rawX=0,rawY=0;
@@ -178,7 +177,7 @@ void PicDebug(char *file,const char *bmpdir, const char *name)
 
    Free(raw);
 }
-#endif
+
 /*
 ** end of examples
 **
@@ -420,7 +419,6 @@ int16_t Yinsr;             /*insertion point*/
 ** out:  int32_t picsz;           size of DoomPIC
 **       char pic[picsz];      buffer for DoomPIC
 */
-#define OPTIMEM 0
 static char *RAWtoPIC(int32_t *ppicsz, char  *raw, int16_t rawX, int16_t rawY,
     int16_t Xinsr,int16_t Yinsr, char transparent)
 {  int16_t x,y;
@@ -465,9 +463,6 @@ static char *RAWtoPIC(int32_t *ppicsz, char  *raw, int16_t rawX, int16_t rawY,
   int worst_case = worst_case_1 > worst_case_2 ? worst_case_1 : worst_case_2;
   picsz= colnbase + ((int32_t)rawX) * worst_case;
   }
-#if OPTIMEM /*optimisation*/
-  if(picsz>0x10000L) picsz=0x10000L;
-#endif
   pic = (char  *)Malloc(picsz);
   ColOfs=(int32_t  *)&(pic[sizeof(struct PICHEAD)]);
   pichead=(struct PICHEAD  *)pic;
@@ -545,19 +540,6 @@ static char *RAWtoPIC(int32_t *ppicsz, char  *raw, int16_t rawX, int16_t rawY,
     }
     pic[colnpos+setpos]=(char)0xFF; /*end of all sets*/
     colnpos+=(int32_t)(setpos+1);          /*position of next column*/
-#if OPTIMEM /*optimisation*/
-    if((colnpos+((int32_t)(5*rawY)/2)+1)>=picsz) /*avoid crash during next column*/
-    { /*pic size was underestimated. need more pic size*/
-      /*Bug("Pic size too small");*/
-#if 1
-      picsz= colnpos+0x4000;/*better make it incremental... not 161k!*/
-#else
-      picsz= colnbase + ((int32_t)rawX) * (1+5*(((int32_t)rawY+1)/2));
-#endif
-      pic = (char  *)Realloc(pic,picsz);
-      ColOfs=(int32_t  *)&(pic[sizeof(struct PICHEAD)]);
-    }
-#endif
   }
   /*picsz was an overestimated size for PIC*/
   pic = (char  *)Realloc(pic,colnpos);
