@@ -1,0 +1,66 @@
+DeuTex
+======
+
+DeuTex can do many things with _Doom_, _Freedoom_, _Heretic_, _Hexen_,
+and _Strife_ https://doomwiki.org/wiki/WAD[“WAD”] files, such as
+extracting and inserting graphics, sounds, levels, and other
+resources.  It can be used for creating and modifying IWAD and PWAD
+files both.
+
+Building and installing
+-----------------------
+
+DeuTex uses an Autoconf+Automake build system, so its compilation and
+installation process is identical to most other Unix packages:
+
+    ./configure
+    make
+    make install
+
+When building directly from the version control repository, you will
+need autoconf and automake installed and run the `./bootstrap` command
+first to generate the `./configure` file.
+
+To build and install the manpage, AsciiDoc must be installed, in
+particular the DocBook-based `a2x` command for transforming it into
+manpage format.  DeuTex will still build without it, however.
+
+To build and install on ReactOS or Microsoft Windows will require an
+environment compatible with Unix shells and programs, such as Cygwin
+or MSYS2.
+
+Old versions of DeuTex ran on DOS and OS/2, but support has been
+removed with no current plans to restore them.  As DeuTex gains new
+features, old versions may not be usable with current build scripts.
+
+History
+-------
+
+DeuTex began life as a fork of Doom Editing Utilities (known as DEU
+for short) by Oliver Montanuy in 1994, expunging the graphical user
+interface in favor of command line and scriptable usage scenarios.
+Originally written for DOS, its primary home is now Unix systems, and
+is a fundamental piece to building
+https://freedoom.github.io/[_Freedoom_’s] playable WAD files.
+
+The name comes from a play on LaTeX and in turn TeX, a popular
+typesetting system in academia but no technical connection to DeuTex.
+It is pronounced as two syllables, the first like “due” or “dew,” and
+the second like “tech” (not “tex”!), owing from its namesake.
+
+Copyright
+---------
+
+Copyright © 1994-1996 Oliver Montanuy, © 1999-2005 André Majorel, ©
+2006-2017 contributors to the DeuTex project.
+
+This program is free software; you can redistribute it and/or modify
+it under the terms of the GNU General Public License as published by
+the Free Software Foundation; either version 2 of the License, or (at
+your option) any later version.
+
+This program is distributed in the hope that it will be useful, but
+WITHOUT ANY WARRANTY; withotu even the implied warranty of
+MERCHANTABILITY or FITNESS FOR ANY PARTICULAR PURPOSE.  See the GNU
+General Public License for more details, provided under the name
++COPYING+.
