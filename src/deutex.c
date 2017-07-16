@@ -878,7 +878,7 @@ int main (int argc, char *argv_non_const[])
    */
    WadInfOk=false;
    George=false;
-   Picture    = PICBMP;
+   Picture    = PICPNG;
    Sound      = SNDWAV;
    trnR=0;trnG=47;trnB=47;
    fullSND    = true;
