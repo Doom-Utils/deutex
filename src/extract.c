@@ -438,12 +438,13 @@ void XTRextractWAD(const char *doomwad, const char *DataDir, const char
 		  false);
               break;
              case ESNDWAV:
-              switch(Sound)
-              { case SNDAU:  extens="AU";break;
-                case SNDWAV: extens="WAV";break;
-                case SNDVOC: extens="VOC";break;
-                default: Bug("EX28", "Invalid snd type %d", Sound);
-              }
+                 switch (Sound) {
+                 case SNDWAV:
+                     extens = "WAV";
+                     break;
+                 default:
+                     Bug("EX28", "Invalid snd type %d", Sound);
+                 }
               res=MakeFileName(file,DataDir,"SOUNDS","",pdir[p].name,extens);
               if((WSafe==true)&&(res==true))
               { Warning("EX29", "Will not overwrite file %s", fname (file));
@@ -936,15 +937,17 @@ void XTRgetEntry(const char *doomwad, const char *DataDir, const char *wadin,
     if (peek_i16_le (Entry) == 3)
       if (Entrysz >= 8 + peek_i32_le (Entry + 4))
       { /*save as sound*/
-        switch(Sound)
-        { case SNDAU:  extens="AU";break;
-          case SNDWAV: extens="WAV";break;
-          case SNDVOC: extens="VOC";break;
-          default: Bug("GE05", "Invalid snd type %d", (int) Sound);
-        }
-        MakeFileName(file,DataDir,"","",Name,extens);
-        SNDsaveSound(file,Entry,Entrysz,Sound,fullSND, Name);
-        Found=true;
+          switch (Sound) {
+          case SNDWAV:
+              extens = "WAV";
+              break;
+          default:
+              Bug("GE05", "Invalid snd type %d", (int) Sound);
+          }
+
+          MakeFileName(file,DataDir,"","",Name,extens);
+          SNDsaveSound(file,Entry,Entrysz,Sound,fullSND, Name);
+          Found=true;
       }
   if(Found!=true)
   { /*save as lump*/

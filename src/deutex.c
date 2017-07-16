@@ -69,7 +69,7 @@ static char WadInf[128];	/* name of the wadinfo file */
 static bool WadInfOk;
 int16_t HowMuchJunk;		/* junk to add*/
 static IMGTYPE Picture;		/* save as PPM, BMP or GIF ? */
-static SNDTYPE Sound;		/* save as WAV, VOC or AU ? */
+static SNDTYPE Sound = SNDWAV; /* save as WAV? Yes. */
 static bool fullSND;
 static bool WSafe;
 static bool George;
@@ -395,30 +395,6 @@ void COMppm (int argc, const char *argv[])
 {
   Picture = PICPPM;
   Info ("AA52", "Saving pictures as rawbits PPM (P6, .ppm)");
-  (void) argc;
-  (void) argv;
-}
-
-void COMau (int argc, const char *argv[])
-{
-  Sound = SNDAU;
-  Info ("AA43", "Save sounds as Sun audio (.au)");
-  (void) argc;
-  (void) argv;
-}
-
-void COMwave (int argc, const char *argv[])
-{
-  Sound = SNDWAV;
-  Info ("AA45", "Save sounds as WAVE (.wav)");
-  (void) argc;
-  (void) argv;
-}
-
-void COMvoc (int argc, const char *argv[])
-{
-  Sound = SNDVOC;
-  Info ("AA44", "Save sounds as voc (.voc)");
   (void) argc;
   (void) argv;
 }
@@ -774,11 +750,8 @@ static comdef_t Com[]=
  {OP2,3,"rgb",      COMrgb,	"<r> <g> <b>",	"specify the transparent colour (default 0 47 47)"},
 
  {SEC,0,NULL,       NULL,	NULL,		"Sound"},
- {OP2,0,"au",       COMau,	NULL,		"save sounds as Sun audio (\1.au\3)"},
  {OP2,0,"fullsnd",  COMfullsnd,	NULL,		"save sounds beyond declared length"},
  {OP2,1,"rate",     COMrate,	"<code>",	"policy for != 11025 Hz (\1reject\3, \1force\3, *\1warn\3, \1accept\3)"},
- {OP2,0,"voc",      COMvoc,	NULL,		"save sounds as voc (\1.voc\3)"},
- {OP2,0,"wav",      COMwave,	NULL,		"save sounds as WAVE (\1.wav\3)"},
 
  {SEC,0,NULL,       NULL,	NULL,		"Reporting"},
  {OP2,1,"di",       COMdi,	"<name>",	"debug identification of entry"},

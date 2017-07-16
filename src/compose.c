@@ -411,37 +411,41 @@ void CMPOmakePWAD(const char *doomwad,WADTYPE type, const char *PWADname,
    **
    **   sounds. all sounds entries
    */
-   if(select&BSOUND)
-   {  start=size=0;
-      if(TXTseekSection(TXT,"SOUNDS"))
-      { Phase("CM60", "Making sounds");
-	while(TXTentryParse(name,filenam,&X,&Y,&Repeat,TXT,false)==true)
-	{ if(Repeat!=true)
-	  { WADRalign4(&rwad);     /*align entry on int32_t word*/
-	    start=WADRposition(&rwad);
-	    if(MakeFileName(file,DataDir,"SOUNDS","",filenam,"TXT")==true)
-	    { size=SNDcopyPCSoundInWAD(&rwad,file);
-	      Detail("CM62", "Reading PC sound from file %s", fname (file));
-	    }
-	    else
-	    { if(MakeFileName(file,DataDir,"SOUNDS","",filenam,"WAV")==true)
-	      { size=SNDcopyInWAD(&rwad,file,SNDWAV);
-	      }
-	      else if(MakeFileName(file,DataDir,"SOUNDS","",filenam,"AU")==true)
-	      { size=SNDcopyInWAD(&rwad,file,SNDAU);
-	      }
-	      else if(MakeFileName(file,DataDir,"SOUNDS","",filenam,"VOC")==true)
-	      { size=SNDcopyInWAD(&rwad,file,SNDVOC);
-	      }
-	      else if(CMPOcopyFromWAD(&size,&rwad,DataDir,"SOUNDS",name,
-		    filenam)!=true)
-		ProgError("CM63", "Can't find sound %s, AU or WAV or VOC",file);
-	      Detail("CM64", "Reading sound file %s", fname (file));
-	    }
-	  }
-	  WADRdirAddEntry(&rwad,start,size,name);
-	}
-      }
+   if (select & BSOUND) {
+       start = size = 0;
+       if (TXTseekSection(TXT, "SOUNDS")) {
+           Phase("CM60", "Making sounds");
+           while (TXTentryParse(name, filenam, &X, &Y, &Repeat, TXT, false) ==
+                  true) {
+               if (Repeat != true) {
+                   WADRalign4(&rwad);	/*align entry on int32_t word */
+                   start = WADRposition(&rwad);
+                   if (MakeFileName
+                       (file, DataDir, "SOUNDS", "", filenam,
+                        "TXT") == true) {
+                       size = SNDcopyPCSoundInWAD(&rwad, file);
+                       Detail("CM62", "Reading PC sound from file %s",
+                              fname(file));
+                   } else {
+                       if (MakeFileName
+                           (file, DataDir, "SOUNDS", "", filenam,
+                            "WAV") == true) {
+                           size = SNDcopyInWAD(&rwad, file, SNDWAV);
+                       } else {
+                           if (CMPOcopyFromWAD
+                               (&size, &rwad, DataDir, "SOUNDS", name,
+                                filenam) != true) {
+                               ProgError("CM63",
+                                         "Can't find sound %s, WAV",
+                                         file);
+                           }
+                       }
+                       Detail("CM64", "Reading sound file %s", fname(file));
+                   }
+               }
+               WADRdirAddEntry(&rwad, start, size, name);
+           }
+       }
    }
    /*
    **

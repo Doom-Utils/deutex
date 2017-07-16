@@ -82,9 +82,9 @@ To extract only the sprites,
 
     @PACKAGE@ -doom2 /path/to/doom2.wad -sprites -xtract
 
-To extract only the sounds and save them as .voc,
+To extract only the sounds,
 
-    @PACKAGE@ -doom2 /path/to/doom2.wad -sounds -voc -xtract
+    @PACKAGE@ -doom2 /path/to/doom2.wad -sounds -xtract
 
 Composing (building) a wad
 ~~~~~~~~~~~~~~~~~~~~~~~~~~
@@ -326,20 +326,11 @@ Specify the transparent colour (default 0 47 47).
 
 Sound
 ~~~~~
-*-au*::
-Save sounds as Sun audio (*.au*).
-
 *-fullsnd*::
 Save sounds beyond declared length.
 
 *-rate* 'code'::
 Policy for != 11025 Hz (*reject*, *force*, *warn*, *accept*; default warn).
-
-*-voc*::
-Save sounds as voc (*.voc*).
-
-*-wav*::
-Save sounds as WAVE (*.wav*).  Default format.
 
 Reporting
 ~~~~~~~~~
