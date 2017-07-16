@@ -22,11 +22,6 @@ GNU General Public License for more details.
 
 #define ROTT 0  /* FIXME make it a run-time option */
 
-/*use old GIF encoder, new one is doing errors*/
-#define NEWGIFE 0
-/*use old GIF decoder, new one is down*/
-#define NEWGIFD 0
-
 #include <stdbool.h>
 #include <stdint.h>
 #include <stdio.h>

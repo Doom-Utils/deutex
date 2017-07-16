@@ -41,9 +41,6 @@
 #include "tools.h"
 
 
-#if NEWGIFE && NEWGIFD
-/*nothing, for new gif encoder*/
-#else
 /*
  * General DEFINEs
  */
@@ -61,11 +58,8 @@ typedef int32_t   count_int;
 static int16_t *table[2];
 /*static int16_t	stack[(1<<(BITS))*2];*/
 static int16_t *stack;
-#endif
 
 
-#if NEWGIFD
-#else
 void decompressInit(void)
 {  
    table[0]=(int16_t *)Malloc(sizeof(int16_t)*(1<<BITS));
@@ -78,11 +72,7 @@ void decompressFree(void)
    Free(table[1]);
    Free(stack);
 }
-#endif
 
-
-#if NEWGIFE
-#else
 /*static count_int htab [HSIZE];*/
 static count_int *htab=NULL;
 /*static unsigned int16_t codetab [HSIZE];*/
@@ -104,7 +94,6 @@ static void cl_hash ( count_int hsize );
 static void char_init ( void );
 static void char_out ( int16_t c );
 static void flush_char ( void );
-#endif
 
 
 
@@ -151,8 +140,6 @@ static void flush_char ( void );
 #include <ctype.h>
 
 
-#if NEWGIFE
-#else
 static int16_t n_bits;                      /* number of bits/code */
 static int16_t maxbits;                	/* user settable max # bits/code */
 static code_int maxcode;                /* maximum code, given n_bits */
@@ -449,7 +436,6 @@ static void flush_char()
      a_count = 0;
    }
 }
-#endif /*NEWGIFE*/
 /* The End */
 
 
@@ -462,8 +448,6 @@ static void flush_char()
 **
 */
 
-#if NEWGIFD
-#else
 #define true 1
 #define false 0
 #define	ReadOK(file,buffer,len)	(fread(buffer, len, 1, file) == 1)
@@ -609,4 +593,3 @@ int16_t LWZReadByte(FILE *fd, int16_t flag, int16_t input_code_size)
    }
    return code;
 }
-#endif /*NEWGIFD*/

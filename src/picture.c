@@ -1338,20 +1338,11 @@ static struct GIFIMAGE  /*size =9*/
 /*
 ** extern LZW routines
 */
-#if NEWGIFE ||NEWGIFD
-#include "gifcodec.h"
-#endif
-#if NEWGIFD
-#else
 extern void decompressInit(void);
 extern void decompressFree(void);
 extern int16_t LWZReadByte( FILE *fd, int16_t flag, int16_t input_code_size );
-#endif
-#if NEWGIF
-#else
 extern void compressInit(void);
 extern void compressFree(void);
-#endif
 
 
 static char  *GIFreadPix(FILE *fd,int16_t Xsz,int16_t Ysz);
@@ -1374,10 +1365,7 @@ static char *GIFtoRAW (int16_t *rawX, int16_t *rawY, char *file)
    fd=fopen(file,FOPEN_RB);
    if (fd == NULL)
      ProgError("GR10", "%s: %s", fname (file), strerror (errno));
-#if NEWGIFD
-#else
    decompressInit();
-#endif
    /*
    ** screen descriptor
    */
@@ -1475,10 +1463,7 @@ static char *GIFtoRAW (int16_t *rawX, int16_t *rawY, char *file)
    *rawX=Xsz;
    *rawY=Ysz;
    /* fclose(fd); */  /* Commented out AYM 1999-01-13. Why close twice ? */
-#if NEWGIFD
-#else
    decompressFree();
-#endif
    return raw;
 }
 /*
@@ -1526,23 +1511,15 @@ static void GIFextens(FILE *fd)
 static char  *GIFreadPix(FILE *fd,int16_t Xsz,int16_t Ysz)
 {  char  *raw=NULL;
    int32_t rawSz;
-#if NEWGIFD
-#else
    int16_t v;
    int32_t rawpos;
    unsigned char c=0;
-#endif
 
    /*
    ** get some space
    */
    rawSz = ((int32_t)Xsz)*((int32_t)Ysz);
    raw = (char  *)Malloc(rawSz);
-#if NEWGIFD
-   InitDecoder( fd, 8, Xsz);
-   Decode((uint8_t  *)raw, rawSz);
-   ExitDecoder();
-#else
    /* Initialize the Compression routines */
    if (fread(&c,1,1,fd)!=1) ProgError("GR50", "GIF: read error" );
    if (LWZReadByte(fd, true, c) < 0) ProgError("GR51", "GIF: bad code in image" );
@@ -1552,7 +1529,6 @@ static char  *GIFreadPix(FILE *fd,int16_t Xsz,int16_t Ysz)
      raw[rawpos]=(v&0xFF);
    }
    while (LWZReadByte(fd,false,c)>=0);  /* ignore extra data */
-#endif
    return raw;
 }
 
@@ -1589,8 +1565,6 @@ static char  *GIFintlace(char  *org,int16_t Xsz,int16_t Ysz)
 ** write GIF
 */
 
-#if NEWGIFE
-#else
 typedef int16_t         code_int;
 extern void compress( int16_t init_bits, FILE *outfile, code_int (* ReadValue)(void));
 static char  *Raw;
@@ -1603,7 +1577,6 @@ static code_int NextPixel(void )
    CountCur++;
    return ((code_int)c &0xFF);
 }
-#endif
 
 static void RAWtoGIF (char *file, char *raw, int16_t rawX, int16_t rawY,
     struct PIXEL *doompal )
@@ -1633,18 +1606,13 @@ static void RAWtoGIF (char *file, char *raw, int16_t rawX, int16_t rawY,
    fputc (0, fd);					/* info */
    /* image data */
    fputc(8,fd);     /* Write out the initial code size */
-#if NEWGIFE
-   InitEncoder(fd,8);
-   Encode((uint8_t  *)raw,rawSz);
-   ExitEncoder();
-#else
    Raw      = raw;  /* init */
    CountTop = rawSz;
    CountCur = 0;
    compressInit();
    compress( 8+1, fd, NextPixel );  /*  write picture, InitCodeSize=8 */
    compressFree();
-#endif
+
    /* termination */
    fputc(0,fd);   /*0 length packet to end*/
    fputc(';',fd); /*GIF file terminator*/
