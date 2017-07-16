@@ -257,26 +257,12 @@ void WADRwriteDir(struct WADINFO *info, int verbose)
 
 void WADRsetDirRef(struct WADINFO *info,int32_t ntry,int32_t dirpos)
 {
-#if 0
-  struct { int32_t ntry;int32_t dirpos;} Head;
-#endif
    if(!(info->ok&WADR_WRITE))Bug("WW24", "%s: WadSDR", fname (info->filename));
-#if 0
-   Head.ntry=BE_int32_t(ntry);
-   Head.dirpos=BE_int32_t(dirpos);
-#endif
    WADRseek(info,4);
    if (wad_write_i32 (info->fd, ntry)
        || wad_write_i32 (info->fd, dirpos))
      ProgError ("WW26", "%s: write error while fixing up the header",
 	 fname (info->filename));
-#if 0
-   if(fwrite(&Head,sizeof(Head),1,info->fd)!=1)
-   { Warning("XX99", "That WAD might not be usable anymore!");
-     Warning("XX99", "Restore bytes 4 to 11 manually if you can.");
-     ProgError("XX99", "Failed writing WAD directory References");
-   }
-#endif
    WADRseek(info,info->wposit);
    info->ntry=ntry;
    info->dirpos=dirpos;
@@ -291,18 +277,8 @@ void WADRchsize(struct WADINFO *info,int32_t fsize)
   info->wposit=fsize;
 }
 
-#if 0
-bool WADRchsize2(struct WADINFO *info,int32_t fsize)
-{ if(!(info->ok&WADR_WRITE)) Bug("XX99", "WadcSz");
-  if(Chsize(fileno(info->fd),fsize)!=0) return false;
-  return true;
-}
-#endif
-
 
 /****************Read********************/
-
-
 
 void WADRseek(struct WADINFO *info,int32_t position)
 {
@@ -335,17 +311,6 @@ iolen_t WADRreadBytes2 (struct WADINFO *info, char *buffer, iolen_t nbytes)
     size_t result;
     if (attempt > nbytes)
       attempt = nbytes;
-#if 0
-    
-    {					/* TEST */
-    const unsigned char *p;
-    printf ("%p", info->fd);
-    for (p = (const unsigned char *) info->fd; (FILE*) p < info->fd + 1; p += 4)
-      printf (" %02X%02X%02X%02X", p[3], p[2], p[1], p[0]);
-    putchar ('\n');
-    clearerr (info->fd);  /* DEBUG */
-    }
-#endif
     result = fread (buffer, 1, attempt, info->fd);
     bytes_read += result;
     if (result == 0)  /* Hit EOF */
@@ -438,13 +403,6 @@ char  *WADRreadEntry(struct WADINFO *info,int16_t n,int32_t *psize)
   start = info->dir[n].start;
   size  = info->dir[n].size;
   buffer=(char  *)Malloc(size);
-#if 0
-  fclose (info->fd);  /* TEST */
-  info->fd = fopen(info->filename,"r+b");  /* TEST */
-  if (info->fd == NULL)  /* TEST */
-    Warning("XX99", "Ugh!");
-  printf ("after %p\n", info->fd);
-#endif
   WADRseek(info,start);
   WADRreadBytes(info,buffer,size);
   *psize=size;

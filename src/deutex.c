@@ -1002,21 +1002,6 @@ int main (int argc, char *argv_non_const[])
 	  ProgError ("AA18",
 	      "Can't find any of doom.wad, doom2.wad, doompres.wad,"
 	      " heretic.wad, hexen.wad, strife1.wad");
-#if 0
-       if(    MakeFileName(MainWAD,DoomDir,"","","doompres","wad")!=true
-	   && MakeFileName(MainWAD,DoomDir,"","","doom",    "wad")!=true
-	   && MakeFileName(MainWAD,DoomDir,"","","doom2",   "wad")!=true
-	   && MakeFileName(MainWAD,DoomDir,"","","heretic", "wad")!=true
-	   && MakeFileName(MainWAD,DoomDir,"","","hexen",   "wad")!=true
-	   && MakeFileName(MainWAD,DoomDir,"","","strife1", "wad")!=true
-	   && MakeFileName(MainWAD,".",    "","","doompres","wad")!=true
-	   && MakeFileName(MainWAD,".",    "","","doom",    "wad")!=true
-	   && MakeFileName(MainWAD,".",    "","","doom2",   "wad")!=true
-	   && MakeFileName(MainWAD,".",    "","","heretic", "wad")!=true
-	   && MakeFileName(MainWAD,".",    "","","hexen",   "wad")!=true
-	   && MakeFileName(MainWAD,".",    "","","strife1", "wad")!=true)
-	 ;
-#endif
      }
 
      if (! (Select & BALL))

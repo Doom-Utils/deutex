@@ -617,16 +617,6 @@ static void IDENTdirPatches(ENTRY  *ids,struct WADINFO *info, char  *Pnam, int32
 static void IDENTdirGraphics(ENTRY  *ids,struct WADINFO *info)
 { int16_t n;
   ident_func = "IDENTdirGraphics";
-#if 0
-  /* Not true for Doom alpha */
-  IDENTdirSet(ids,info,"TITLEPIC",EGRAPHIC);
-  /* not true for heretic*/
-  IDENTdirSet(ids,info,"HELP1",EGRAPHIC);
-  IDENTdirSet(ids,info,"HELP2",EGRAPHIC);
-  IDENTdirSet(ids,info,"HELP",EGRAPHIC);
-  IDENTdirSet(ids,info,"CREDIT",EGRAPHIC);
-  IDENTdirSet(ids,info,"TITLE",EGRAPHIC);
-#endif
   /*heretic fonts*/
   IDENTdirSet(ids,info,"FONTA_S",ELUMP);
   IDENTdirSet(ids,info,"FONTA_E",ELUMP);
@@ -895,97 +885,12 @@ static void IDENTdirLevels (ENTRY *ids, struct WADINFO *info)
 	{
 	  int i;
 
-#if 0
-	  for (i = 0; i <= max_lumps; i++)
-	    if (! lump_present[i] && Part[i].mandatory)
-	      Warning ("XX99", "Level %s: no %s lump", level_name, Part[i].name); 
-#endif
 	  for (i = n0; i <= n; i++)
 	    IDENTsetType (ids, info, i, level);
 	}
       }
     }
 
-#if 0
-    if(ids[n]==EZZZZ)
-    {
-      Normalise(name,info->dir[n].name);
-      l=IDENTlevel(name);
-      if(l>=0)
-      {
-        Normalise (level_name, info->dir[n].name);
-	level=(name[0]=='M')? EMAP:ELEVEL;
-        level|=l;
-        level_lump = 1;
-        IDENTsetType (ids, info, n, level);
-	{
-	  int n;
-	  lump_present[0] = 1;
-	  for (n = 1; n <= max_lumps; n++)
-	    lump_present[n] = 0;
-	  wrong_order = 0;
-	}
-      }
-      else if (level_lump > 0)
-      {
-	int 
-	l = IDENTlevelPart(name);
-	if (have_lump[l])
-	{
-	  Warning ("XX99", "Level %s: duplicate %s lump",
-	      lump_name (level_name), lump_name (name));
-	  level_lump = 0;
-	}
-	if (l != level_lump)
-	{
-	  if (! wrong_order)
-	    Warning ("XX99", "Level %s: lumps in the wrong order (%s)",
-		level_name, lump_name (name));
-	  wrong_order = 1;
-	}
-
-	if (level_lump != 0)
-	  IDENTsetType (ids, info, n, level);
-
-	/* If level is complete, stop here */
-	{
-	  int n;
-	  for (n = 0; n < max_lumps; n++)
-	    if (! lump_present[n])
-	      break;
-	  if (n == max_lumps)
-	    level_lump = 0;
-	}
-
-	/* If end of directory or followed by other level, stop here */
-	if (n + 1 >= info->nentry)
-	  level_lump = 0;
-	else
-	{
-	  char next_lump[8];
-	  if (n + 1 >= info->nentry
-	      || info->dir[n]);
-	}
-
-
-      }
-
-	/* Reached last lump of level. */
-	if (level_lump == 0)
-	{
-	  int n;
-
-	  for (n = 0; n <= max_lumps; n++)
-	    if (! have_lump[n] && IDENTlevelPartMandatory (n))
-	      Warning ("XX99", "Level %s: no %s lump", IDENTlevelPartName (n)); 
-	}
-    }
-    "th ld sd v seg ss nod sec rej bm"
-    "th ld sd v seg ss nod sec rej bm beh"
-    "th ld sd v nod sec"
-    "th ld sd v nod sec beh"
-    "fn pnt lines sec th"
-#endif
   }
   if (in_level)
     Bug ("IL11", "Reached EOD while in level");

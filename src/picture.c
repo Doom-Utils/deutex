@@ -111,20 +111,6 @@ int parse_pic_header (
       FAIL1 ("width < 1 (%d)", (int) h->width);
    if (h->height < 1)
       FAIL1 ("height < 1 (%d)", (int) h->height);
-#if 0
-   /*if (h->width > 4096)
-      FAIL1 ("width > 4096 (%d)", (int) h->width);*/
-   if (h->height > 4096)
-      FAIL1 ("height > 4096 (%d)", (int)h->height);
-   if (h->xofs < -4096)
-      FAIL1 ("X-offset < -4096 (%d)", (int) h->xofs);
-   if (h->xofs > 4096)
-      FAIL1 ("X-offset > 4096 (%d)", (int) h->xofs);
-   if (h->yofs < -4096)
-      FAIL1 ("Y-offset < -4096 (%d)", (int) h->yofs);
-   if (h->yofs > 4096)
-      FAIL1 ("Y-offset > 4096 (%d)", (int) h->yofs);
-#endif
 
    /* Array of column offsets. Column data. */ 
    h->colofs = p;
@@ -170,29 +156,6 @@ static char *GIFtoRAW (int16_t *rawX, int16_t *rawY, char *file);
 static void RAWtoGIF (char *file, char *raw, int16_t rawX, int16_t rawY,
     struct PIXEL *doompal);
 
-/*
-**
-**  this is only a test example
-**  COLinit and COLfree must be called before
-**  BMP->GIF
-*/
-#if 0
-void PicDebug(char *file, const char *bmpdir, const char *name)
-{  char  *raw;
-   int16_t rawX,rawY;
-   struct PIXEL  * doompal;
-
-   Phase("XX99", "BMP->RAW");
-   MakeFileName(file,bmpdir,"","",name,"BMP");
-   raw =BMPtoRAW(&rawX,&rawY,file);
-   doompal = COLdoomPalet();
-   Phase("XX99", "RAW->GIF");
-   MakeFileName(file,bmpdir,"","",name,"GIF");
-   RAWtoGIF(file,raw,rawX,rawY,doompal);
-
-   Free(raw);
-}
-#endif
 /*
 **  this is only a test example
 **  GIF->BMP

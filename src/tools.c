@@ -664,19 +664,3 @@ void Detail (const char *code, const char *fmt, ...)
     fputc ('\n', stdinfo_);
   }
 }
-
-#if 0
-int16_t NbP=0;
-void Progress(void)
-{ NbP++;
-  if(NbP&0xF==0) fprintf(stdinfo_,".");
-  if(NbP>0x400)
-  { NbP=0;
-    fprintf(stdinfo_,"\n");
-  }
-}
-
-void ProgressEnds(void)
-{ fprintf(stdinfo_,"\n");
-}
-#endif

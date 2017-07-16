@@ -229,7 +229,6 @@ void COLinit( uint8_t invR, uint8_t invG, uint8_t invB,char  *Colors, int16_t Co
      COLpal[i].G=Colors[i*3+1];
      COLpal[i].B=Colors[i*3+2];
    }
-#if 1  /*supposedly exact...*/
    if (COLpal[0].R == 0 && COLpal[0].G == 0 && COLpal[0].B == 0
      && COLpal[0xf7].R == 0 && COLpal[0xf7].G == 0 && COLpal[0xf7].B == 0)
    { i = 0xf7;
@@ -240,12 +239,11 @@ void COLinit( uint8_t invR, uint8_t invG, uint8_t invB,char  *Colors, int16_t Co
    { i = 0xff;
      name = "Heretic";
    }
-#if 0
-   else if (0)  /* FIXME */
+   else if (COLpal[33].R == 29 && COLpal[33].G == 32 && COLpal[33].B == 29
+       && COLpal[255].R == 255 && COLpal[255].G == 255 && COLpal[255].B == 255)
    {
      name = "Hexen";
    }
-#endif
    else if (COLpal[0].R == 0 && COLpal[0].G == 0 && COLpal[0].B == 0
      && COLpal[240].R == 0 && COLpal[240].G == 0 && COLpal[240].B == 0)
    { i = 0xf0;
@@ -255,9 +253,6 @@ void COLinit( uint8_t invR, uint8_t invG, uint8_t invB,char  *Colors, int16_t Co
    { i = 0xff;
      name = NULL;
    }
-#else  /*screws some little points, on some sprites*/
-   i=0xFF; /*DOOM and HERETIC*/
-#endif
    /*
    ** correction to doom palette
    */
