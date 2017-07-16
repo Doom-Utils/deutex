@@ -317,6 +317,9 @@ Graphics
 *-bmp*::
 Save pictures as BMP (*.bmp*).
 
+*-png*::
+Save pictures as PNG (*.png*).  Default format.
+
 *-gif*::
 Save pictures as GIF (*.gif*).
 
@@ -341,7 +344,7 @@ Policy for != 11025 Hz (*reject*, *force*, *warn*, *accept*; default warn).
 Save sounds as voc (*.voc*).
 
 *-wav*::
-Save sounds as WAVE (*.wav*).
+Save sounds as WAVE (*.wav*).  Default format.
 
 Reporting
 ~~~~~~~~~
