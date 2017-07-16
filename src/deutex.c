@@ -105,55 +105,6 @@ void COMipf (int argc, const char *argv[]);
 void COMtf (int argc, const char *argv[]);
 void COMitl (int argc, const char *argv[]);
 
-/*
-** WinTex comand line replaces
-** -out
-** -v3
-** -doom       doom directory
-** -dir        data directory
-** -sel        select byte
-** -colRrGgBb  red = (R-'A')*16+(r-'A')
-*/
-void COMwintxn(int argc, const char *argv[])
-{  const char *num;
-   PrintInit(true);                /*-out*/
-   PrintVerbosity(3);                /*-v3*/
-   DoomDir=argv[1];                /*doom*/
-   DataDir=argv[2];                /*data*/
-   MakeFileName(WadInf,DataDir,"","",argv[3],"TXT");
-   WadInfOk=true;
-   Select|= atoi(argv[4]);        /*select*/
-   num = argv[5];                /*colour*/
-   if(strlen(num)<6) ProgError("AA24", "Invalid colour \"%.128s\"", num);
-   trnR= (((num[0]&0xF)<<4)+(num[1]&0xF))&0xFF;
-   trnG= (((num[2]&0xF)<<4)+(num[3]&0xF))&0xFF;
-   trnB= (((num[4]&0xF)<<4)+(num[5]&0xF))&0xFF;
-   Info("AA26", "Transparent colour is R=%d G=%d B=%d",
-    ((int)trnR&0xFF),((int)trnG&0xFF),((int)trnB&0xFF));
-   (void)argc;
-}
-
-void COMwintxm(int argc, const char *argv[])
-{  PrintInit(true);                /*-out*/
-   PrintVerbosity(3);                /*-v3*/
-   DoomDir=argv[1];                /*doom*/
-   DataDir=".";
-   Select|= atoi(argv[2]);        /*select*/
-   trnR= 0;trnG= 255;trnB= 255;
-   (void)argc;
-}
-
-void COMwintex(int argc, const char *argv[])
-{  PrintInit(true);                /*-out*/
-   PrintVerbosity(3);                /*-v3*/
-   DoomDir=NULL;
-   strncpy(MainWAD,argv[1],128);/*main*/
-   DataDir=".";
-   Select|= BALL;                /*select*/
-   trnR= 0;trnG= 255;trnB= 255;
-   (void)argc;
-}
-
 void COMverbose(int argc, const char *argv[])
 {  PrintVerbosity(argv[0][2]-'0');
    Info("AA10", "Verbosity level is %c",argv[0][2]);
@@ -840,11 +791,6 @@ static comdef_t Com[]=
  {OP2,0,"v3",       COMverbose,	NULL,		"set verbosity level to 3"},
  {OP2,0,"v4",       COMverbose,	NULL,		"set verbosity level to 4"},
  {OP2,0,"v5",       COMverbose,	NULL,		"set verbosity level to 5"},
-
- {SEC,0,NULL,       NULL,	NULL,		"WinTex-related options"},
- {OP2,5,"win",      COMwintxn,	"<doom> <data> <info> <select> <colour>", "WinTex shortcut"},
- {OP2,2,"wim",      COMwintxm,	"<doom> <select>",	"WinTex shortcut"},
- {OP2,1,"wtx",      COMwintex,	"<iwad>",		"WinTex shortcut"},
 
  {END,0,"",         COMhelp,	NULL,		""}
 };
