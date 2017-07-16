@@ -6,5 +6,5 @@ mkwad.h picture.c picture.h sound.c sound.h sscript.c sscript.h		\
 text.c text.h texture.c texture.h tools.c tools.h usedidx.c usedidx.h	\
 wadio.c wadio.h
 
+deutex_LDADD=@PNG_LIBS@
 AM_CFLAGS=@PNG_CFLAGS@
-AM_LDFLAGS=@PNG_LIBS@
