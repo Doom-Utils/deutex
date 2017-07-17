@@ -67,7 +67,7 @@ void MakeDir(char file[128], const char *path, const char *dir, const char
     *sdir);
 bool MakeFileName(char file[128], const char *path, const char *dir, const
     char *sdir, const char *name, const char *extens);
-void GetNameOfWAD(char name[8], const char *path);
+void GetNameOfWAD(char name[32], const char *path);
 int16_t Chsize(int handle,int32_t newsize);
 int32_t Get_File_Time(const char *path);
 void Set_File_Time(const char *path, int32_t time);

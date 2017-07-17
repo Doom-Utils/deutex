@@ -73,11 +73,11 @@ void set_input_wad_endianness (int big_endian)
  *
  *	Return 0 on success, non-zero on failure.
  */
-int wad_read_name (FILE *fd, char name[8])
+int wad_read_name (FILE *fd, char name[32])
 {
   size_t n;
   int end = 0;
-  for (n = 0; n < 8; n++)
+  for (n = 0; n < 32; n++)
   {
     int c = getc (fd);
     name[n] = end ? '\0' : toupper (c);
@@ -90,9 +90,9 @@ int wad_read_name (FILE *fd, char name[8])
 int wad_write_name (FILE *fd, const char *name)
 {
   size_t n;
-  for (n = 0; n < 8 && name[n]; n++)
+  for (n = 0; n < 32 && name[n]; n++)
     putc (toupper (name[n]), fd);
-  for (; n < 8; n++)
+  for (; n < 32; n++)
     putc ('\0', fd);
   return ferror (fd);
 }
