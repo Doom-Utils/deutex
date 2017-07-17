@@ -1,29 +1,11 @@
 /*
- *	endianio.c - file I/O with explicit endianness
- *
- *	Those functions allow to read little-endian and
- *	big-endian integers from a file regardless of the
- *	endianness of the CPU.
- *
- *	This code has been tested on 16-bit and 32-bit C
- *	compilers.
- *
- *	Adapted from Yadex by AYM on 1999-03-06.
- */
+  This file is Copyright © 1999-2005 André Majorel,
+               Copyright © 2006-2017 contributors to the DeuTex project.
 
+  Those functions allow to read little-endian and big-endian integers
+  from a file regardless of the endianness of the CPU.
 
-/*
-This file is Copyright © 1999-2005 André Majorel.
-
-This library is free software; you can redistribute it and/or modify
-it under the terms of the GNU Lesser General Public License as
-published by the Free Software Foundation; either version 2.1 of the
-License, or (at your option) any later version.
-
-This library is distributed in the hope that it will be useful, but
-WITHOUT ANY WARRANTY; without even the implied warranty of
-MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the GNU
-Lesser General Public License for more details.
+  SPDX-License-Identifier: LGPL-2.1+
 */
 
 

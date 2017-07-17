@@ -1,4 +1,16 @@
 /*
+  This file is Copyright © 1994-1995 Olivier Montanuy,
+               Copyright © 1999-2005 André Majorel,
+               Copyright © 2006-2017 contributors to the DeuTex project.
+
+  DeuTex incorporates code derived from DEU 5.21 that was put in the
+  public domain in 1994 by Raphaël Quinet and Brendon Wyber.
+
+
+  SPDX-License-Identifier: GPL-2.0+
+*/
+
+/*
   DeuTex is a sequel to the DOOM editor DEU 5.21 (hence the name)
   Originaly it used lots of code from DEU, and even some DEU modules
   Now it doesn't use anymore DEU modules, but large parts of this
@@ -19,25 +31,6 @@
   I would strongly advise *not* to reuse this code, unless you
   like my bugs and take the engagement to treat them well.
   I'm so fond of them now...  -- Olivier Montanuy
-*/
-
-
-/*
-This file is Copyright © 1994-1995 Olivier Montanuy,
-             Copyright © 1999-2005 André Majorel.
-
-It may incorporate code derived from DEU 5.21 that was put in the public
-domain in 1994 by Raphaël Quinet and Brendon Wyber.
-
-This program is free software; you can redistribute it and/or modify
-it under the terms of the GNU General Public License as published by
-the Free Software Foundation; either version 2 of the License, or
-(at your option) any later version.
-
-This program is distributed in the hope that it will be useful,
-but WITHOUT ANY WARRANTY; without even the implied warranty of
-MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
-GNU General Public License for more details.
 */
 
 

@@ -1,23 +1,19 @@
 /*
+  This file is Copyright © 1994-1995 Olivier Montanuy,
+               Copyright © 1999-2005 André Majorel,
+               Copyright © 2006-2017 contributors to the DeuTex project.
+
+  DeuTex incorporates code derived from DEU 5.21 that was put in the
+  public domain in 1994 by Raphaël Quinet and Brendon Wyber.
+
+
+  SPDX-License-Identifier: GPL-2.0+
+*/
+/*
  *	wadio.c
  *	Wad low level I/O routines, without error checking.
  *	AYM 1999-03-06
  */
-
-/*
-This file is copyright André Majorel 1999-2005.
-
-This program is free software; you can redistribute it and/or modify
-it under the terms of the GNU General Public License as published by
-the Free Software Foundation; either version 2 of the License, or
-(at your option) any later version.
-
-This program is distributed in the hope that it will be useful,
-but WITHOUT ANY WARRANTY; without even the implied warranty of
-MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
-GNU General Public License for more details.
-*/
-
 
 #include "deutex.h"
 #include <ctype.h>

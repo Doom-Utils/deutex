@@ -3,7 +3,8 @@
 ------------------------------------------------------------------------
 
 DeuTex is Copyright © 1994-1995 Olivier Montanuy,
-      and Copyright © 1999-2005 André Majorel.
+          Copyright © 1999-2005 André Majorel,
+          Copyright © 2006-2017 contributors to the DeuTex project.
 
 The parts of DeuTex that have been written by Olivier Montanuy,
 Kevin McGrail, André Majorel and other contributors are
@@ -34,9 +35,7 @@ written by other people or distributed under different licences :
    put in the public domain in 1994 by Raphaël Quinet and Brendon
    Wyber. No part of DeuTex is public-domain, however.
 
-2. The file gifcodec.c is Copyright © 1995 David Kaplan.
-
-3. The file lzw.c contains the following notes :
+2. The file lzw.c contains the following notes :
 
    > Copyright 1993, David Koblas (koblas=netcom+com)
    >
@@ -68,7 +67,5 @@ written by other people or distributed under different licences :
    > CompuServe Incorporated.  GIF(sm) is a Service Mark property of
    > CompuServe Incorporated.
 
-4. The files endianio.c and endianm.c are Copyright © André Majorel 1999
+3. The files endianio.c and endianm.c are Copyright © André Majorel 1999
    and available under the terms of the LGPL.
-
--- AYM 2005-08-28

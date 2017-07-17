@@ -1,13 +1,12 @@
 /*
- *	endianm.h
- *	Endianness-independant memory access.
- *
- *	Those functions allow to retrieve little-endian and
- *	big-endian integers from a memory area regardless of
- *	the endianness of the CPU.
- *
- *	AYM 1999-07-04
- */
+  This file is Copyright © 1999-2005 André Majorel,
+               Copyright © 2006-2017 contributors to the DeuTex project.
+
+  Those functions allow to read little-endian and big-endian integers
+  from memory regardless of the endianness of the CPU.
+
+  SPDX-License-Identifier: LGPL-2.1+
+*/
 
 
 /* Use the names DeuTex provides */
