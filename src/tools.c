@@ -263,7 +263,7 @@ bool MakeFileName(char file[128], const char *path, const char *dir, const
 /*
 ** Get the root name of a WAD file
 */
-void GetNameOfWAD(char name[8], const char *path)
+void GetNameOfWAD(char name[32], const char *path)
 { int16_t n, nam,len;
   len=(int16_t)strlen(path);
   /*find end of DOS or Unix path*/
@@ -278,7 +278,7 @@ void GetNameOfWAD(char name[8], const char *path)
     }
   /*find root name*/
   /* FIXME AYM 1999-06-09: Do we really have to truncate to 8 ? */
-  for (n = 0; n < 8; n++) {
+  for (n = 0; n < 32; n++) {
       switch (path[nam + n]) {
       case '.':
       case '\0':
