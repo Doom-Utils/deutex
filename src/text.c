@@ -65,6 +65,9 @@ void TXTinit(void)
 	case '_':                   /*in name*/
 	case '\\':		/* deal with VILE strange name*/
 	   val |=NAME+EXESTRNG;break;
+	case '[':		/* deal with VILE strange name*/
+	case ']':		/* deal with VILE strange name*/
+	   val |=SECTION+NAME+EXESTRNG;break;
 	case '-': case '+':         /*in integer number*/
 	   val |=NUMBER+EXESTRNG;break;
 	case '*':                   /*start of patch wall*/
