@@ -1,1 +1,2 @@
 SUBDIRS = man src
+EXTRA_DIST = LICENCE NEWS.adoc README.adoc

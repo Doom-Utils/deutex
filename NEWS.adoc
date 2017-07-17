@@ -1,0 +1,51 @@
+4.5.0-beta.1 (2017-07-17)
+-----------------------
+
+Removed features
+~~~~~~~~~~~~~~~~
+  * DeuSF.
+  * `-man` troff format generation.
+  * WinTex options.
+  * `-fullsnd`: now the only mode.
+  * MS-DOS and OS/2 compatibility.
+
+File format support
+~~~~~~~~~~~~~~~~~~~
+  * PNG support added, creating a dependency on libpng 1.6.  It is now
+    the default extraction format.
+  * Au and VOC sound formats removed.  WAV is the only supported
+    format for extraction and creation.
+  * Full sound lumps from the WAD are always extracted.
+
+General
+~~~~~~~
+  * Log file support has been removed, in favor of the user doing a
+    shell redirection (eg, with `>` or `2>`) instead.
+  * Arch-vile sprites are now extracted and inserted using literal
+    names for sprites with the `[` and `]` characters in names
+    (illegal file name characters on DOS, but not current Windows
+    systems), and sprite names with `\` are now altered to use `^`
+    on-disk, matching the ZDoom PK3 standard.
+  * Graphics with a height > 128 and < 256 are now inserted into Doom
+    WAD files correctly.
+
+Build systems, code standards
+~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+  * Real Autoconf+Automake build system to replace the
+    barely-functioning imitation one.  `./configure`, `make`, and
+    related environment variables work as should be expected.
+  * MS-DOS and OS/2 batch files removed.
+  * A `malloc.h` include was removed to allow compilation on Mac OS X,
+    and is not needed by current Unix systems in general.
+  * Over 1500 lines of dead/useless C code deleted, including whole
+    files and functions that were not used in the build, conditionals
+    for MS-DOS and OS/2 support, ancient compilers like Borland
+    C, etc.
+  * C99-style cleanups to use (`u`)`intN_t` types, `bool`, `true`,
+    `false` throughout the code, replacing old defines.
+  * AsciiDoc now used for documentation, and building the manpage
+    requires it to be installed.
+
+// Old release notes for 4.4.902 and earlier are not (presently)
+// available in this file.  See the version control repository for those
+// details.
