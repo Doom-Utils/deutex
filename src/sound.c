@@ -151,7 +151,7 @@ char  *SNDloadWaveFile(char *file, int32_t *psize, int32_t *pspeed)
 
 /**************** generic sound *******************/
 void SNDsaveSound (char *file, char *buffer, int32_t size, SNDTYPE format,
-    bool fullsnd, const char *name)
+                   const char *name)
 {
   char  *data;
   int32_t  datasize;
@@ -183,19 +183,9 @@ void SNDsaveSound (char *file, char *buffer, int32_t size, SNDTYPE format,
 	lump_name (name), (unsigned long) datasize, (unsigned long) phys_size);
     datasize = phys_size;
   }
-  /* Sometimes the size of sound lump is greater
-     than the declared sound size. */
-
   else if (datasize < phys_size)
   {
-    if (fullsnd == true)       /* Save entire lump */
       datasize = phys_size;
-    else
-    {
-      Warning ("SD13",
-	"Sound %s: lump size %lu > declared length %lu, truncating",
-	lump_name (name), (unsigned long) datasize, (unsigned long) phys_size);
-    }
   }
 
   switch (format) {

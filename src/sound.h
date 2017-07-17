@@ -12,8 +12,8 @@
 
 /********************* sound.c *******************/
 void SNDsaveSound(char *file,char  *buffer,int32_t size,SNDTYPE Sound,
-    bool fullSND, const char *name);
+                  const char *name);
 int32_t SNDcopyInWAD(struct WADINFO *info,char *file,SNDTYPE Sound);
 void SNDsavePCSound(const char *name, const char *file, const char *buffer,
-    int32_t size);
+                    int32_t size);
 int32_t SNDcopyPCSoundInWAD(struct WADINFO *info,char *file);

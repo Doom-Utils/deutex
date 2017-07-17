@@ -63,7 +63,6 @@ static bool WadInfOk;
 int16_t HowMuchJunk;		/* junk to add*/
 static IMGTYPE Picture;		/* save as PPM, BMP or GIF ? */
 static SNDTYPE Sound = SNDWAV; /* save as WAV? Yes. */
-static bool fullSND;
 static bool WSafe;
 static bool George;
 char trnR,trnG,trnB;
@@ -330,12 +329,6 @@ void COMdir(int argc, const char *argv[])
   (void)argc;
 }
 
-void COMfullsnd(int argc, const char *argv[])
-{ fullSND=true;
-  Info("AA46", "Saving sounds beyond declared length");
-  (void)argc;(void)argv;
-}
-
 void COMrate(int argc, const char *argv[])
 { 
   if (argc >= 2 && ! strcmp (argv[1], "reject"))
@@ -562,12 +555,12 @@ void COMxtra(int argc, const char *argv[])
   }
   if(argc<=1){wadin=MainWAD;}else{wadin=argv[1];}
   if(argc<=2){wadinf=WadInf;}else{wadinf=argv[2];}
-  XTRextractWAD (MainWAD, DataDir, wadin, wadinf, Picture, Sound, fullSND,
-      Select, trnR, trnG, trnB, WSafe, NULL);
+  XTRextractWAD (MainWAD, DataDir, wadin, wadinf, Picture, Sound,
+                 Select, trnR, trnG, trnB, WSafe, NULL);
 }
 
 void COMget(int argc, const char *argv[])
-{ XTRgetEntry(MainWAD,DataDir,((argc<3)? MainWAD: argv[2]),argv[1],Picture,Sound,fullSND,trnR,trnG,trnB);
+{ XTRgetEntry(MainWAD,DataDir,((argc<3)? MainWAD: argv[2]),argv[1],Picture,Sound,trnR,trnG,trnB);
 }
 
 void COMpackNorm(int argc, const char *argv[])
@@ -605,8 +598,8 @@ void COMusedidx(int argc, const char *argv[])
       cusage->where_first[n][0] = '\0';
     }
   }
-  XTRextractWAD (MainWAD, DataDir, wadin, wadinf, Picture, Sound, fullSND,
-      Select, trnR, trnG, trnB, WSafe, cusage);
+  XTRextractWAD (MainWAD, DataDir, wadin, wadinf, Picture, Sound,
+                 Select, trnR, trnG, trnB, WSafe, cusage);
   Free (cusage);
 }
 
@@ -743,7 +736,6 @@ static comdef_t Com[]=
  {OP2,3,"rgb",      COMrgb,	"<r> <g> <b>",	"specify the transparent colour (default 0 47 47)"},
 
  {SEC,0,NULL,       NULL,	NULL,		"Sound"},
- {OP2,0,"fullsnd",  COMfullsnd,	NULL,		"save sounds beyond declared length"},
  {OP2,1,"rate",     COMrate,	"<code>",	"policy for != 11025 Hz (\1reject\3, \1force\3, *\1warn\3, \1accept\3)"},
 
  {SEC,0,NULL,       NULL,	NULL,		"Reporting"},
@@ -797,7 +789,6 @@ int main (int argc, char *argv_non_const[])
    Picture    = PICPNG;
    Sound      = SNDWAV;
    trnR=0;trnG=47;trnB=47;
-   fullSND    = true;
    WSafe      = true;
    HowMuchJunk= 0;
    Select     = 0;

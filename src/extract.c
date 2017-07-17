@@ -79,8 +79,8 @@ static bool XTRbmpSave(int16_t *pinsrX,int16_t *pinsrY,struct WADDIR  *entry,
 ** in the wad.
 */
 void XTRextractWAD(const char *doomwad, const char *DataDir, const char
-    *wadin, const char *wadinfo, IMGTYPE Picture,SNDTYPE Sound,bool
-    fullSND,NTRYB select, char trnR, char trnG, char trnB,bool WSafe,
+    *wadin, const char *wadinfo, IMGTYPE Picture,SNDTYPE Sound,
+    NTRYB select, char trnR, char trnG, char trnB,bool WSafe,
     cusage_t *cusage)
 { static struct WADINFO pwad;
   static struct WADINFO iwad;
@@ -445,8 +445,7 @@ void XTRextractWAD(const char *doomwad, const char *DataDir, const char
               { buffer=(char  *)Malloc(pdir[p].size);
                 WADRseek(&pwad,pdir[p].start);
                 WADRreadBytes(&pwad,buffer,pdir[p].size);
-                SNDsaveSound(file,buffer,pdir[p].size,Sound,fullSND,
-		    pdir[p].name);
+                SNDsaveSound(file,buffer,pdir[p].size,Sound,pdir[p].name);
                 Detail("EX30", "Saved sound as   %s", fname (file));
                 Free(buffer);
               }
@@ -855,7 +854,7 @@ void XTRextractWAD(const char *doomwad, const char *DataDir, const char
 
 
 void XTRgetEntry(const char *doomwad, const char *DataDir, const char *wadin,
-    const char *entry, IMGTYPE Picture,SNDTYPE Sound,bool fullSND, char trnR,
+    const char *entry, IMGTYPE Picture,SNDTYPE Sound, char trnR,
     char trnG, char trnB)
 { static struct WADINFO pwad;
   static struct WADINFO iwad;
@@ -938,7 +937,7 @@ void XTRgetEntry(const char *doomwad, const char *DataDir, const char *wadin,
           }
 
           MakeFileName(file,DataDir,"","",Name,extens);
-          SNDsaveSound(file,Entry,Entrysz,Sound,fullSND, Name);
+          SNDsaveSound(file,Entry,Entrysz,Sound,Name);
           Found=true;
       }
   if(Found!=true)

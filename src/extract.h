@@ -12,13 +12,13 @@
 
 /*extract.c: list dir and extract entries*/
 void XTRextractWAD(const char *doomwad, const char *DataDir, const char
-    *wadin, const char *texout, IMGTYPE Picture,SNDTYPE Sound,bool
-    fullSND,NTRYB select, char trnR, char trnG, char trnB,bool WSafe,
+    *wadin, const char *texout, IMGTYPE Picture,SNDTYPE Sound,
+    NTRYB select, char trnR, char trnG, char trnB,bool WSafe,
     cusage_t *cusage);
 
 /*extract.c: get a single entry*/
 void XTRgetEntry(const char *doomwad, const char *DataDir, const char *wadin,
-    const char *entry, IMGTYPE Picture,SNDTYPE Sound,bool fullSND, char trnR,
+    const char *entry, IMGTYPE Picture,SNDTYPE Sound, char trnR,
     char trnG, char trnB);
 
 /*obsolete junk*/

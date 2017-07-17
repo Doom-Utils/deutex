@@ -326,9 +326,6 @@ Specify the transparent colour (default 0 47 47).
 
 Sound
 ~~~~~
-*-fullsnd*::
-Save sounds beyond declared length.
-
 *-rate* 'code'::
 Policy for != 11025 Hz (*reject*, *force*, *warn*, *accept*; default warn).
 
