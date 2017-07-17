@@ -218,19 +218,19 @@ bool MakeFileName(char file[128], const char *path, const char *dir, const
    char name2[8];  /* AYM 1999-01-13: keep checker happy */
    /* deal with VILE strange name
    ** replace the VILE\ 
-   ** by          VIL@B 
+   ** by          VIL^B 
    */
    Normalise(name2,name);
  
-   /* 2017-07-17: Only replace backslash. [ and ] characters are 
-      supported in Windows and Unix-derived systems.  */
+   /* Replace backslash as it is an illegal character on 
+      Windows.  */
    switch(name2[4])
    {
-     case '\\': name2[4]='@';break;
+     case '\\': name2[4]='^';break;
    }
    switch(name2[6])
    { 
-     case '\\': name2[6]='@';break;
+     case '\\': name2[6]='^';break;
    }
    NameDir(file,path,dir,sdir);
    /*
