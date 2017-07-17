@@ -225,26 +225,21 @@ bool MakeFileName(char file[128], const char *path, const char *dir, const
 {  FILE *fp;
    char name2[8];  /* AYM 1999-01-13: keep checker happy */
    /* deal with VILE strange name
-   ** replace the VILE[ VILE\ VILE]
-   ** by          VIL@A VIL@B VIL@C
+   ** replace the VILE\ 
+   ** by          VIL^B 
    */
    Normalise(name2,name);
-
-   /* FIXME AYM 1999-06-09: Not sure whether it is a good thing
-      to keep this translation scheme for the Unix version.
-      However, removing it would make the DOS version and the
-      Unix version incompatible. */
+ 
+   /* Replace backslash as it is an illegal character on 
+      Windows.  */
    switch(name2[4])
-   { case '[':  name2[4]='$';break;
-     case '\\': name2[4]='@';break;
-     case ']':  name2[4]='#';break;
+   {
+     case '\\': name2[4]='^';break;
    }
    switch(name2[6])
-   { case '[':  name2[6]='$';break;
-     case '\\': name2[6]='@';break;
-     case ']':  name2[6]='#';break;
+   { 
+     case '\\': name2[6]='^';break;
    }
-
    NameDir(file,path,dir,sdir);
    /*
    ** file name
