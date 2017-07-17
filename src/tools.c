@@ -215,6 +215,23 @@ void MakeDir(char file[128], const char *path, const char *dir, const char
 bool MakeFileName(char file[128], const char *path, const char *dir, const
     char *sdir, const char *name, const char *extens)
 {  FILE *fp;
+   char name2[8];  /* AYM 1999-01-13: keep checker happy */
+   /* deal with VILE strange name
+   ** replace the VILE\ 
+   ** by          VIL@B 
+   */
+   Normalise(name2,name);
+ 
+   /* 2017-07-17: Only replace backslash. [ and ] characters are 
+      supported in Windows and Unix-derived systems.  */
+   switch(name2[4])
+   {
+     case '\\': name2[4]='@';break;
+   }
+   switch(name2[6])
+   { 
+     case '\\': name2[6]='@';break;
+   }
    NameDir(file,path,dir,sdir);
    /*
    ** file name
