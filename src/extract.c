@@ -58,7 +58,6 @@ static bool XTRbmpSave(int16_t *pinsrX,int16_t *pinsrY,struct WADDIR  *entry,
 	 case PICGIF: extens="GIF";break;
      case PICBMP: extens="BMP";break;
      case PICPPM: extens="PPM";break;
-     case PICTGA: extens="TGA";break;
      default: Bug("EX47", "Invalid img type %d", (int) Picture);
    }
    res = MakeFileName(file,DataDir,dir,"",name,extens);
