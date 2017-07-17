@@ -494,27 +494,6 @@ static void IDENTdirWalls(ENTRY *ids, struct WADINFO *info)
   }
 }
 
-
-/* Is it a good idea to decide a lump is a lump without even
-   looking at it ? Has a potential for breaking when used with
-   different iwads. -- AYM 1999-10-18 */
-static void IDENTdirLumps(ENTRY  *ids,struct WADINFO *info)
-{
-  ident_func = "IDENTdirLumps";
-  IDENTdirSet(ids,info,palette_lump,ELUMP);
-  IDENTdirSet(ids,info,"COLORMAP",ELUMP);
-  IDENTdirSet(ids,info,"ENDOOM",ELUMP);
-  IDENTdirSet(ids,info,"ENDTEXT",ELUMP);
-  IDENTdirSet(ids,info,"DEMO1",ELUMP);
-  IDENTdirSet(ids,info,"DEMO2",ELUMP);
-  IDENTdirSet(ids,info,"DEMO3",ELUMP);
-  IDENTdirSet(ids,info,"LOADING",ELUMP); /*loading screen*/
-  IDENTdirSet(ids,info,"DMXGUS",ELUMP);
-  IDENTdirSet(ids,info,"GENMIDI",ELUMP);
-  IDENTdirSet(ids,info,"TINTTAB",ELUMP);
-}
-
-
 static void IDENTdirPatches(ENTRY  *ids,struct WADINFO *info, char  *Pnam, int32_t Pnamsz,bool Check)
 { int16_t p_end,p_start;
   int16_t n,p;
