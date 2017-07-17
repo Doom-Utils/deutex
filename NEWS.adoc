@@ -16,6 +16,7 @@ File format support
   * Au and VOC sound formats removed.  WAV is the only supported
     format for extraction and creation.
   * Full sound lumps from the WAD are always extracted.
+  * MIDI files can be included just by being named *.mid.
 
 General
 ~~~~~~~
