@@ -74,15 +74,9 @@ static int16_t CMPOloadPic(int32_t * size, struct WADINFO *rwad,
         res = PICBMP;
     else if (MakeFileName(file, DataDir, Dir, "", filenam, "png") == true)
         res = PICPNG;
-    else if (MakeFileName(file, DataDir, Dir, "", filenam, "gif") == true) {
-        static int gif_warning = 0;
+    else if (MakeFileName(file, DataDir, Dir, "", filenam, "gif") == true)
         res = PICGIF;
-        if (!gif_warning) {
-            Warning("PC10", "GIF support may go away in the future");
-            gif_warning = 1;
-        }
-    } else if (CMPOcopyFromWAD(size, rwad, DataDir, Dir, nam, filenam) ==
-               true)
+    else if (CMPOcopyFromWAD(size, rwad, DataDir, Dir, nam, filenam) == true)
         return PICWAD;
     if (res != PICNONE)
         *size = PICsaveInWAD(rwad, file, Type, OfsX, OfsY, res);

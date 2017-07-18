@@ -997,8 +997,6 @@ int main(int argc, char *argv_non_const[])
 
         if (!(Select & BALL))
             Select = BALL;
-        if (Picture == PICGIF)
-            Warning("GX10", "GIF support may go away in the future");
         if (ROTT)
             palette_lump = "PAL";
         d->exec(c, v);
