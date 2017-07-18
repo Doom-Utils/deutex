@@ -244,8 +244,7 @@ void XTRextractWAD(const char *doomwad, const char *DataDir, const char
         TXT = TXTopenW(wadinfo);
         {
             char comment[81];
-            sprintf(comment, PACKAGE_NAME " %.32s by Olivier Montanuy",
-                    PACKAGE_VERSION);
+            sprintf(comment, PACKAGE_NAME " %.32s", PACKAGE_VERSION);
             TXTaddComment(TXT, comment);
         }
         TXTaddComment(TXT, "PWAD creation directives");
