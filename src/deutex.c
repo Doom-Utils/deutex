@@ -70,7 +70,6 @@ texture_lump_t texture_lump = TL_NORMAL;
 rate_policy_t rate_policy = RP_WARN;
 clobber_t clobber = CLOBBER_NO;
 const char *debug_ident = NULL;
-int old_music_ident_method = 0;
 const char *palette_lump = "PLAYPAL";
 
 static char anon[1] = { '\0' };
@@ -348,14 +347,6 @@ void COMdi(int argc, const char *argv[])
          lump_name(argv[1]));
     debug_ident = argv[1];
     (void) argc;
-}
-
-void COMmusid(int argc, const char *argv[])
-{
-    Info("AA19", "Using old music identification method");
-    old_music_ident_method = 1;
-    (void) argc;
-    (void) argv;
 }
 
 void COMdeu(int argc, const char *argv[])
@@ -800,8 +791,6 @@ static comdef_t Com[] = {
     {OP2, 0, "iwad", COMiwad, NULL, "compose iwad, not pwad"},
     {OP2, 0, "le", COMle, NULL,
      "assume all wads are little endian (default)"},
-    {OP2, 0, "musid", COMmusid, NULL,
-     "use old music identification method"},
     {OP2, 0, "obe", COMobe, NULL, "create big endian wads (default LE)"},
     {OP2, 0, "ole", COMole, NULL, "create little endian wads (default)"},
     {OP2, 1, "otf", COMtf, "<code>",

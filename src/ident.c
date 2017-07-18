@@ -692,32 +692,16 @@ static void IDENTdirMusics(ENTRY * ids, struct WADINFO *info, bool Check)
     ident_func = "IDENTdirMusics";
     for (n = 0; n < info->ntry; n++) {
         if (ids[n] == EZZZZ) {
-            /* Pre-4.4 method. Does not work for Hexen. When sure that
-               the new method does not break merging and adding sprites
-               and flats, delete this block and the -musid option. */
-            if (old_music_ident_method) {
-                if (info->dir[n].size > 8
-                    && (strncmp(info->dir[n].name, "D_", 2) == 0
-                        || strncmp(info->dir[n].name, "MUS_", 4) == 0)) {
-                    if (Check != true) {
-                        IDENTsetType(ids, info, n, EMUSIC);
-                    } else {
-                        /* Must start with "MUS\x1a" */
-                        WADRseek(info, info->dir[n].start);
-                        if (WADRreadShort(info) == 0x554D
-                            && WADRreadShort(info) == 0x1A53)
-                            IDENTsetType(ids, info, n, EMUSIC);
-                    }
+            if (info->dir[n].size >= 4) {
+                WADRseek(info, info->dir[n].start);
+                if (WADRreadShort(info) == 0x554D
+                    && WADRreadShort(info) == 0x1A53) {
+                    IDENTsetType(ids, info, n, EMUS);
                 }
-            }
-            /* New method. Slower but more correct. */
-            else {
-                if (info->dir[n].size >= 4) {
-                    WADRseek(info, info->dir[n].start);
-                    if (WADRreadShort(info) == 0x554D
-                        && WADRreadShort(info) == 0x1A53) {
-                        IDENTsetType(ids, info, n, EMUSIC);
-                    }
+                WADRseek(info, info->dir[n].start);
+                if (WADRreadShort(info) == 0x544D
+                    && WADRreadShort(info) == 0x6468) {
+                    IDENTsetType(ids, info, n, EMIDI);
                 }
             }
         }

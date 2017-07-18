@@ -138,6 +138,8 @@ typedef int16_t ENTRY;
 #define   EFLAT2        0x0A02
 #define   EFLAT3        0x0A03
 #define EMUSIC          0x0B00
+#define   EMUS          0x0B01
+#define   EMIDI         0x0B02
 #define EDATA           0x1000
 #define ESNEA           0x2000
 #define   ESNEAP        0x2001  /* Snea using PLAYPAL */
@@ -186,5 +188,4 @@ extern texture_lump_t texture_lump;
 extern rate_policy_t rate_policy;
 extern clobber_t clobber;
 extern const char *debug_ident;
-extern int old_music_ident_method;
 extern const char *palette_lump;

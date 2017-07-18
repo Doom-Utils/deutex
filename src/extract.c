@@ -529,9 +529,13 @@ void XTRextractWAD(const char *doomwad, const char *DataDir, const char
                 } else {
                     ostart = pwad.dir[p].start;
                     osize = pwad.dir[p].size;
-                    res =
-                        MakeFileName(file, DataDir, "MUSICS", "",
-                                     pdir[p].name, "MUS");
+                    if (piden[p] == EMUS) {
+                        res = MakeFileName(file, DataDir, "MUSICS", "",
+                                           pdir[p].name, "MUS");
+                    } else {
+                        res = MakeFileName(file, DataDir, "MUSICS", "",
+                                           pdir[p].name, "MID");
+                    }
                     if ((WSafe == true) && (res == true)) {
                         Warning("EX33", "Will not overwrite file %s",
                                 fname(file));
