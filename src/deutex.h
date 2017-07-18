@@ -147,7 +147,6 @@ typedef int16_t ENTRY;
 #define EWALL           0x4000  /* ROTT wall (WALLSTRT/WALLSTOP) */
 #define EZZZZ           0x7F00  /*unidentified entries */
 
-bool LetsHaveFunBaby(long guesswhat);
 void CMPOmakePWAD(const char *doomwad, WADTYPE type, const char *PWADname,
                   const char *DataDir, const char *texin, NTRYB select,
                   char trnR, char trnG, char trnB, bool George);
