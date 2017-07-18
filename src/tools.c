@@ -232,7 +232,7 @@ void MakeDir(char file[128], const char *path, const char *dir, const char
 #ifdef _WIN32
     CreateDirectory(file, NULL);
 #else
-    mkdir(file, (mode_t) S_IRWXU);
+    mkdir(file, (mode_t) 0777);
 #endif
 }
 
