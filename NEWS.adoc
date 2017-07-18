@@ -1,5 +1,5 @@
-5.0.0-beta.1 (2017-07-17)
--------------------------
+5.0.0 (2017-??-??)
+------------------
 
 Removed features
 ~~~~~~~~~~~~~~~~
@@ -16,7 +16,8 @@ File format support
   * Au and VOC sound formats removed.  WAV is the only supported
     format for extraction and creation.
   * Full sound lumps from the WAD are always extracted.
-  * MIDI files can be included just by being named *.mid.
+  * MIDI files can be included just by being named *.mid, and are
+    extracted to the same file name extension.
 
 General
 ~~~~~~~
@@ -38,10 +39,10 @@ Build systems, code standards
   * MS-DOS and OS/2 batch files removed.
   * A `malloc.h` include was removed to allow compilation on Mac OS X,
     and is not needed by current Unix systems in general.
-  * Over 1500 lines of dead/useless C code deleted, including whole
-    files and functions that were not used in the build, conditionals
-    for MS-DOS and OS/2 support, ancient compilers like Borland
-    C, etc.
+  * Thousands of lines of code deleted and the entire tree reformated
+    (primarily by using `indent -kr`, followed up by manual
+    touch-ups).  Several unused files, functions, and commented out
+    code removed.
   * C99-style cleanups to use (`u`)`intN_t` types, `bool`, `true`,
     `false` throughout the code, replacing old defines.
   * AsciiDoc now used for documentation, and building the manpage
