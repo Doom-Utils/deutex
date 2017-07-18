@@ -890,7 +890,6 @@ ENTRY *IDENTentriesIWAD (struct WADINFO *info,char  *Pnam, int32_t Pnamsz,
   */
   for(n=0;n<info->ntry;n++)
     ids[n]=EZZZZ;
-  IDENTdirLumps(ids,info);         /*fast*/
   IDENTdirSprites(ids,info,false); /*fast*/
   IDENTdirFlats(ids,info);         /*fast*/
   if (ROTT)
@@ -944,7 +943,6 @@ ENTRY *IDENTentriesPWAD(struct WADINFO *info,char  *Pnam, int32_t Pnamsz)
   */
   for(n=0;n<info->ntry;n++)
     ids[n]=EZZZZ;
-  IDENTdirLumps(ids,info);
   IDENTdirSprites(ids,info,true);
   IDENTdirFlats(ids,info);
   if (ROTT)
