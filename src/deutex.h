@@ -80,7 +80,6 @@ typedef int16_t IMGTYPE;
 #define PICBMP          (1)
 #define PICGIF          (2)
 #define PICPPM          (3)
-#define PICTGA          (4)
 #define PICWAD          (5)
 #define PICPNG          (6)
 

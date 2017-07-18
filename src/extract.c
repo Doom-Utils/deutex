@@ -988,9 +988,6 @@ void XTRgetEntry(const char *doomwad, const char *DataDir,
             case PICPPM:
                 extens = "PPM";
                 break;
-            case PICTGA:
-                extens = "TGA";
-                break;
             default:
                 Bug("GE03", "Invalid img type %d", (int) Picture);
             }
