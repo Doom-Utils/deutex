@@ -53,6 +53,8 @@ static const struct
   { "name",     1, '?', NULL   },
   { "BEHAVIOR", 0, 'n', "n11"  },	/* Hexen only */
   { "BLOCKMAP", 1, 'n', "n10"  },
+  { "DIALOGUE", 0, 'n', "n15"  },       /* UDMF */
+  { "ENDMAP",   0, 'n', "n12"  },       /* UDMF */	
   { "FLATNAME", 1, 'a', "a1"   },	/* Doom alpha 0.4 and 0.5 only */
   { "LINEDEFS", 1, 'n', "n2"   },
   { "LINES",    1, 'a', "a3"   },	/* Doom alpha 0.4 and 0.5 only */
@@ -63,8 +65,10 @@ static const struct
   { "SEGS",     1, 'n', "n5"   },
   { "SIDEDEFS", 1, 'n', "n3"   },
   { "SSECTORS", 1, 'n', "n6"   },
+  { "TEXTMAP",  0, 'n', "n13"  },       /* UDMF */
   { "THINGS",   1, '?', "a5n1" },
   { "VERTEXES", 1, 'n', "n4"   },
+  { "ZNODES",   0, 'n', "n14"  },       /* UDMF */
 };
 
 static int IDENTlevelPartMax (void)
