@@ -293,9 +293,6 @@ void SNDsavePCSound(const char *lumpname, const char *file,
         ProgError("KW13", "%s: %s", fname(file), strerror(errno));
     for (i = 0; i < datasize; i++) {
         fprintf(fp, "%d\n", ((int) data[i]) & 0xFF);
-#ifdef WinDeuTex
-        windoze();              /*Actually Process Windows Messages */
-#endif
     }
     if (fclose(fp) != 0)
         ProgError("KW14", "%s: %s", fname(file), strerror(errno));
