@@ -83,8 +83,13 @@ static int16_t CMPOloadPic(int32_t * size, struct WADINFO *rwad,
     if (res != PICNONE)
         *size = PICsaveInWAD(rwad, file, Type, OfsX, OfsY, res);
     else if (Type != PLUMP)
+#ifdef HAVE_LIBPNG
+        Warning("PC90", "could not find file %s, .png, .ppm, .bmp or .gif",
+                file);
+#else
         Warning("PC90", "could not find file %s, .ppm, .bmp or .gif",
                 file);
+#endif
     return res;
 }
 
