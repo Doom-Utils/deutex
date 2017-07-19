@@ -118,7 +118,7 @@ Print list of options.
 Print the syntax of wad creation directives.
 
 *--version*::
-Print version number and exit immediately.
+Print version number.
 
 *-unused* 'in.wad'::
 Find unused spaces in a wad.
