@@ -72,8 +72,10 @@ static int16_t CMPOloadPic(int32_t * size, struct WADINFO *rwad,
         res = PICPPM;
     else if (MakeFileName(file, DataDir, Dir, "", filenam, "bmp") == true)
         res = PICBMP;
+#ifdef HAVE_LIBPNG
     else if (MakeFileName(file, DataDir, Dir, "", filenam, "png") == true)
         res = PICPNG;
+#endif
     else if (MakeFileName(file, DataDir, Dir, "", filenam, "gif") == true)
         res = PICGIF;
     else if (CMPOcopyFromWAD(size, rwad, DataDir, Dir, nam, filenam) == true)

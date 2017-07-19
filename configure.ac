@@ -7,9 +7,19 @@ AC_PROG_CC_C99
 AM_SILENT_RULES([yes])
 
 AC_CHECK_PROG([ASCIIDOC], [a2x], [yes])
-AM_CONDITIONAL([ASCIIDOC], [test x$ASCIIDOC = xyes])
+AM_CONDITIONAL([ASCIIDOC], [test "$ASCIIDOC" = yes])
 
-PKG_CHECK_MODULES([PNG], [libpng16])
+AC_ARG_WITH([libpng],
+    AS_HELP_STRING([--without-libpng],
+                   [Build without libpng @<:@default=check@:>@]),
+    [],
+    [[with_libpng=check]])
+AS_IF([test "$with_libpng" != no],
+    [PKG_CHECK_MODULES([PNG], [libpng >= 1.6.0],
+        [AC_DEFINE([HAVE_LIBPNG], [1], [libpng installed])],
+        [AS_IF([test "$with_libpng" != check],
+        [AC_MSG_FAILURE([--with-libpng was given, but test for libpng failed])
+]) ]) ])
 
 AC_CONFIG_HEADERS([config.h])
 AC_CONFIG_FILES([

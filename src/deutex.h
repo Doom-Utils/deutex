@@ -81,7 +81,9 @@ typedef int16_t IMGTYPE;
 #define PICGIF          (2)
 #define PICPPM          (3)
 #define PICWAD          (5)
+#ifdef HAVE_LIBPNG
 #define PICPNG          (6)
+#endif
 
 /*wad directory*/
 struct WADDIR {                 /*same as in doom */

@@ -397,6 +397,7 @@ void COMgif(int argc, const char *argv[])
     (void) argv;
 }
 
+#ifdef HAVE_LIBPNG
 void COMpng(int argc, const char *argv[])
 {
     Picture = PICPNG;
@@ -404,6 +405,7 @@ void COMpng(int argc, const char *argv[])
     (void) argc;
     (void) argv;
 }
+#endif
 
 void COMbmp(int argc, const char *argv[])
 {
@@ -819,7 +821,9 @@ static comdef_t Com[] = {
     {SEC, 0, NULL, NULL, NULL, "Graphics"},
     {OP2, 0, "bmp", COMbmp, NULL, "save pictures as BMP (\1.bmp\3)"},
     {OP2, 0, "gif", COMgif, NULL, "save pictures as GIF (\1.gif\3)"},
+#ifdef HAVE_LIBPNG
     {OP2, 0, "png", COMpng, NULL, "save pictures as PNG (\1.png\3)"},
+#endif
     {OP2, 0, "ppm", COMppm, NULL,
      "save pictures as rawbits PPM (P6, \1.ppm\3)"},
     {OP2, 3, "rgb", COMrgb, "<r> <g> <b>",
@@ -876,7 +880,11 @@ int main(int argc, char *argv_non_const[])
     */
     WadInfOk = false;
     George = false;
+#ifdef HAVE_LIBPNG
     Picture = PICPNG;
+#else
+    Picture = PICPPM;
+#endif
     Sound = SNDWAV;
     trnR = 0;
     trnG = 47;

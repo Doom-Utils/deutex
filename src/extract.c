@@ -47,9 +47,11 @@ static bool XTRbmpSave(int16_t * pinsrX, int16_t * pinsrY,
     if (size < 8L)
         return false;
     switch (Picture) {
+#ifdef HAVE_LIBPNG
     case PICPNG:
         extens = "PNG";
         break;
+#endif
     case PICGIF:
         extens = "GIF";
         break;
@@ -975,9 +977,11 @@ void XTRgetEntry(const char *doomwad, const char *DataDir,
     if (Found != true)
         if (Entrysz > 8) {
             switch (Picture) {
+#ifdef HAVE_LIBPNG
             case PICPNG:
                 extens = "PNG";
                 break;
+#endif
             case PICGIF:
                 extens = "GIF";
                 break;

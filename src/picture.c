@@ -10,8 +10,13 @@
 */
 
 #include "deutex.h"
+
 #include <ctype.h>
 #include <errno.h>
+#ifdef HAVE_LIBPNG
+#include <png.h>
+#endif
+
 #include "tools.h"
 #include "endianio.h"
 #include "endianm.h"
@@ -20,7 +25,6 @@
 #include "ident.h"
 #include "color.h"
 #include "usedidx.h"
-#include <png.h>
 
 static int wall_to_raw(char *data, int32_t datasz, const char *name);
 
@@ -139,9 +143,12 @@ static char *PPMtoRAW(int16_t * prawX, int16_t * prawY, char *file);
 static char *GIFtoRAW(int16_t * rawX, int16_t * rawY, char *file);
 static void RAWtoGIF(char *file, char *raw, int16_t rawX, int16_t rawY,
                      struct PIXEL *doompal);
+#ifdef HAVE_LIBPNG
 static void RAWtoPNG(char *file, char *raw, int16_t rawX, int16_t rawY,
                      struct PIXEL *doompal);
 static char *PNGtoRAW(int16_t * prawX, int16_t * prawY, char *file);
+#endif
+
 /*
 **  this is only a test example
 **  GIF->BMP
@@ -269,9 +276,11 @@ bool PICsaveInFile(char *file, PICTYPE type, char *pic, int32_t picsz,
         ** convert to BMP/GIF/PPM/PNG
         */
         switch (Picture) {
+#ifdef HAVE_LIBPNG
         case PICPNG:
             RAWtoPNG(file, raw, rawX, rawY, doompal);
             break;
+#endif
         case PICGIF:
             RAWtoGIF(file, raw, rawX, rawY, doompal);
             break;
@@ -317,9 +326,11 @@ int32_t PICsaveInWAD(struct WADINFO * info, char *file, PICTYPE type,
     */
     transparent = COLinvisible();
     switch (Picture) {
+#ifdef HAVE_LIBPNG
     case PICPNG:
         raw = PNGtoRAW(&rawX, &rawY, file);
         break;
+#endif
     case PICGIF:
         raw = GIFtoRAW(&rawX, &rawY, file);
         break;
@@ -1163,6 +1174,7 @@ static char *PPMtoRAW(int16_t * prawX, int16_t * prawY, char *file)
     return raw;
 }
 
+#ifdef HAVE_LIBPNG
 static char *PNGtoRAW(int16_t * rawX, int16_t * rawY, char *file)
 {
     char *raw;
@@ -1238,6 +1250,7 @@ static void RAWtoPNG(char *file, char *raw, int16_t rawX, int16_t rawY,
     }
     Free(colormap);
 }
+#endif
 
 static struct {
     uint16_t Transparent;
