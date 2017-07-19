@@ -716,7 +716,7 @@ static comdef_t Com[] = {
      "print the syntax of wad creation directives"},
     {CM3, 1, "unused", COMvoid, "<in.wad>", "find unused spaces in a wad"},
     {CM0, 0, "-version", COMvers, NULL,
-     "print version number and exit successfully"},
+     "print version number"},
 
     {SEC, 0, NULL, NULL, NULL, "Modal options requiring an iwad"},
     {CM4, 2, "add", COMadd, "<in.wad> <out.wad>",
@@ -1169,15 +1169,14 @@ void COMhelp(int argc, const char *argv[])
 }
 
 /*
- *      Print version and exit successfully.
+ *      Print version.
  *      All --version does.
  */
 void COMvers(int argc, const char *argv[])
 {
+    printf("%s %.32s\n", PACKAGE_NAME, PACKAGE_VERSION);
     (void) argc;
     (void) argv;
-    printf("%s %.32s\n", PACKAGE_NAME, PACKAGE_VERSION);
-    exit(0);
 }
 
 static char *Format[] = { "* Format of PWAD creation directives *",
