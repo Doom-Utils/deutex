@@ -41,7 +41,7 @@ for short) by Olivier Montanuy in 1994, expunging the graphical user
 interface in favor of command line and scriptable usage scenarios.
 Originally written for DOS, its primary home is now Unix systems, and
 is a fundamental piece to building
-https://freedoom.github.io/[_Freedoom_’s] playable WAD files.
+_https://freedoom.github.io/[Freedoom’s]_ playable WAD files.
 
 The name comes from a play on LaTeX and in turn TeX, a popular
 typesetting system in academia but no technical connection to DeuTex.
