@@ -169,7 +169,7 @@ typedef struct cusage_s cusage_t;
 /*
  *      Misc globals, set by command line arguments
  */
-typedef enum { PF_NORMAL, PF_ALPHA, PF_PR, PF_ROTT } picture_format_t;
+typedef enum { PF_NORMAL, PF_ALPHA, PF_PR } picture_format_t;
 typedef enum { TF_NORMAL, TF_NAMELESS, TF_NONE,
     TF_STRIFE11
 } texture_format_t;
