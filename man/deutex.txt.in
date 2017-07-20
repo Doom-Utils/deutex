@@ -304,6 +304,9 @@ Select sounds.
 *-sprites*::
 Select sprites.
 
+*-walls*::
+Select walls.
+
 *-textures*::
 Select textures.
 

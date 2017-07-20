@@ -307,6 +307,14 @@ void COMscripts(int argc, const char *argv[])
     (void) argv;
 }
 
+void COMwall(int argc, const char *argv[])
+{
+    Select |= BWALL;
+    Info("AA75", "Select walls");
+    (void) argc;
+    (void) argv;
+}
+
 void COMgeorge(int argc, const char *argv[])
 {
     George = true;
@@ -815,6 +823,7 @@ static comdef_t Com[] = {
     {OP2, 0, "sounds", COMsound, NULL, "select sounds"},
     {OP2, 0, "sprites", COMsprit, NULL, "select sprites"},
     {OP2, 0, "textures", COMtextur, NULL, "select textures"},
+    {OP2, 0, "walls", COMwall, NULL, "select walls"},
 
     {SEC, 0, NULL, NULL, NULL, "Graphics"},
     {OP2, 0, "bmp", COMbmp, NULL, "save pictures as BMP (\1.bmp\3)"},
