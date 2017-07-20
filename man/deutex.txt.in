@@ -329,6 +329,12 @@ Sound
 *-rate* 'code'::
 Policy for != 11025 Hz (*reject*, *force*, *warn*, *accept*; default warn).
 
+*-wav*::
+Save sounds as WAVE (*.wav*).  Default format.
+
+*-pcsnd*::
+Save sounds as PC speaker sounds (*.txt*).
+
 Reporting
 ~~~~~~~~~
 *-di* 'name'::
