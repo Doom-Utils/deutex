@@ -423,6 +423,22 @@ void COMppm(int argc, const char *argv[])
     (void) argv;
 }
 
+void COMwave (int argc, const char *argv[])
+{
+  Sound = SNDWAV;
+  Info ("AA45", "Save sounds as WAVE (.wav)");
+  (void) argc;
+  (void) argv;
+}
+
+void COMpcsnd (int argc, const char *argv[])
+{
+  Sound = SNDPC;
+  Info ("AA48", "Save sounds as PC speaker sounds (.txt)");
+  (void) argc;
+  (void) argv;
+}
+
 void COMrgb(int argc, const char *argv[])
 {
     trnR = (char) (atoi(argv[1]) & 0xFF);
@@ -826,6 +842,12 @@ static comdef_t Com[] = {
      "save pictures as rawbits PPM (P6, \1.ppm\3)"},
     {OP2, 3, "rgb", COMrgb, "<r> <g> <b>",
      "specify the transparent colour (default 0 47 47)"},
+  
+    {SEC0, 0, NULL, NULL, NULL, "Sounds"},
+    {OP2, 0, "wav", COMwave, NULL,
+     "save sounds as WAVE (\1.wav\3)"},
+    {OP2, 0, "pcsnd", COMpcsnd, NULL,
+     "save sounds as PC speaker sounds (\1.txt\3)"},
 
     {SEC, 0, NULL, NULL, NULL, "Sound"},
     {OP2, 1, "rate", COMrate, "<code>",
