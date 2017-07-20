@@ -72,6 +72,7 @@ typedef int16_t NTRYB;
 typedef int16_t SNDTYPE;
 #define SNDNONE         (0)
 #define SNDWAV          (2)
+#define SNDPC           (3)
 typedef int16_t IMGTYPE;
 #define PICNONE         (0)
 #define PICBMP          (1)

@@ -445,9 +445,16 @@ void XTRextractWAD(const char *doomwad, const char *DataDir, const char
                     osize = pwad.dir[p].size;
                     switch (piden[p]) {
                     case ESNDPC:
+                        switch (Sound) {
+                        case SNDPC:
+                            extens = "TXT";
+                            break;
+                        default:
+                            Bug("EX24", "Invalid snd type %d", Sound);
+                        }
                         res =
                             MakeFileName(file, DataDir, "SOUNDS", "",
-                                         pdir[p].name, "TXT");
+                                         pdir[p].name, extens);
                         if ((WSafe == true)
                             && (res == true)) {
                             Warning("EX26", "Will not overwrite file %s",
