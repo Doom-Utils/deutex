@@ -249,9 +249,6 @@ Compose iwad, not pwad.
 *-le*::
 Assume all wads are little endian (default).
 
-*-musid*::
-Use old music identification method.
-
 *-obe*::
 Create big endian wads (default LE).
 
