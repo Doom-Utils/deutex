@@ -234,7 +234,7 @@ Input wads are big endian (default LE).
 Input wads are little endian (default).
 
 *-ipf* 'code'::
-Picture format (*alpha*, *normal*, *pr*, *rott*; default normal).
+Picture format (*alpha*, *normal*, *pr*; default normal).
 
 *-itf* 'code'::
 Input texture format (*nameless*, *none*, *normal*, *strife11*;

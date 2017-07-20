@@ -485,10 +485,8 @@ void COMipf(int argc, const char *argv[])
         picture_format = PF_NORMAL;
     else if (argc >= 2 && !strcmp(argv[1], "pr"))
         picture_format = PF_PR;
-    else if (argc >= 2 && !strcmp(argv[1], "rott"))
-        picture_format = PF_ROTT;
     else
-        ProgError("PI01", "Usage is \"-ipf {alpha|normal|pr|rott}\"");
+        ProgError("PI01", "Usage is \"-ipf {alpha|normal|pr}\"");
     Info("PI02", "Input picture format is \"%s\"", argv[1]);
 }
 
@@ -785,7 +783,7 @@ static comdef_t Com[] = {
     {OP2, 0, "ile", COMile, NULL,
      "input wads are little endian (default)"},
     {OP2, 1, "ipf", COMipf, "<code>",
-     "picture format (\1alpha\3, *\1normal\3, \1pr\3, \1rott\3)"},
+     "picture format (\1alpha\3, *\1normal\3, \1pr\3)"},
     {OP2, 1, "itf", COMtf, "<code>",
      "input texture format (\1nameless\3, \1none\3, *\1normal\3, \1strife11\3)"},
     {OP2, 1, "itl", COMitl, "<code>",
@@ -1005,8 +1003,6 @@ int main(int argc, char *argv_non_const[])
 
         if (!(Select & BALL))
             Select = BALL;
-        if (ROTT)
-            palette_lump = "PAL";
         d->exec(c, v);
     }
 

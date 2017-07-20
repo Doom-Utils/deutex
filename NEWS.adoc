@@ -8,6 +8,7 @@ Removed features
   * WinTex options.
   * `-fullsnd`: now the only mode.
   * MS-DOS and OS/2 compatibility.
+  * Incomplete (and conditioned out) Rise of the Triad support.
 
 File format support
 ~~~~~~~~~~~~~~~~~~~

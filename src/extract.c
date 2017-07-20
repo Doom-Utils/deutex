@@ -868,43 +868,6 @@ void XTRextractWAD(const char *doomwad, const char *DataDir, const char
         }
     }
 
-    /* Extract all ROTT walls. They're raw 64x64 bitmaps, between
-       WALLSTRT and WALLSTOP. This is based on the regular Doom
-       flats extraction code above. */
-    if (ROTT && (select & BWALL)) {
-        Phase("EX70", "Extracting walls...");
-        ostart = 0x80000000L;
-        osize = 0;
-        for (EntryFound = false, p = 0; p < pnb; p++) {
-            if ((piden[p] & EMASK) == EWALL) {
-                if (EntryFound != true) {
-                    if (cusage == NULL)
-                        MakeDir(file, DataDir, "WALLS", "");
-                    TXTaddEmptyLine(TXT);
-                    TXTaddComment(TXT, "List of walls");
-                    TXTaddSection(TXT, "walls");
-                    EntryFound = true;
-                }
-                if ((ostart == pwad.dir[p].start)
-                    && (osize == pwad.dir[p].size)) {
-                    TXTaddEntry(TXT, pdir[p].name, NULL, INVALIDINT,
-                                INVALIDINT, true, false);
-                } else {
-                    ostart = pwad.dir[p].start;
-                    osize = pwad.dir[p].size;
-                    if (XTRbmpSave
-                        (&insrX, &insrY, &pdir[p], PWALL, DataDir, "WALLS",
-                         &pwad, Picture, WSafe, cusage) != true)
-                        Warning("EX71", "Failed to write wall %s",
-                                lump_name(pwad.dir[p].name));
-                    else
-                        TXTaddEntry(TXT, pdir[p].name, NULL, INVALIDINT,
-                                    INVALIDINT, false, false);
-                }
-            }
-        }
-    }
-
     /* If -usedidx, print statistics */
     if (cusage != NULL) {
         int n;

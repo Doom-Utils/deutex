@@ -67,21 +67,6 @@ int parse_pic_header(const char *buf, long bufsz, pic_head_t * h,
         h->height = *p++;
         h->xofs = *p++;
         h->yofs = *p++;
-    } else if (picture_format == PF_ROTT) {
-        int16_t unknown;
-
-        if (p + 10 - 1 > buf_end)
-            FAIL0("header too short");
-        read_i16_le(p, &unknown);       /* FIXME find out what it's for */
-        p += 2;
-        read_i16_le(p, &h->width);
-        p += 2;
-        read_i16_le(p, &h->height);
-        p += 2;
-        read_i16_le(p, &h->xofs);
-        p += 2;
-        read_i16_le(p, &h->yofs);
-        p += 2;
     } else {
         if (p + 8 - 1 > buf_end)
             FAIL0("header too short");
@@ -755,42 +740,6 @@ static char *snea_to_raw(int16_t * prawX, int16_t * prawY,
     *prawX = width;
     *prawY = height;
     return raw;
-}
-
-/*
- *      wall_to_raw - convert ROTT wall data to a RAW bitmap
- *
- *      A ROTT wall is a 64x64 pixel matrix, read down and right. To
- *      convert it to RAW format, mirror it along the first diagonal
- *      ((0,0)-(63,63)).
- */
-#define WALL_DIM 64
-static int wall_to_raw(char *data, int32_t datasz, const char *name)
-{
-    char *s = data + 1;
-    char *d = s + WALL_DIM - 1;
-    int i;
-    int j;
-
-    if (datasz != WALL_DIM * WALL_DIM) {
-        Warning("WA10", "Wall %s: size not %d", lump_name(name),
-                WALL_DIM * WALL_DIM);
-        return 0;
-    }
-
-    for (i = 1; i < WALL_DIM; i++) {
-        for (j = i; j < WALL_DIM; j++) {
-            char swap = *d;     /* Swap (*s) and (*d) */
-            *d = *s;
-            *s = swap;
-            s++;
-            d += WALL_DIM;
-        }
-        s += 1 + i;
-        d = s + WALL_DIM - 1;
-    }
-
-    return 0;
 }
 
 /*

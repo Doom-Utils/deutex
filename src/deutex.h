@@ -11,8 +11,6 @@
 
 #include "config.h"
 
-#define ROTT 0                  /* FIXME make it a run-time option */
-
 #include <stdbool.h>
 #include <stdint.h>
 #include <stdio.h>
@@ -146,7 +144,6 @@ typedef int16_t ENTRY;
 #define   ESNEAP        0x2001  /* Snea using PLAYPAL */
 #define   ESNEAT        0x2002  /* Snea using TITLEPAL */
 #define ESSCRIPT        0x3000  /* Strife script (SCRIPTnn) */
-#define EWALL           0x4000  /* ROTT wall (WALLSTRT/WALLSTOP) */
 #define EZZZZ           0x7F00  /*unidentified entries */
 
 void CMPOmakePWAD(const char *doomwad, WADTYPE type, const char *PWADname,

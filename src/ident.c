@@ -436,51 +436,6 @@ static void IDENTdirFlats(ENTRY * ids, struct WADINFO *info)
     }
 }
 
-/*
- *      IDENTdirWalls - identify ROTT walls (WALLSTRT/WALLSTOP)
- *
- *      Precond: ids contains EZZZZ for unidentified entries
- */
-static void IDENTdirWalls(ENTRY * ids, struct WADINFO *info)
-{
-    int16_t w_start, w_end;
-    int16_t n;
-    const int32_t WALL_SIZE = 4096;
-
-    ident_func = "IDENTdirWalls";
-    w_start = WADRfindEntry(info, "WALLSTRT");
-    w_end = WADRfindEntry(info, "WALLSTOP");
-    if (w_start < 0)
-        Warning("IW05", "No WALLSTRT");
-    if (w_start < 0)
-        return;
-    if (w_start >= 0 && w_end < 0)
-        Warning("IW06",
-                "WALLSTRT but no WALLSTOP. Guessing where walls stop.");
-
-    IDENTdirSet(ids, info, "WALLSTRT", EVOID);
-    IDENTdirSet(ids, info, "WALLSTOP", EVOID);
-
-    for (n = w_start + 1; n > 0; n++) {
-        if (n >= info->ntry)
-            break;
-        if (w_end >= 0 && n >= w_end)
-            break;
-        if (w_end < 0 && info->dir[n].size != WALL_SIZE)
-            break;
-        if (info->dir[n].size == 0) {
-            /* The iwad has empty walls. Ignore them. */
-            IDENTsetType(ids, info, n, EVOID);
-            continue;
-        }
-        if (info->dir[n].size != WALL_SIZE)
-            Warning("IW10", "Wall with size != %ld", (long) WALL_SIZE);
-        if (ids[n] != EZZZZ)
-            Warning("IW11", "Wall already identified as %d", (int) ids[n]);
-        IDENTsetType(ids, info, n, EWALL);
-    }
-}
-
 static void IDENTdirPatches(ENTRY * ids, struct WADINFO *info, char *Pnam,
                             int32_t Pnamsz, bool Check)
 {
@@ -837,8 +792,6 @@ ENTRY *IDENTentriesIWAD(struct WADINFO *info, char *Pnam, int32_t Pnamsz,
         ids[n] = EZZZZ;
     IDENTdirSprites(ids, info, false);  /*fast */
     IDENTdirFlats(ids, info);   /*fast */
-    if (ROTT)
-        IDENTdirWalls(ids, info);
     IDENTdirLevels(ids, info);  /*fast */
     IDENTdirMusics(ids, info, false);   /*fast */
     IDENTdirPCSounds(ids, info, false); /*fast */
@@ -879,9 +832,6 @@ ENTRY *IDENTentriesPWAD(struct WADINFO * info, char *Pnam, int32_t Pnamsz)
         ids[n] = EZZZZ;
     IDENTdirSprites(ids, info, true);
     IDENTdirFlats(ids, info);
-    if (ROTT) {
-        IDENTdirWalls(ids, info);
-    }
     IDENTdirLevels(ids, info);
     IDENTdirMusics(ids, info, true);
     IDENTdirPCSounds(ids, info, true);
