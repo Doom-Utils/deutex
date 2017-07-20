@@ -127,8 +127,6 @@ int16_t IDENTinsrX(PICTYPE type, int16_t insrX, int16_t szx)
         return (int16_t) (-(320 - szx) / 2);    /* -160+X?? */
     case PFLAT:                /*no insertion point */
     case PLUMP:                /*no insertion point */
-    case PWALL:                /*no insertion point */
-        return (int16_t) 0;
     case PGRAPH:               /*0,0 by default */
         return (int16_t) 0;
     default:
@@ -153,8 +151,6 @@ int16_t IDENTinsrY(PICTYPE type, int16_t insrY, int16_t szy)
         return (int16_t) (-(200 - szy));
     case PFLAT:                /*no insertion point */
     case PLUMP:                /*no insertion point */
-    case PWALL:                /*no insertion point */
-        return (int16_t) 0;
     case PGRAPH:               /*0,0 by default */
         return (int16_t) 0;
     default:
@@ -885,7 +881,6 @@ static const entry_type_def_t entry_type_def[] = {
     {ESNEAP, "sneap", "sneaps", PSNEAP},
     {ESNEAT, "sneat", "sneats", PSNEAT},
     {ESSCRIPT, "script", "scripts", -1},
-    {EWALL, "wall", "walls", PWALL},
     {0, NULL, NULL, -1}
 };
 

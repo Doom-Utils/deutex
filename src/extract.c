@@ -118,9 +118,7 @@ void XTRextractWAD(const char *doomwad, const char *DataDir, const char
 
     /* If -usedidx, we're only interested in graphics. */
     if (cusage != NULL)
-        select &=
-            (BGRAPHIC | BSPRITE | BPATCH | BFLAT | BSNEAP | BSNEAT |
-             BWALL);
+        select &= (BGRAPHIC | BSPRITE | BPATCH | BFLAT | BSNEAP | BSNEAT);
 
     /*read WAD */
     pwad.ok = 0;
@@ -965,7 +963,7 @@ void XTRgetEntry(const char *doomwad, const char *DataDir,
                      insrY);
                 Found = true;
             }
-            /* FIXME try wall as well ? */
+
             else if ((Entrysz == 0x1000) || (Entrysz == 0x1040)) {
                 if (PICsaveInFile
                     (file, PFLAT, Entry, Entrysz, &insrX, &insrY, Picture,

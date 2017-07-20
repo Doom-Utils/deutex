@@ -67,7 +67,6 @@ typedef int16_t NTRYB;
 #define BSNEAT          (0x0400)
 #define BSCRIPT         (0x0800)
 #define BSNEA           (BSNEAP|BSNEAT)
-#define BWALL           (0x1000)
 #define BALL            (0x7FFF)
 
 typedef int16_t SNDTYPE;
@@ -113,7 +112,6 @@ typedef int16_t PICTYPE;
 #define PLUMP   0x0c
 #define PSNEAP  0x0d
 #define PSNEAT  0x0e
-#define PWALL   0x10
 
 typedef int16_t ENTRY;
 #define EMASK           0xFF00

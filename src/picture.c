@@ -26,8 +26,6 @@
 #include "color.h"
 #include "usedidx.h"
 
-static int wall_to_raw(char *data, int32_t datasz, const char *name);
-
 /*
  *      parse_pic_header
  *
@@ -210,20 +208,6 @@ bool PICsaveInFile(char *file, PICTYPE type, char *pic, int32_t picsz,
             usedidx_rectangle(pic, picsz, name, cusage);
         break;
 
-    case PWALL:
-        if (picsz == 4096) {
-            rawX = 64;
-            rawY = 64;
-        } else
-            return false;       /*Wrong size for WALL. */
-        if (wall_to_raw(pic, picsz, name) != 0)
-            ProgError("GW88", "Wall %s: wall_to_raw error",
-                      lump_name(name));
-        raw = pic;
-        if (cusage != NULL)
-            usedidx_rectangle(pic, picsz, name, cusage);
-        break;
-
     case PSNEAP:
     case PSNEAT:
         raw =
@@ -291,7 +275,6 @@ bool PICsaveInFile(char *file, PICTYPE type, char *pic, int32_t picsz,
         break;
     case PFLAT:                /*don't free pic! */
     case PLUMP:
-    case PWALL:
         break;
     }
     return true;
@@ -358,14 +341,6 @@ int32_t PICsaveInWAD(struct WADINFO * info, char *file, PICTYPE type,
             Warning("LB11", "%s: weird height for a lump (not 200)",
                     fname(file));
         break;
-    case PWALL:
-        if (rawX != 64)
-            Warning("WB10", "%s: weird width for a wall (not 64)",
-                    fname(file));
-        if (rawY != 64)
-            Warning("WB11", "%s: weird height for a wall (not 64)",
-                    fname(file));
-        break;
     default:
         Bug("GB91", "Invalid type %d", (int) type);
     }
@@ -389,11 +364,6 @@ int32_t PICsaveInWAD(struct WADINFO * info, char *file, PICTYPE type,
         break;
     case PLUMP:                /*LUMP is RAW */
     case PFLAT:                /*FLAT is RAW */
-        picsz = ((int32_t) rawX) * ((int32_t) rawY);
-        WADRwriteBytes(info, raw, picsz);
-        Free(raw);
-        break;
-    case PWALL:                /* FIXME rotate 270° */
         picsz = ((int32_t) rawX) * ((int32_t) rawY);
         WADRwriteBytes(info, raw, picsz);
         Free(raw);

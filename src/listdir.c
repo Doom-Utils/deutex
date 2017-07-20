@@ -140,10 +140,6 @@ void XTRlistDir(const char *doomwad, const char *wadin, NTRYB select)
             if (!(select & BMUSIC))
                 continue;
             break;
-        case EWALL:
-            if (!(select & BWALL))
-                continue;
-            break;
         }
         switch (type & EMASK) {
         case EVOID:
