@@ -26,7 +26,6 @@
 #include <utime.h>
 
 #include <time.h>
-#include <stdarg.h>
 #include <ctype.h>
 #include <sys/types.h>
 #include <sys/stat.h>
