@@ -267,7 +267,7 @@ int32_t SNDcopyInWAD(struct WADINFO *info, char *file, SNDTYPE format)
         size += WADRwriteLong(info, datasize);
         size += WADRwriteBytes(info, data, datasize);
     }
-    Free(data);
+    free(data);
     return size;
 }
 

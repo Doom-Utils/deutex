@@ -64,9 +64,9 @@ void decompressInit(void)
 
 void decompressFree(void)
 {
-    Free(table[0]);
-    Free(table[1]);
-    Free(stack);
+    free(table[0]);
+    free(table[1]);
+    free(stack);
 }
 
 /*static count_int htab [HSIZE];*/
@@ -81,8 +81,8 @@ void compressInit(void)
 
 void compressFree(void)
 {
-    Free(htab);
-    Free(codetab);
+    free(htab);
+    free(codetab);
 }
 
 static void output(code_int code);

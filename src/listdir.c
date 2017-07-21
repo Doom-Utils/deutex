@@ -69,7 +69,7 @@ void XTRlistDir(const char *doomwad, const char *wadin, NTRYB select)
         ProgError("LS10", "Can't find PNAMES in main WAD");
     Pnam = WADRreadEntry(&iwad, pnm, &Pnamsz);
     WADRclose(&iwad);
-    /**/ if (wadin != NULL) {
+    if (wadin != NULL) {
         pwad.ok = 0;
         WADRopenR(&pwad, wadin);
         iden = IDENTentriesPWAD(&pwad, Pnam, Pnamsz);
@@ -82,9 +82,9 @@ void XTRlistDir(const char *doomwad, const char *wadin, NTRYB select)
         ntry = iwad.ntry;
         dir = iwad.dir;
     }
-    /**/ Free(Pnam);
-    /**/ Output("\nListing of WAD directory for %s\n\n",
-                wadin != NULL ? wadin : doomwad);
+    free(Pnam);
+    Output("\nListing of WAD directory for %s\n\n",
+           wadin != NULL ? wadin : doomwad);
     Output("Entry\t      Size\tType\n\n");
     for (n = 0; n < ntry; n++) {
         type = iden[n];
@@ -236,7 +236,7 @@ void XTRlistDir(const char *doomwad, const char *wadin, NTRYB select)
         WADRclose(&pwad);
     else
         WADRclose(&iwad);
-    Free(iden);
+    free(iden);
 }
 
 int XTRdirCmp(const void *d1, const void *d2)
@@ -367,7 +367,7 @@ void CheckSideDefs(struct WADINFO *pwad, int32_t start, int32_t size,
         CheckTexture(side->Below, IsDef);
         CheckTexture(side->Center, IsDef);
     }
-    Free(sid);
+    free(sid);
 }
 
 void CheckLevels(struct WADINFO *pwad, bool IsDef)
@@ -436,7 +436,7 @@ void XTRstructureTest(const char *doomwad, const char *wadin)
         WADRreadBytes(&iwad, Pnames, size);
     }
     PNMinit(Pnames, size);
-    Free(Pnames);
+    free(Pnames);
     /*
     ** find each PNAME and identify Xsz Ysz
     */
@@ -472,7 +472,7 @@ void XTRstructureTest(const char *doomwad, const char *wadin)
         WADRreadBytes(&pwad, buffer, e->size);
         TXUinit();
         TXUreadTEXTURE(e->name, buffer, e->size, NULL, 0, true);
-        Free(buffer);
+        free(buffer);
         /*for each textures, check what is covered */
         Phase("LS31", "Checking TEXTURE1");
         TXUcheckTex(nbPatchs, PszX);
@@ -486,13 +486,13 @@ void XTRstructureTest(const char *doomwad, const char *wadin)
         WADRreadBytes(&pwad, buffer, e->size);
         TXUinit();
         TXUreadTEXTURE(e->name, buffer, e->size, NULL, 0, true);
-        Free(buffer);
+        free(buffer);
         /*for each textures, check what is covered */
         Phase("LS33", "Checking TEXTURE2");
         TXUcheckTex(nbPatchs, PszX);
         TXUfree();
     }
-    Free(PszX);
+    free(PszX);
     /*
     ** check if all textures composing walls are here
     **
@@ -506,7 +506,7 @@ void XTRstructureTest(const char *doomwad, const char *wadin)
         WADRseek(&pwad, e->start);
         WADRreadBytes(&pwad, buffer, e->size);
         TXUreadTEXTURE(e->name, buffer, e->size, NULL, 0, true);
-        Free(buffer);
+        free(buffer);
     } else {
         pnm = WADRfindEntry(&iwad, "TEXTURE1");
         if (pnm >= 0) {
@@ -515,7 +515,7 @@ void XTRstructureTest(const char *doomwad, const char *wadin)
             WADRseek(&iwad, e->start);
             WADRreadBytes(&iwad, buffer, e->size);
             TXUreadTEXTURE(e->name, buffer, e->size, NULL, 0, true);
-            Free(buffer);
+            free(buffer);
         }
     }
     pnm = WADRfindEntry(&pwad, "TEXTURE2");
@@ -525,7 +525,7 @@ void XTRstructureTest(const char *doomwad, const char *wadin)
         WADRseek(&pwad, e->start);
         WADRreadBytes(&pwad, buffer, e->size);
         TXUreadTEXTURE(e->name, buffer, e->size, NULL, 0, true);
-        Free(buffer);
+        free(buffer);
     } else {
         pnm = WADRfindEntry(&iwad, "TEXTURE2");
         if (pnm >= 0) {
@@ -534,7 +534,7 @@ void XTRstructureTest(const char *doomwad, const char *wadin)
             WADRseek(&iwad, e->start);
             WADRreadBytes(&iwad, buffer, e->size);
             TXUreadTEXTURE(e->name, buffer, e->size, NULL, 0, true);
-            Free(buffer);
+            free(buffer);
         }
     }
     CheckLevels(&pwad, false);
@@ -703,7 +703,7 @@ void XTRcompakWAD(const char *DataDir, const char *wadin,
         }
     fclose(out);
     WADRclose(&pwad);
-    Free(bbas);
-    Free(btst);
-    Free(psame);
+    free(bbas);
+    free(btst);
+    free(psame);
 }

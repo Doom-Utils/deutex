@@ -70,7 +70,7 @@ static void HDRplunderWad(struct WADINFO *rwad, struct WADINFO *ewad)
         }
     }
 
-    Free(data);
+    free(data);
 }
 
 /*
@@ -104,7 +104,7 @@ static int32_t HDRinsertWad(struct WADINFO *rwad, struct WADINFO *ewad,
         }
         /*if((wsize&0xF000)==0) Phase("."); FIXME need /dev/tty output */
     }
-    Free(data);
+    free(data);
     for (n = 0; n < (rwad->ntry); n++) {        /*detect external entries */
         if ((rwad->dir[n].start) & EXTERNAL) {  /*update new directory */
             rwad->dir[n].start &= (~EXTERNAL);
@@ -200,7 +200,7 @@ void HDRrestoreWAD(const char *wadres)
                         break;
                     }
                 }
-                Free(data);
+                free(data);
                 fclose(fp);
             } else
                 Warning("ME40", "%s: %s", fname(ewadfile),
@@ -293,7 +293,7 @@ void PSTmergeWAD(const char *doomwad, const char *wadin, NTRYB select)
     pwad.ok = 0;
     WADRopenR(&pwad, wadin);
     piden = IDENTentriesPWAD(&pwad, Pnam, Pnamsz);
-     /**/ Free(Pnam);
+    free(Pnam);
     /*where to put pwad? at pwadstart */
     /* merge the two directories */
     NewDir =
@@ -347,7 +347,7 @@ void ADDappendSpriteFloor(const char *doomwad, const char *wadres,
     pwad.ok = 0;
     WADRopenR(&pwad, wadres);
     piden = IDENTentriesPWAD(&pwad, Pnam, Pnamsz);
-     /**/ Free(Pnam);
+    free(Pnam);
     /* merge the two directories */
     NewDir =
         LISmergeDir(&NewNtry, true, true, select, &iwad, iiden, EXTERNAL,
@@ -408,7 +408,7 @@ void ADDjoinWads(const char *doomwad, const char *wadres, const char
     rwad.ok = 0;
     WADRopenR(&rwad, wadres);
     riden = IDENTentriesPWAD(&rwad, Entry, EntrySz);
-     /**/ Free(Entry);
+    free(Entry);
     /*merge texture1 if needed */
     etexu = WADRfindEntry(&ewad, "TEXTURE1");
     rtexu = WADRfindEntry(&rwad, "TEXTURE1");
@@ -422,7 +422,7 @@ void ADDjoinWads(const char *doomwad, const char *wadres, const char
             Bug("ME73", "JnPnm");
         Entry = WADRreadEntry(&iwad, entry, &EntrySz);
         PNMinit(Entry, EntrySz);
-        Free(Entry);
+        free(Entry);
         /*declare TEXTURE1 from IWAD */
         TXUinit();
     }
@@ -441,8 +441,8 @@ void ADDjoinWads(const char *doomwad, const char *wadres, const char
         TXUreadTEXTURE(rwad.dir[pnm].name, Entry, EntrySz, Patch, PatchSz,
                        true);
         if (PatchSz != 0)
-            Free(Patch);
-        Free(Entry);
+            free(Patch);
+        free(Entry);
         riden[rtexu] = EVOID;   /* forget r texu */
         /*TEXTURE1 from ewad */
         Phase("ME82", "  And TEXTURE1 from %s", fname(wadext));
@@ -458,8 +458,8 @@ void ADDjoinWads(const char *doomwad, const char *wadres, const char
         TXUreadTEXTURE(ewad.dir[pnm].name, Entry, EntrySz, Patch, PatchSz,
                        false);
         if (PatchSz != 0)
-            Free(Patch);
-        Free(Entry);
+            free(Patch);
+        free(Entry);
         eiden[etexu] = EVOID;   /* forget e texu */
     }
     /* merge the two directories, all entries */
@@ -535,7 +535,7 @@ void ADDallSpriteFloor(const char *wadout, const char *doomwad, const char
     pwad.ok = 0;
     WADRopenR(&pwad, wadres);
     piden = IDENTentriesPWAD(&pwad, Pnam, Pnamsz);
-     /**/ Free(Pnam);
+    free(Pnam);
     /*where to put pwad? at pwadstart */
     if ((iwad.maxpos | pwad.maxpos) & EXTERNAL)
         Bug("ME94", "AddExt");
@@ -559,7 +559,7 @@ void ADDallSpriteFloor(const char *wadout, const char *doomwad, const char
             size = WADRwriteWADbytes(&rwad, &pwad, ostart, osize);
         WADRdirAddEntry(&rwad, start, size, NewDir[n].name);
     }
-    Free(NewDir);
+    free(NewDir);
     /*close files memory */
     WADRclose(&iwad);
     WADRclose(&pwad);

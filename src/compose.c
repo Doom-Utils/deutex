@@ -217,7 +217,7 @@ void CMPOmakePWAD(const char *doomwad, WADTYPE type, const char *PWADname,
         }
         COLinit(trnR, trnG, trnB, paldata, (int16_t) EntrySz,
                 playpal_pathname, playpal_lumpname);
-        Free(paldata);
+        free(paldata);
     }
 
     /*
@@ -265,7 +265,7 @@ void CMPOmakePWAD(const char *doomwad, WADTYPE type, const char *PWADname,
             ProgError("CM40", "Can't find PNAMES in main WAD");
         EntryP = WADRreadEntry(&iwad, entry, &EntrySz);
         PNMinit(EntryP, EntrySz);
-        Free(EntryP);
+        free(EntryP);
         NeedPNAME = false;
     }
     /*
@@ -279,7 +279,7 @@ void CMPOmakePWAD(const char *doomwad, WADTYPE type, const char *PWADname,
             if (entry >= 0) {
                 EntryP = WADRreadEntry(&iwad, entry, &EntrySz);
                 TXUreadTEXTURE("TEXTURE1", EntryP, EntrySz, NULL, 0, true);
-                Free(EntryP);
+                free(EntryP);
             } else
                 Warning("CM51", "Can't find TEXTURE1 in main WAD");
             FoundOne = false;
@@ -303,7 +303,7 @@ void CMPOmakePWAD(const char *doomwad, WADTYPE type, const char *PWADname,
                             EntryP = WADRreadEntry(&pwad, entry, &EntrySz);
                             TXUreadTEXTURE("TEXTURE1", EntryP, EntrySz, NULL,
                                            0, true);
-                            Free(EntryP);
+                            free(EntryP);
                             NeedPNAME = true;
                             FoundOne = true;
                         }
@@ -332,7 +332,7 @@ void CMPOmakePWAD(const char *doomwad, WADTYPE type, const char *PWADname,
             if (entry >= 0) {
                 EntryP = WADRreadEntry(&iwad, entry, &EntrySz);
                 TXUreadTEXTURE("TEXTURE2", EntryP, EntrySz, NULL, 0, true);
-                Free(EntryP);
+                free(EntryP);
             } else
                 Warning("CM56", "Can't find TEXTURE2 in main WAD");
             FoundOne = false;
@@ -356,7 +356,7 @@ void CMPOmakePWAD(const char *doomwad, WADTYPE type, const char *PWADname,
                             EntryP = WADRreadEntry(&pwad, entry, &EntrySz);
                             TXUreadTEXTURE("TEXTURE2", EntryP, EntrySz, NULL,
                                            0, true);
-                            Free(EntryP);
+                            free(EntryP);
                             NeedPNAME = true;
                             FoundOne = true;
                         }

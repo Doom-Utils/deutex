@@ -61,7 +61,7 @@ void usedidx_end_lump(cusage_t * cusage)
             cusage->nlumps[i]++;
         }
     }
-    Free(cusage->lump_uses);
+    free(cusage->lump_uses);
 }
 
 /*
@@ -93,5 +93,5 @@ void usedidx_rectangle(const char *buf, long buf_size, const char *name,
             cusage->nlumps[i]++;
         }
     }
-    Free(uses);
+    free(uses);
 }

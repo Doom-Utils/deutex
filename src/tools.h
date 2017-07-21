@@ -57,7 +57,6 @@ void Memcpy(void *dest, const void *src, long n);
 void Memset(void *dest, char car, long n);
 void *Malloc(long size);
 void *Realloc(void *old, long size);
-void Free(void *);
 
 void Normalise(char dest[8], const char *src);
 

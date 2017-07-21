@@ -108,7 +108,7 @@ int sscript_save(struct WADINFO *wad, int16_t n, const char *file)
         }
     }
 
-    Free(data);
+    free(data);
     if (fclose(fp)) {
         nf_err("SS45", "%s: %s", file, strerror(errno));
         return 1;

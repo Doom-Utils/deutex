@@ -106,10 +106,10 @@ static void LISallocLists(void)
 
 static void LISfreeLists(void)
 {
-    Free(LISflt.Lst);
-    Free(LISpat.Lst);
-    Free(LISspr.Lst);
-    Free(LISlmp.Lst);
+    free(LISflt.Lst);
+    free(LISpat.Lst);
+    free(LISspr.Lst);
+    free(LISlmp.Lst);
 }
 
 /*
@@ -551,7 +551,7 @@ struct WADDIR *LISmergeDir(int32_t * pNtry, bool Append, bool Complain,
             break;
         }
     }
-    Free(iiden);
+    free(iiden);
     /*update position of PWAD entries */
     for (p = 0; p < pnb; p++) {
         pdir[p].start |= pwadflag;
@@ -655,7 +655,7 @@ struct WADDIR *LISmergeDir(int32_t * pNtry, bool Append, bool Complain,
             break;
         }
     }
-    Free(piden);
+    free(piden);
     /*create the new directory */
     LISmakeNewDir(&nwad, S_END, P_END, F_END, Pn, Fn);
     /*free memory */

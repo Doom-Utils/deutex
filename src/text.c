@@ -116,7 +116,7 @@ void TXTcloseR(struct TXTFILE *TXT)
     if (TXTok != true)
         Bug("TR91", "TxtClo");
     fclose(TXT->fp);
-    Free(TXT);
+    free(TXT);
 }
 
 struct TXTFILE *TXTopenR(const char *file, int silent)
@@ -137,7 +137,7 @@ struct TXTFILE *TXTopenR(const char *file, int silent)
     TXT->fp = fopen(file, FOPEN_RT);
     if (TXT->fp == NULL) {
         if (silent) {
-            Free(TXT);
+            free(TXT);
             return NULL;
         }
         ProgError("TR03", "%s: %s", fname(file), strerror(errno));
@@ -568,7 +568,7 @@ void TXTcloseW(struct TXTFILE *TXT)
     if (TXTok != true)
         Bug("TW91", "TxtClo");
     fclose(TXT->fp);
-    Free(TXT);
+    free(TXT);
 }
 
 /*

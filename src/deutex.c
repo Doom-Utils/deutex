@@ -333,7 +333,7 @@ void COMdebug(int argc, const char *argv[])
     Colors = WADRreadEntry(&iwad, pnm, &Pnamsz);
     COLinit(trnR, trnG, trnB, Colors, (int16_t) Pnamsz, iwad.filename,
             palette_lump);
-    Free(Colors);
+    free(Colors);
     WADRclose(&iwad);
     PicDebug(file, DataDir, (argc < 2) ? "test" : argv[1]);
     COLfree();
@@ -661,7 +661,7 @@ void COMusedidx(int argc, const char *argv[])
     }
     XTRextractWAD(MainWAD, DataDir, wadin, wadinf, Picture, Sound, Select,
                   trnR, trnG, trnB, WSafe, cusage);
-    Free(cusage);
+    free(cusage);
 }
 
 void COMcheck(int argc, const char *argv[])

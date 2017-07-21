@@ -182,7 +182,7 @@ int IDENTgraphic(struct WADINFO *info, int16_t n)
 
     /* If parse_pic_header() chokes, it must not be a valid picture */
     if (parse_pic_header(buf, size, &h, NULL)) {
-        Free(buf);
+        free(buf);
         return 0;
     }
 
@@ -212,7 +212,7 @@ int IDENTgraphic(struct WADINFO *info, int16_t n)
         }
 
         if (buf + ofs < h.data || ofs >= size) {
-            Free(buf);
+            free(buf);
             return 0;
         }
 
@@ -232,7 +232,7 @@ int IDENTgraphic(struct WADINFO *info, int16_t n)
     }
 
     /*valid...graphic...maybe... */
-    Free(buf);
+    free(buf);
     if (bad_order)
         return 50;
     else
@@ -496,7 +496,7 @@ static void IDENTdirPatches(ENTRY * ids, struct WADINFO *info, char *Pnam,
             WADRseek(info, info->dir[n].start);
             WADRreadBytes(info, Pnames, info->dir[n].size);
             PNMinit(Pnames, info->dir[n].size);
-            Free(Pnames);
+            free(Pnames);
         } else {                /*init with default DOOM Pnames */
             if (Pnam != NULL && Pnamsz != 0)
                 PNMinit(Pnam, Pnamsz);

@@ -394,8 +394,8 @@ void WADRclose(struct WADINFO *info)
     if (!(info->ok & WADR_RDWR))
         Bug("WR97", "WadClo");
     info->ok = false;
-    Free(info->filename);
-    Free(info->dir);
+    free(info->filename);
+    free(info->dir);
     fclose(info->fd);
 }
 
@@ -497,11 +497,11 @@ void WADRsaveEntry(struct WADINFO *info, int16_t n, const char *file)
         sz = (size - wsize > MEMORYCACHE) ? MEMORYCACHE : size - wsize;
         WADRreadBytes(info, buffer, sz);
         if (fwrite(buffer, (size_t) sz, 1, fd) != 1) {
-            Free(buffer);
+            free(buffer);
             ProgError("WR89", "%s: write error", fname(file));
         }
     }                           /*declare in WAD directory */
-    Free(buffer);
+    free(buffer);
     if (fclose(fd))
         ProgError("WR90", "%s: %s", fname(file), strerror(errno));
 }
@@ -661,7 +661,7 @@ int32_t WADRwriteWADbytes(struct WADINFO * info, struct WADINFO * src,
         WADRreadBytes(src, data, sz);
         wsize += WADRwriteBlock(info, data, sz);
     }                           /*declare in WAD directory */
-    Free(data);
+    free(data);
     return wsize;
 }
 
@@ -686,7 +686,7 @@ int32_t WADRwriteLump(struct WADINFO * info, const char *file)
             break;
         size += WADRwriteBlock(info, data, sz);
     }
-    Free(data);
+    free(data);
     fclose(fd);
     return size;
 }
@@ -820,7 +820,7 @@ int32_t WADRprepareAppend(const char *wadres, struct WADINFO *rwad,
     rwad->wposit = ewadstart;
     WADRseek(rwad, ewadstart);
     /*Change to New directory */
-    Free(rwad->dir);
+    free(rwad->dir);
     rwad->dir = NewDir;
     rwad->ntry = NewNtry;
     rwad->maxdir = NewNtry;

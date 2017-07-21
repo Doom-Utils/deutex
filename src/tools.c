@@ -184,11 +184,6 @@ void *Realloc(void *old, long size)
     return ret;
 }
 
-void Free(void *ptr)
-{
-    free(ptr);
-}
-
 /*
 ** Use only lower case file names
 */

@@ -155,7 +155,7 @@ bool PNMisNew(int16_t idx)
 void PNMfree(void)
 {
     PNMok = false;
-    Free(PNMpatchs);
+    free(PNMpatchs);
 }
 
 int32_t PNMwritePNAMEtoWAD(struct WADINFO *info)
@@ -269,8 +269,8 @@ void TXUfree(void)
 {
     if (TXUok != true)
         Bug("TX93", "TXUok");
-    Free(TXUpat);
-    Free(TXUtex);
+    free(TXUpat);
+    free(TXUtex);
     TXUok = false;
 }
 

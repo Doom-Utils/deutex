@@ -150,7 +150,7 @@ void PicDebug(char *file, const char *bmpdir, const char *name)
     MakeFileName(file, bmpdir, "", "", name, "BMP");
     RAWtoBMP(file, raw, rawX, rawY, doompal);
 
-    Free(raw);
+    free(raw);
 }
 
 /*
@@ -271,7 +271,7 @@ bool PICsaveInFile(char *file, PICTYPE type, char *pic, int32_t picsz,
     case PPATCH:
     case PSNEAP:
     case PSNEAT:
-        Free(raw);
+        free(raw);
         break;
     case PFLAT:                /*don't free pic! */
     case PLUMP:
@@ -358,15 +358,15 @@ int32_t PICsaveInWAD(struct WADINFO * info, char *file, PICTYPE type,
     case PSPRIT:
     case PPATCH:
         pic = RAWtoPIC(&picsz, raw, rawX, rawY, Xinsr, Yinsr, transparent);
-        Free(raw);
+        free(raw);
         WADRwriteBytes(info, pic, picsz);
-        Free(pic);
+        free(pic);
         break;
     case PLUMP:                /*LUMP is RAW */
     case PFLAT:                /*FLAT is RAW */
         picsz = ((int32_t) rawX) * ((int32_t) rawY);
         WADRwriteBytes(info, raw, picsz);
-        Free(raw);
+        free(raw);
         break;
     }
     /*
@@ -692,7 +692,7 @@ static char *snea_to_raw(int16_t * prawX, int16_t * prawY,
         Warning("SN10",
                 "Snea %s: mismatch between size and geometry, skipping snea",
                 lump_name(name));
-        Free(raw);
+        free(raw);
         return NULL;
     }
 
@@ -742,7 +742,7 @@ struct BMPHEAD {
     int32_t szy;                /*16 Y size = height    int16_t height */
     int32_t planebits;          /*1A equal to 1         word planes */
     /*1C nb of bits         word bitcount  1,4,8,24 */
-    /**/ int32_t compress;     /*1E int32_t compression = BI_RGB = 0 */
+    int32_t compress;           /*1E int32_t compression = BI_RGB = 0 */
     int32_t pixlen;             /*22 int32_t SizeImage    size of array necessary for pixels */
     int32_t XpixRes;            /*26   XPelsPerMeter   X resolution no one cares */
     int32_t YpixRes;            /*2A  YPelPerMeter    Y resolution  but code1a=code1b */
@@ -837,7 +837,7 @@ static char *BMPtoRAW(int16_t * prawX, int16_t * prawY, char *file)
             Idx2Doom[p] =
                 COLindex(palet[p].R, palet[p].G, palet[p].B, (uint8_t) p);
         }
-        Free(palet);
+        free(palet);
         break;
     default:
         ProgError("BR20", "%s: unsupported BMP type (%d bits)",
@@ -853,7 +853,7 @@ static char *BMPtoRAW(int16_t * prawX, int16_t * prawY, char *file)
             ProgError("BR21", "%s: size of pixel area incorrect",
                       fname(file));
 
-    Free(head);
+    free(head);
     /* seek start of pixels */
     if (fseek(fd, startpix, SEEK_SET))
         ProgError("BR22", "%s: can't seek to pixel data (%s)", fname(file), strerror(errno));   /* FIXME mention the destination offset */
@@ -878,7 +878,7 @@ static char *BMPtoRAW(int16_t * prawX, int16_t * prawY, char *file)
             raw[rawpos] = col;
         }
     }
-    Free(line);
+    free(line);
     fclose(fd);
     *prawX = szx;
     *prawY = szy;
@@ -937,7 +937,7 @@ static void RAWtoBMP(char *file, char *raw, int16_t rawX, int16_t rawY,
     write_i32_le(&head->ColorImp, ncol);
     if (fwrite(head, sizeof(struct BMPHEAD), 1, fd) != 1)
         ProgError("BW12", "%s: write error", fname(file));
-    Free(head);
+    free(head);
     /*
     ** set palette
     **
@@ -951,7 +951,7 @@ static void RAWtoBMP(char *file, char *raw, int16_t rawX, int16_t rawY,
     }
     if (fwrite(palet, (size_t) paletsz, 1, fd) != 1)
         ProgError("BW13", "%s: write error", fname(file));
-    Free(palet);
+    free(palet);
     /*
     ** set data
     **
@@ -968,7 +968,7 @@ static void RAWtoBMP(char *file, char *raw, int16_t rawX, int16_t rawY,
         if (fwrite(bmpidxs, 1, linesz, fd) != linesz)
             ProgError("BW14", "%s: write error", fname(file));
     }
-    Free(bmpidxs);
+    free(bmpidxs);
     /*done */
     if (fclose(fd))
         ProgError("BW15", "%s: %s", fname(file), strerror(errno));
@@ -1126,7 +1126,7 @@ static char *PNGtoRAW(int16_t * rawX, int16_t * rawY, char *file)
                                  0);
                 }
             }
-            Free(buffer);
+            free(buffer);
             return raw;
         } else {
             ProgError("GR33", "libPNG decoding error");
@@ -1167,7 +1167,7 @@ static void RAWtoPNG(char *file, char *raw, int16_t rawX, int16_t rawY,
     if (!png_image_write_to_file(&image, file, 0, raw, 0, colormap)) {
         ProgError("GR34", "libPNG encoding error");
     }
-    Free(colormap);
+    free(colormap);
 }
 #endif
 
@@ -1457,7 +1457,7 @@ static char *GIFintlace(char *org, int16_t Xsz, int16_t Ysz)
             orgpos += Xsz;
         }
     }
-    Free(org);
+    free(org);
     return raw;
 }
 

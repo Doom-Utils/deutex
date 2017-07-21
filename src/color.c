@@ -229,7 +229,7 @@ void COLinit(uint8_t invR, uint8_t invG, uint8_t invB, char *Colors,
                 && (i == 0 || pixel_cmp(unique + i, unique + i - 1) != 0))
                 COLputColHash(i, unique[i].R, unique[i].G, unique[i].B);
         }
-        Free(unique);
+        free(unique);
     }
 }
 
@@ -238,10 +238,10 @@ void COLfree(void)
     if (COLok != true)
         Bug("PL99", "COLok");
     COLok = false;
-    Free(COLpal);
-    Free(COLhash);
+    free(COLpal);
+    free(COLhash);
     if (COLpalAlt != NULL)
-        Free(COLpalAlt);
+        free(COLpalAlt);
 }
 
 uint8_t COLinvisible(void)
@@ -318,7 +318,7 @@ struct PIXEL *COLaltPalet(void)
             p->G = d < dmax ? *d++ : 0;
             p->B = d < dmax ? *d++ : 0;
         }
-        Free(titlepal_data);
+        free(titlepal_data);
         titlepal_data = NULL;   /* Paranoia */
     }
 

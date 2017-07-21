@@ -77,7 +77,7 @@ static bool XTRbmpSave(int16_t * pinsrX, int16_t * pinsrY,
                       name, cusage);
     if (res == true)
         Detail("EX49", "Saved picture as %s", fname(file));
-    Free(buffer);
+    free(buffer);
     return res;
 }
 
@@ -137,7 +137,7 @@ void XTRextractWAD(const char *doomwad, const char *DataDir, const char
             Pnam = WADRreadEntry(&iwad, pnm, &Pnamsz);
         piden = IDENTentriesPWAD(&pwad, Pnam, Pnamsz);
         if (Pnam != NULL)
-            Free(Pnam);
+            free(Pnam);
     }
 
     /*
@@ -177,7 +177,7 @@ void XTRextractWAD(const char *doomwad, const char *DataDir, const char
         }
         COLinit(trnR, trnG, trnB, lumpdata, (int16_t) lumpsz,
                 (wad == NULL) ? "(nofile)" : wad->filename, lumpname);
-        Free(lumpdata);
+        free(lumpdata);
     }
 
     /* If TITLEPAL exists, read the first 768 bytes of it. But
@@ -223,7 +223,7 @@ void XTRextractWAD(const char *doomwad, const char *DataDir, const char
             Pnam = WADRreadEntry(&iwad, pnm, &lumpsz);
         }
         PNMinit(Pnam, lumpsz);
-        Free(Pnam);
+        free(Pnam);
     }
     while (0);
 
@@ -383,7 +383,7 @@ void XTRextractWAD(const char *doomwad, const char *DataDir, const char
                     TXUinit();
                     TXUreadTEXTURE(pdir[p].name, buffer, pdir[p].size,
                                    NULL, 0, true);
-                    Free(buffer);
+                    free(buffer);
                     TXUwriteTexFile(file);
                     TXUfree();
                 }
@@ -412,7 +412,7 @@ void XTRextractWAD(const char *doomwad, const char *DataDir, const char
                     TXUinit();
                     TXUreadTEXTURE(pdir[p].name, buffer, pdir[p].size,
                                    NULL, 0, true);
-                    Free(buffer);
+                    free(buffer);
                     TXUwriteTexFile(file);
                     TXUfree();
                 }
@@ -461,7 +461,7 @@ void XTRextractWAD(const char *doomwad, const char *DataDir, const char
                             WADRreadBytes(&pwad, buffer, pdir[p].size);
                             SNDsavePCSound(name, file, buffer,
                                            pdir[p].size);
-                            Free(buffer);
+                            free(buffer);
                             Detail("EX27", "Saved PC sound as   %s",
                                    fname(file));
                         }
@@ -492,7 +492,7 @@ void XTRextractWAD(const char *doomwad, const char *DataDir, const char
                                          pdir[p].name);
                             Detail("EX30", "Saved sound as   %s",
                                    fname(file));
-                            Free(buffer);
+                            free(buffer);
                         }
                         TXTaddEntry(TXT, pdir[p].name, NULL, INVALIDINT,
                                     INVALIDINT, false, false);
@@ -590,7 +590,7 @@ void XTRextractWAD(const char *doomwad, const char *DataDir, const char
                         sprintf(name, "%.*s", (int) sizeof pdir[p].name,
                                 pdir[p].name);
                         TXTaddComment(TXT, name);
-                        Free(name);
+                        free(name);
                     } else if (cusage == NULL) {
                         if (MakeFileName
                             (file, DataDir, "LUMPS", "", pdir[p].name,
@@ -608,7 +608,7 @@ void XTRextractWAD(const char *doomwad, const char *DataDir, const char
                                     (int) sizeof pdir[p].name,
                                     pdir[p].name);
                             TXTaddComment(TXT, name);
-                            Free(name);
+                            free(name);
                         }
                     }
                 }
@@ -884,7 +884,7 @@ void XTRextractWAD(const char *doomwad, const char *DataDir, const char
     ** exit graphics and end
     */
     COLfree();
-    Free(piden);
+    free(piden);
     WADRclose(&pwad);
     TXTaddEmptyLine(TXT);
     TXTaddComment(TXT, "End of extraction");
@@ -922,12 +922,12 @@ void XTRgetEntry(const char *doomwad, const char *DataDir,
     WADRopenR(&pwad, wadin);
     e = WADRfindEntry(&pwad, palette_lump);
     if (e >= 0) {
-        Free(Colors);
+        free(Colors);
         Colors = WADRreadEntry(&pwad, e, &Entrysz);
     }
     COLinit(trnR, trnG, trnB, Colors, (int16_t) Entrysz, pwad.filename,
             palette_lump);
-    Free(Colors);
+    free(Colors);
     e = WADRfindEntry(&pwad, Name);
     if (e < 0)
         ProgError("GE01", "%s: %s: lump not found", fname(pwad.filename),
@@ -998,6 +998,6 @@ void XTRgetEntry(const char *doomwad, const char *DataDir,
         MakeFileName(file, DataDir, "", "", Name, "LMP");
         WADRsaveEntry(&pwad, e, file);
     }
-    Free(Entry);
+    free(Entry);
     WADRclose(&pwad);
 }
