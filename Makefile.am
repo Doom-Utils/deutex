@@ -1,5 +1,5 @@
 SUBDIRS = man src
-EXTRA_DIST = LICENCE NEWS.adoc README.adoc
+EXTRA_DIST = LICENSE NEWS.adoc README.adoc
 
 if ASCIIDOC
 %.html: %.adoc
