@@ -26,6 +26,7 @@ AC_CONFIG_FILES([
     Makefile
     man/Makefile
     man/deutex.txt
+    pkg.w32/config.make
     src/Makefile
 ])
 AC_OUTPUT
