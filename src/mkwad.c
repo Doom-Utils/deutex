@@ -11,10 +11,11 @@
 
 #include "deutex.h"
 
+#include <errno.h>
 #include <sys/types.h>
 #include <sys/stat.h>
 #include <time.h>
-#include <errno.h>
+#include <unistd.h>
 
 #include "tools.h"
 #include "mkwad.h"
@@ -272,7 +273,7 @@ void WADRchsize(struct WADINFO *info, int32_t fsize)
 {
     if (!(info->ok & WADR_WRITE))
         Bug("WW93", "WadcSz");
-    if (Chsize(fileno(info->fd), fsize) != 0)
+    if (ftruncate(fileno(info->fd), fsize) != 0)
         ProgError("WW95", "%s: %s", fname(info->filename),
                   strerror(errno));
     /*@ AEO while trying the change the size of the wad */

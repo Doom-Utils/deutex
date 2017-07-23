@@ -20,7 +20,6 @@
 #include "tools.h"
 
 #define SEPARATOR "/"
-#include <unistd.h>
 #include <memory.h>
 
 #include <utime.h>
@@ -36,15 +35,6 @@
 #endif
 
 static const char hex_digit[16] = "0123456789ABCDEF";
-
-/*
-** Resize a file
-** returns   0 if okay    -1 if failed.
-*/
-int16_t Chsize(int handle, int32_t newsize)
-{
-    return (int16_t) ftruncate(handle, newsize);
-}
 
 /*
 ** Get a file time stamp. (date of last modification)
