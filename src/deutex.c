@@ -870,9 +870,6 @@ int main(int argc, char *argv_non_const[])
         }
     }
 
-    /* Sanity checks */
-    check_types();
-
     /*
     ** default parameters
     */

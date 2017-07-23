@@ -14,8 +14,6 @@
 #define MSGCLASS_ERR  'E'
 #define MSGCLASS_BUG  'B'
 
-void check_types(void);
-
 void PrintCopyright(void);
 void print_version(void);
 void NoCommandGiven(void);

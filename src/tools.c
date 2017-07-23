@@ -38,45 +38,6 @@
 static const char hex_digit[16] = "0123456789ABCDEF";
 
 /*
- *      check_types
- *      Sanity checks on the specified-width types.
- *      Will help catching porting errors.
- */
-typedef struct {
-    const char *name;
-    size_t mandated_size;
-    size_t actual_size;
-} type_check_t;
-
-static const type_check_t type_checks[] = {
-    {"int8_t", 1, sizeof(int8_t)}
-    ,
-    {"int16_t", 2, sizeof(int16_t)}
-    ,
-    {"int32_t", 4, sizeof(int32_t)}
-    ,
-    {"uint8_t", 1, sizeof(uint8_t)}
-    ,
-    {"uint16_t", 2, sizeof(uint16_t)}
-    ,
-    {"uint32_t", 4, sizeof(uint32_t)}
-};
-
-void check_types(void)
-{
-    const type_check_t *t;
-    for (t = type_checks; t - type_checks < sizeof type_checks / sizeof *t;
-         t++) {
-        /* FIXME Perhaps too strict. Wouldn't "<" suffice ? */
-        if (t->actual_size != t->mandated_size)
-            ProgError("AA01",
-                      "Type %s has size %d (should be %d);"
-                      " fix deutex.h and recompile", t->name,
-                      (int) t->actual_size, (int) t->mandated_size);
-    }
-}
-
-/*
 ** Resize a file
 ** returns   0 if okay    -1 if failed.
 */
