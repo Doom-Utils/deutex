@@ -132,7 +132,6 @@ void WADRopenR(struct WADINFO *info, const char *wadin)
           (long) ntry);
 }
 
-static char signature[19 + 32];
 void WADRopenW(struct WADINFO *info, const char *wadout, WADTYPE type,
                int verbose)
 {
@@ -166,11 +165,6 @@ void WADRopenW(struct WADINFO *info, const char *wadout, WADTYPE type,
     /* will be fixed when closing the WAD */
     WADRwriteLong(info, -1);    /* no counter of dir entries */
     WADRwriteLong(info, -1);    /* no dir pointer */
-    /* DeuTex notice */
-    sprintf(signature, " " PACKAGE_NAME " %.32s %cOJM 94 ",
-            PACKAGE_VERSION, 0xB8);
-    /********----**----**-********/
-    WADRwriteBytes(info, signature, strlen(signature));
     WADRalign4(info);
 }
 
