@@ -100,7 +100,7 @@ void CMPOerrorAction(void)
     if (CMPOwadout == NULL)
         return;
     WADRclose(CMPOrwad);        /*close file */
-    Unlink(CMPOwadout);         /*delete file */
+    remove(CMPOwadout);         /*delete file */
 }
 
 void CMPOmakePWAD(const char *doomwad, WADTYPE type, const char *PWADname,

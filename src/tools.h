@@ -50,7 +50,6 @@ void GetNameOfWAD(char name[8], const char *path);
 int16_t Chsize(int handle, int32_t newsize);
 int32_t Get_File_Time(const char *path);
 void Set_File_Time(const char *path, int32_t time);
-void Unlink(const char *file);
 void Memcpy(void *dest, const void *src, long n);
 void Memset(void *dest, char car, long n);
 void *Malloc(long size);

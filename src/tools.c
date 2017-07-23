@@ -47,14 +47,6 @@ int16_t Chsize(int handle, int32_t newsize)
 }
 
 /*
-** Delete a file
-*/
-void Unlink(const char *file)
-{
-    remove(file);
-}
-
-/*
 ** Get a file time stamp. (date of last modification)
 */
 int32_t Get_File_Time(const char *path)
