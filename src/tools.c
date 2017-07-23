@@ -19,9 +19,7 @@
 #include <stdarg.h>
 #include "tools.h"
 
-#define SEPARATOR "/"
 #include <memory.h>
-
 #include <utime.h>
 
 #include <time.h>
@@ -145,12 +143,12 @@ static void NameDir(char file[128], const char *path, const char *dir, const
         }
     if (dir != NULL)
         if (strlen(dir) > 0) {
-            strcat(file, SEPARATOR);
+            strcat(file, "/");
             strncat(file, dir, 12);
         }
     if (sdir != NULL)
         if (strlen(sdir) > 0) {
-            strcat(file, SEPARATOR);
+            strcat(file, "/");
             strncat(file, sdir, 12);
         }
     ToLowerCase(file);
@@ -201,7 +199,7 @@ bool MakeFileName(char file[128], const char *path, const char *dir, const
     /*
     ** file name
     */
-    strcat(file, SEPARATOR);
+    strcat(file, "/");
     strncat(file, name2, 8);
     strcat(file, ".");
     strncat(file, extens, 4);
