@@ -95,9 +95,6 @@ void Memset(void *dest, char car, long n)
 /*
 ** Allocate memory
 */
-/*code derived from DEU*/
-#define SIZE_THRESHOLD        0x400L
-#define SIZE_OF_BLOCK        0xFFFL
 /* actually, this is (size - 1) */
 void *Malloc(long size)
 {
