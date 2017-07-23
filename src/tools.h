@@ -24,7 +24,6 @@ char *lump_name(const char *name);
 char *short_dump(const char *data, size_t size);
 const char *quotechar(char c);
 
-void PrintInit(bool asFile);
 void PrintVerbosity(int16_t level);
 void PrintExit(void);
 

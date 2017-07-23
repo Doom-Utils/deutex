@@ -893,10 +893,6 @@ int main(int argc, char *argv_non_const[])
 
     /*setbuf(stdout,(char *)NULL); */
     setvbuf(stdout, NULL, _IOLBF, BUFSIZ);
-    /*
-    ** print on screen or file?
-    */
-    PrintInit(false);
     PrintVerbosity(2);
 
     /* Do a second pass through argv to catch options like --help that

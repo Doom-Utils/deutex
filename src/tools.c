@@ -395,38 +395,6 @@ const char *quotechar(char c)
 */
 static bool asFile = false;
 static int16_t Verbosity = 2;
-static FILE *Stdout;            /*command output */
-static FILE *Stderr;            /*errors */
-static FILE *Stdwarn;           /*warningss */
-static FILE *Stdinfo;           /*infos */
-
-#define stderr_  (Stderr  != NULL ? Stderr  : stderr)
-#define stdinfo_ (Stdinfo != NULL ? Stdinfo : stdout)
-#define stdout_  (Stdout  != NULL ? Stdout  : stdout)
-#define stdwarn_ (Stdwarn != NULL ? Stdwarn : stderr)
-
-void PrintInit(bool asfile)
-{
-    /*clear a previous call */
-    PrintExit();
-    /* choose */
-    if (asfile == true) {
-        if ((Stdout = fopen("output.txt", FOPEN_WT)) == NULL)
-            ProgError("DI10", "output.txt: %s", strerror(errno));
-        if ((Stderr = fopen("error.txt", FOPEN_WT)) == NULL) {
-            Stderr = stderr;
-            ProgError("DI20", "error.txt: %s", strerror(errno));
-        }
-        Stdinfo = stdout;
-        Stdwarn = Stderr;
-    } else {
-        Stdout = stdout;
-        Stderr = stderr;
-        Stdwarn = stderr;
-        Stdinfo = stdout;
-    }
-    asFile = asfile;
-}
 
 void PrintVerbosity(int16_t level)
 {
@@ -436,9 +404,8 @@ void PrintVerbosity(int16_t level)
 void PrintExit(void)
 {
     if (asFile == true) {
-        fclose(Stdout);
-        fclose(Stderr);
-        /*fclose(Stdinfo); */
+        fclose(stdout);
+        fclose(stderr);
     }
 }
 
@@ -462,14 +429,14 @@ void ProgError(const char *code, const char *fmt, ...)
 {
     va_list args;
 
-    fflush(stdout_);
-    fprintf(stderr_, "E %s ", code);
+    fflush(stdout);
+    fprintf(stderr, "E %s ", code);
     va_start(args, fmt);
-    vfprintf(stderr_, fmt, args);
+    vfprintf(stderr, fmt, args);
     va_end(args);
     va_start(args, fmt);
     va_end(args);
-    fputc('\n', stderr_);
+    fputc('\n', stderr);
     (*Action) ();               /* execute error handler */
     PrintExit();
     exit(2);
@@ -482,30 +449,30 @@ void nf_err(const char *code, const char *fmt, ...)
 {
     va_list args;
 
-    fflush(stdout_);
-    fprintf(stderr_, "%c %s ", MSGCLASS_ERR, code);
+    fflush(stdout);
+    fprintf(stderr, "%c %s ", MSGCLASS_ERR, code);
     va_start(args, fmt);
-    vfprintf(stderr_, fmt, args);
+    vfprintf(stderr, fmt, args);
     va_end(args);
     va_start(args, fmt);
     va_end(args);
-    fputc('\n', stderr_);
-    fflush(stderr_);
+    fputc('\n', stderr);
+    fflush(stderr);
 }
 
 void Bug(const char *code, const char *fmt, ...)
 {
     va_list args;
 
-    fflush(stdout_);
-    fprintf(stdwarn_, "%c %s ", MSGCLASS_BUG, code);
+    fflush(stdout);
+    fprintf(stderr, "%c %s ", MSGCLASS_BUG, code);
     va_start(args, fmt);
-    vfprintf(stderr_, fmt, args);
+    vfprintf(stderr, fmt, args);
     va_end(args);
     va_start(args, fmt);
     va_end(args);
-    fputc('\n', stderr_);
-    fputs("Please report that bug\n", stderr_);
+    fputc('\n', stderr);
+    fputs("Please report that bug\n", stderr);
     /* CloseWadFiles(); */
     PrintExit();
     exit(3);
@@ -515,14 +482,14 @@ void Warning(const char *code, const char *fmt, ...)
 {
     va_list args;
 
-    fflush(stdout_);
-    fprintf(stdwarn_, "%c %s ", MSGCLASS_WARN, code);
+    fflush(stdout);
+    fprintf(stderr, "%c %s ", MSGCLASS_WARN, code);
     va_start(args, fmt);
-    vfprintf(stdwarn_, fmt, args);
+    vfprintf(stderr, fmt, args);
     va_end(args);
     va_start(args, fmt);
     va_end(args);
-    fputc('\n', stdwarn_);
+    fputc('\n', stderr);
 }
 
 void LimitedWarn(int *left, const char *code, const char *fmt, ...)
@@ -530,14 +497,14 @@ void LimitedWarn(int *left, const char *code, const char *fmt, ...)
     if (left == NULL || (left != NULL && *left > 0)) {
         va_list args;
 
-        fflush(stdout_);
-        fprintf(stdwarn_, "%c %s ", MSGCLASS_WARN, code);
+        fflush(stdout);
+        fprintf(stderr, "%c %s ", MSGCLASS_WARN, code);
         va_start(args, fmt);
-        vfprintf(stdwarn_, fmt, args);
+        vfprintf(stderr, fmt, args);
         va_end(args);
         va_start(args, fmt);
         va_end(args);
-        fputc('\n', stdwarn_);
+        fputc('\n', stderr);
     }
     if (left != NULL)
         (*left)--;
@@ -546,17 +513,17 @@ void LimitedWarn(int *left, const char *code, const char *fmt, ...)
 void LimitedEpilog(int *left, const char *code, const char *fmt, ...)
 {
     if (left != NULL && *left < 0) {
-        fflush(stdout_);
+        fflush(stdout);
         if (fmt != NULL) {
             va_list args;
-            fprintf(stdwarn_, "%c %s ", MSGCLASS_WARN, code);
+            fprintf(stderr, "%c %s ", MSGCLASS_WARN, code);
             va_start(args, fmt);
-            vfprintf(stdwarn_, fmt, args);
+            vfprintf(stderr, fmt, args);
             va_end(args);
             va_start(args, fmt);
             va_end(args);
         }
-        fprintf(stdwarn_, "%d warnings omitted\n", -*left);
+        fprintf(stderr, "%d warnings omitted\n", -*left);
     }
 }
 
@@ -565,7 +532,7 @@ void Output(const char *fmt, ...)
     va_list args;
 
     va_start(args, fmt);
-    vfprintf(stdout_, fmt, args);
+    vfprintf(stdout, fmt, args);
     va_end(args);
     va_start(args, fmt);
     va_end(args);
@@ -576,13 +543,13 @@ void Info(const char *code, const char *fmt, ...)
     if (Verbosity >= 1) {
         va_list args;
 
-        fprintf(stdinfo_, "%c %s ", MSGCLASS_INFO, code);
+        fprintf(stdout, "%c %s ", MSGCLASS_INFO, code);
         va_start(args, fmt);
-        vfprintf(stdinfo_, fmt, args);
+        vfprintf(stdout, fmt, args);
         va_end(args);
         va_start(args, fmt);
         va_end(args);
-        fputc('\n', stdinfo_);
+        fputc('\n', stdout);
     }
 }
 
@@ -591,13 +558,13 @@ void Phase(const char *code, const char *fmt, ...)
     if (Verbosity >= 2) {
         va_list args;
 
-        fprintf(stdinfo_, "%c %s ", MSGCLASS_INFO, code);
+        fprintf(stdout, "%c %s ", MSGCLASS_INFO, code);
         va_start(args, fmt);
-        vfprintf(stdinfo_, fmt, args);
+        vfprintf(stdout, fmt, args);
         va_end(args);
         va_start(args, fmt);
         va_end(args);
-        fputc('\n', stdinfo_);
+        fputc('\n', stdout);
     }
 }
 
@@ -606,12 +573,12 @@ void Detail(const char *code, const char *fmt, ...)
     if (Verbosity >= 3) {
         va_list args;
 
-        fprintf(stdinfo_, "%c %s ", MSGCLASS_INFO, code);
+        fprintf(stdout, "%c %s ", MSGCLASS_INFO, code);
         va_start(args, fmt);
-        vfprintf(stdinfo_, fmt, args);
+        vfprintf(stdout, fmt, args);
         va_end(args);
         va_start(args, fmt);
         va_end(args);
-        fputc('\n', stdinfo_);
+        fputc('\n', stdout);
     }
 }
