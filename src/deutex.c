@@ -371,12 +371,10 @@ void COMrate(int argc, const char *argv[])
         rate_policy = RP_REJECT;
     else if (argc >= 2 && !strcmp(argv[1], "force"))
         rate_policy = RP_FORCE;
-    else if (argc >= 2 && !strcmp(argv[1], "warn"))
-        rate_policy = RP_WARN;
     else if (argc >= 2 && !strcmp(argv[1], "accept"))
         rate_policy = RP_ACCEPT;
     else
-        ProgError("AA41", "Usage is \"-rate {reject|force|warn|accept}\"");
+        ProgError("AA41", "Usage is \"-rate {reject|force|accept}\"");
     Info("AA42", "Sample rate policy is \"%s\"", argv[1]);
     (void) argc;
 }
@@ -829,7 +827,7 @@ static comdef_t Com[] = {
 
     {SEC, 0, NULL, NULL, NULL, "Sound"},
     {OP2, 1, "rate", COMrate, "<code>",
-     "policy for != 11025 Hz (\1reject\3, \1force\3, *\1warn\3, \1accept\3)"},
+     "policy for != 22050 Hz (\1reject\3, \1force\3, \1accept\3)"},
 
     {SEC, 0, NULL, NULL, NULL, "Reporting"},
     {OP2, 1, "di", COMdi, "<name>", "debug identification of entry"},
