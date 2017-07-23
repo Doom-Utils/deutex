@@ -213,17 +213,17 @@ int32_t SNDcopyInWAD(struct WADINFO *info, char *file, SNDTYPE format)
     wadrate = rate;
     switch (rate_policy) {
     case RP_REJECT:
-        if (rate != 11025)
-            ProgError("SC11", "%s: sample rate not 11025 Hz", fname(file));
+        if (rate != 22050)
+            ProgError("SC11", "%s: sample rate not 22050 Hz", fname(file));
         break;
 
     case RP_FORCE:
-        if (rate > 11025) {
-            Warning("SC12", "%s: resampling down from %ld Hz to 11025 Hz",
+        if (rate > 22050) {
+            Warning("SC12", "%s: resampling down from %ld Hz to 22050 Hz",
                     fname(file), rate);
-            wadrate = 11025;
+            wadrate = 22050;
             {
-                double ratio = 11025.0 / rate;
+                double ratio = 22050.0 / rate;
                 long s;
 
                 datasize = (int32_t) (ratio * datasize) + 1;
@@ -231,12 +231,12 @@ int32_t SNDcopyInWAD(struct WADINFO *info, char *file, SNDTYPE format)
                     data[s] = data[(size_t) (s / ratio + 0.5)];
             }
             data = (char *) Realloc(data, datasize);
-        } else if (rate < 11025) {
-            Warning("SC13", "%s: resampling up from %ld Hz to 11025 Hz",
+        } else if (rate < 22050) {
+            Warning("SC13", "%s: resampling up from %ld Hz to 22050 Hz",
                     fname(file), rate);
-            wadrate = 11025;
+            wadrate = 22050;
             {
-                double ratio = 11025.0 / rate;
+                double ratio = 22050.0 / rate;
                 long s;
 
                 datasize = (int32_t) (ratio * datasize) + 1;
@@ -245,13 +245,6 @@ int32_t SNDcopyInWAD(struct WADINFO *info, char *file, SNDTYPE format)
                     data[s] = data[(size_t) (s / ratio + 0.5)];
             }
         }
-        break;
-
-    case RP_WARN:
-        if (rate != 11025)
-            Warning("SC14",
-                    "%s: sample rate != 11025 Hz, won't work on Doom < 1.4",
-                    fname(file));
         break;
 
     case RP_ACCEPT:
