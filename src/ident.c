@@ -781,6 +781,7 @@ ENTRY *IDENTentriesIWAD(struct WADINFO *info, char *Pnam, int32_t Pnamsz,
     if (WADRfindEntry(info, "ENDTEXT") < 0)     /*Not Heretic */
         if (WADRfindEntry(info, "ENDOOM") >= 0)
             Doom = true;
+            
     /*
     ** identify for IWAD
     */
@@ -793,7 +794,12 @@ ENTRY *IDENTentriesIWAD(struct WADINFO *info, char *Pnam, int32_t Pnamsz,
     IDENTdirPCSounds(ids, info, false); /*fast */
     IDENTdirPatches(ids, info, Pnam, Pnamsz, false);    /*fast */
     IDENTdirGraphics(ids, info);        /*fast */
-    IDENTdirSscripts(ids, info); // FIXME Should not be called if not Strife!
+    /*
+    **  Check if Strife's ENDSTRF lump is present
+    */
+    if(WADfindEntry(info, "ENDSTRF") >= 0) {
+        IDENTdirSscripts(ids, info);
+    }
     if (Fast != true) {
         IDENTdirSounds(ids, info, Doom);        /*slow! */
         IDENTdirGraphics2(ids, info, true);     /*slow! */
@@ -833,7 +839,12 @@ ENTRY *IDENTentriesPWAD(struct WADINFO * info, char *Pnam, int32_t Pnamsz)
     IDENTdirPCSounds(ids, info, true);
     IDENTdirPatches(ids, info, Pnam, Pnamsz, true);
     IDENTdirGraphics(ids, info);
-    IDENTdirSscripts(ids, info); // FIXME Should not be called if not Strife!
+    /*
+    **  Check if Strife's ENDSTRF lump is present
+    */
+    if(WADfindEntry(info, "ENDSTRF") >= 0) {
+        IDENTdirSscripts(ids, info);
+    }
     IDENTdirSounds(ids, info, false);
     IDENTdirGraphics2(ids, info, true);
     ident_func = "IDENTentriesPWAD";
