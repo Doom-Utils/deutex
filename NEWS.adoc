@@ -12,8 +12,9 @@ Removed features
 
 File format support
 ~~~~~~~~~~~~~~~~~~~
-  * PNG support added, creating a dependency on libpng 1.6.  It is now
-    the default extraction format.
+  * PNG support added, creating an optional dependency on libpng 1.6.
+    If compiled in, it is the default extraction format, PPM
+    otherwise.
   * Au and VOC sound formats removed.  WAV is the only supported
     format for extraction and creation.
   * Full sound lumps from the WAD are always extracted.
