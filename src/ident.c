@@ -169,7 +169,7 @@ int IDENTgraphic(struct WADINFO *info, int16_t n)
 {
     int32_t start = info->dir[n].start;
     int32_t size = info->dir[n].size;
-    char *buf;
+    unsigned char *buf;
     pic_head_t h;
     int x;
     int bad_order = 0;
