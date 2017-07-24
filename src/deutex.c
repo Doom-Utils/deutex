@@ -1168,7 +1168,7 @@ void COMvers(int argc, const char *argv[])
 {
     (void) argc;
     (void) argv;
-    printf("%s %.32s\n", PACKAGE_NAME, PACKAGE_VERSION);
+    printf("%s %s\n", PACKAGE_NAME, PACKAGE_VERSION);
     exit(0);
 }
 
