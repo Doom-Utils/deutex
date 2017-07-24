@@ -950,6 +950,7 @@ int main(int argc, char *argv_non_const[])
                 "freedoom1",    /* Freedoom: Phase 1 */
                 "freedoom2",    /* Freedoom: Phase 2 */
                 "freedm",       /* FreeDM */
+                "blasphem",     /* Blasphemer */
                 "heretic",      /* Heretic */
                 "hexen",        /* Hexen */
                 "strife1",      /* Strife */
@@ -957,6 +958,8 @@ int main(int argc, char *argv_non_const[])
                 "doom1",        /* Doom shareware */
                 "heretic1",     /* Heretic demo */
                 "strife0",      /* Strife demo */
+                "hacx",         /* Hacx IWAD */
+                "chex3",        /* Chex Quest 3 IWAD *//
                 NULL
             };
             int gotit = 0;
