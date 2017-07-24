@@ -959,7 +959,7 @@ int main(int argc, char *argv_non_const[])
                 "heretic1",     /* Heretic demo */
                 "strife0",      /* Strife demo */
                 "hacx",         /* Hacx IWAD */
-                "chex3",        /* Chex Quest 3 IWAD *//
+                "chex3",        /* Chex Quest 3 IWAD */
                 NULL
             };
             int gotit = 0;
