@@ -951,19 +951,30 @@ int main(int argc, char *argv_non_const[])
         if (d->type & 0x20) {
             static const char *wads[] = {
                 "doom",         /* Doom, Ultimate Doom, Doom alpha */
+                "doomu"         /* Ultimate Doom */
                 "doom2",        /* Doom II */
                 "plutonia",     /* Final Doom */
                 "tnt",          /* Final Doom */
+                "doombfg",      /* Doom 1 BFG Edition */
+                "bfgdoom",      /* Doom 1 BFG Edition */
+                "doom2bfg",     /* Doom 2 BFG Edition */
+                "bfgdoom2",     /* Doom 2 BFG Edition */
+                "doom2f",       /* French Doom 2 */
                 "freedoom1",    /* Freedoom: Phase 1 */
                 "freedoom2",    /* Freedoom: Phase 2 */
                 "freedm",       /* FreeDM */
+                "blasphem",     /* Blasphemer */
+                "blasphemer",   /* Blasphemer */
                 "heretic",      /* Heretic */
                 "hexen",        /* Hexen */
                 "strife1",      /* Strife */
+                "strife",       /* Strife */
                 "doompres",     /* Doom Press Release pre-beta */
                 "doom1",        /* Doom shareware */
                 "heretic1",     /* Heretic demo */
                 "strife0",      /* Strife demo */
+                "hacx",         /* Hacx IWAD */
+                "chex3",        /* Chex Quest 3 IWAD *//
                 NULL
             };
             int gotit = 0;
