@@ -951,7 +951,6 @@ int main(int argc, char *argv_non_const[])
         if (d->type & 0x20) {
             static const char *wads[] = {
                 "doom",         /* Doom, Ultimate Doom, Doom alpha */
-                "doomu"         /* Ultimate Doom */
                 "doom2",        /* Doom II */
                 "plutonia",     /* Final Doom */
                 "tnt",          /* Final Doom */
