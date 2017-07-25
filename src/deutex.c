@@ -112,6 +112,15 @@ void COMdoom02(int argc, const char *argv[])
     (void) argc;
 }
 
+void COMdoom03(int argc, const char *argv[])
+{
+    call_opt(COMdoom, anon, argv[1], NULL);
+    call_opt(COMipf, anon, "alpha", NULL);
+    call_opt(COMtf, "tf", "none", NULL);
+    call_opt(COMitl, anon, "none", NULL);
+    (void) argc;
+}
+
 void COMdoom04(int argc, const char *argv[])
 {
     call_opt(COMdoom, anon, argv[1], NULL);
@@ -763,6 +772,7 @@ static comdef_t Com[] = {
     {OP2, 1, "doom", COMdoom, "<dir>", "path to Doom iwad"},
     {OP2, 1, "doom2", COMdoom, "<dir>", "path to Doom II iwad"},
     {OP2, 1, "doom02", COMdoom02, "<dir>", "path to Doom alpha 0.2 iwad"},
+    {OP2, 1, "doom03", COMdoom03, "<dir>", "path to Doom alpha 0.3 iwad"},
     {OP2, 1, "doom04", COMdoom04, "<dir>", "path to Doom alpha 0.4 iwad"},
     {OP2, 1, "doom05", COMdoom05, "<dir>", "path to Doom alpha 0.5 iwad"},
     {OP2, 1, "doompr", COMdoompr, "<dir>",
