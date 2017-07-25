@@ -128,6 +128,12 @@ void XTRextractWAD(const char *doomwad, const char *DataDir, const char
 
     /*find PNAMES */
     {
+      /* Checks if this specific command is executed. Only found when 
+         using -doom02. Meant to overcome the "can't find PNAMES" error
+         when extracting Doom 0.2 IWAD */ 
+      if(call_opt(COMtf, "tf", "none", NULL)) {
+        break;
+      } else {
         int16_t pnm = WADRfindEntry(&iwad, "PNAMES");
         char *Pnam = NULL;
         int32_t Pnamsz = 0;
@@ -138,6 +144,7 @@ void XTRextractWAD(const char *doomwad, const char *DataDir, const char
         piden = IDENTentriesPWAD(&pwad, Pnam, Pnamsz);
         if (Pnam != NULL)
             free(Pnam);
+      }
     }
 
     /*
