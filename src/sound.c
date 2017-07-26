@@ -114,7 +114,7 @@ char *SNDloadWaveFile(char *file, int32_t * psize, int32_t * pspeed)
    if(fread(&headf, sizeof(struct WAVEFMT), 1, fp) == 1) {
      Info("RR01", "%s is not a WAVE file", fname(file));
    } else {
-     ProgError("RR02", "%s is a WAVE file", fname(file);
+     ProgError("RR02", "%s is a WAVE file", fname(file));
    }
     if (peek_i16_le(&headf.tag) != 1)
         ProgError("RR16", "%s: not raw data", fname(file));
