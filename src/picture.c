@@ -418,34 +418,12 @@ static char *RAWtoPIC(int32_t * ppicsz, char *raw, int16_t rawX,
     /*offset of first column */
     colnbase = sizeof(struct PICHEAD) + ((int32_t) rawX) * sizeof(int32_t);
     /* worst expansion when converting from PIXEL column to
-    ** list of sets: (5*Ysize/2)+1, corresponding to a dotted vertical
-    ** transparent line. Ysize/2 dots, 4overhead+1pix, 1 last FF code.
-    ** but if too big, allow only a 10 split mean per line
+    ** list of sets: (5*Ysize/2)+10, corresponding to a dotted vertical
+    ** transparent line.
     */
-    /*this memory optimisation doesn't work for big pics
-      with many transparent areas. it limits the number of transp slots
-      to a mean of 10. so a resize could be needed later.
-      else, the biggest would be 162k
-    */
-    /* AYM 1999-05-09: changed the calculation of picsz.
-       Previously, it was assumed that the worst case was when
-       every second pixel was transparent. This is not true for
-       textures that are only 2-pixel high; in that case, if the
-       two pixels are opaque, the column uses 7 bytes. The old
-       code thought that was 6 bytes, and overflowed the buffer
-       for at least one picture (Strife's STBFN045). */
-    /* Highest possible picture :
-       Post 1  yofs = 0    length = 254
-       Post 2  yofs = 254  length = 255
-       Max height is 509 pixels. */
-    {
-        /* FIXME */
-        int worst_case_1 = 5 * (((long) rawY + 1) / 2) + 1 + 1; /* "+ 1" matters ! */
-        int worst_case_2 = 4 + rawY + 1;
-        int worst_case =
-            worst_case_1 > worst_case_2 ? worst_case_1 : worst_case_2;
-        picsz = colnbase + ((int32_t) rawX) * worst_case;
-    }
+    int32_t worst_case = (int32_t) (5 * ((rawY + 1) / 2) + 10);
+    picsz = colnbase + ((int32_t) rawX) * worst_case;
+
     pic = (char *) Malloc(picsz);
     ColOfs = (int32_t *) & (pic[sizeof(struct PICHEAD)]);
     pichead = (struct PICHEAD *) pic;
@@ -572,21 +550,21 @@ static char *RAWtoPIC(int32_t * ppicsz, char *raw, int16_t rawX,
                 Set[first_pix_index + setcount] = pix;        /*non transparent pixel */
                 setcount++;     /*update count of pixel in set */
             } else {            /*pix is transparent */
+                if (y >= 509) {
+                    Warning("PI20", "Column has more than 509 pixels, truncating at (%d,%d)",
+                                (int) x, (int) y);
+                        break;
+                }
                 if (is_tall_pic_post_header){
                     Set[4] += 1; //increase transparent pixel count in tallpic post header
                     rowpos = -1; //keep resetting rowpos until we get a non-transparent pixel
-                    if (y >= 509) {
-                        Warning("PI20",
-                                "Column has more than 509 pixels, truncating at (%d,%d)",
-                                (int) x, (int) y);
-                        break;
-                    }
                 }
                 else if (lastpix != transparent) {   /*finish the current set */
                     Set[number_of_pix_index] = setcount;
                     Set[first_pix_index + setcount] = lastpix; //dummy
                     setpos += first_pix_index + setcount + 1; /*1pos,1cnt,1dmy,setcount pixels,1dmy */
                 }
+
                 /*else: not in set but in transparent area */
             }
             lastpix = pix;
