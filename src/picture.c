@@ -440,25 +440,25 @@ static char *RAWtoPIC(int32_t * ppicsz, char *raw, int16_t rawX,
         setpos = 0;
         lastpix = transparent;
         /* So this is how posts work:
-           0 [y-offset] 
-           1 [n# of pixels in post] 
-           2 [dummy pixel] 
-           3 [pixel 0] 
-           4 [pixel 1] 
-           ... 
-           3+n-1 [pixel n-1] 
+           0 [y-offset]
+           1 [n# of pixels in post]
+           2 [dummy pixel]
+           3 [pixel 0]
+           4 [pixel 1]
+           ...
+           3+n-1 [pixel n-1]
            4+n-1 [dummy pixel]
 
            It makes a new one every tranparent pixel.
 
-           If y == 254 and the height of the image is >= 256, then a new tallpic 
+           If y == 254 and the height of the image is >= 256, then a new tallpic
            post is started like this:
 
-           0 [254] 
-           1 [0] 
-           2 [0] 
-           3 [0] 
-           4 [no. of trans pixels between pixel 254 and the next non transparent pixel] 
+           0 [254]
+           1 [0]
+           2 [0]
+           3 [0]
+           4 [no. of trans pixels between pixel 254 and the next non transparent pixel]
            5 [n# of pixels in post]
            6 [dummy pixel]
            7 [pixel 0]
@@ -472,7 +472,7 @@ static char *RAWtoPIC(int32_t * ppicsz, char *raw, int16_t rawX,
            1 [n# of pixels]
            2 [dummy]
            etc.
-           */
+        */
         is_tall_pic_post_header = false;
         number_of_pix_index = 1;
         first_pix_index = 3;
@@ -481,44 +481,42 @@ static char *RAWtoPIC(int32_t * ppicsz, char *raw, int16_t rawX,
             rawpos = ((int32_t) x) + ((int32_t) rawX) * ((int32_t) y);
             pix = raw[rawpos];
             if (y == 254 && rawY >= 256)
-            {
-                is_tall_pic_post_header = true;
-                /*finish the current set, if any */
-                if (lastpix != transparent)
                 {
-                    Set[1] = setcount;
-                    Set[3 + setcount] = lastpix;
-                    setpos += 3 + setcount + 1; /*1pos,1cnt,1dmy,setcount pixels,1dmy */
-                }
-                Set = (char *) &(pic[colnpos + setpos]);
-                rowpos = 0; //reset row position for subsequent posts after this one.
-                setcount = 0;
-                number_of_pix_index = 5;
-                first_pix_index = 7;
+                    is_tall_pic_post_header = true;
+                    /*finish the current set, if any */
+                    if (lastpix != transparent) {
+                        Set[1] = setcount;
+                        Set[3 + setcount] = lastpix;
+                        setpos += 3 + setcount + 1; /*1pos,1cnt,1dmy,setcount pixels,1dmy */
+                    }
+                    Set = (char *) &(pic[colnpos + setpos]);
+                    rowpos = 0; //reset row position for subsequent posts after this one.
+                    setcount = 0;
+                    number_of_pix_index = 5;
+                    first_pix_index = 7;
 
-                /*start new tallpic post*/
-                Set[0] = 254;
-                Set[1] = 0;
-                Set[2] = 0;
-                Set[3] = 0;
-                Set[4] = 0; /*number of transparent pixels between this post and next*/
-                Set[5] = 0; /*count (updated later) */
-                if (pix != transparent)
-                    Set[6] = pix; //dummy
-                else
-                    Set[6] = 0; //dummy
-            }
+                    /*start new tallpic post*/
+                    Set[0] = 254;
+                    Set[1] = 0;
+                    Set[2] = 0;
+                    Set[3] = 0;
+                    Set[4] = 0; /*number of transparent pixels between this post and next*/
+                    Set[5] = 0; /*count (updated later) */
+                    if (pix != transparent)
+                        Set[6] = pix; //dummy
+                    else
+                        Set[6] = 0; //dummy
+                }
             /* Start new post ? */
             if (pix != transparent) {
-                if (is_tall_pic_post_header)
-                {
-                   is_tall_pic_post_header = false;
-                   lastpix = pix; //we DO NOT want to start a new post. 
-                } 
-                /* End current post and start new one if more than 
-                   128 consecutive non-transparent pixels AND picture 
+                if (is_tall_pic_post_header) {
+                    is_tall_pic_post_header = false;
+                    lastpix = pix; //we DO NOT want to start a new post.
+                }
+                /* End current post and start new one if more than
+                   128 consecutive non-transparent pixels AND picture
                    is less than 256 pixels tall
-                   */
+                */
                 if (setcount == 128 && rawY < 256 && lastpix != transparent) {
                     Set[1] = setcount;
                     Set[3 + setcount] = lastpix; //dummy
@@ -552,8 +550,8 @@ static char *RAWtoPIC(int32_t * ppicsz, char *raw, int16_t rawX,
             } else {            /*pix is transparent */
                 if (y >= 509) {
                     Warning("PI20", "Column has more than 509 pixels, truncating at (%d,%d)",
-                                (int) x, (int) y);
-                        break;
+                            (int) x, (int) y);
+                    break;
                 }
                 if (is_tall_pic_post_header){
                     Set[4] += 1; //increase transparent pixel count in tallpic post header
@@ -575,16 +573,13 @@ static char *RAWtoPIC(int32_t * ppicsz, char *raw, int16_t rawX,
             Set[first_pix_index + setcount] = lastpix; //dummy
             setpos += first_pix_index + setcount + 1; /*1pos,1cnt,1dmy,setcount pixels,1dmy */
         }
-        /*If we've reached the end of the column and we're still in the tallpic header, 
+        /*If we've reached the end of the column and we're still in the tallpic header,
           end the post at offset 4.*/
-        if (is_tall_pic_post_header)
-        {
+        if (is_tall_pic_post_header) {
             Set[4] = (char) 0xFF;
             setpos += 4;
-        }
-        //otherwise, end it normally.
-        else
-        {
+        } else {
+            //otherwise, end it normally.
             pic[colnpos + setpos] = (char) 0xFF;    /*end of all sets */
         }
         colnpos += (int32_t) (setpos + 1);      /*position of next column */
