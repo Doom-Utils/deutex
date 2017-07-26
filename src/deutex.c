@@ -1324,4 +1324,5 @@ static void call_opt(comfun_t func, ...)
         }
     }
     func(argc, argv);
+    va_end(args);
 }
