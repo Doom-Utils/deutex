@@ -1197,7 +1197,6 @@ static char *PNGtoRAW(int16_t * rawX, int16_t * rawY, char *file)
             return raw;
         } else {
             ProgError("GR33", "libPNG decoding error");
-            return 0;
         }
     }
 }
