@@ -647,7 +647,7 @@ void XTRcompakWAD(const char *DataDir, const char *wadin,
     WADRopenR(&pwad, wadin);
     pnb = (int16_t) pwad.ntry;
     pdir = pwad.dir;
-    psame = (bool *) Malloc(pnb * sizeof(bool));
+    psame = (bool *) Malloc(pnb);
     for (p = 0; p < pnb; p++) {
         psame[p] = false;
     }
