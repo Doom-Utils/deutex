@@ -315,9 +315,9 @@ int32_t PICsaveInWAD(struct WADINFO * info, char *file, PICTYPE type,
         ProgError("GB10", "%s: picture width < 1", fname(file));
     if (rawY < 1)
         ProgError("GB11", "%s: picture height < 1", fname(file));
-    /* AYM (256 -> 509) */
-    if (rawY > 509)
-        ProgError("GB13", "%s: picture height > 509", fname(file));
+    /*max tallpic is 2048*/
+    if (rawY > 2048)
+        ProgError("GB13", "%s: picture height > 2048", fname(file));
     switch (type) {
     case PGRAPH:
     case PWEAPN:
@@ -418,10 +418,10 @@ static char *RAWtoPIC(int32_t * ppicsz, char *raw, int16_t rawX,
     /*offset of first column */
     colnbase = sizeof(struct PICHEAD) + ((int32_t) rawX) * sizeof(int32_t);
     /* worst expansion when converting from PIXEL column to
-    ** list of sets: (5*Ysize/2)+10, corresponding to a dotted vertical
-    ** transparent line.
+    ** list of sets: (5*Ysize/2)+(Y/254*8), corresponding to a dotted vertical
+    ** transparent line with tallpic posts.
     */
-    int32_t worst_case = (int32_t) (5 * ((rawY + 1) / 2) + 10);
+    int32_t worst_case = (int32_t) (5 * ((rawY + 1) / 2) + ((rawY / 254) * 8 ));
     picsz = colnbase + ((int32_t) rawX) * worst_case;
 
     pic = (char *) Malloc(picsz);
@@ -451,8 +451,8 @@ static char *RAWtoPIC(int32_t * ppicsz, char *raw, int16_t rawX,
 
            It makes a new one every tranparent pixel.
 
-           If y == 254 and the height of the image is >= 256, then a new tallpic
-           post is started like this:
+           If y % 254 == 0 and the height of the image is >= 256, 509, etc,
+           then a new tallpic post is started like this:
 
            0 [254]
            1 [0]
@@ -480,36 +480,37 @@ static char *RAWtoPIC(int32_t * ppicsz, char *raw, int16_t rawX,
         for (y = 0; y < rawY; y++) {    /*get column pixel */
             rawpos = ((int32_t) x) + ((int32_t) rawX) * ((int32_t) y);
             pix = raw[rawpos];
-            if (y == 254 && rawY >= 256)
-                {
-                    is_tall_pic_post_header = true;
-                    /*finish the current set, if any */
-                    if (lastpix != transparent) {
-                        Set[1] = setcount;
-                        Set[3 + setcount] = lastpix;
-                        setpos += 3 + setcount + 1; /*1pos,1cnt,1dmy,setcount pixels,1dmy */
-                    }
-                    Set = (char *) &(pic[colnpos + setpos]);
-                    rowpos = 0; //reset row position for subsequent posts after this one.
-                    setcount = 0;
-                    number_of_pix_index = 5;
-                    first_pix_index = 7;
-
-                    /*start new tallpic post*/
-                    Set[0] = 254;
-                    Set[1] = 0;
-                    Set[2] = 0;
-                    Set[3] = 0;
-                    Set[4] = 0; /*number of transparent pixels between this post and next*/
-                    Set[5] = 0; /*count (updated later) */
-                    if (pix != transparent)
-                        Set[6] = pix; //dummy
-                    else
-                        Set[6] = 0; //dummy
+            /*if this is a picture that has a height of >256, make tallpic post.*/
+            if (y != 0 && y % 254 == 0 && rawY > y+1) {
+                is_tall_pic_post_header = true;
+                /*finish the current set, if any */
+                if (lastpix != transparent) {
+                    Set[number_of_pix_index] = setcount;
+                    Set[first_pix_index + setcount] = lastpix;
+                    setpos += first_pix_index + setcount + 1; /*1pos,1cnt,1dmy,setcount pixels,1dmy */
                 }
+                Set = (char *) &(pic[colnpos + setpos]);
+                rowpos = 0; //reset row position for subsequent posts after this one.
+                setcount = 0;
+                number_of_pix_index = 5;
+                first_pix_index = 7;
+
+                /*start new tallpic post*/
+                Set[0] = 254;
+                Set[1] = 0;
+                Set[2] = 0;
+                Set[3] = 0;
+                Set[4] = 0; /*number of transparent pixels between this post and next*/
+                Set[5] = 0; /*count (updated later) */
+                if (pix != transparent)
+                    Set[6] = pix; //dummy
+                else
+                    Set[6] = 0; //dummy
+            }
             /* Start new post ? */
             if (pix != transparent) {
                 if (is_tall_pic_post_header) {
+                    //We are done making the tallpic post header.
                     is_tall_pic_post_header = false;
                     lastpix = pix; //we DO NOT want to start a new post.
                 }
@@ -529,13 +530,6 @@ static char *RAWtoPIC(int32_t * ppicsz, char *raw, int16_t rawX,
                     Set[1] = 0; /* Count (updated later) */
                     Set[2] = pix;       /* dummy */
                 }
-                /* More than 509 pixels for this column. Quit. */
-                if (y >= 509) {
-                    Warning("PI20",
-                            "Column has more than 509 pixels, truncating at (%d,%d)",
-                            (int) x, (int) y);
-                    break;
-                }
                 if (lastpix == transparent) {   /* begining of post */
                     Set = (char *) &(pic[colnpos + setpos]);
                     setcount = 0;
@@ -548,11 +542,6 @@ static char *RAWtoPIC(int32_t * ppicsz, char *raw, int16_t rawX,
                 Set[first_pix_index + setcount] = pix;        /*non transparent pixel */
                 setcount++;     /*update count of pixel in set */
             } else {            /*pix is transparent */
-                if (y >= 509) {
-                    Warning("PI20", "Column has more than 509 pixels, truncating at (%d,%d)",
-                            (int) x, (int) y);
-                    break;
-                }
                 if (is_tall_pic_post_header){
                     Set[4] += 1; //increase transparent pixel count in tallpic post header
                     rowpos = -1; //keep resetting rowpos until we get a non-transparent pixel
