@@ -522,13 +522,7 @@ static char *RAWtoPIC(int32_t * ppicsz, char *raw, int16_t rawX,
                     Set[1] = setcount;
                     Set[3 + setcount] = lastpix; //dummy
                     setpos += 3 + setcount + 1;
-                    Set = (char *) &(pic[colnpos + setpos]);
-                    setcount = 0;
-                    number_of_pix_index = 1;
-                    first_pix_index = 3;
-                    Set[0] = rowpos; /* Y-offset */
-                    Set[1] = 0; /* Count (updated later) */
-                    Set[2] = pix;       /* dummy */
+                    lastpix = transparent; //start a new post
                 }
                 if (lastpix == transparent) {   /* begining of post */
                     Set = (char *) &(pic[colnpos + setpos]);
