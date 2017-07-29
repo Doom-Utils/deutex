@@ -227,9 +227,8 @@ void GetNameOfWAD(char name[8], const char *path)
         switch (path[n]) {
 #ifdef _WIN32
         case '\\':
-#else
-        case '/':
 #endif
+        case '/':
             nam = n + 1;
         }
     /*find root name */
