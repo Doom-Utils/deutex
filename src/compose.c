@@ -434,7 +434,7 @@ void CMPOmakePWAD(const char *doomwad, WADTYPE type, const char *PWADname,
     */
     if (select & BMUSIC) {
         start = size = 0;
-        if (TXTseekSection(TXT, "MUSICS")) {
+        if (TXTseekSection(TXT, "MUSIC")) {
             Phase("CM65", "Making musics");
             while (TXTentryParse
                    (name, filenam, &X, &Y, &Repeat, TXT, false) == true) {
@@ -443,21 +443,21 @@ void CMPOmakePWAD(const char *doomwad, WADTYPE type, const char *PWADname,
                     start = WADRposition(&rwad);
                     /*Music */
                     if (MakeFileName
-                        (file, DataDir, "MUSICS", "", filenam,
+                        (file, DataDir, "MUSIC", "", filenam,
                          "MUS") == true) {
                         size = WADRwriteLump(&rwad, file);
                         Detail("CM66", "Reading music file %s",
                                fname(file));
                     } else
                         if (MakeFileName
-                            (file, DataDir, "MUSICS", "", filenam,
+                            (file, DataDir, "MUSIC", "", filenam,
                              "MID") == true) {
                             size = WADRwriteLump(&rwad, file);
                             Detail("CM68", "Reading music file %s",
                                    fname(file));
                         } else
                             if (CMPOcopyFromWAD
-                                (&size, &rwad, DataDir, "MUSICS", name,
+                                (&size, &rwad, DataDir, "MUSIC", name,
                                  filenam) != true)
                                 ProgError("CM67", "Can't find music %s", file);
                 }
