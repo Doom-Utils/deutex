@@ -404,6 +404,7 @@ static char *RAWtoPIC(int32_t * ppicsz, char *raw, int16_t rawX,
     int16_t number_of_pix_index = 1;
     int16_t first_pix_index = 3;
     bool is_tall_pic_post_header;
+    bool is_first_254;
     char pix, lastpix;          /*pixels */
     /*Doom PIC */
     char *pic;                  /*picture */
@@ -474,15 +475,21 @@ static char *RAWtoPIC(int32_t * ppicsz, char *raw, int16_t rawX,
            etc.
         */
         is_tall_pic_post_header = false;
+        is_first_254 = true;
         number_of_pix_index = 1;
         first_pix_index = 3;
         rowpos = 0;
+
         for (y = 0; y < rawY; y++) {    /*get column pixel */
             rawpos = ((int32_t) x) + ((int32_t) rawX) * ((int32_t) y);
             pix = raw[rawpos];
-            /*if this is a picture that has a height of >256, make tallpic post.*/
-            if (y != 0 && y % 254 == 0 && rawY > y+1) {
+            /*if this is a picture that has a height of >=256, make tallpic post.*/
+            if (((y == 254) ||
+                (y > 254 && setcount == 254) ||
+                (y > 254 && rowpos >= 254 && lastpix == transparent))
+                 && rawY > 255 ) {
                 is_tall_pic_post_header = true;
+                is_first_254 = false;
                 /*finish the current set, if any */
                 if (lastpix != transparent) {
                     Set[number_of_pix_index] = setcount;
@@ -532,6 +539,10 @@ static char *RAWtoPIC(int32_t * ppicsz, char *raw, int16_t rawX,
                     Set[0] = rowpos; /* y position */
                     Set[1] = 0; /*count (updated later) */
                     Set[2] = pix;       /*unused */
+                    if (!is_first_254) {
+                        //reset rowpos if we are in relative offset mode
+                        rowpos = 0;
+                    }
                 }
                 Set[first_pix_index + setcount] = pix;        /*non transparent pixel */
                 setcount++;     /*update count of pixel in set */
@@ -593,6 +604,8 @@ static char *PICtoRAW(int16_t * prawX, int16_t * prawY, int16_t * pXinsr,
 {
     int16_t x, y;               /*pixels */
     const void *offsets;
+    int realY;
+    bool is_first_254;
     /* Last byte of pic buffer */
     const unsigned char *pic_end =
         ((const unsigned char *) pic) + picsz - 1;
@@ -664,6 +677,8 @@ static char *PICtoRAW(int16_t * prawX, int16_t * prawY, int16_t * pXinsr,
                         (long) ((const char *) pic - (const char *) post));
         }
         /* Read an entire post */
+        realY = 0;
+        is_first_254 = true;
         for (;;) {
             int post_length;
             const unsigned char *post_end;
@@ -676,8 +691,25 @@ static char *PICtoRAW(int16_t * prawX, int16_t * prawY, int16_t * pXinsr,
             /* Read the header of the post */
             if (*post == 0xff)
                 break;          /* Last post */
-            y = *post++;
-            post_length = *post++;
+            else if (*post == 0xfe) { //If this is a tallpic post
+                is_first_254 = false;
+                y = *post;
+                y += realY;
+                post = &post[4];
+                if (*post == 0xff) //last post
+                    break;
+                y += *post++; //read transparent pixel count, go to count
+                post_length = *post++;
+                realY = y;
+            }
+            else{
+                y = *post++;
+                post_length = *post++;
+                if (is_first_254 == false) { //if we are in relative offset mode
+                    y += realY;
+                    realY = y;
+                }
+            }
             if (h.dummy_bytes)
                 post++;
             post_end = post + post_length;
