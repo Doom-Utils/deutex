@@ -515,10 +515,10 @@ void XTRextractWAD(const char *doomwad, const char *DataDir, const char
         for (EntryFound = false, p = 0; p < pnb; p++) {
             if ((piden[p] & EMASK) == EMUSIC) {
                 if (EntryFound != true) {
-                    MakeDir(file, DataDir, "MUSICS", "");
+                    MakeDir(file, DataDir, "MUSIC", "");
                     TXTaddEmptyLine(TXT);
-                    TXTaddComment(TXT, "List of Musics");
-                    TXTaddSection(TXT, "musics");
+                    TXTaddComment(TXT, "List of Music");
+                    TXTaddSection(TXT, "music");
                     EntryFound = true;
                 }
                 if ((ostart == pwad.dir[p].start)
@@ -529,10 +529,10 @@ void XTRextractWAD(const char *doomwad, const char *DataDir, const char
                     ostart = pwad.dir[p].start;
                     osize = pwad.dir[p].size;
                     if (piden[p] == EMUS) {
-                        res = MakeFileName(file, DataDir, "MUSICS", "",
+                        res = MakeFileName(file, DataDir, "MUSIC", "",
                                            pdir[p].name, "MUS");
                     } else {
-                        res = MakeFileName(file, DataDir, "MUSICS", "",
+                        res = MakeFileName(file, DataDir, "MUSIC", "",
                                            pdir[p].name, "MID");
                     }
                     if ((WSafe == true) && (res == true)) {
