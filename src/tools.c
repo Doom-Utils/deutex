@@ -225,13 +225,11 @@ void GetNameOfWAD(char name[8], const char *path)
     /*find end of DOS or Unix path */
     for (nam = n = 0; n < len; n++)
         switch (path[n]) {
-            /* FIXME AYM 1999-06-09: I don't understand what "$" is
-               doing here. */
-            /* FIXME AYM 1999-06-09: Is it really a good idea to
-               consider "\" a path separator under Unix ? */
+#ifdef _WIN32
         case '\\':
+#else
         case '/':
-        case '$':
+#endif
             nam = n + 1;
         }
     /*find root name */
