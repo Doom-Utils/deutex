@@ -30,8 +30,8 @@ General
     (illegal file name characters on DOS, but not current Windows
     systems), and sprite names with `\` are now altered to use `^`
     on-disk, matching the ZDoom PK3 standard.
-  * Graphics with a height > 128 and < 256 are now inserted into Doom
-    WAD files correctly.
+  * Graphics with a height > 128 are now inserted into Doom WAD files
+    correctly.
   * UDMF (Universal Doom Map Format) support.
 
 Build systems, code standards
