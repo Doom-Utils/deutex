@@ -63,6 +63,13 @@ static const struct {
     {"THINGS",   1, '?', "a5n1"},
     {"VERTEXES", 1, 'n',   "n4"},
     {"ZNODES",   0, 'n',  "n14"},  /* UDMF */
+    {"GL_VERT",  0, 'n',  "n16"},  /* GZDoom */
+    {"GL_SEGS",  0, 'n',  "n17"},  /* GZDoom */
+    {"GL_SSECT", 0, 'n',  "n18"},  /* GZDoom */
+    {"GL_NODES", 0, 'n',  "n19"},  /* GZDoom */
+    {"GL_PVS",   0, 'n',  "n20"},
+    {"GL_HEAD",  0, 'n',  "n21"},  /* GZDoom, not an actual lump, just indicates a header*/
+
 };
 
 static int IDENTlevelPartMax(void)
@@ -76,6 +83,13 @@ int IDENTlevelPart(const char *name)
     for (n = 1; n < sizeof Part / sizeof *Part; n++) {
         if (strncmp(Part[n].name, name, 8) == 0)
             return n;
+    }
+    //If this is is a GL node header...
+    if (strncmp("GL_", name, 3) == 0){
+        for (n = 1; n < sizeof Part / sizeof *Part; n++) {
+            if (strncmp(Part[n].name, "GL_HEAD", 7) == 0)
+                return n;
+        }
     }
     return -1;
 }
@@ -697,7 +711,7 @@ static void IDENTdirLevels(ENTRY * ids, struct WADINFO *info)
     /* int wrong_order = 0; */
     const int part_num_max = IDENTlevelPartMax();
     int in_level = 0;
-    int lump_present[20];       /* Really sizeof Parts / sizeof *Parts */
+    int lump_present[sizeof Part / sizeof *Part];       /* Really sizeof Parts / sizeof *Parts */
     char level_format = '\0';   /* Initialised to avoid a warning */
     int n0 = 0;                 /* Initialised to avoid a warning */
 
