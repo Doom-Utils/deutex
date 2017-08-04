@@ -384,6 +384,7 @@ void COMrate(int argc, const char *argv[])
 void COMstroy(int argc, const char *argv[])
 {
     WSafe = false;
+    clobber = CLOBBER_YES;
     Info("AA28", "Overwrite existing files");
     (void) argc;
     (void) argv;
