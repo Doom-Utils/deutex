@@ -112,7 +112,7 @@ char *SNDloadWaveFile(char *file, int32_t * psize, int32_t * pspeed)
     }
     fseek(fp, chunk, SEEK_SET);
     if (fread(&headf, sizeof(struct WAVEFMT), 1, fp) == 1) {
-        Info("RR01", "%s is a WAVE file", fname(file));
+        Detail("RR01", "%s is a WAVE file", fname(file));
     } else {
         ProgError("RR02", "%s is not a WAVE file", fname(file));
     }
