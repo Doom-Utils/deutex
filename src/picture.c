@@ -130,7 +130,7 @@ static void RAWtoGIF(char *file, char *raw, int16_t rawX, int16_t rawY,
 #ifdef HAVE_LIBPNG
 static void RAWtoPNG(char *file, char *raw, int16_t rawX, int16_t rawY,
                      struct PIXEL *doompal, int16_t Xinsr, int16_t Yinsr);
-static char *PNGtoRAW(int16_t * prawX, int16_t * prawY, char *file, 
+static char *PNGtoRAW(int16_t * prawX, int16_t * prawY, char *file,
                       int16_t * altXinsr, int16_t * altYinsr);
 #endif
 
@@ -300,7 +300,7 @@ int32_t PICsaveInWAD(struct WADINFO * info, char *file, PICTYPE type,
     case PICPNG:
         raw = PNGtoRAW(&rawX, &rawY, file, &altXinsr, &altYinsr);
         /* if the option to use png_offsets is set, use them */
-        if (use_png_offsets == true){
+        if (use_png_offsets == true) {
             if (altXinsr != INVALIDINT && altYinsr != INVALIDINT) {
                 Xinsr = altXinsr;
                 Yinsr = altYinsr;
@@ -324,7 +324,7 @@ int32_t PICsaveInWAD(struct WADINFO * info, char *file, PICTYPE type,
         ProgError("GB10", "%s: picture width < 1", fname(file));
     if (rawY < 1)
         ProgError("GB11", "%s: picture height < 1", fname(file));
-    /*max tallpic is 2048*/
+    /*max tallpic is 2048 */
     if (rawY > 2048)
         ProgError("GB13", "%s: picture height > 2048", fname(file));
     switch (type) {
@@ -431,7 +431,8 @@ static char *RAWtoPIC(int32_t * ppicsz, char *raw, int16_t rawX,
     ** list of sets: (5*Ysize/2)+(Y/254*8) + 5, corresponding to a dotted vertical
     ** transparent line with tallpic posts.
     */
-    int32_t worst_case = (int32_t) (5 * ((rawY + 1) / 2) + ((rawY / 254) * 8 ) + 5);
+    int32_t worst_case =
+        (int32_t) (5 * ((rawY + 1) / 2) + ((rawY / 254) * 8) + 5);
     picsz = colnbase + ((int32_t) rawX) * worst_case;
 
     pic = (char *) Malloc(picsz);
@@ -482,7 +483,7 @@ static char *RAWtoPIC(int32_t * ppicsz, char *raw, int16_t rawX,
            1 [n# of pixels]
            2 [dummy]
            etc.
-        */
+         */
         is_tall_pic_post_header = false;
         is_first_254 = true;
         number_of_pix_index = 1;
@@ -492,34 +493,34 @@ static char *RAWtoPIC(int32_t * ppicsz, char *raw, int16_t rawX,
         for (y = 0; y < rawY; y++) {    /*get column pixel */
             rawpos = ((int32_t) x) + ((int32_t) rawX) * ((int32_t) y);
             pix = raw[rawpos];
-            /*if this is a picture that has a height of >=256, make tallpic post.*/
+            /*if this is a picture that has a height of >=256, make tallpic post. */
             if (((y == 254) ||
-                (y > 254 && setcount == 254) ||
-                (y > 254 && rowpos >= 254 && lastpix == transparent))
-                 && rawY > 255 ) {
+                 (y > 254 && setcount == 254) ||
+                 (y > 254 && rowpos >= 254 && lastpix == transparent))
+                && rawY > 255) {
                 is_tall_pic_post_header = true;
                 is_first_254 = false;
                 /*finish the current set, if any */
                 if (lastpix != transparent) {
                     Set[number_of_pix_index] = setcount;
                     Set[first_pix_index + setcount] = lastpix;
-                    setpos += first_pix_index + setcount + 1; /*1pos,1cnt,1dmy,setcount pixels,1dmy */
+                    setpos += first_pix_index + setcount + 1;   /*1pos,1cnt,1dmy,setcount pixels,1dmy */
                 }
                 Set = (char *) &(pic[colnpos + setpos]);
-                rowpos = 0; //reset row position for subsequent posts after this one.
+                rowpos = 0;     //reset row position for subsequent posts after this one.
                 setcount = 0;
                 number_of_pix_index = 5;
                 first_pix_index = 7;
 
-                /*start new tallpic post*/
+                /*start new tallpic post */
                 Set[0] = 254;
                 Set[1] = 0;
                 Set[2] = 0;
                 Set[3] = 0;
-                Set[4] = 0; /*number of transparent pixels between this post and next*/
-                Set[5] = 0; /*count (updated later) */
+                Set[4] = 0;     /*number of transparent pixels between this post and next */
+                Set[5] = 0;     /*count (updated later) */
                 if (pix != transparent)
-                    Set[6] = pix; //dummy
+                    Set[6] = pix;       //dummy
                 else
                     Set[6] = 0; //dummy
             }
@@ -528,24 +529,25 @@ static char *RAWtoPIC(int32_t * ppicsz, char *raw, int16_t rawX,
                 if (is_tall_pic_post_header) {
                     //We are done making the tallpic post header.
                     is_tall_pic_post_header = false;
-                    lastpix = pix; //we DO NOT want to start a new post.
+                    lastpix = pix;      //we DO NOT want to start a new post.
                 }
                 /* End current post and start new one if more than
                    128 consecutive non-transparent pixels AND picture
                    is less than 256 pixels tall
-                */
-                if (setcount == 128 && rawY < 256 && lastpix != transparent) {
+                 */
+                if (setcount == 128 && rawY < 256
+                    && lastpix != transparent) {
                     Set[1] = setcount;
-                    Set[3 + setcount] = lastpix; //dummy
+                    Set[3 + setcount] = lastpix;        //dummy
                     setpos += 3 + setcount + 1;
-                    lastpix = transparent; //start a new post
+                    lastpix = transparent;      //start a new post
                 }
                 if (lastpix == transparent) {   /* begining of post */
                     Set = (char *) &(pic[colnpos + setpos]);
                     setcount = 0;
                     number_of_pix_index = 1;
                     first_pix_index = 3;
-                    Set[0] = rowpos; /* y position */
+                    Set[0] = rowpos;    /* y position */
                     Set[1] = 0; /*count (updated later) */
                     Set[2] = pix;       /*unused */
                     if (!is_first_254) {
@@ -553,17 +555,16 @@ static char *RAWtoPIC(int32_t * ppicsz, char *raw, int16_t rawX,
                         rowpos = 0;
                     }
                 }
-                Set[first_pix_index + setcount] = pix;        /*non transparent pixel */
+                Set[first_pix_index + setcount] = pix;  /*non transparent pixel */
                 setcount++;     /*update count of pixel in set */
             } else {            /*pix is transparent */
-                if (is_tall_pic_post_header){
-                    Set[4] += 1; //increase transparent pixel count in tallpic post header
-                    rowpos = -1; //keep resetting rowpos until we get a non-transparent pixel
-                }
-                else if (lastpix != transparent) {   /*finish the current set */
+                if (is_tall_pic_post_header) {
+                    Set[4] += 1;        //increase transparent pixel count in tallpic post header
+                    rowpos = -1;        //keep resetting rowpos until we get a non-transparent pixel
+                } else if (lastpix != transparent) {    /*finish the current set */
                     Set[number_of_pix_index] = setcount;
-                    Set[first_pix_index + setcount] = lastpix; //dummy
-                    setpos += first_pix_index + setcount + 1; /*1pos,1cnt,1dmy,setcount pixels,1dmy */
+                    Set[first_pix_index + setcount] = lastpix;  //dummy
+                    setpos += first_pix_index + setcount + 1;   /*1pos,1cnt,1dmy,setcount pixels,1dmy */
                 }
 
                 /*else: not in set but in transparent area */
@@ -573,23 +574,23 @@ static char *RAWtoPIC(int32_t * ppicsz, char *raw, int16_t rawX,
         }
         if (lastpix != transparent) {   /*finish current set, if any */
             Set[number_of_pix_index] = setcount;
-            Set[first_pix_index + setcount] = lastpix; //dummy
-            setpos += first_pix_index + setcount + 1; /*1pos,1cnt,1dmy,setcount pixels,1dmy */
+            Set[first_pix_index + setcount] = lastpix;  //dummy
+            setpos += first_pix_index + setcount + 1;   /*1pos,1cnt,1dmy,setcount pixels,1dmy */
         }
         /*If we've reached the end of the column and we're still in the tallpic header,
-          end the post at offset 4.*/
+           end the post at offset 4. */
         if (is_tall_pic_post_header) {
             Set[4] = (char) 0xFF;
             setpos += 4;
         } else {
             //otherwise, end it normally.
-            pic[colnpos + setpos] = (char) 0xFF;    /*end of all sets */
+            pic[colnpos + setpos] = (char) 0xFF;        /*end of all sets */
         }
         colnpos += (int32_t) (setpos + 1);      /*position of next column */
     }
     /*picsz was an overestimated size for PIC */
     pic = (char *) Realloc(pic, colnpos);
-    *ppicsz = colnpos; /*real size of PIC */
+    *ppicsz = colnpos;          /*real size of PIC */
     return pic;
 }
 
@@ -646,12 +647,12 @@ static char *PICtoRAW(int16_t * prawX, int16_t * prawY, int16_t * pXinsr,
     /* Read all columns, post by post */
     /* allocate raw. (care: free it if error, before exit) */
     /*Warning ("XX99", "%s: %d x %d",
-      lump_name (name), (int) h.width, (int) h.height); */
+       lump_name (name), (int) h.width, (int) h.height); */
     rawsz = (long) h.width * h.height;
     raw = (char *) Malloc(rawsz);
     Memset(raw, transparent, rawsz);
     for (x = 0; x < h.width; x++) {
-        const unsigned char *post = NULL;  // Initialised to avoid a warning
+        const unsigned char *post = NULL;       // Initialised to avoid a warning
         if (h.colofs_size == 4) {
             int32_t ofs;
             read_i32_le(((const int32_t *) offsets) + x, &ofs);
@@ -700,21 +701,20 @@ static char *PICtoRAW(int16_t * prawX, int16_t * prawY, int16_t * pXinsr,
             /* Read the header of the post */
             if (*post == 0xff)
                 break;          /* Last post */
-            else if (*post == 0xfe) { //If this is a tallpic post
+            else if (*post == 0xfe) {   //If this is a tallpic post
                 is_first_254 = false;
                 y = *post;
                 y += realY;
                 post = &post[4];
-                if (*post == 0xff) //last post
+                if (*post == 0xff)      //last post
                     break;
-                y += *post++; //read transparent pixel count, go to count
+                y += *post++;   //read transparent pixel count, go to count
                 post_length = *post++;
                 realY = y;
-            }
-            else{
+            } else {
                 y = *post++;
                 post_length = *post++;
-                if (is_first_254 == false) { //if we are in relative offset mode
+                if (is_first_254 == false) {    //if we are in relative offset mode
                     y += realY;
                     realY = y;
                 }
@@ -749,7 +749,7 @@ static char *PICtoRAW(int16_t * prawX, int16_t * prawY, int16_t * pXinsr,
             if (h.dummy_bytes)
                 post++;
         }
-    done_with_column:
+      done_with_column:
         ;
     }
 
@@ -827,7 +827,7 @@ struct BMPHEAD {
     int32_t bmplen;             /*02 total file length  Size */
     int32_t reserved;           /*06 void Reserved1 Reserved2 */
     int32_t startpix;           /*0A start of pixels   OffBits */
-    /*bitmap core header*/
+    /*bitmap core header */
     int32_t headsz;             /*0E Size =nb of bits in bc header */
     int32_t szx;                /*12 X size = width     int16_t width */
     int32_t szy;                /*16 Y size = height    int16_t height */
@@ -840,7 +840,7 @@ struct BMPHEAD {
     int32_t ColorUsed;          /*2C ClrUsed       nb of colors in palette */
     int32_t ColorImp;           /*32 ClrImportant   nb of important colors in palette */
     /*palette pos: ((uint8_t *)&headsz) + headsz */
-    /*palette size = 4*nb of colors. order is Blue Green Red (Black? always0)*/
+    /*palette size = 4*nb of colors. order is Blue Green Red (Black? always0) */
     /*bmp line size is xsize*bytes_per_pixel aligned on int32_t */
     /*pixlen = ysize * line size */
 };
@@ -869,8 +869,8 @@ static char *BMPtoRAW(int16_t * prawX, int16_t * prawY, char *file)
     FILE *fd;
     char sig[2];
     /*
-    ** read BMP header for size
-    */
+     ** read BMP header for size
+     */
 
     fd = fopen(file, FOPEN_RB);
     if (fd == NULL)
@@ -884,8 +884,8 @@ static char *BMPtoRAW(int16_t * prawX, int16_t * prawY, char *file)
     if (fread(head, sizeof(struct BMPHEAD), 1, fd) != 1)
         ProgError("BR13", "%s: read error in header", fname(file));
     /*
-    ** check the BMP header
-    */
+     ** check the BMP header
+     */
     if (peek_i32_le(&head->compress) != 0)
         ProgError("BR14", "%s: not an RGB BMP", fname(file));
     read_i32_le(&head->startpix, &startpix);
@@ -897,12 +897,12 @@ static char *BMPtoRAW(int16_t * prawX, int16_t * prawY, char *file)
         ProgError("BR16", "%s: bad height", fname(file));
     ncols = peek_i32_le(&head->ColorUsed);
     /*
-    ** Allocate memory for raw bytes
-    */
+     ** Allocate memory for raw bytes
+     */
     raw = (char *) Malloc(((int32_t) szx) * ((int32_t) szy));
     /*
-    ** Determine line size and palet (if needed)
-    */
+     ** Determine line size and palet (if needed)
+     */
     nbits = (int16_t) ((peek_i32_le(&head->planebits) >> 16) & 0xFFFFL);
     switch (nbits) {
     case 24:
@@ -1030,9 +1030,9 @@ static void RAWtoBMP(char *file, char *raw, int16_t rawX, int16_t rawY,
         ProgError("BW12", "%s: write error", fname(file));
     free(head);
     /*
-    ** set palette
-    **
-    */
+     ** set palette
+     **
+     */
     palet = (struct BMPPALET *) Malloc(paletsz);
     for (x = 0; x < ncol; x++) {
         palet[x].R = doompal[x].R;
@@ -1044,9 +1044,9 @@ static void RAWtoBMP(char *file, char *raw, int16_t rawX, int16_t rawY,
         ProgError("BW13", "%s: write error", fname(file));
     free(palet);
     /*
-    ** set data
-    **
-    */
+     ** set data
+     **
+     */
     bmpidxs = (uint8_t *) Malloc(linesz);
     for (y = rawY - 1; y >= 0; y--) {
         for (x = 0; x < rawX; x++) {
@@ -1186,7 +1186,7 @@ static char *PPMtoRAW(int16_t * prawX, int16_t * prawY, char *file)
 
 #ifdef HAVE_LIBPNG
 static char *PNGtoRAW(int16_t * rawX, int16_t * rawY, char *file,
-                        int16_t * altXinsr, int16_t * altYinsr)
+                      int16_t * altXinsr, int16_t * altYinsr)
 {
     char *raw;
     int i;
@@ -1259,8 +1259,7 @@ static void RAWtoPNG(char *file, char *raw, int16_t rawX, int16_t rawY,
     }
     if (!png_image_write_to_file(&image, file, 0, raw, 0, colormap)) {
         ProgError("GR34", "libPNG encoding error");
-    }
-    else {
+    } else {
         if (Xinsr != INVALIDINT && Yinsr != INVALIDINT &&
             Xinsr != 0 && Yinsr != 0)
             write_grAb(file, Xinsr, Yinsr);
@@ -1275,7 +1274,7 @@ static struct {
     uint16_t InputFlag;
     uint16_t Disposal;
 } Gif89 = {
-    -1, -1, -1, 0};
+-1, -1, -1, 0};
 
 static struct {
     int16_t Width;
@@ -1340,8 +1339,8 @@ static char *GIFtoRAW(int16_t * rawX, int16_t * rawY, char *file)
         ProgError("GR10", "%s: %s", fname(file), strerror(errno));
     decompressInit();
     /*
-    ** screen descriptor
-    */
+     ** screen descriptor
+     */
     if (fread(GifIdent, 6, 1, fd) != 1) {
         fclose(fd);
         ProgError("GR11", "%s: read error in GIF magic", fname(file));
@@ -1352,9 +1351,9 @@ static char *GIFtoRAW(int16_t * rawX, int16_t * rawY, char *file)
     }
     if (fread_i16_le(fd, &GifHead.xsize)
         || fread_i16_le(fd, &GifHead.ysize)
-        || (chr = fgetc(fd), GifHead.info = chr, chr == EOF)       // Training
-        ||(chr = fgetc(fd), GifHead.backgnd = chr, chr == EOF)     // for the
-        ||(chr = fgetc(fd), GifHead.aspratio = chr, chr == EOF)) { // IOCCC
+        || (chr = fgetc(fd), GifHead.info = chr, chr == EOF)    // Training
+        || (chr = fgetc(fd), GifHead.backgnd = chr, chr == EOF) // for the
+        || (chr = fgetc(fd), GifHead.aspratio = chr, chr == EOF)) {     // IOCCC
         fclose(fd);
         ProgError("GR13", "%s: read error in GIF header", fname(file));
     }
@@ -1373,8 +1372,8 @@ static char *GIFtoRAW(int16_t * rawX, int16_t * rawY, char *file)
         }
     }
     /*
-    ** Read extension, images, etc...
-    */
+     ** Read extension, images, etc...
+     */
     while ((c = getc(fd)) != EOF) {
         if (c == ';')
             break;              /* GIF terminator */
@@ -1412,8 +1411,8 @@ static char *GIFtoRAW(int16_t * rawX, int16_t * rawY, char *file)
                 }
             }
             /*read the GIF. if many pictures, only the last
-              one is kept.
-            */
+               one is kept.
+             */
             raw = GIFreadPix(fd, Xsz, Ysz);
         }
         /*else, not a valid start character, skip to next */
@@ -1499,8 +1498,8 @@ static char *GIFreadPix(FILE * fd, int16_t Xsz, int16_t Ysz)
     unsigned char c = 0;
 
     /*
-    ** get some space
-    */
+     ** get some space
+     */
     rawSz = ((int32_t) Xsz) * ((int32_t) Ysz);
     raw = (char *) Malloc(rawSz);
     /* Initialize the Compression routines */

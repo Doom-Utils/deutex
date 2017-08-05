@@ -68,7 +68,8 @@ static const struct {
     {"GL_SSECT", 0, 'n',  "n18"},  /* GZDoom */
     {"GL_NODES", 0, 'n',  "n19"},  /* GZDoom */
     {"GL_PVS",   0, 'n',  "n20"},
-    {"GL_HEAD",  0, 'n',  "n21"},  /* GZDoom, not an actual lump, just indicates a header*/
+    {"GL_HEAD",  0, 'n',  "n21"},  /* GZDoom, not an actual lump, just
+                                      indicates a header */
 
 };
 
@@ -85,7 +86,7 @@ int IDENTlevelPart(const char *name)
             return n;
     }
     //If this is is a GL node header...
-    if (strncmp("GL_", name, 3) == 0){
+    if (strncmp("GL_", name, 3) == 0) {
         for (n = 1; n < sizeof Part / sizeof *Part; n++) {
             if (strncmp(Part[n].name, "GL_HEAD", 7) == 0)
                 return n;
@@ -811,7 +812,7 @@ ENTRY *IDENTentriesIWAD(struct WADINFO *info, char *Pnam, int32_t Pnamsz,
     /*
     **  Check if Strife's ENDSTRF lump is present
     */
-    if(WADRfindEntry(info, "ENDSTRF") >= 0) {
+    if (WADRfindEntry(info, "ENDSTRF") >= 0) {
         IDENTdirSscripts(ids, info);
     }
     if (Fast != true) {
@@ -856,7 +857,7 @@ ENTRY *IDENTentriesPWAD(struct WADINFO * info, char *Pnam, int32_t Pnamsz)
     /*
     **  Check if Strife's ENDSTRF lump is present
     */
-    if(WADRfindEntry(info, "ENDSTRF") >= 0) {
+    if (WADRfindEntry(info, "ENDSTRF") >= 0) {
         IDENTdirSscripts(ids, info);
     }
     IDENTdirSounds(ids, info, false);

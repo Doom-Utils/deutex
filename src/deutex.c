@@ -442,12 +442,14 @@ void COMle(int argc, const char *argv[])
     (void) argc;
     (void) argv;
 }
+
 void COMpngoffset(int argc, const char *argv[])
 {
     use_png_offsets = true;
     (void) argc;
     (void) argv;
 }
+
 void COMbe(int argc, const char *argv[])
 {
     set_input_wad_endianness(1);

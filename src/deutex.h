@@ -173,7 +173,7 @@ typedef struct cusage_s cusage_t;
  */
 typedef enum { PF_NORMAL, PF_ALPHA, PF_PR } picture_format_t;
 typedef enum { TF_NORMAL, TF_NAMELESS, TF_NONE,
-    TF_STRIFE11
+               TF_STRIFE11
 } texture_format_t;
 typedef enum { TL_NORMAL, TL_TEXTURES, TL_NONE } texture_lump_t;
 typedef enum { RP_REJECT, RP_FORCE, RP_WARN, RP_ACCEPT } rate_policy_t;
