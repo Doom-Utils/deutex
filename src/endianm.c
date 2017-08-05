@@ -36,6 +36,19 @@ void read_i32_le(const void *ptr, i32 * buf)
 }
 
 /*
+ *      read_i32_be
+ *      Read a big-endian 32-bit signed integer from memory area
+ *      pointed to by <ptr>.
+ */
+void read_i32_be(const void *ptr, i32 * buf)
+{
+    *buf = ((i32) ((const unsigned char *) ptr)[0] << 24)
+        | ((i32) ((const unsigned char *) ptr)[1] << 16)
+        | ((u16) ((const unsigned char *) ptr)[2] << 8)
+        | (((const unsigned char *) ptr)[3]);
+}
+
+/*
  *      peek_i16_le
  *      Read a little-endian 16-bit signed integer from memory area
  *      pointed to by <ptr>.

@@ -15,6 +15,7 @@
 #include <errno.h>
 #ifdef HAVE_LIBPNG
 #include <png.h>
+#include "png_tools.h"
 #endif
 
 #include "tools.h"
@@ -128,8 +129,9 @@ static void RAWtoGIF(char *file, char *raw, int16_t rawX, int16_t rawY,
                      struct PIXEL *doompal);
 #ifdef HAVE_LIBPNG
 static void RAWtoPNG(char *file, char *raw, int16_t rawX, int16_t rawY,
-                     struct PIXEL *doompal);
-static char *PNGtoRAW(int16_t * prawX, int16_t * prawY, char *file);
+                     struct PIXEL *doompal, int16_t Xinsr, int16_t Yinsr);
+static char *PNGtoRAW(int16_t * prawX, int16_t * prawY, char *file, 
+                      int16_t * altXinsr, int16_t * altYinsr);
 #endif
 
 /*
@@ -247,7 +249,7 @@ bool PICsaveInFile(char *file, PICTYPE type, char *pic, int32_t picsz,
         switch (Picture) {
 #ifdef HAVE_LIBPNG
         case PICPNG:
-            RAWtoPNG(file, raw, rawX, rawY, doompal);
+            RAWtoPNG(file, raw, rawX, rawY, doompal, *pXinsr, *pYinsr);
             break;
 #endif
         case PICGIF:
@@ -288,7 +290,7 @@ int32_t PICsaveInWAD(struct WADINFO * info, char *file, PICTYPE type,
     char *pic = NULL;
     int32_t picsz = 0;          /* Initialise to placate GCC */
     char transparent;
-
+    int16_t altXinsr = 0, altYinsr = 0;
     /*
     ** convert BMP to RAW
     */
@@ -296,7 +298,14 @@ int32_t PICsaveInWAD(struct WADINFO * info, char *file, PICTYPE type,
     switch (Picture) {
 #ifdef HAVE_LIBPNG
     case PICPNG:
-        raw = PNGtoRAW(&rawX, &rawY, file);
+        raw = PNGtoRAW(&rawX, &rawY, file, &altXinsr, &altYinsr);
+        /* if the option to use png_offsets is set, use them */
+        if (use_png_offsets == true){
+            if (altXinsr != INVALIDINT && altYinsr != INVALIDINT) {
+                Xinsr = altXinsr;
+                Yinsr = altYinsr;
+            }
+        }
         break;
 #endif
     case PICGIF:
@@ -1176,13 +1185,15 @@ static char *PPMtoRAW(int16_t * prawX, int16_t * prawY, char *file)
 }
 
 #ifdef HAVE_LIBPNG
-static char *PNGtoRAW(int16_t * rawX, int16_t * rawY, char *file)
+static char *PNGtoRAW(int16_t * rawX, int16_t * rawY, char *file,
+                        int16_t * altXinsr, int16_t * altYinsr)
 {
     char *raw;
     int i;
     png_image image;
     memset(&image, 0, (sizeof image));
     image.version = PNG_IMAGE_VERSION;
+    read_grAb(file, altXinsr, altYinsr);
     if (png_image_begin_read_from_file(&image, file)) {
         png_bytep buffer;
         image.format = PNG_FORMAT_RGBA;
@@ -1212,12 +1223,13 @@ static char *PNGtoRAW(int16_t * rawX, int16_t * rawY, char *file)
             return raw;
         } else {
             ProgError("GR33", "libPNG decoding error");
+            return NULL;
         }
     }
 }
 
 static void RAWtoPNG(char *file, char *raw, int16_t rawX, int16_t rawY,
-                     struct PIXEL *doompal)
+                     struct PIXEL *doompal, int16_t Xinsr, int16_t Yinsr)
 {
     int i;
     png_image image;
@@ -1247,6 +1259,11 @@ static void RAWtoPNG(char *file, char *raw, int16_t rawX, int16_t rawY,
     }
     if (!png_image_write_to_file(&image, file, 0, raw, 0, colormap)) {
         ProgError("GR34", "libPNG encoding error");
+    }
+    else {
+        if (Xinsr != INVALIDINT && Yinsr != INVALIDINT &&
+            Xinsr != 0 && Yinsr != 0)
+            write_grAb(file, Xinsr, Yinsr);
     }
     free(colormap);
 }

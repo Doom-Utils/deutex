@@ -8,6 +8,8 @@
 
   SPDX-License-Identifier: GPL-2.0+
 */
+#ifndef TOOLS_H
+#define TOOLS_H
 
 #define MSGCLASS_INFO 'i'
 #define MSGCLASS_WARN 'w'
@@ -57,3 +59,5 @@ void Normalise(char dest[8], const char *src);
 
 void Progress(void);
 void ProgressEnds(void);
+
+#endif //TOOLS_H

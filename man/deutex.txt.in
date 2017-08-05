@@ -259,6 +259,9 @@ Create little endian wads (default).
 Output texture format (*nameless*, *none*, *normal*, *strife11*;
 default normal).
 
+*-png_offset*::
+Override offsets in WADINFO with offsets contained in PNG metadata
+
 *-tf* 'code'::
 Texture format (*nameless*, *none*, *normal*, *strife11*; default
 normal).

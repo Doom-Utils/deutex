@@ -8,6 +8,8 @@
 
   SPDX-License-Identifier: GPL-2.0+
 */
+#ifndef DEUTEX_H
+#define DEUTEX_H
 
 #include "config.h"
 
@@ -182,5 +184,8 @@ extern texture_format_t output_texture_format;
 extern texture_lump_t texture_lump;
 extern rate_policy_t rate_policy;
 extern clobber_t clobber;
+extern bool use_png_offsets;
 extern const char *debug_ident;
 extern const char *palette_lump;
+
+#endif //DEUTEX_H

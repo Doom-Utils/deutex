@@ -27,6 +27,7 @@
 
 void read_i16_le(const void *ptr, i16 * buf);
 void read_i32_le(const void *ptr, i32 * buf);
+void read_i32_be(const void *ptr, i32 * buf);
 i16 peek_i16_le(const void *ptr);
 u16 peek_u16_le(const void *ptr);
 i32 peek_i32_be(const void *ptr);

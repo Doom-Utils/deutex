@@ -69,6 +69,7 @@ texture_format_t output_texture_format = TF_NORMAL;
 texture_lump_t texture_lump = TL_NORMAL;
 rate_policy_t rate_policy = RP_WARN;
 clobber_t clobber = CLOBBER_NO;
+bool use_png_offsets = false;
 const char *debug_ident = NULL;
 const char *palette_lump = "PLAYPAL";
 
@@ -441,7 +442,12 @@ void COMle(int argc, const char *argv[])
     (void) argc;
     (void) argv;
 }
-
+void COMpngoffset(int argc, const char *argv[])
+{
+    use_png_offsets = true;
+    (void) argc;
+    (void) argv;
+}
 void COMbe(int argc, const char *argv[])
 {
     set_input_wad_endianness(1);
@@ -796,6 +802,8 @@ static comdef_t Com[] = {
     {OP2, 0, "ole", COMole, NULL, "create little endian wads (default)"},
     {OP2, 1, "otf", COMtf, "<code>",
      "output texture format (\1nameless\3, \1none\3, *\1normal\3, \1strife11\3)"},
+    {OP2, 0, "png_offset", COMpngoffset, NULL,
+     "override offsets in WADINFO with offsets contained in PNG metadata"},
     /*by request from George Hamlin */
     {OP2, 0, "s_end", COMgeorge, NULL,
      "use \1S_END\3 for sprites, not \1SS_END\3"},
