@@ -419,10 +419,10 @@ static char *RAWtoPIC(int32_t * ppicsz, char *raw, int16_t rawX,
     /*offset of first column */
     colnbase = sizeof(struct PICHEAD) + ((int32_t) rawX) * sizeof(int32_t);
     /* worst expansion when converting from PIXEL column to
-    ** list of sets: (5*Ysize/2)+(Y/254*8), corresponding to a dotted vertical
+    ** list of sets: (5*Ysize/2)+(Y/254*8) + 5, corresponding to a dotted vertical
     ** transparent line with tallpic posts.
     */
-    int32_t worst_case = (int32_t) (5 * ((rawY + 1) / 2) + ((rawY / 254) * 8 ));
+    int32_t worst_case = (int32_t) (5 * ((rawY + 1) / 2) + ((rawY / 254) * 8 ) + 5);
     picsz = colnbase + ((int32_t) rawX) * worst_case;
 
     pic = (char *) Malloc(picsz);
