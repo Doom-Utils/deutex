@@ -1,3 +1,21 @@
+HEAD
+----
+
+General
+~~~~~~~
+  * The `-overwrite` option now works.
+  * Levels are extracted/inserted in a way to preserve GL nodes.
+  * Inserting pictures with a height of 1 pixel no longer causes a
+    malloc error, and allows the operation of rebuilding a _Doom_ 1 or
+    2 IWAD.
+
+Graphics
+~~~~~~~~
+  * DeuTex supports reading and writing sprite offsets based on PNG
+    +grAb+ chunks in a manner compatible with SLADE and ZDoom.
+    +wadinfo.txt+ overrides these offsets unless `-png_offsets` is
+    used.
+
 5.0.0 (2017-07-31)
 ------------------
 
