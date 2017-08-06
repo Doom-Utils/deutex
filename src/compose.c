@@ -287,7 +287,7 @@ void CMPOmakePWAD(const char *doomwad, WADTYPE type, const char *PWADname,
             while (TXTentryParse
                    (name, filenam, &X, &Y, &Repeat, TXT, false) == true) {
                 if (MakeFileName
-                    (file, DataDir, "TEXTURES", "", name, "TXT") == true) {
+                    (file, DataDir, "TEXTURES", "", filenam, "TXT") == true) {
                     Detail("CM52", "Reading texture file %s", fname(file));
                     TXUreadTexFile(file, true);
                     NeedPNAME = true;
@@ -340,7 +340,7 @@ void CMPOmakePWAD(const char *doomwad, WADTYPE type, const char *PWADname,
             while (TXTentryParse
                    (name, filenam, &X, &Y, &Repeat, TXT, false) == true) {
                 if (MakeFileName
-                    (file, DataDir, "TEXTURES", "", name, "TXT") == true) {
+                    (file, DataDir, "TEXTURES", "", filenam, "TXT") == true) {
                     Detail("CM57", "Reading texture file %s", fname(file));
                     TXUreadTexFile(file, true);
                     NeedPNAME = true;
