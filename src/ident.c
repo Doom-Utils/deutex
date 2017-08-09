@@ -55,6 +55,7 @@ static const struct {
     {"NODES",    1, 'n',   "n7"},
     {"POINTS",   1, 'a',   "a2"},  /* Doom alpha 0.4 and 0.5 only */
     {"REJECT",   1, 'n',   "n9"},  /* Not in Doom PR */
+    {"SCRIPTS",  0, 'n',  "n22"},
     {"SECTORS",  1, '?', "a4n8"},
     {"SEGS",     1, 'n',   "n5"},
     {"SIDEDEFS", 1, 'n',   "n3"},
