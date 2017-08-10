@@ -443,12 +443,14 @@ void COMle(int argc, const char *argv[])
     (void) argv;
 }
 
+#ifdef HAVE_LIBPNG
 void COMpngoffset(int argc, const char *argv[])
 {
     use_png_offsets = true;
     (void) argc;
     (void) argv;
 }
+#endif
 
 void COMbe(int argc, const char *argv[])
 {
@@ -804,8 +806,10 @@ static comdef_t Com[] = {
     {OP2, 0, "ole", COMole, NULL, "create little endian wads (default)"},
     {OP2, 1, "otf", COMtf, "<code>",
      "output texture format (\1nameless\3, \1none\3, *\1normal\3, \1strife11\3)"},
+#ifdef HAVE_LIBPNG
     {OP2, 0, "png_offset", COMpngoffset, NULL,
      "override offsets in WADINFO with offsets contained in PNG metadata"},
+#endif
     /*by request from George Hamlin */
     {OP2, 0, "s_end", COMgeorge, NULL,
      "use \1S_END\3 for sprites, not \1SS_END\3"},
