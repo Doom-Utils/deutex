@@ -1,4 +1,4 @@
-AC_INIT([DeuTex], [5.0.0], [https://github.com/Doom-Utils/deutex/issues])
+AC_INIT([DeuTex], [5.1.0], [https://github.com/Doom-Utils/deutex/issues])
 AC_PACKAGE_URL([https://github.com/Doom-Utils/deutex])
 AM_INIT_AUTOMAKE([foreign])
 AC_PROG_CC
