@@ -724,6 +724,7 @@ static comdef_t Com[] = {
     {CM0, 0, "syntax", COMformat, NULL,
      "print the syntax of wad creation directives"},
     {CM3, 1, "unused", COMvoid, "<in.wad>", "find unused spaces in a wad"},
+    {CM0, 0, "version", COMvers, NULL, "same as \1--version\3"},
     {CM0, 0, "-version", COMvers, NULL,
      "print version number and exit successfully"},
 
