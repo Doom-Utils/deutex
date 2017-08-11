@@ -8,6 +8,7 @@ General
   * Inserting pictures with a height of 1 pixel no longer causes a
     malloc error, and allows the operation of rebuilding a _Doom_ 1 or
     2 IWAD.
+  * texture lump file names can now be overridden.
 
 Graphics
 ~~~~~~~~
