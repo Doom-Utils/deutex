@@ -120,7 +120,7 @@ Doc
 
 _Strife_
 ~~~~~~~~
-The `SCRIPT`_nn_ lumps are now extracted in human-readable form into the
+The `SCRIPTnn` lumps are now extracted in human-readable form into the
 `scripts/` directory.  The reverse operation is not implemented.  Since
 we understand the Strife script format only partially, the output format
 is still in flux.  New option `-scripts` to extract only the scripts.
