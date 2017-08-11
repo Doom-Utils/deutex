@@ -807,7 +807,7 @@ static comdef_t Com[] = {
     {OP2, 1, "otf", COMtf, "<code>",
      "output texture format (\1nameless\3, \1none\3, *\1normal\3, \1strife11\3)"},
 #ifdef HAVE_LIBPNG
-    {OP2, 0, "png_offset", COMpngoffset, NULL,
+    {OP2, 0, "pngoffsets", COMpngoffset, NULL,
      "override offsets in WADINFO with offsets contained in PNG metadata"},
 #endif
     /*by request from George Hamlin */

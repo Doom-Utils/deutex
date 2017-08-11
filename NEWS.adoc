@@ -17,7 +17,7 @@ Graphics
 ~~~~~~~~
   * DeuTex supports reading and writing sprite offsets based on PNG
     +grAb+ chunks in a manner compatible with SLADE and ZDoom.
-    +wadinfo.txt+ overrides these offsets unless `-png_offsets` is
+    +wadinfo.txt+ overrides these offsets unless `-pngoffsets` is
     used.
 
 5.0.0 (2017-07-31)
