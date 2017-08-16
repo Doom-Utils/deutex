@@ -7,4 +7,6 @@ CLEANFILES = @PACKAGE@.6 @PACKAGE@.html
 
 @PACKAGE@.html: deutex.txt
 	TZ=UTC asciidoc deutex.txt
+
+html: @PACKAGE@.html
 endif

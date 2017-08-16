@@ -6,4 +6,6 @@ if ASCIIDOC
 CLEANFILES = *.html
 %.html: %.adoc
 	TZ=UTC asciidoc $<
+
+html: README.html NEWS.html
 endif

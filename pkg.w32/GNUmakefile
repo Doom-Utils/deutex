@@ -1,8 +1,6 @@
 include config.make
 
-DOC_FILES = ../NEWS.html       \
-            ../README.html     \
-            ../man/deutex.html
+DOC_HTML_FILES = ../NEWS.html ../README.html ../man/$(PACKAGE).html
 DOC_TXT_FILES = ../AUTHORS ../COPYING
 ZIP=$(PACKAGE)-$(PACKAGE_VERSION)_w32.zip
 
@@ -14,15 +12,22 @@ clean:
 $(ZIP): staging
 	zip -Xjr $@ $</*
 
-staging:
+../NEWS.html: ../NEWS.adoc
+	make -C .. NEWS.html
+
+../README.html: ../README.adoc
+	make -C .. README.html
+
+../man/$(PACKAGE).html: ../man/deutex.txt
+	make -C ../man $(PACKAGE).html
+
+staging: $(DOC_HTML_FILES)
 	mkdir $@
 	./cp-with-libs --ldflags="$(LDFLAGS)" ../src/deutex.exe $@
 
 	$(STRIP) $@/*.exe $@/*.dll
 
-	# Will require NEWS.html README.html and man/deutex.html to be
-	# built.
-	for f in $(DOC_FILES); do cp $$f $@; done
+	for f in $(DOC_HTML_FILES); do cp $$f $@; done
 	for f in $(DOC_TXT_FILES); do                                  \
 		unix2dos --add-bom -n $$f $@/$$(basename $$f).txt;     \
 	done
