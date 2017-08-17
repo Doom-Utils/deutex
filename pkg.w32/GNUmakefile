@@ -13,13 +13,13 @@ $(ZIP): staging
 	zip -Xjr $@ $</*
 
 ../NEWS.html: ../NEWS.adoc
-	make -C .. NEWS.html
+	$(MAKE) -C .. NEWS.html
 
 ../README.html: ../README.adoc
-	make -C .. README.html
+	$(MAKE) -C .. README.html
 
 ../man/$(PACKAGE).html: ../man/deutex.txt
-	make -C ../man $(PACKAGE).html
+	$(MAKE) -C ../man $(PACKAGE).html
 
 staging: $(DOC_HTML_FILES)
 	mkdir $@
