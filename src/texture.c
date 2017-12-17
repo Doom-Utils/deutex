@@ -393,7 +393,7 @@ void TXUreadTEXTURE(const char *texture1_name, const char *Data,
     int16_t Xofs, Yofs, Pindex; /* x,y coordinate in texture space */
     /* patch name index in PNAMES table */
     int32_t MaxPindex;
-    static char tname[8];       /*texture name */
+    static char tname[10];       /*texture name */
     static char pname[8];       /*patch name */
     size_t header_size = 0;
     size_t item_size = 0;
