@@ -105,8 +105,6 @@ void WADRopenR(struct WADINFO *info, const char *wadin)
     ntry = WADRreadLong(info);
     if (ntry <= 0)
         ProgError("WR09", "%s: zero entries", fname(wadin));
-    if (ntry >= 0x2000)
-        ProgError("WR11", "%s: too many entries", fname(wadin));
     info->dirpos = dirpos = WADRreadLong(info);
     if ((dirpos < 0) || (dirpos > 0x10000000L))
         ProgError("WR13", "%s: invalid directory offset %08lX",
