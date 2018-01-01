@@ -76,7 +76,7 @@ const char *palette_lump = "PLAYPAL";
 static char anon[1] = { '\0' };
 
 typedef void (*comfun_t) (int argc, const char *argv[]);
-static void opt_widths();
+static void opt_widths(void);
 static int is_prefix(const char *s1, const char *s2);
 static void call_opt(comfun_t func, ...);
 
@@ -1212,7 +1212,7 @@ void COMformat(int argc, const char *argv[])
 /*
  *      opt_widths - make a pass through Com and compute widths per section
  */
-static void opt_widths()
+static void opt_widths(void)
 {
     comdef_t *d;
     comdef_t *current_section = NULL;
