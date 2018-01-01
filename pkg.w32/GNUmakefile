@@ -25,7 +25,8 @@ staging: $(DOC_HTML_FILES)
 	mkdir $@
 	./cp-with-libs --ldflags="$(LDFLAGS)" ../src/deutex.exe $@
 
-	$(STRIP) $@/*.exe $@/*.dll
+	$(STRIP) $@/*.exe
+	-$(STRIP) $@/*.dll
 
 	for f in $(DOC_HTML_FILES); do cp $$f $@; done
 	for f in $(DOC_TXT_FILES); do                                  \
