@@ -1124,11 +1124,14 @@ void COMhelp(int argc, const char *argv[])
         /* Do a first pass on all the options for this section. Find out how
            wide the left and right columns need to be. */
         if (d->type == SEC) {
+            uint16_t tmp;
             if (section++)
                 putchar('\n');
             printf("%s:\n", d->help);
-            width1 = *((short *) &d->exec) + OPTINDENT;
-            width2 = *((short *) &d->use);
+            memcpy(&tmp, d->exec, sizeof(tmp));
+            width1 = tmp + OPTINDENT;
+            memcpy(&tmp, d->use, sizeof(tmp));
+            width2 = tmp;
             if (width1 + 1 + width2 > TTYCOL)
                 width1 = TTYCOL - width2 - COLSPACING;
         }
@@ -1229,24 +1232,26 @@ static void opt_widths()
                - exec = maximum text width of the first column,
                - use  = maximum text width of second column. */
             if (current_section != NULL) {
+                uint16_t tmp;
                 current_section->argc = (char) width1r;
                 if (current_section->argc != width1r)
                     current_section->argc = CHAR_MAX;   /* Can't happen */
 
-                *((short *) &current_section->com) = (short) width2r;
-                if (*((short *) &current_section->com) != width2r)
+                tmp = width2r;
+                if (tmp != width2r)
                     /* Can't happen */
-                    *((short *) &current_section->com) = SHRT_MAX;
+                    tmp = SHRT_MAX;
+                memcpy(current_section->com, &tmp, sizeof(tmp));
 
-                *((short *) &current_section->exec) = (short) width1t;
-                if (*((short *) &current_section->exec) != width1t)
-                    /* Can't happen */
-                    *((short *) &current_section->exec) = SHRT_MAX;
+                tmp = width1t;
+                if (tmp != width1t)
+                    tmp = SHRT_MAX;
+                memcpy(current_section->exec, &tmp, sizeof(tmp));
 
-                *((short *) &current_section->use) = (short) width2t;
-                if (*((short *) &current_section->use) != width2t)
-                    /* Can't happen */
-                    *((short *) &current_section->use) = SHRT_MAX;
+                tmp = width2t;
+                if (tmp != width2t)
+                    tmp = SHRT_MAX;
+                memcpy(current_section->use, &tmp, sizeof(tmp));
             }
         }
 
