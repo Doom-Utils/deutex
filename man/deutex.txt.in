@@ -414,7 +414,7 @@ variable is overridden by *-main*, *-doom* and friends.
 COPYRIGHT
 ---------
 @PACKAGE_NAME@ is copyright © 1994-1995 Olivier Montanuy, copyright ©
-1999-2005 André Majorel, copyright © 2006-2017 contributors to
+1999-2005 André Majorel, copyright © 2006-2018 contributors to
 @PACKAGE_NAME@.
 
 Most of this program is under the GNU General Public License version

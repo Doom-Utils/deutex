@@ -1,5 +1,5 @@
 /*
-  This file is Copyright © 2017 contributors to the DeuTex project.
+  This file is Copyright © 2018 contributors to the DeuTex project.
 
   SPDX-License-Identifier: GPL-2.0+
 */
