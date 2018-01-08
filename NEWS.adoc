@@ -1,6 +1,21 @@
 DeuTex release notes
 ====================
 
+5.1.1 (2018-01-08)
+------------------
+
+General
+~~~~~~~
+  * The texture name array was fixed so the maximum possible string
+    size is now supported.
+  * Some warnings and errors with old versions of pkg-config and gcc
+    have been fixed.
+  * Aliasing errors have been resolved, which caused crashes on some
+    architectures, such as sparc64.
+  * DeuTex can now build WADs with an arbitrary number of lumps, but
+    prints a warning when more than 4046 are included (the Vanilla
+    Doom limit).
+
 5.1.0 (2017-08-11)
 ------------------
 
