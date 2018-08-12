@@ -710,6 +710,8 @@ typedef struct {
     comfun_t exec;
     char *use;
     char *help;
+    uint16_t width1;
+    uint16_t width2;
 } comdef_t;
 
 /* FIXME should be at the top of the file but we need comdef_t */
@@ -1124,14 +1126,11 @@ void COMhelp(int argc, const char *argv[])
         /* Do a first pass on all the options for this section. Find out how
            wide the left and right columns need to be. */
         if (d->type == SEC) {
-            uint16_t tmp;
             if (section++)
                 putchar('\n');
             printf("%s:\n", d->help);
-            memcpy(&tmp, d->exec, sizeof(tmp));
-            width1 = tmp + OPTINDENT;
-            memcpy(&tmp, d->use, sizeof(tmp));
-            width2 = tmp;
+            width1 = d->width1 + OPTINDENT;
+            width2 = d->width2;
             if (width1 + 1 + width2 > TTYCOL)
                 width1 = TTYCOL - width2 - COLSPACING;
         }
@@ -1241,17 +1240,16 @@ static void opt_widths(void)
                 if (tmp != width2r)
                     /* Can't happen */
                     tmp = SHRT_MAX;
-                memcpy(current_section->com, &tmp, sizeof(tmp));
 
                 tmp = width1t;
                 if (tmp != width1t)
                     tmp = SHRT_MAX;
-                memcpy(current_section->exec, &tmp, sizeof(tmp));
+                current_section->width1 = tmp;
 
                 tmp = width2t;
                 if (tmp != width2t)
                     tmp = SHRT_MAX;
-                memcpy(current_section->use, &tmp, sizeof(tmp));
+                current_section->width2 = tmp;
             }
         }
 
