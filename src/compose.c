@@ -93,6 +93,27 @@ static int16_t CMPOloadPic(int32_t * size, struct WADINFO *rwad,
     return res;
 }
 
+/*
+** find a raw picture, for TX_START support.
+*/
+static void CMPOloadRawPic(int32_t * size, struct WADINFO *rwad,
+                           char *file, const char *DataDir,
+                           const char *Dir, const char *nam,
+                           const char *filenam)
+{
+    if (MakeFileName(file, DataDir, Dir, "", filenam, "gif") ||
+        MakeFileName(file, DataDir, Dir, "", filenam, "jpeg") ||
+        MakeFileName(file, DataDir, Dir, "", filenam, "jpg") ||
+        MakeFileName(file, DataDir, Dir, "", filenam, "png")) {
+
+        *size = WADRwriteLump(rwad, file);
+        return;
+    }
+
+    /* file has the last filename tried, i.e. NAME.png */
+    Warning("PC91", "could not find file %s, .gif, or .jpeg", file);
+}
+
 struct WADINFO *CMPOrwad;
 const char *CMPOwadout = NULL;
 void CMPOerrorAction(void)
@@ -385,6 +406,46 @@ void CMPOmakePWAD(const char *doomwad, WADTYPE type, const char *PWADname,
             start = WADRposition(&rwad);
             size = PNMwritePNAMEtoWAD(&rwad);
             WADRdirAddEntry(&rwad, start, size, "PNAMES");
+        }
+    }
+    /*
+    ** TX_START
+    ** textures  (patch or PNG format)
+    ** TX_END
+    */
+    if (select & BTEXTUR) {
+        start = size = 0;
+        if (TXTseekSection(TXT, "TX_START")) {
+            Phase("CM59", "Making TX_START textures");
+            FoundOne = false;
+            while (TXTentryParse
+                   (name, filenam, &X, &Y, &Repeat, TXT, true) == true) {
+                /* only add markers if we have some textures */
+                if (!FoundOne) {
+                    WADRalign4(&rwad);  /*align entry on int32_t word */
+                    start = WADRposition(&rwad);
+                    WADRdirAddEntry(&rwad, start, 0L, "TX_START");
+                    FoundOne = true;
+                }
+
+                WADRalign4(&rwad);  /*align entry on int32_t word */
+                start = WADRposition(&rwad);
+
+                /* when X value is > 0, insert as a raw lump (no conversion) */
+                if (X > 0) {
+                    CMPOloadRawPic(&size, &rwad, file, DataDir, "TX_START",
+                                   name, filenam);
+                } else {
+                    CMPOloadPic(&size, &rwad, file, DataDir, "TX_START",
+                                name, filenam, PGRAPH, X, Y);
+                }
+                WADRdirAddEntry(&rwad, start, size, name);
+            }
+            if (FoundOne) {
+                WADRalign4(&rwad);
+                start = WADRposition(&rwad);
+                WADRdirAddEntry(&rwad, start, 0L, "TX_END");
+            }
         }
     }
     /*

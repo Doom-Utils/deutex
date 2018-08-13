@@ -179,7 +179,7 @@ bool MakeFileName(char file[128], const char *path, const char *dir, const
     char name2[8]; /* AYM 1999-01-13: keep checker happy */
     /* deal with VILE strange name
     ** replace the VILE\
-    ** by          VIL^B
+    ** by          VILE^
     */
     Normalise(name2, name);
 
