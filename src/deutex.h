@@ -80,9 +80,8 @@ typedef int16_t IMGTYPE;
 #define PICGIF          (2)
 #define PICPPM          (3)
 #define PICWAD          (5)
-#ifdef HAVE_LIBPNG
 #define PICPNG          (6)
-#endif
+#define PICJPEG         (7)
 
 /*wad directory*/
 struct WADDIR {                 /*same as in doom */
@@ -139,6 +138,7 @@ typedef int16_t ENTRY;
 #define EMUSIC          0x0B00
 #define   EMUS          0x0B01
 #define   EMIDI         0x0B02
+#define ETXSTART        0x0C00
 #define EDATA           0x1000
 #define ESNEA           0x2000
 #define   ESNEAP        0x2001  /* Snea using PLAYPAL */

@@ -96,22 +96,23 @@ static int16_t CMPOloadPic(int32_t * size, struct WADINFO *rwad,
 /*
 ** find a raw picture, for TX_START support.
 */
-static void CMPOloadRawPic(int32_t * size, struct WADINFO *rwad,
+static bool CMPOloadRawPic(int32_t * size, struct WADINFO *rwad,
                            char *file, const char *DataDir,
                            const char *Dir, const char *nam,
                            const char *filenam)
 {
-    if (MakeFileName(file, DataDir, Dir, "", filenam, "gif") ||
-        MakeFileName(file, DataDir, Dir, "", filenam, "jpeg") ||
+    /* most ports support PNG, ZDoom also supports JPEG */
+    if (MakeFileName(file, DataDir, Dir, "", filenam, "jpeg") ||
         MakeFileName(file, DataDir, Dir, "", filenam, "jpg") ||
         MakeFileName(file, DataDir, Dir, "", filenam, "png")) {
 
         *size = WADRwriteLump(rwad, file);
-        return;
+        return true;
     }
 
     /* file has the last filename tried, i.e. NAME.png */
     Warning("PC91", "could not find file %s, .gif, or .jpeg", file);
+    return false;
 }
 
 struct WADINFO *CMPOrwad;
@@ -430,6 +431,7 @@ void CMPOmakePWAD(const char *doomwad, WADTYPE type, const char *PWADname,
 
                 WADRalign4(&rwad);  /*align entry on int32_t word */
                 start = WADRposition(&rwad);
+                size = 0;
 
                 /* when X value is > 0, insert as a raw lump (no conversion) */
                 if (X > 0) {

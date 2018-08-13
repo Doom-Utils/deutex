@@ -82,6 +82,44 @@ static bool XTRbmpSave(int16_t * pinsrX, int16_t * pinsrY,
 }
 
 /*
+** determine image format of a lump within TX_START..TX_END.
+** returns a PICXXX value, defaulting to PICNONE when no
+** specific image format matches the lump data.
+*/
+static IMGTYPE XTRpicFormat(struct WADDIR *entry, struct WADINFO *info)
+{
+    int32_t start = entry->start;
+    int32_t size = entry->size;
+
+    unsigned char buf[16];
+
+    memset(buf, 0, sizeof(buf));
+
+    if (size > 16)
+        size = 16;
+
+    WADRseek(info, start);
+    WADRreadBytes(info, buf, size);
+
+    /* PNG? */
+    if (buf[0] == 0x89 &&
+        buf[1] == 'P' && buf[2] == 'N' && buf[3] == 'G' &&
+        buf[4] == 0x0D && buf[5] == 0x0A && buf[6] == 0x1A) {
+        return PICPNG;
+    }
+
+    /* JPEG? */
+    if (buf[0] == 0xFF && buf[1] == 0xD8 &&
+        buf[2] == 0xFF && buf[3] >= 0xE0 &&
+        ((buf[6] == 'J' && buf[7] == 'F') ||
+         (buf[6] == 'E' && buf[7] == 'x'))) {
+        return PICJPEG;
+    }
+
+    return PICNONE;
+}
+
+/*
 ** extract entries from a WAD
 **
 ** Called with cusage == NULL, (-xtract) this function extracts
@@ -415,6 +453,62 @@ void XTRextractWAD(const char *doomwad, const char *DataDir, const char
                     free(buffer);
                     TXUwriteTexFile(file);
                     TXUfree();
+                }
+            }
+        }
+    }
+
+    /*
+    ** TX_START textures
+    */
+    if ((select & BTEXTUR) && cusage == NULL) {
+        Phase("EX70", "Extracting TX_START textures...");
+        EntryFound = false;
+        for (p = 0; p < pnb; p++) {
+            if (piden[p] == ETXSTART) {
+                IMGTYPE detect_type;
+
+                if (!EntryFound) {
+                    MakeDir(file, DataDir, "TX_START", "");
+                    TXTaddEmptyLine(TXT);
+                    TXTaddComment(TXT, "List of TX_START textures");
+                    TXTaddSection(TXT, "tx_start");
+                    EntryFound = true;
+                }
+
+                ostart = pwad.dir[p].start;
+                osize = pwad.dir[p].size;
+                insrX = insrY = 0;
+
+                detect_type = XTRpicFormat(&pdir[p], &pwad);
+
+                if (detect_type == PICNONE) {
+                    /* assume DOOM patch format */
+                    if (XTRbmpSave(&insrX, &insrY, &pdir[p], PGRAPH,
+                        DataDir, "TX_START", &pwad, Picture, WSafe,
+                        cusage) != true) {
+                            Warning("EX71", "Failed to write TX_START texture %s",
+                                    lump_name(pwad.dir[p].name));
+                    } else {
+                        TXTaddEntry(TXT, pdir[p].name, NULL, INVALIDINT,
+                                    INVALIDINT, false, false);
+                    }
+                } else {
+                    /* write PNG or JPEG as a raw file, no conversion */
+                    const char *ext = "PNG";
+                    if (detect_type == PICJPEG)
+                        ext = "JPG";
+
+                    res = MakeFileName(file, DataDir, "TX_START", "",
+                                       pdir[p].name, ext);
+                    if (WSafe && res) {
+                        Warning("EX73", "Will not overwrite file %s", file);
+                    } else {
+                        WADRsaveEntry(&pwad, p, file);
+                        Detail("EX74", "Saved lump as   %s", fname(file));
+                    }
+
+                    TXTaddEntry(TXT, pdir[p].name, NULL, 1, 0, false, true);
                 }
             }
         }

@@ -533,6 +533,48 @@ static void IDENTdirPatches(ENTRY * ids, struct WADINFO *info, char *Pnam,
 }
 
 /*
+** identifies graphics between TX_START and TX_END
+**
+** Precond: ids contains EZZZZ for unidentified entries
+*/
+static void IDENTdirTXSTART(ENTRY * ids, struct WADINFO *info)
+{
+    int16_t tx_start;
+    int16_t tx_end;
+    int16_t n;
+
+    ident_func = "IDENTdirTXSTART";
+    /*
+    ** check if there are TX_START textures
+    */
+    tx_start = WADRfindEntry(info, "TX_START");
+    tx_end = WADRfindEntry(info, "TX_END");
+
+    if (tx_start < 0 || tx_end < 0) {
+        if (tx_start >= 0)
+            Warning("ITX1", "TX_START exists without matching TX_END");
+        else if (tx_end >= 0)
+            Warning("ITX2", "TX_END exists without matching TX_START");
+        return;
+    }
+    if (tx_end < tx_start) {
+        Warning("ITX3", "TX_START and TX_END occur in wrong order");
+        return;
+    }
+
+    /*
+    ** declare TX_START textures
+    */
+    IDENTsetType(ids, info, tx_start, EVOID);
+    IDENTsetType(ids, info, tx_end, EVOID);
+
+    for (n = tx_end - 1; n > tx_start; n--) {
+        /* format is determined later, when extracting it */
+        IDENTsetType(ids, info, n, ETXSTART);
+    }
+}
+
+/*
 ** Ident unreferenced graphics
 */
 static void IDENTdirGraphics(ENTRY * ids, struct WADINFO *info)
@@ -803,6 +845,7 @@ ENTRY *IDENTentriesIWAD(struct WADINFO *info, char *Pnam, int32_t Pnamsz,
     */
     for (n = 0; n < info->ntry; n++)
         ids[n] = EZZZZ;
+    IDENTdirTXSTART(ids, info); /* fast */
     IDENTdirSprites(ids, info, false);  /*fast */
     IDENTdirFlats(ids, info);   /*fast */
     IDENTdirLevels(ids, info);  /*fast */
@@ -848,6 +891,7 @@ ENTRY *IDENTentriesPWAD(struct WADINFO * info, char *Pnam, int32_t Pnamsz)
     */
     for (n = 0; n < info->ntry; n++)
         ids[n] = EZZZZ;
+    IDENTdirTXSTART(ids, info);
     IDENTdirSprites(ids, info, true);
     IDENTdirFlats(ids, info);
     IDENTdirLevels(ids, info);
