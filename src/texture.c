@@ -85,7 +85,7 @@ int16_t PNMindexOfPatch(char *patch)
     int16_t idx;
     char name[8];
     Normalise(name, patch);
-    if (PNMok != true)
+    if (!PNMok)
         return -1;
     /*check index already exists */
     for (idx = 0; idx < PNMtop; idx++)
@@ -101,7 +101,7 @@ static int16_t PNMgetPatchIndex(char *patch)
 {
     int16_t idx;
     char name[8];
-    if (PNMok != true)
+    if (!PNMok)
         Bug("PA90", "PNMok");
     Normalise(name, patch);
     idx = PNMindexOfPatch(patch);
@@ -124,7 +124,7 @@ static int16_t PNMgetPatchIndex(char *patch)
 */
 void PNMgetPatchName(char name[8], int16_t index)
 {
-    if (PNMok != true)
+    if (!PNMok)
         Bug("PA91", "PNMok");
     if (index >= PNMtop)
         Bug("PA92", "PnmGP>");
@@ -142,7 +142,7 @@ int16_t PNMgetNbOfPatch(void)
 
 bool PNMisNew(int16_t idx)
 {
-    if (PNMok != true)
+    if (!PNMok)
         Bug("PA93", "PNMok");
     if (idx >= PNMtop)
         Bug("PA94", "PnmIN>");
@@ -163,7 +163,7 @@ int32_t PNMwritePNAMEtoWAD(struct WADINFO *info)
     int16_t idx;
     int32_t size = 0;
     char buffer[8];
-    if (PNMok != true)
+    if (!PNMok)
         Bug("PA95", "PNMok");
     /*Write the Number of entries */
     size += WADRwriteLong(info, PNMtop);
@@ -214,7 +214,7 @@ static void TXUdefineCurTex(char name[8], int16_t X, int16_t Y,
                             bool Redefn)
 {
     int t;
-    if (TXUok != true)
+    if (!TXUok)
         Bug("TX89", "TXUok");
     TXUtexCur = TXUtexTop;      /*set current entry */
     TXUtexTop += 1;             /*find a free position */
@@ -247,7 +247,7 @@ static void TXUdefineCurTex(char name[8], int16_t X, int16_t Y,
 static void TXUaddPatchToCurTex(int16_t pindex, int16_t ofsX, int16_t ofsY)
 {
     char pname[8];
-    if (TXUok != true)
+    if (!TXUok)
         Bug("TX91", "TXUok");
     if (TXUpatTop >= TXUpatMax) {
         TXUpatMax += NEWPATCHESDEF;
@@ -267,7 +267,7 @@ static void TXUaddPatchToCurTex(int16_t pindex, int16_t ofsX, int16_t ofsY)
 
 void TXUfree(void)
 {
-    if (TXUok != true)
+    if (!TXUok)
         Bug("TX93", "TXUok");
     free(TXUpat);
     free(TXUtex);
@@ -277,7 +277,7 @@ void TXUfree(void)
 bool TXUexist(char *Name)
 {
     int t;
-    if (TXUok != true)
+    if (!TXUok)
         Bug("TX94", "TXUok");
     for (t = 0; t < TXUtexTop; t++) {
         if (strncmp(TXUtex[t].Name, Name, 8) == 0)
@@ -311,7 +311,7 @@ int32_t TXUwriteTEXTUREtoWAD(struct WADINFO * info)
     int32_t size, ofsTble;
     int32_t NbOfTex;
 
-    if (TXUok != true)
+    if (!TXUok)
         Bug("TX95", "TXUok");
     if (TXUtexTop < 1)
         Bug("TX96", "TxuNTx");
@@ -541,7 +541,7 @@ bool TXUcheckTex(int16_t npatch, int16_t * PszX)
     int16_t bit, C, b;          /*bit test */
     int16_t Meduza;
     bool Res = true;
-    if (TXUok != true)
+    if (!TXUok)
         Bug("TX23", "TXUok");
     Output("Checking textures\n");
     if (TXUtexTop < 1)
@@ -608,7 +608,7 @@ bool TXUcheckTex(int16_t npatch, int16_t * PszX)
                     }
                 }
             }
-            if (found == false) {
+            if (!found) {
                 /* FIXME assign a code to this message */
                 Output("Warning: Empty column %d in texture %s\n", col,
                        lump_name(TXUtex[t].Name));
@@ -645,7 +645,7 @@ bool TXUcheckTex(int16_t npatch, int16_t * PszX)
 */
 void TXUfakeTex(char Name[8])
 {
-    if (TXUok != true)
+    if (!TXUok)
         Bug("TX27", "TXUok");
     /*if already exist */
     if (TXUexist(Name))
@@ -670,7 +670,7 @@ void TXUfakeTex(char Name[8])
 void TXUlistTex(void)
 {
     int16_t t;
-    if (TXUok != true)
+    if (!TXUok)
         Bug("TX28", "TXUok");
     for (t = 0; t < TXUtexTop; t++) {
         if (TXUtex[t].Name[0] != '\0')
@@ -687,7 +687,7 @@ void TXUwriteTexFile(const char *file)
     char pname[8];
     FILE *out;
 
-    if (TXUok != true)
+    if (!TXUok)
         Bug("TX29", "TXUok");
     if (TXUtexTop < 1)
         Bug("TX30", "TxunTx");
@@ -734,7 +734,7 @@ void TXUreadTexFile(const char *file, bool Redefn)
     struct TXTFILE *TXT;
     TXT = TXTopenR(file, 0);
     for (t = 0; t < MAXTEXTURES; t++) {
-        if (TXTreadTexDef(TXT, tname, &xsize, &ysize) == false)
+        if (!TXTreadTexDef(TXT, tname, &xsize, &ysize))
             break;
         /* check X size */
         if (xsize < 0)

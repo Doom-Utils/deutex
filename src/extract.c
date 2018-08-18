@@ -297,7 +297,7 @@ void XTRextractWAD(const char *doomwad, const char *DataDir, const char
             switch (piden[p] & EMASK) {
             case ELEVEL:
             case EMAP:
-                if (EntryFound != true) {
+                if (!EntryFound) {
                     MakeDir(file, DataDir, "LEVELS", "");
                     TXTaddEmptyLine(TXT);
                     TXTaddComment(TXT, "List of levels");
@@ -340,7 +340,7 @@ void XTRextractWAD(const char *doomwad, const char *DataDir, const char
         osize = 0;
         for (EntryFound = false, p = 0; p < pnb; p++) {
             if ((piden[p] & EMASK) == ELUMP) {
-                if (EntryFound != true) {
+                if (!EntryFound) {
                     MakeDir(file, DataDir, "LUMPS", "");
                     TXTaddEmptyLine(TXT);
                     TXTaddComment(TXT, "List of data Lumps");
@@ -362,7 +362,7 @@ void XTRextractWAD(const char *doomwad, const char *DataDir, const char
                                        DataDir, "LUMPS", &pwad, Picture,
                                        WSafe, cusage);
                     }
-                    if (res != true) {
+                    if (!res) {
                         /*normal lumps */
                         res =
                             MakeFileName(file, DataDir, "LUMPS", "",
@@ -390,7 +390,7 @@ void XTRextractWAD(const char *doomwad, const char *DataDir, const char
         EntryFound = false;
         for (p = 0; p < pnb; p++) {
             if (piden[p] == ETEXTUR + 1) {
-                if (EntryFound != true) {
+                if (!EntryFound) {
                     MakeDir(file, DataDir, "TEXTURES", "");
                     EntryFound = true;
                 }
@@ -428,7 +428,7 @@ void XTRextractWAD(const char *doomwad, const char *DataDir, const char
         }
         for (p = 0; p < pnb; p++) {
             if (piden[p] == ETEXTUR + 2) {
-                if (EntryFound != true) {
+                if (!EntryFound) {
                     MakeDir(file, DataDir, "TEXTURES", "");
                     EntryFound = true;
                 }
@@ -483,9 +483,9 @@ void XTRextractWAD(const char *doomwad, const char *DataDir, const char
 
                 if (detect_type == PICNONE) {
                     /* assume DOOM patch format */
-                    if (XTRbmpSave(&insrX, &insrY, &pdir[p], PGRAPH,
+                    if (!XTRbmpSave(&insrX, &insrY, &pdir[p], PGRAPH,
                         DataDir, "TX_START", &pwad, Picture, WSafe,
-                        cusage) != true) {
+                        cusage)) {
                             Warning("EX71", "Failed to write TX_START texture %s",
                                     lump_name(pwad.dir[p].name));
                     } else {
@@ -522,7 +522,7 @@ void XTRextractWAD(const char *doomwad, const char *DataDir, const char
         osize = 0;
         for (EntryFound = false, p = 0; p < pnb; p++) {
             if ((piden[p] & EMASK) == ESOUND) {
-                if (EntryFound != true) {
+                if (!EntryFound) {
                     MakeDir(file, DataDir, "SOUNDS", "");
                     TXTaddEmptyLine(TXT);
                     TXTaddComment(TXT, "List of Sounds");
@@ -605,7 +605,7 @@ void XTRextractWAD(const char *doomwad, const char *DataDir, const char
         osize = 0;
         for (EntryFound = false, p = 0; p < pnb; p++) {
             if ((piden[p] & EMASK) == EMUSIC) {
-                if (EntryFound != true) {
+                if (!EntryFound) {
                     MakeDir(file, DataDir, "MUSICS", "");
                     TXTaddEmptyLine(TXT);
                     TXTaddComment(TXT, "List of Musics");
@@ -649,7 +649,7 @@ void XTRextractWAD(const char *doomwad, const char *DataDir, const char
         osize = 0;
         for (EntryFound = false, p = 0; p < pnb; p++) {
             if ((piden[p] & EMASK) == EGRAPHIC) {
-                if (EntryFound != true && cusage == NULL) {
+                if (!EntryFound && cusage == NULL) {
                     MakeDir(file, DataDir, "GRAPHICS", "");
                 }
                 if ((ostart == pwad.dir[p].start)
@@ -662,7 +662,7 @@ void XTRextractWAD(const char *doomwad, const char *DataDir, const char
                     if (XTRbmpSave
                         (&insrX, &insrY, &pdir[p], PGRAPH, DataDir,
                          "GRAPHICS", &pwad, Picture, WSafe, cusage)) {
-                        if (EntryFound != true) {
+                        if (!EntryFound) {
                             TXTaddEmptyLine(TXT);
                             TXTaddComment(TXT,
                                           "List of Pictures (with insertion point)");
@@ -714,7 +714,7 @@ void XTRextractWAD(const char *doomwad, const char *DataDir, const char
         osize = 0;
         for (EntryFound = false, p = 0; p < pnb; p++) {
             if ((piden[p] & EMASK) == ESPRITE) {
-                if (EntryFound != true) {
+                if (!EntryFound) {
                     if (cusage == NULL)
                         MakeDir(file, DataDir, "SPRITES", "");
                     TXTaddEmptyLine(TXT);
@@ -729,10 +729,10 @@ void XTRextractWAD(const char *doomwad, const char *DataDir, const char
                 } else {
                     ostart = pwad.dir[p].start;
                     osize = pwad.dir[p].size;
-                    if (XTRbmpSave
+                    if (!XTRbmpSave
                         (&insrX, &insrY, &pdir[p], PSPRIT, DataDir,
                          "SPRITES", &pwad, Picture, WSafe,
-                         cusage) != true) {
+                         cusage)) {
                         Warning("EX41", "Failed to write sprite %s",
                                 lump_name(pwad.dir[p].name));
                     } else {
@@ -751,7 +751,7 @@ void XTRextractWAD(const char *doomwad, const char *DataDir, const char
         Phase("EX45", "Extracting patches...");
         for (EntryFound = false, p = 0; p < pnb; p++) {
             if ((piden[p] & EMASK) == EPATCH) {
-                if (EntryFound != true) {
+                if (!EntryFound) {
                     if (cusage == NULL)
                         MakeDir(file, DataDir, "PATCHES", "");
                     TXTaddEmptyLine(TXT);
@@ -786,7 +786,7 @@ void XTRextractWAD(const char *doomwad, const char *DataDir, const char
         osize = 0;
         for (EntryFound = false, p = 0; p < pnb; p++) {
             if ((piden[p] & EMASK) == EFLAT) {
-                if (EntryFound != true) {
+                if (!EntryFound) {
                     if (cusage == NULL)
                         MakeDir(file, DataDir, "FLATS", "");
                     TXTaddEmptyLine(TXT);
@@ -801,9 +801,9 @@ void XTRextractWAD(const char *doomwad, const char *DataDir, const char
                 } else {
                     ostart = pwad.dir[p].start;
                     osize = pwad.dir[p].size;
-                    if (XTRbmpSave
+                    if (!XTRbmpSave
                         (&insrX, &insrY, &pdir[p], PFLAT, DataDir, "FLATS",
-                         &pwad, Picture, WSafe, cusage) != true) {
+                         &pwad, Picture, WSafe, cusage)) {
                         if (strncmp(pwad.dir[p].name, "F_SKY1", 6) != 0)
                             Warning("EX51", "Failed to write flat %s",
                                     lump_name(pwad.dir[p].name));
@@ -824,7 +824,7 @@ void XTRextractWAD(const char *doomwad, const char *DataDir, const char
 
         for (EntryFound = false, p = 0; p < pnb; p++) {
             if (piden[p] == type) {
-                if (EntryFound != true) {
+                if (!EntryFound) {
                     char comment[40];
                     if (cusage == NULL)
                         MakeDir(file, DataDir, entry_type_dir(type), "");
@@ -842,11 +842,11 @@ void XTRextractWAD(const char *doomwad, const char *DataDir, const char
                 } else {
                     ostart = pwad.dir[p].start;
                     osize = pwad.dir[p].size;
-                    if (XTRbmpSave
+                    if (!XTRbmpSave
                         (&insrX, &insrY, &pdir[p],
                          entry_type_pictype(type), DataDir,
                          entry_type_dir(type), &pwad, Picture, WSafe,
-                         cusage) != true) {
+                         cusage)) {
                         Warning("EX56", "Failed to write %.20s %s",
                                 entry_type_name(type),
                                 lump_name(pwad.dir[p].name));
@@ -868,7 +868,7 @@ void XTRextractWAD(const char *doomwad, const char *DataDir, const char
 
         for (EntryFound = false, p = 0; p < pnb; p++) {
             if (piden[p] == type) {
-                if (EntryFound != true) {
+                if (!EntryFound) {
                     char comment[40];
                     if (cusage == NULL)
                         MakeDir(file, DataDir, entry_type_dir(type), "");
@@ -886,11 +886,11 @@ void XTRextractWAD(const char *doomwad, const char *DataDir, const char
                 } else {
                     ostart = pwad.dir[p].start;
                     osize = pwad.dir[p].size;
-                    if (XTRbmpSave
+                    if (!XTRbmpSave
                         (&insrX, &insrY, &pdir[p],
                          entry_type_pictype(type), DataDir,
                          entry_type_dir(type), &pwad, Picture, WSafe,
-                         cusage) != true) {
+                         cusage)) {
                         Warning("EX61", "Failed to write %.20s %s",
                                 entry_type_name(type),
                                 lump_name(pwad.dir[p].name));
@@ -912,7 +912,7 @@ void XTRextractWAD(const char *doomwad, const char *DataDir, const char
 
         for (EntryFound = false, p = 0; p < pnb; p++) {
             if (piden[p] == type) {
-                if (EntryFound != true) {
+                if (!EntryFound) {
                     char comment[40];
                     if (cusage == NULL)
                         MakeDir(file, DataDir, entry_type_dir(type), "");
@@ -1024,7 +1024,7 @@ void XTRgetEntry(const char *doomwad, const char *DataDir,
     Phase("GE02", "%s: %s: extracting", fname(wadin), lump_name(entry));
     Entry = WADRreadEntry(&pwad, e, &Entrysz);
     /*try graphic */
-    if (Found != true)
+    if (!Found)
         if (Entrysz > 8) {
             switch (Picture) {
 #ifdef HAVE_LIBPNG
@@ -1067,7 +1067,7 @@ void XTRgetEntry(const char *doomwad, const char *DataDir,
                 }
             }
         }
-    if (Found != true)
+    if (!Found)
         if (peek_i16_le(Entry) == 3)
             if (Entrysz >= 8 + peek_i32_le(Entry + 4)) {
                 /*save as sound */
@@ -1083,7 +1083,7 @@ void XTRgetEntry(const char *doomwad, const char *DataDir,
                 SNDsaveSound(file, Entry, Entrysz, Sound, Name);
                 Found = true;
             }
-    if (Found != true) {        /*save as lump */
+    if (!Found) {        /*save as lump */
         MakeFileName(file, DataDir, "", "", Name, "LMP");
         WADRsaveEntry(&pwad, e, file);
     }

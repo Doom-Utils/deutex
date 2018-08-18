@@ -731,7 +731,7 @@ static void IDENTdirSounds(ENTRY * ids, struct WADINFO *info, bool Doom)
                 /*works only for DOOM, not HERETIC */
                 if (strncmp(info->dir[n].name, "DS", 2) == 0) {
                     IDENTsetType(ids, info, n, ESNDWAV);
-                } else if (Doom == false) {
+                } else if (!Doom) {
                     WADRseek(info, info->dir[n].start);
                     if (WADRreadShort(info) == 0x3)
                         if (WADRreadShort(info) == 0x2B11)
@@ -833,7 +833,7 @@ ENTRY *IDENTentriesIWAD(struct WADINFO *info, char *Pnam, int32_t Pnamsz,
     bool Doom = false;
     ENTRY *ids;
     Phase("ID50", "IWAD entry identification...");
-    if (info->ok != true)
+    if (!info->ok)
         Bug("ID51", "IdnOeI");
     ids = (ENTRY *) Malloc((info->ntry) * sizeof(ENTRY));
     if (WADRfindEntry(info, "ENDTEXT") < 0)     /*Not Heretic */
@@ -859,7 +859,7 @@ ENTRY *IDENTentriesIWAD(struct WADINFO *info, char *Pnam, int32_t Pnamsz,
     if (WADRfindEntry(info, "ENDSTRF") >= 0) {
         IDENTdirSscripts(ids, info);
     }
-    if (Fast != true) {
+    if (!Fast) {
         IDENTdirSounds(ids, info, Doom);        /*slow! */
         IDENTdirGraphics2(ids, info, true);     /*slow! */
     }
@@ -883,7 +883,7 @@ ENTRY *IDENTentriesPWAD(struct WADINFO * info, char *Pnam, int32_t Pnamsz)
     int16_t n;
     ENTRY *ids;
     Phase("ID10", "PWAD entry identification...");
-    if (info->ok != true)
+    if (!info->ok)
         Bug("ID11", "IdnOeP");
     ids = (ENTRY *) Malloc((info->ntry) * sizeof(ENTRY));
     /*

@@ -342,7 +342,7 @@ void CheckTexture(char *tex, bool IsDef)
         if (IsDef) {    /*if we only wish to declare the tex */
             TXUfakeTex(Name);
         } else {
-            if (TXUexist(Name) == false)
+            if (!TXUexist(Name))
                 Output("Warning: undefined sidedef %s\n", lump_name(Name));
         }
     }
@@ -660,7 +660,7 @@ void XTRcompakWAD(const char *DataDir, const char *wadin,
     bbas = (char *) Malloc(MEMORYCACHE);
     btst = (char *) Malloc(MEMORYCACHE);
     for (bas = 0; bas < pnb; bas++)
-        if (psame[bas] == false) {      /*skip already treated */
+        if (!psame[bas]) {      /*skip already treated */
             size = pdir[bas].size;
             if (pdir[bas].start <= 8)
                 continue;

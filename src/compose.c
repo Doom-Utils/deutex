@@ -43,7 +43,7 @@ static bool CMPOcopyFromWAD(int32_t * size, struct WADINFO *rwad,
 {
     static struct WADINFO pwad;
     int16_t entry;
-    if (MakeFileName(file, DataDir, Dir, "", filenam, "WAD") != true)
+    if (!MakeFileName(file, DataDir, Dir, "", filenam, "WAD"))
         return false;
     WADRopenR(&pwad, file);
     entry = WADRfindEntry(&pwad, nam);
@@ -183,8 +183,8 @@ void CMPOmakePWAD(const char *doomwad, WADTYPE type, const char *PWADname,
                 if (p < 0)
                     ProgError("CM11", "Illegal level name %s",
                               lump_name(name));
-                if (MakeFileName
-                    (file, DataDir, "LEVELS", "", filenam, "WAD") != true)
+                if (!MakeFileName
+                    (file, DataDir, "LEVELS", "", filenam, "WAD"))
                     ProgError("CM12", "Can't find level WAD %s",
                               fname(file));
                 Detail("CM13", "Reading level WAD file %s", fname(file));
@@ -252,7 +252,7 @@ void CMPOmakePWAD(const char *doomwad, WADTYPE type, const char *PWADname,
             Phase("CM30", "Making lumps");
             while (TXTentryParse
                    (name, filenam, &X, &Y, &Repeat, TXT, false)) {
-                if (Repeat != true) {
+                if (!Repeat) {
                     WADRalign4(&rwad);  /*align entry on int32_t word */
                     start = WADRposition(&rwad);
                     if (MakeFileName
@@ -264,10 +264,9 @@ void CMPOmakePWAD(const char *doomwad, WADTYPE type, const char *PWADname,
                                         "LUMPS", name, filenam, PLUMP, X,
                                         Y);
                         if (Picture == PICNONE)
-                            if (CMPOcopyFromWAD
+                            if (!CMPOcopyFromWAD
                                 (&size, &rwad, DataDir, "LUMPS", name,
-                                 filenam)
-                                != true)
+                                 filenam))
                                 ProgError("CM31",
                                           "Can't find lump or picture file %s",
                                           file);
@@ -457,7 +456,7 @@ void CMPOmakePWAD(const char *doomwad, WADTYPE type, const char *PWADname,
             Phase("CM60", "Making sounds");
             while (TXTentryParse
                    (name, filenam, &X, &Y, &Repeat, TXT, false)) {
-                if (Repeat != true) {
+                if (!Repeat) {
                     WADRalign4(&rwad);  /*align entry on int32_t word */
                     start = WADRposition(&rwad);
                     if (MakeFileName
@@ -470,9 +469,9 @@ void CMPOmakePWAD(const char *doomwad, WADTYPE type, const char *PWADname,
                             (file, DataDir, "SOUNDS", "", filenam, "WAV")) {
                             size = SNDcopyInWAD(&rwad, file, SNDWAV);
                         } else {
-                            if (CMPOcopyFromWAD
+                            if (!CMPOcopyFromWAD
                                 (&size, &rwad, DataDir, "SOUNDS", name,
-                                 filenam) != true) {
+                                 filenam)) {
                                 ProgError("CM63",
                                           "Can't find sound %s, WAV",
                                           file);
@@ -496,7 +495,7 @@ void CMPOmakePWAD(const char *doomwad, WADTYPE type, const char *PWADname,
             Phase("CM65", "Making musics");
             while (TXTentryParse
                    (name, filenam, &X, &Y, &Repeat, TXT, false)) {
-                if (Repeat != true) {
+                if (!Repeat) {
                     WADRalign4(&rwad);  /*align entry on int32_t word */
                     start = WADRposition(&rwad);
                     /*Music */
@@ -512,9 +511,9 @@ void CMPOmakePWAD(const char *doomwad, WADTYPE type, const char *PWADname,
                             Detail("CM68", "Reading music file %s",
                                    fname(file));
                         } else
-                            if (CMPOcopyFromWAD
+                            if (!CMPOcopyFromWAD
                                 (&size, &rwad, DataDir, "MUSICS", name,
-                                 filenam) != true)
+                                 filenam))
                                 ProgError("CM67", "Can't find music %s", file);
                 }
                 WADRdirAddEntry(&rwad, start, size, name);
@@ -530,7 +529,7 @@ void CMPOmakePWAD(const char *doomwad, WADTYPE type, const char *PWADname,
             Phase("CM70", "Making graphics");
             while (TXTentryParse
                    (name, filenam, &X, &Y, &Repeat, TXT, true)) {
-                if (Repeat != true) {
+                if (!Repeat) {
                     WADRalign4(&rwad);  /*align entry on int32_t word */
                     start = WADRposition(&rwad);
                     Picture =
@@ -555,10 +554,10 @@ void CMPOmakePWAD(const char *doomwad, WADTYPE type, const char *PWADname,
             while (TXTentryParse
                    (name, filenam, &X, &Y, &Repeat, TXT, true)) {
                 /* first sprite seen? */
-                if ((Repeat != true) || (FoundOne != true)) {
+                if (!Repeat || !FoundOne) {
                     WADRalign4(&rwad);  /*align entry on int32_t word */
                     start = WADRposition(&rwad);
-                    if (FoundOne != true) {
+                    if (!FoundOne) {
                         if (type == IWAD)
                             WADRdirAddEntry(&rwad, start, 0L, "S_START");
                         else
@@ -598,10 +597,10 @@ void CMPOmakePWAD(const char *doomwad, WADTYPE type, const char *PWADname,
             Phase("CM80", "Making patches");
             while (TXTentryParse
                    (name, filenam, &X, &Y, &Repeat, TXT, true)) {
-                if ((Repeat != true) || (FoundOne != true)) {
+                if (!Repeat || !FoundOne) {
                     WADRalign4(&rwad);  /*align entry on int32_t word */
                     start = WADRposition(&rwad);
-                    if (FoundOne == false) {
+                    if (!FoundOne) {
                         if (type == IWAD) {
                             WADRdirAddEntry(&rwad, start, 0L, "P_START");
                             WADRdirAddEntry(&rwad, start, 0L, "P1_START");
@@ -621,7 +620,7 @@ void CMPOmakePWAD(const char *doomwad, WADTYPE type, const char *PWADname,
         */
         nbPatchs = PNMgetNbOfPatch();
         for (p = 0; p < nbPatchs; p++) {
-            if (PNMisNew(p) != true) {
+            if (!PNMisNew(p)) {
                 continue;       /*if old patch, forget it */
             }
             PNMgetPatchName(name, p);
@@ -643,7 +642,7 @@ void CMPOmakePWAD(const char *doomwad, WADTYPE type, const char *PWADname,
                                 name, filenam, PPATCH, INVALIDINT,
                                 INVALIDINT);
                 if (Picture != PICNONE) {
-                    if (FoundOne == false) {
+                    if (!FoundOne) {
                         Phase("CM82", "Making patches");
                         if (type == IWAD) {
                             WADRdirAddEntry(&rwad, start, 0L, "P_START");
@@ -686,12 +685,12 @@ void CMPOmakePWAD(const char *doomwad, WADTYPE type, const char *PWADname,
             FoundOne = false;
             while (TXTentryParse
                    (name, filenam, &X, &Y, &Repeat, TXT, false)) {
-                if ((Repeat != true) || (FoundOne != true)) {
+                if (!Repeat || !FoundOne) {
                     /*align entry on int32_t word */
                     WADRalign4(&rwad);
 
                     start = WADRposition(&rwad);
-                    if (FoundOne == false) {
+                    if (!FoundOne) {
                         if (type == IWAD) {
                             WADRdirAddEntry(&rwad, start, 0L, "F_START");
                             WADRdirAddEntry(&rwad, start, 0L, "F1_START");

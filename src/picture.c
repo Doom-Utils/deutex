@@ -714,7 +714,7 @@ static char *PICtoRAW(int16_t * prawX, int16_t * prawY, int16_t * pXinsr,
             } else {
                 y = *post++;
                 post_length = *post++;
-                if (is_first_254 == false) {    //if we are in relative offset mode
+                if (!is_first_254) {    //if we are in relative offset mode
                     y += realY;
                     realY = y;
                 }

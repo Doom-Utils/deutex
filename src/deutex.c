@@ -579,7 +579,7 @@ void COMiwad(int argc, const char *argv[])
 void COMmake(int argc, const char *argv[])
 {
     const char *wadinf, *wadout;
-    if (WadInfOk == false) {
+    if (!WadInfOk) {
         MakeFileName(WadInf, DataDir, "", "", "WADINFO", "TXT");
     }
     if (argc <= 2) {
@@ -597,7 +597,7 @@ void COMmake(int argc, const char *argv[])
 void COMxtra(int argc, const char *argv[])
 {
     const char *wadinf, *wadin;
-    if (WadInfOk == false) {
+    if (!WadInfOk) {
         MakeFileName(WadInf, DataDir, "", "", "WADINFO", "TXT");
     }
     if (argc <= 1) {
@@ -647,7 +647,7 @@ void COMusedidx(int argc, const char *argv[])
 {
     const char *wadinf, *wadin;
     cusage_t *cusage = NULL;
-    if (WadInfOk == false) {
+    if (!WadInfOk) {
         /* Not used anyway */
         MakeFileName(WadInf, DataDir, "", "", "WADINFO", "TXT");
     }

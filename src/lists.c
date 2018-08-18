@@ -302,7 +302,7 @@ static void LISaddSprite(struct WADDIR *dir, bool Warn)
                 LISdeleteSprite(dir[0].name, dir[0].name[6],
                                 dir[0].name[7]);
     }
-    if ((Okay == false) && Warn) {
+    if (!Okay && Warn) {
         Warning("LI11", "Entry %s might be ignored by the game",
                 lump_name(dir[0].name));
     }
@@ -414,7 +414,7 @@ struct WADDIR *LISmergeDir(int32_t * pNtry, bool Append, bool Complain,
     /*
     ** select Sprites markers  (tricky hack!)
     */
-    refwad = ((Append != true) || (select & BSPRITE)) ? iwad : pwad;
+    refwad = (!Append || (select & BSPRITE)) ? iwad : pwad;
     if (WADRfindEntry(refwad, "S_END") >= 0) {
         /*full sprite list is here */
         S_END |= X_END;
@@ -432,7 +432,7 @@ struct WADDIR *LISmergeDir(int32_t * pNtry, bool Append, bool Complain,
     /*
     ** select Patches markers  (tricky hack!)
     */
-    refwad = (Append != true) ? iwad : pwad;
+    refwad = (!Append) ? iwad : pwad;
     if (WADRfindEntry(refwad, "P_END") >= 0) {
         /*full patch list is here */
         P_END |= X_END;
@@ -450,7 +450,7 @@ struct WADDIR *LISmergeDir(int32_t * pNtry, bool Append, bool Complain,
     /*
     ** select Flats markers  (tricky hack!)
     */
-    refwad = ((Append != true) || (select & BFLAT)) ? iwad : pwad;
+    refwad = (!Append || (select & BFLAT)) ? iwad : pwad;
     if (WADRfindEntry(refwad, "F_END") >= 0) {
         /*full flat list is here */
         F_END |= X_END;
@@ -496,7 +496,7 @@ struct WADDIR *LISmergeDir(int32_t * pNtry, bool Append, bool Complain,
         switch (type & EMASK) {
         case ELEVEL:
         case EMAP:
-            if (Append == false) {
+            if (!Append) {
                 /*APPEND doesn't need old enties */
                 if (select & BLEVEL) {
                     for (found = 1; found < 11; found++) {
@@ -515,14 +515,14 @@ struct WADDIR *LISmergeDir(int32_t * pNtry, bool Append, bool Complain,
         case EMUSIC:
         case ESOUND:
         case EDATA:
-            if (Append == false) {
+            if (!Append) {
                 /*APPEND doesn't need old enties */
                 LISadd(&LISlmp, &(idir[i]));
             }
             break;
         case EPATCH:
             /*if(AllPat!=true) type=ELUMP; */
-            if (Append == false) {
+            if (!Append) {
                 /*APPEND doesn't need old enties */
                 if (select & BPATCH) {
                     LISadd(&LISpat, &(idir[i]));
@@ -585,7 +585,7 @@ struct WADDIR *LISmergeDir(int32_t * pNtry, bool Append, bool Complain,
             break;
         case EDATA:
         case ELUMP:
-            if ((Append != true) && Complain)
+            if (!Append && Complain)
                 /*warn if missing */
                 LISsubstit(&LISlmp, &(pdir[p]));
             else
@@ -594,7 +594,7 @@ struct WADDIR *LISmergeDir(int32_t * pNtry, bool Append, bool Complain,
             break;
         case ETEXTUR:
         case EPNAME:
-            if ((Append != true) && Complain)
+            if (!Append && Complain)
                 /*warn if missing */
                 LISsubstit(&LISlmp, &(pdir[p]));
             else
@@ -602,7 +602,7 @@ struct WADDIR *LISmergeDir(int32_t * pNtry, bool Append, bool Complain,
                 LISmove(&LISlmp, &(pdir[p]));
             break;
         case ESOUND:
-            if ((Append != true) && Complain)
+            if (!Append && Complain)
                 /*warn if missing */
                 LISsubstit(&LISlmp, &(pdir[p]));
             else
@@ -610,7 +610,7 @@ struct WADDIR *LISmergeDir(int32_t * pNtry, bool Append, bool Complain,
                 LISmove(&LISlmp, &(pdir[p]));
             break;
         case EMUSIC:
-            if ((Append != true) && Complain)
+            if (!Append && Complain)
                 /*warn if missing */
                 LISsubstit(&LISlmp, &(pdir[p]));
             else
@@ -619,14 +619,14 @@ struct WADDIR *LISmergeDir(int32_t * pNtry, bool Append, bool Complain,
             break;
         case EGRAPHIC:
             if (NoSprite) {
-                /*special: look for sprites identfied as graphics */
-                if (LISfindRplc(&LISspr, &(pdir[p])) == false) {
+                /*special: look for sprites identified as graphics */
+                if (!LISfindRplc(&LISspr, &(pdir[p]))) {
                     /*not a sprite. add in lumps */
                     LISmove(&LISlmp, &(pdir[p]));
                 }
             } else {
                 /*normal */
-                if ((Append != true) && Complain)
+                if (!Append && Complain)
                     /*warn if missing */
                     LISsubstit(&LISlmp, &(pdir[p]));
                 else

@@ -74,7 +74,7 @@ static uint8_t COLpalMatch(uint8_t R, uint8_t G, uint8_t B)
 {
     int16_t i, test, min = 0x7FFF;
     uint8_t idxmin = '\0';
-    if (COLok != true)
+    if (!COLok)
         Bug("PL24", "COLok");
     for (i = 0; i < 256; i++) {
         if ((uint8_t) i != COLinvisib) {
@@ -235,7 +235,7 @@ void COLinit(uint8_t invR, uint8_t invG, uint8_t invB, char *Colors,
 
 void COLfree(void)
 {
-    if (COLok != true)
+    if (!COLok)
         Bug("PL99", "COLok");
     COLok = false;
     free(COLpal);
@@ -246,14 +246,14 @@ void COLfree(void)
 
 uint8_t COLinvisible(void)
 {
-    if (COLok != true)
+    if (!COLok)
         Bug("PL27", "COLok");
     return COLinvisib;
 }
 
 struct PIXEL *COLdoomPalet(void)
 {
-    if (COLok != true)
+    if (!COLok)
         Bug("PL20", "COLok");
     return COLpal;
 }
@@ -261,7 +261,7 @@ struct PIXEL *COLdoomPalet(void)
 uint8_t COLindex(uint8_t R, uint8_t G, uint8_t B, uint8_t index)
 {
     int16_t i;
-    if (COLok != true)
+    if (!COLok)
         Bug("PL23", "COLok");
     /*check for invisible color */
     if (R == COLinv.R && G == COLinv.G && B == COLinv.B)
