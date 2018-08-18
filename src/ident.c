@@ -360,7 +360,7 @@ static void IDENTdirSprites(ENTRY * ids, struct WADINFO *info, bool Check)
                 break;          /*last sprite */
             if (info->dir[n].size < 8)
                 break;          /*last sprite */
-            if (Check == true) {
+            if (Check) {
                 if (IDENTgraphic(info, n) == 0)
                     break;
             }
@@ -505,7 +505,7 @@ static void IDENTdirPatches(ENTRY * ids, struct WADINFO *info, char *Pnam,
     ** check for lost patches
     **
     */
-    if (Check == true) {        /*checkif PNAMES is redefined */
+    if (Check) {        /*checkif PNAMES is redefined */
         n = WADRfindEntry(info, "PNAMES");
         if (n >= 0) {
             Pnames = (char *) Malloc(info->dir[n].size);
@@ -616,7 +616,7 @@ static void IDENTdirGraphics2(ENTRY * ids, struct WADINFO *info,
                 } else if (strncmp(info->dir[n].name, "ST", 2)
                            == 0) {
                     IDENTsetType(ids, info, n, EGRAPHIC);
-                } else if (Check == true) {
+                } else if (Check) {
                     int is_picture = IDENTgraphic(info, n);
                     int is_snea = IDENTsnea(info, n);
                     /* Looks more like a picture */
@@ -682,7 +682,7 @@ static void IDENTdirPCSounds(ENTRY * ids, struct WADINFO *info, bool Check)
         if (ids[n] == EZZZZ) {
             if (info->dir[n].size > 4)  /*works only for DOOM, not HERETIC */
                 if (strncmp(info->dir[n].name, "DP", 2) == 0) {
-                    if (Check == true) {
+                    if (Check) {
                         WADRseek(info, info->dir[n].start);
                         if (WADRreadShort(info) == 0x0)
                             IDENTsetType(ids, info, n, ESNDPC);

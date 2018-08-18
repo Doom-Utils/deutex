@@ -231,7 +231,7 @@ static void TXUdefineCurTex(char name[8], int16_t X, int16_t Y,
     /*check if we redefine other textures, and overide them. */
     for (t = 0; t < TXUtexCur; t++) {
         if (strncmp(TXUtex[t].Name, name, 8) == 0) {
-            if (Redefn == true) {
+            if (Redefn) {
                 TXUtex[t].Name[0] = '\0';
                 Detail("TX90", "Warning: texture %s is redefined",
                        lump_name(name));
@@ -648,7 +648,7 @@ void TXUfakeTex(char Name[8])
     if (TXUok != true)
         Bug("TX27", "TXUok");
     /*if already exist */
-    if (TXUexist(Name) == true)
+    if (TXUexist(Name))
         return;
     TXUtexCur = TXUtexTop;      /*set current entry */
     TXUtexTop += 1;             /*find a free position */
@@ -766,7 +766,7 @@ void TXUreadTexFile(const char *file, bool Redefn)
         {
             long npat = 0;
 
-            while (TXTreadPatchDef(TXT, pname, &ofsx, &ofsy) == true) {
+            while (TXTreadPatchDef(TXT, pname, &ofsx, &ofsy)) {
                 if (npat == MAX_PATCHES)
                     Warning("TX42",
                             "Texture %s: more than 32767 patches, ignoring excess",

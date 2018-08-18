@@ -315,7 +315,7 @@ int32_t SNDcopyPCSoundInWAD(struct WADINFO *info, char *file)
     datasizepos = WADRposition(info);
     size += WADRwriteShort(info, -1);
     datasize = 0;
-    while (TXTskipComment(Txt) != false) {
+    while (TXTskipComment(Txt)) {
         s = TXTreadShort(Txt);
         if ((s < 0) || (s > 255))
             ProgError("KR11", "%s: number out of bounds [0-255]",

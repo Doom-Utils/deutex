@@ -145,7 +145,7 @@ void HDRrestoreWAD(const char *wadres)
         Fail = true;
     if (strncmp(HDRdir[0].name, "IZNOGOOD", 8) != 0)
         Fail = true;
-    if (Fail != false) {
+    if (Fail) {
         if ((n = WADRfindEntry(&rwad, "_DEUTEX_")) >= 0)
             if (rwad.dir[n].size >= HDRdirSz) {
                 dirpos = rwad.dir[n].start;
@@ -160,7 +160,7 @@ void HDRrestoreWAD(const char *wadres)
                     Fail = true;
             }
     }
-    if (Fail != false)
+    if (Fail)
         ProgError("ME25", "Not a modified WAD");
     Phase("ME28", "Restoration infos seem correct");
     dirpos = peek_i32_le(&HDRdir[1].start);
@@ -172,7 +172,7 @@ void HDRrestoreWAD(const char *wadres)
     Normalise(ewadname, HDRdir[3].name);        /*name of WAD inside */
     /*original file time */
     time = peek_i32_le(&HDRdir[4].size);
-    if (peek_i32_le(&HDRdir[4].start) != false) {       /*extract the PWAD */
+    if (peek_i32_le(&HDRdir[4].start)) {       /*extract the PWAD */
         sprintf(ewadfile, "%.8s.WAD", ewadname);
         ToLowerCase(ewadfile);
         fp = fopen(ewadfile, FOPEN_RB);
@@ -232,7 +232,7 @@ static void HDRsetDir(struct WADINFO *rwad, bool IsIwad, bool Restore,
     /*Set original WAD DIRECTORY */
     write_i32_le(&HDRdir[1].start, dirpos);
     write_i32_le(&HDRdir[1].size, ntry);
-    Normalise(HDRdir[1].name, (IsIwad == true) ? "DOOM_DIR" : "PWAD_DIR");
+    Normalise(HDRdir[1].name, IsIwad ? "DOOM_DIR" : "PWAD_DIR");
     /*Store original WAD size and start */
     write_i32_le(&HDRdir[2].start, 0);
     write_i32_le(&HDRdir[2].size, rsize);
@@ -427,7 +427,7 @@ void ADDjoinWads(const char *doomwad, const char *wadres, const char
         TXUinit();
     }
     WADRclose(&iwad);
-    if (TexuMrg == true) {      /*add TEXTURE1 from rwad */
+    if (TexuMrg) {      /*add TEXTURE1 from rwad */
         Phase("ME76", "  With TEXTURE1 from %s", fname(wadres));
         PatchSz = 0;
         Patch = NULL;
@@ -473,7 +473,7 @@ void ADDjoinWads(const char *doomwad, const char *wadres, const char
     /* append PWAD into PWAD, restorable */
     estart = HDRinsertWad(&rwad, &ewad, &esize);
     /* append texu/pname */
-    if (TexuMrg == true) {
+    if (TexuMrg) {
         WADRalign4(&rwad);
         start = WADRposition(&rwad);
         size = TXUwriteTEXTUREtoWAD(&rwad);

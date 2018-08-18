@@ -339,7 +339,7 @@ void CheckTexture(char *tex, bool IsDef)
     case '\0':
         break;
     default:
-        if (IsDef == true) {    /*if we only wish to declare the tex */
+        if (IsDef) {    /*if we only wish to declare the tex */
             TXUfakeTex(Name);
         } else {
             if (TXUexist(Name) == false)
@@ -666,7 +666,7 @@ void XTRcompakWAD(const char *DataDir, const char *wadin,
                 continue;
             if (size < 1)
                 continue;
-            if ((size >= 8) && (ShowIdx == true)) {
+            if ((size >= 8) && ShowIdx) {
                 WADRseek(&pwad, pdir[bas].start);
                 WADRreadBytes(&pwad, bbas, 8);
                 ofsx = ((bbas[5] << 8) & 0xFF00) + (bbas[4] & 0xFF);

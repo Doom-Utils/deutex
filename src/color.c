@@ -156,7 +156,7 @@ void COLinit(uint8_t invR, uint8_t invG, uint8_t invB, char *Colors,
     int16_t i;
     const char *name = NULL;
     /*int16_t R,G,B; */
-    if (COLok != false)
+    if (COLok)
         Bug("PL02", "COLok");
     if (Colsz < 256 * sizeof(struct PIXEL)) {
         if (lumpname == NULL) {

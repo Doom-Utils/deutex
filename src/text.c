@@ -415,7 +415,7 @@ static bool TXTboundSection(struct TXTFILE *TXT)
     /*check that we don't read twice the same section */
     if (TXT->SectionEnd > TXT->SectionStart)
         Bug("TR51", "TxtBdS");
-    if (TXTfindSection(TXT, false) == true)
+    if (TXTfindSection(TXT, false))
         TXT->SectionEnd = TXT->Lines - 1;
     else
         TXT->SectionEnd = TXT->Lines;
@@ -495,13 +495,13 @@ bool TXTentryParse(char *name, char *filenam, int16_t * x, int16_t * y,
     if (c != '=')
         TXTungetc(TXT);
     /* read integer */
-    if (XY == true) {
+    if (XY) {
         xx = TXTreadOptionalShort(TXT);
         yy = TXTreadOptionalShort(TXT);
     }
     Normalise(filenam, name);
     TXTreadOptionalName(TXT, filenam);
-    if (XY == true) {
+    if (XY) {
         if (xx == INVALIDINT)
             xx = TXTreadOptionalShort(TXT);
         if (yy == INVALIDINT)
@@ -594,9 +594,9 @@ void TXTaddEntry(struct TXTFILE *TXT, const char *name,
     fprintf(TXT->fp, "%.8s", name);
     if (filenam != NULL)
         fprintf(TXT->fp, "\t%.8s", filenam);
-    if (XY == true)
+    if (XY)
         fprintf(TXT->fp, "\t%d\t%d", x, y);
-    if (repeat == true)
+    if (repeat)
         fprintf(TXT->fp, "\t*");
     fprintf(TXT->fp, "\n");
 }

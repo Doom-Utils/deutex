@@ -125,7 +125,7 @@ static bool LISunwantedPhase(char pv[2], char phase, char view,
         return true;            /*delete phase if equal */
     switch (pv[1]) {            /*view 0 unwanted if any other view exist */
     case '0':
-        return (AllViews == true) ? true : false;
+        return (AllViews == true);
         /*view unwanted if view 0 exist */
     case '1':
     case '2':
@@ -135,7 +135,7 @@ static bool LISunwantedPhase(char pv[2], char phase, char view,
     case '6':
     case '7':
     case '8':
-        return (AllViews == true) ? false : true;
+        return (AllViews == false);
     }
     return false;
 }
@@ -168,16 +168,14 @@ static bool LISdeleteSprite(char root[8], char phase, char view)
         if (strncmp(LISspr.Lst[l].name, root, 4) == 0) {
             /*2nd unwanted: replace by 0 */
             if (LISunwantedPhase
-                (&(LISspr.Lst[l].name[6]), phase, view,
-                 AllViews) == true) {
+                (&(LISspr.Lst[l].name[6]), phase, view, AllViews)) {
                 LISspr.Lst[l].name[6] = '\0';
                 LISspr.Lst[l].name[7] = '\0';
                 Okay = true;
             }
             /*1st unwanted: replace by second */
             if (LISunwantedPhase
-                (&(LISspr.Lst[l].name[4]), phase, view,
-                 AllViews) == true) {
+                (&(LISspr.Lst[l].name[4]), phase, view, AllViews)) {
                 LISspr.Lst[l].name[4] = LISspr.Lst[l].name[6];
                 LISspr.Lst[l].name[5] = LISspr.Lst[l].name[7];
                 LISspr.Lst[l].name[6] = '\0';
@@ -254,7 +252,7 @@ static bool LISfindRplc(struct ELIST *L, struct WADDIR *dir)
 */
 static void LISsubstit(struct ELIST *L, struct WADDIR *dir)
 {                               /* SUBSTIT in List */
-    if (LISfindRplc(L, dir) == true)
+    if (LISfindRplc(L, dir))
         return;
     Warning("LI09", "Entry %s might be ignored by the game",
             lump_name(dir[0].name));
@@ -291,7 +289,7 @@ static void LISaddSprite(struct WADDIR *dir, bool Warn)
     bool Okay = false;
     /*warn:  false= no warning. true = warn. */
     /* If entry already exists, replace it */
-    if (LISfindRplc(&LISspr, dir) == true)
+    if (LISfindRplc(&LISspr, dir))
         return;
     /* Entry does not exist. Check that this sprite
     ** viewpoint doesn't obsolete other sprite viewpoints.
@@ -304,7 +302,7 @@ static void LISaddSprite(struct WADDIR *dir, bool Warn)
                 LISdeleteSprite(dir[0].name, dir[0].name[6],
                                 dir[0].name[7]);
     }
-    if ((Okay == false) && (Warn == true)) {
+    if ((Okay == false) && Warn) {
         Warning("LI11", "Entry %s might be ignored by the game",
                 lump_name(dir[0].name));
     }
@@ -587,7 +585,7 @@ struct WADDIR *LISmergeDir(int32_t * pNtry, bool Append, bool Complain,
             break;
         case EDATA:
         case ELUMP:
-            if ((Append != true) && (Complain == true))
+            if ((Append != true) && Complain)
                 /*warn if missing */
                 LISsubstit(&LISlmp, &(pdir[p]));
             else
@@ -596,7 +594,7 @@ struct WADDIR *LISmergeDir(int32_t * pNtry, bool Append, bool Complain,
             break;
         case ETEXTUR:
         case EPNAME:
-            if ((Append != true) && (Complain == true))
+            if ((Append != true) && Complain)
                 /*warn if missing */
                 LISsubstit(&LISlmp, &(pdir[p]));
             else
@@ -604,7 +602,7 @@ struct WADDIR *LISmergeDir(int32_t * pNtry, bool Append, bool Complain,
                 LISmove(&LISlmp, &(pdir[p]));
             break;
         case ESOUND:
-            if ((Append != true) && (Complain == true))
+            if ((Append != true) && Complain)
                 /*warn if missing */
                 LISsubstit(&LISlmp, &(pdir[p]));
             else
@@ -612,7 +610,7 @@ struct WADDIR *LISmergeDir(int32_t * pNtry, bool Append, bool Complain,
                 LISmove(&LISlmp, &(pdir[p]));
             break;
         case EMUSIC:
-            if ((Append != true) && (Complain == true))
+            if ((Append != true) && Complain)
                 /*warn if missing */
                 LISsubstit(&LISlmp, &(pdir[p]));
             else
@@ -620,7 +618,7 @@ struct WADDIR *LISmergeDir(int32_t * pNtry, bool Append, bool Complain,
                 LISmove(&LISlmp, &(pdir[p]));
             break;
         case EGRAPHIC:
-            if (NoSprite == true) {
+            if (NoSprite) {
                 /*special: look for sprites identfied as graphics */
                 if (LISfindRplc(&LISspr, &(pdir[p])) == false) {
                     /*not a sprite. add in lumps */
@@ -628,7 +626,7 @@ struct WADDIR *LISmergeDir(int32_t * pNtry, bool Append, bool Complain,
                 }
             } else {
                 /*normal */
-                if ((Append != true) && (Complain == true))
+                if ((Append != true) && Complain)
                     /*warn if missing */
                     LISsubstit(&LISlmp, &(pdir[p]));
                 else

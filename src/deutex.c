@@ -983,15 +983,14 @@ int main(int argc, char *argv_non_const[])
             int gotit = 0;
             const char **w;
             for (w = wads; *w != NULL; w++) {
-                if (MakeFileName(MainWAD, ".", "", "", *w, "wad") == true) {
+                if (MakeFileName(MainWAD, ".", "", "", *w, "wad")) {
                     gotit = 1;
                     break;
                 }
             }
             if (!gotit) {
                 for (w = wads; *w != NULL; w++) {
-                    if (MakeFileName(MainWAD, DoomDir, "", "", *w, "wad")
-                        == true) {
+                    if (MakeFileName(MainWAD, DoomDir, "", "", *w, "wad")) {
                         gotit = 1;
                         break;
                     }
@@ -1001,8 +1000,7 @@ int main(int argc, char *argv_non_const[])
             if (!gotit) {
                 for (w = wads; *w != NULL; w++) {
                     if (MakeFileName
-                        (MainWAD, "/usr/share/games/doom", "", "", *w,
-                         "wad") == true) {
+                        (MainWAD, "/usr/share/games/doom", "", "", *w, "wad")) {
                         gotit = 1;
                         break;
                     }

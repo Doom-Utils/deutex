@@ -6,7 +6,7 @@
 
 /*
   This is a quick-and-dirty hack to read/write the grAb chunk from a
-  png file A grAb chunk is a custom PNG chunk that zdoom and SLADE
+  png file.  A grAb chunk is a custom PNG chunk that zdoom and SLADE
   uses to store the offset of the image.
 */
 

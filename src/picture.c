@@ -300,7 +300,7 @@ int32_t PICsaveInWAD(struct WADINFO * info, char *file, PICTYPE type,
     case PICPNG:
         raw = PNGtoRAW(&rawX, &rawY, file, &altXinsr, &altYinsr);
         /* if the option to use png_offsets is set, use them */
-        if (use_png_offsets == true) {
+        if (use_png_offsets) {
             if (altXinsr != INVALIDINT && altYinsr != INVALIDINT) {
                 Xinsr = altXinsr;
                 Yinsr = altYinsr;
@@ -1432,7 +1432,7 @@ static char *GIFtoRAW(int16_t * rawX, int16_t * rawY, char *file)
         raw[rawpos] = Idx2Doom[((int16_t) raw[rawpos]) & 0xFF];
     }
     /*unInterlace */
-    if (IntLace == true) {
+    if (IntLace) {
         raw = GIFintlace(raw, Xsz, Ysz);
     }
     *rawX = Xsz;

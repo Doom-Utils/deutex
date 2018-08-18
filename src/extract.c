@@ -65,7 +65,7 @@ static bool XTRbmpSave(int16_t * pinsrX, int16_t * pinsrY,
         Bug("EX47", "Invalid img type %d", (int) Picture);
     }
     res = MakeFileName(file, DataDir, dir, "", name, extens);
-    if ((WSafe == true) && (res == true)) {
+    if (res && WSafe) {
         Warning("EX48", "Will not overwrite file %s", file);
         return true;
     }
@@ -75,7 +75,7 @@ static bool XTRbmpSave(int16_t * pinsrX, int16_t * pinsrY,
     res =
         PICsaveInFile(file, type, buffer, size, pinsrX, pinsrY, Picture,
                       name, cusage);
-    if (res == true)
+    if (res)
         Detail("EX49", "Saved picture as %s", fname(file));
     free(buffer);
     return res;
@@ -312,7 +312,7 @@ void XTRextractWAD(const char *doomwad, const char *DataDir, const char
                     res =
                         MakeFileName(file, DataDir, "LEVELS", "",
                                      pdir[p].name, "WAD");
-                    if ((WSafe == true) && (res == true))
+                    if (res && WSafe)
                         Warning("EX11", "Will not overwrite file %s",
                                 file);
                     else {
@@ -367,8 +367,7 @@ void XTRextractWAD(const char *doomwad, const char *DataDir, const char
                         res =
                             MakeFileName(file, DataDir, "LUMPS", "",
                                          pdir[p].name, "LMP");
-                        if ((WSafe == true)
-                            && (res == true)) {
+                        if (res && WSafe) {
                             Warning("EX16", "Will not overwrite file %s",
                                     file);
                         } else {
@@ -412,7 +411,7 @@ void XTRextractWAD(const char *doomwad, const char *DataDir, const char
                         MakeFileName(file, DataDir, "TEXTURES", "", name,
                                      "TXT");
                 }
-                if ((WSafe == true) && (res == true)) {
+                if (res && WSafe) {
                     Warning("EX21", "Will not overwrite file %s", file);
                 } else {
                     buffer = (char *) Malloc(pdir[p].size);
@@ -441,7 +440,7 @@ void XTRextractWAD(const char *doomwad, const char *DataDir, const char
                 res =
                     MakeFileName(file, DataDir, "TEXTURES", "",
                                  pdir[p].name, "TXT");
-                if ((WSafe == true) && (res == true)) {
+                if (res && WSafe) {
                     Warning("EX22", "Will not overwrite file %s", file);
                 } else {
                     buffer = (char *) Malloc(pdir[p].size);
@@ -542,8 +541,7 @@ void XTRextractWAD(const char *doomwad, const char *DataDir, const char
                         res =
                             MakeFileName(file, DataDir, "SOUNDS", "",
                                          pdir[p].name, "TXT");
-                        if ((WSafe == true)
-                            && (res == true)) {
+                        if (res && WSafe) {
                             Warning("EX26", "Will not overwrite file %s",
                                     file);
                         } else {
@@ -573,8 +571,7 @@ void XTRextractWAD(const char *doomwad, const char *DataDir, const char
                         res =
                             MakeFileName(file, DataDir, "SOUNDS", "",
                                          pdir[p].name, extens);
-                        if ((WSafe == true)
-                            && (res == true)) {
+                        if (res && WSafe) {
                             Warning("EX29", "Will not overwrite file %s",
                                     fname(file));
                         } else {
@@ -629,7 +626,7 @@ void XTRextractWAD(const char *doomwad, const char *DataDir, const char
                         res = MakeFileName(file, DataDir, "MUSICS", "",
                                            pdir[p].name, "MID");
                     }
-                    if ((WSafe == true) && (res == true)) {
+                    if (res && WSafe) {
                         Warning("EX33", "Will not overwrite file %s",
                                 fname(file));
                     } else {
@@ -664,8 +661,7 @@ void XTRextractWAD(const char *doomwad, const char *DataDir, const char
                     osize = pwad.dir[p].size;
                     if (XTRbmpSave
                         (&insrX, &insrY, &pdir[p], PGRAPH, DataDir,
-                         "GRAPHICS", &pwad, Picture, WSafe,
-                         cusage) == true) {
+                         "GRAPHICS", &pwad, Picture, WSafe, cusage)) {
                         if (EntryFound != true) {
                             TXTaddEmptyLine(TXT);
                             TXTaddComment(TXT,
@@ -678,7 +674,7 @@ void XTRextractWAD(const char *doomwad, const char *DataDir, const char
                     } else if (XTRbmpSave
                                (&insrX, &insrY, &pdir[p], PFLAT,
                                 DataDir, "LUMPS", &pwad, Picture,
-                                WSafe, cusage) == true) {
+                                WSafe, cusage)) {
                         /*Was saved as graphic lump */
                         char *name = Malloc(sizeof pdir[p].name + 1);
                         sprintf(name, "%.*s", (int) sizeof pdir[p].name,
@@ -687,8 +683,7 @@ void XTRextractWAD(const char *doomwad, const char *DataDir, const char
                         free(name);
                     } else if (cusage == NULL) {
                         if (MakeFileName
-                            (file, DataDir, "LUMPS", "", pdir[p].name,
-                             "LMP") == true) {
+                            (file, DataDir, "LUMPS", "", pdir[p].name, "LMP")) {
                             Warning("EX36", "Will not overwrite file %s",
                                     fname(file));
                         } else {
@@ -766,7 +761,7 @@ void XTRextractWAD(const char *doomwad, const char *DataDir, const char
                 }
                 if (XTRbmpSave
                     (&insrX, &insrY, &pdir[p], PPATCH, DataDir, "PATCHES",
-                     &pwad, Picture, WSafe, cusage) == true) {
+                     &pwad, Picture, WSafe, cusage)) {
                     TXTaddEntry(TXT, pdir[p].name, NULL, INVALIDINT,
                                 INVALIDINT, false, false);
                 } else {
@@ -940,7 +935,7 @@ void XTRextractWAD(const char *doomwad, const char *DataDir, const char
                             MakeFileName(file, DataDir,
                                          entry_type_dir(type), "",
                                          pdir[p].name, "txt");
-                        if (WSafe == true && res == true) {
+                        if (res && WSafe) {
                             Warning("EX66", "Will not overwrite file %s",
                                     file);
                         } else {
@@ -1052,7 +1047,7 @@ void XTRgetEntry(const char *doomwad, const char *DataDir,
             MakeFileName(file, DataDir, "", "", Name, extens);
             if (PICsaveInFile
                 (file, PGRAPH, Entry, Entrysz, &insrX, &insrY, Picture,
-                 Name, NULL) == true) {
+                 Name, NULL)) {
                 Info("GE04", "Picture insertion point is (%d,%d)", insrX,
                      insrY);
                 Found = true;
@@ -1061,13 +1056,13 @@ void XTRgetEntry(const char *doomwad, const char *DataDir,
             else if ((Entrysz == 0x1000) || (Entrysz == 0x1040)) {
                 if (PICsaveInFile
                     (file, PFLAT, Entry, Entrysz, &insrX, &insrY, Picture,
-                     Name, NULL) == true) {
+                     Name, NULL)) {
                     Found = true;
                 }
             } else if (Entrysz == 64000L) {
                 if (PICsaveInFile
                     (file, PLUMP, Entry, Entrysz, &insrX, &insrY, Picture,
-                     Name, NULL) == true) {
+                     Name, NULL)) {
                     Found = true;
                 }
             }

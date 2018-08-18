@@ -257,7 +257,7 @@ void Normalise(char dest[8], const char *src)
     bool pad = false;
     char c = 'A';
     for (n = 0; n < 8; n++) {
-        c = (pad == true) ? '\0' : src[n];
+        c = pad ? '\0' : src[n];
         if (c == '\0')
             pad = true;
         else
@@ -398,7 +398,7 @@ void PrintVerbosity(int16_t level)
 
 void PrintExit(void)
 {
-    if (asFile == true) {
+    if (asFile) {
         fclose(stdout);
         fclose(stderr);
     }
