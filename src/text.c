@@ -9,11 +9,6 @@
   SPDX-License-Identifier: GPL-2.0+
 */
 
-/*
-** This code should contain all the tricky O/S related
-** functions. If you're porting DeuTex, look here!
-*/
-
 #include "deutex.h"
 #include <errno.h>
 #include "tools.h"
@@ -38,6 +33,7 @@ const int16_t STPATCH = 0x80;   /*start of patch? */
 const int16_t EXESTRNG = 0x100; /*valid in #string# */
 const int16_t BOUNDARY = 0x200; /*# */
 const int16_t STEQUAL = 0x400;  /*=*/
+const int16_t STFLAG = 0x800;   /*start of flag? */
 static int16_t TXTval[256];
 static bool TXTok = false;
 
@@ -75,6 +71,9 @@ void TXTinit(void)
         case '=':
             val |= STEQUAL + EXESTRNG;
             break;
+        case '/':
+            val |= STFLAG + EXESTRNG;
+            break;
         case '?':
         case '!':
         case '.':
@@ -86,7 +85,6 @@ void TXTinit(void)
         case '$':
         case '%':
         case '@':
-        case '/':
         case '<':
         case '>':
         case ' ':
@@ -291,28 +289,29 @@ static bool TXTreadOptionalRepeat(struct TXTFILE *TXT)
 /*
 ** STEQUAL is used to indicate alternate name
 */
-static void TXTreadOptionalName(struct TXTFILE *TXT, char name[8])
+static bool TXTreadOptionalName(struct TXTFILE *TXT, char name[8])
 {
     int16_t c = 0, val = 0;
+
+    /* check for the equal */
     while (1) {
         if (!TXTgetc(TXT, &c, &val))
-            return;
-        if (!(val & NEWLINE)) {
-            if (val & STEQUAL)
-                continue;       /*skip '=' */
-            if (val & SPACE)
-                continue;       /*skip space */
-            if (val & (NAME & (~NUMBER)))
-                break;
-        }
+            return false;
+        if (c == '=')
+            break;
+        if (!(val & NEWLINE) && (val & SPACE))
+            continue;       /*skip space */
+
         TXTungetc(TXT);
-        return;                 /*name is NOT modified */
+        return false;
     }
-    TXTungetc(TXT);
+
     if (!TXTread(TXT, name, NAME | NUMBER)) {
         ProgError("TR32", "%s(%ld): invalid optional name", TXT->pathname,
                   (long) TXT->Lines);
     }
+
+    return true;
 }
 
 /*
@@ -358,6 +357,51 @@ static int16_t TXTreadOptionalShort(struct TXTFILE *TXT)
         name[n] = '\0';
     name[8] = '\0';
     return (int16_t) atoi(name);
+}
+
+/*
+** Parse a flag, which is a keyword preceded by a '/'.
+*/
+static bool TXTreadOptionalFlag(struct TXTFILE *TXT, FLAGS *flags)
+{
+    uint16_t c = 0, val = 0;
+    char flag_name[9];
+
+    /* check for the slash */
+    while (1) {
+        if (!TXTgetc(TXT, &c, &val))
+            return false;
+        if (c == '/')
+            break;
+        if (!(val & NEWLINE) && (val & SPACE))
+            continue;       /*skip space */
+
+        TXTungetc(TXT);
+        return false;
+    }
+
+    if (!TXTread(TXT, flag_name, NAME | NUMBER)) {
+        ProgError("TR33", "%s(%ld): invalid flag name", TXT->pathname,
+                  (long) TXT->Lines);
+    }
+
+    flag_name[8] = 0;
+    Normalise(flag_name, flag_name);
+
+    if (strcmp(flag_name, "RAW") == 0) {
+        (*flags) |= F_RAW;
+    } else {
+        ProgError("TR34", "%s(%ld): unknown flag /%s", TXT->pathname,
+                  (long) TXT->Lines, flag_name);
+    }
+
+    return true;
+}
+
+static void TXTreadOptionalFlags(struct TXTFILE *TXT, FLAGS *flags)
+{
+    while (TXTreadOptionalFlag(TXT, flags)) {
+    }
 }
 
 /* read Blocks of the form
@@ -481,31 +525,32 @@ bool TXTreadPatchDef(struct TXTFILE * TXT, char name[8], int16_t * ofsx,
     return true;
 }
 
-bool TXTentryParse(char *name, char *filenam, int16_t * x, int16_t * y,
-                   bool * repeat, struct TXTFILE * TXT, bool XY)
+bool TXTparseEntry(char *name, char *filenam, int16_t * x, int16_t * y,
+                   FLAGS *flags, bool *repeat, struct TXTFILE * TXT, bool XY)
 {
     int16_t c = 0, val = 0;
     bool comment;
     int16_t xx = INVALIDINT, yy = INVALIDINT;
     if (!TXTreadIdent(TXT, name))
         return false;
-    /* skip the equal */
-    if (!TXTgetc(TXT, &c, &val))
-        return false;
-    if (c != '=')
-        TXTungetc(TXT);
+    *flags = 0;
+    TXTreadOptionalFlags(TXT, flags);
     /* read integer */
     if (XY) {
         xx = TXTreadOptionalShort(TXT);
         yy = TXTreadOptionalShort(TXT);
     }
     Normalise(filenam, name);
-    TXTreadOptionalName(TXT, filenam);
-    if (XY) {
-        if (xx == INVALIDINT)
-            xx = TXTreadOptionalShort(TXT);
-        if (yy == INVALIDINT)
-            yy = TXTreadOptionalShort(TXT);
+    if (TXTreadOptionalName(TXT, filenam)) {
+        /* flags and/or XY values can appear either after the base name or
+           after the optional filename */
+        TXTreadOptionalFlags(TXT, flags);
+        if (XY) {
+            if (xx == INVALIDINT)
+                xx = TXTreadOptionalShort(TXT);
+            if (yy == INVALIDINT)
+                yy = TXTreadOptionalShort(TXT);
+        }
     }
     *repeat = TXTreadOptionalRepeat(TXT);
     *x = xx;
@@ -584,18 +629,20 @@ void TXTaddSection(struct TXTFILE *TXT, const char *def)
 }
 
 void TXTaddEntry(struct TXTFILE *TXT, const char *name,
-                 const char *filenam, int16_t x, int16_t y, bool repeat,
-                 bool XY)
+                 const char *filenam, int16_t x, int16_t y,
+                 FLAGS flags, bool repeat, bool XY)
 {
     if (TXT == &TXTdummy)
         return;
     if (!TXTok)
         Bug("TW21", "TxtAdE");
     fprintf(TXT->fp, "%.8s", name);
-    if (filenam != NULL)
-        fprintf(TXT->fp, "\t%.8s", filenam);
+    if (flags & F_RAW)
+        fprintf(TXT->fp, "\t/raw", filenam);
     if (XY)
         fprintf(TXT->fp, "\t%d\t%d", x, y);
+    if (filenam != NULL)
+        fprintf(TXT->fp, "\t= %.8s", filenam);
     if (repeat)
         fprintf(TXT->fp, "\t*");
     fprintf(TXT->fp, "\n");

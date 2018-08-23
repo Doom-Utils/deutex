@@ -324,7 +324,7 @@ void XTRextractWAD(const char *doomwad, const char *DataDir, const char
                         WADRclose(&lwad);
                     }
                     TXTaddEntry(TXT, pdir[p].name, NULL, INVALIDINT,
-                                INVALIDINT, false, false);
+                                INVALIDINT, 0, false, false);
                     p = pmax - 1;
                 }
             }
@@ -350,7 +350,7 @@ void XTRextractWAD(const char *doomwad, const char *DataDir, const char
                 if ((ostart == pwad.dir[p].start)
                     && (osize == pwad.dir[p].size)) {
                     TXTaddEntry(TXT, pdir[p].name, NULL, INVALIDINT,
-                                INVALIDINT, true, false);
+                                INVALIDINT, 0, true, false);
                 } else {
                     ostart = pwad.dir[p].start;
                     osize = pwad.dir[p].size;
@@ -377,7 +377,7 @@ void XTRextractWAD(const char *doomwad, const char *DataDir, const char
                         }
                     }
                     TXTaddEntry(TXT, pdir[p].name, NULL, INVALIDINT,
-                                INVALIDINT, false, false);
+                                INVALIDINT, 0, false, false);
                 }
             }
         }
@@ -406,7 +406,7 @@ void XTRextractWAD(const char *doomwad, const char *DataDir, const char
                     else
                         name = pdir[p].name;
                     TXTaddEntry(TXT, name, NULL, INVALIDINT, INVALIDINT,
-                                false, false);
+                                0, false, false);
                     res =
                         MakeFileName(file, DataDir, "TEXTURES", "", name,
                                      "TXT");
@@ -436,7 +436,7 @@ void XTRextractWAD(const char *doomwad, const char *DataDir, const char
                 TXTaddComment(TXT, "List of definitions for TEXTURE2");
                 TXTaddSection(TXT, "texture2");
                 TXTaddEntry(TXT, pdir[p].name, NULL, INVALIDINT,
-                            INVALIDINT, false, false);
+                            INVALIDINT, 0, false, false);
                 res =
                     MakeFileName(file, DataDir, "TEXTURES", "",
                                  pdir[p].name, "TXT");
@@ -490,7 +490,7 @@ void XTRextractWAD(const char *doomwad, const char *DataDir, const char
                                     lump_name(pwad.dir[p].name));
                     } else {
                         TXTaddEntry(TXT, pdir[p].name, NULL, INVALIDINT,
-                                    INVALIDINT, false, false);
+                                    INVALIDINT, 0, false, false);
                     }
                 } else {
                     /* write PNG or JPEG as a raw file, no conversion */
@@ -507,7 +507,8 @@ void XTRextractWAD(const char *doomwad, const char *DataDir, const char
                         Detail("EX74", "Saved lump as   %s", fname(file));
                     }
 
-                    TXTaddEntry(TXT, pdir[p].name, NULL, 1, 0, false, true);
+                    TXTaddEntry(TXT, pdir[p].name, NULL, INVALIDINT,
+                                INVALIDINT, F_RAW, false, false);
                 }
             }
         }
@@ -532,7 +533,7 @@ void XTRextractWAD(const char *doomwad, const char *DataDir, const char
                 if ((ostart == pwad.dir[p].start)
                     && (osize == pwad.dir[p].size)) {
                     TXTaddEntry(TXT, pdir[p].name, NULL, INVALIDINT,
-                                INVALIDINT, true, false);
+                                INVALIDINT, 0, true, false);
                 } else {
                     ostart = pwad.dir[p].start;
                     osize = pwad.dir[p].size;
@@ -558,7 +559,7 @@ void XTRextractWAD(const char *doomwad, const char *DataDir, const char
                                    fname(file));
                         }
                         TXTaddEntry(TXT, pdir[p].name, NULL, INVALIDINT,
-                                    INVALIDINT, false, false);
+                                    INVALIDINT, 0, false, false);
                         break;
                     case ESNDWAV:
                         switch (Sound) {
@@ -586,7 +587,7 @@ void XTRextractWAD(const char *doomwad, const char *DataDir, const char
                             free(buffer);
                         }
                         TXTaddEntry(TXT, pdir[p].name, NULL, INVALIDINT,
-                                    INVALIDINT, false, false);
+                                    INVALIDINT, 0, false, false);
                         break;
                     default:
                         Bug("EX31", "Invalid snd type %d", piden[p]);
@@ -615,7 +616,7 @@ void XTRextractWAD(const char *doomwad, const char *DataDir, const char
                 if ((ostart == pwad.dir[p].start)
                     && (osize == pwad.dir[p].size)) {
                     TXTaddEntry(TXT, pdir[p].name, NULL, INVALIDINT,
-                                INVALIDINT, true, false);
+                                INVALIDINT, 0, true, false);
                 } else {
                     ostart = pwad.dir[p].start;
                     osize = pwad.dir[p].size;
@@ -634,7 +635,7 @@ void XTRextractWAD(const char *doomwad, const char *DataDir, const char
                         WADRsaveEntry(&pwad, p, file);
                     }
                     TXTaddEntry(TXT, pdir[p].name, NULL, INVALIDINT,
-                                INVALIDINT, false, false);
+                                INVALIDINT, 0, false, false);
                 }
             }
         }
@@ -655,7 +656,7 @@ void XTRextractWAD(const char *doomwad, const char *DataDir, const char
                 if ((ostart == pwad.dir[p].start)
                     && (osize == pwad.dir[p].size)) {
                     TXTaddEntry(TXT, pdir[p].name, NULL, INVALIDINT,
-                                INVALIDINT, true, false);
+                                INVALIDINT, 0, true, false);
                 } else {
                     ostart = pwad.dir[p].start;
                     osize = pwad.dir[p].size;
@@ -670,7 +671,7 @@ void XTRextractWAD(const char *doomwad, const char *DataDir, const char
                             EntryFound = true;
                         }
                         TXTaddEntry(TXT, pdir[p].name, NULL, insrX, insrY,
-                                    false, true);
+                                    0, false, true);
                     } else if (XTRbmpSave
                                (&insrX, &insrY, &pdir[p], PFLAT,
                                 DataDir, "LUMPS", &pwad, Picture,
@@ -725,7 +726,7 @@ void XTRextractWAD(const char *doomwad, const char *DataDir, const char
                 if ((ostart == pwad.dir[p].start)
                     && (osize == pwad.dir[p].size)) {
                     TXTaddEntry(TXT, pdir[p].name, NULL, INVALIDINT,
-                                INVALIDINT, true, false);
+                                INVALIDINT, 0, true, false);
                 } else {
                     ostart = pwad.dir[p].start;
                     osize = pwad.dir[p].size;
@@ -737,7 +738,7 @@ void XTRextractWAD(const char *doomwad, const char *DataDir, const char
                                 lump_name(pwad.dir[p].name));
                     } else {
                         TXTaddEntry(TXT, pdir[p].name, NULL, insrX, insrY,
-                                    false, true);
+                                    0, false, true);
                     }
                 }
             }
@@ -763,7 +764,7 @@ void XTRextractWAD(const char *doomwad, const char *DataDir, const char
                     (&insrX, &insrY, &pdir[p], PPATCH, DataDir, "PATCHES",
                      &pwad, Picture, WSafe, cusage)) {
                     TXTaddEntry(TXT, pdir[p].name, NULL, INVALIDINT,
-                                INVALIDINT, false, false);
+                                INVALIDINT, 0, false, false);
                 } else {
                     Warning("EX46", "Failed to write patch %s",
                             lump_name(pwad.dir[p].name));
@@ -797,7 +798,7 @@ void XTRextractWAD(const char *doomwad, const char *DataDir, const char
                 if ((ostart == pwad.dir[p].start)
                     && (osize == pwad.dir[p].size)) {
                     TXTaddEntry(TXT, pdir[p].name, NULL, INVALIDINT,
-                                INVALIDINT, true, false);
+                                INVALIDINT, 0, true, false);
                 } else {
                     ostart = pwad.dir[p].start;
                     osize = pwad.dir[p].size;
@@ -809,7 +810,7 @@ void XTRextractWAD(const char *doomwad, const char *DataDir, const char
                                     lump_name(pwad.dir[p].name));
                     } else
                         TXTaddEntry(TXT, pdir[p].name, NULL, INVALIDINT,
-                                    INVALIDINT, false, false);
+                                    INVALIDINT, 0, false, false);
                 }
             }
         }
@@ -838,7 +839,7 @@ void XTRextractWAD(const char *doomwad, const char *DataDir, const char
                 if ((ostart == pwad.dir[p].start)
                     && (osize == pwad.dir[p].size)) {
                     TXTaddEntry(TXT, pdir[p].name, NULL, INVALIDINT,
-                                INVALIDINT, true, false);
+                                INVALIDINT, 0, true, false);
                 } else {
                     ostart = pwad.dir[p].start;
                     osize = pwad.dir[p].size;
@@ -852,7 +853,7 @@ void XTRextractWAD(const char *doomwad, const char *DataDir, const char
                                 lump_name(pwad.dir[p].name));
                     } else {
                         TXTaddEntry(TXT, pdir[p].name, NULL, INVALIDINT,
-                                    INVALIDINT, false, false);
+                                    INVALIDINT, 0, false, false);
                     }
                 }
             }
@@ -882,7 +883,7 @@ void XTRextractWAD(const char *doomwad, const char *DataDir, const char
                 if ((ostart == pwad.dir[p].start)
                     && (osize == pwad.dir[p].size)) {
                     TXTaddEntry(TXT, pdir[p].name, NULL, INVALIDINT,
-                                INVALIDINT, true, false);
+                                INVALIDINT, 0, true, false);
                 } else {
                     ostart = pwad.dir[p].start;
                     osize = pwad.dir[p].size;
@@ -896,7 +897,7 @@ void XTRextractWAD(const char *doomwad, const char *DataDir, const char
                                 lump_name(pwad.dir[p].name));
                     } else {
                         TXTaddEntry(TXT, pdir[p].name, NULL, INVALIDINT,
-                                    INVALIDINT, false, false);
+                                    INVALIDINT, 0, false, false);
                     }
                 }
             }
@@ -926,7 +927,7 @@ void XTRextractWAD(const char *doomwad, const char *DataDir, const char
                 if ((ostart == pwad.dir[p].start)
                     && (osize == pwad.dir[p].size)) {
                     TXTaddEntry(TXT, pdir[p].name, NULL, INVALIDINT,
-                                INVALIDINT, true, false);
+                                INVALIDINT, 0, true, false);
                 } else {
                     ostart = pwad.dir[p].start;
                     osize = pwad.dir[p].size;
@@ -945,8 +946,8 @@ void XTRextractWAD(const char *doomwad, const char *DataDir, const char
                                         lump_name(pwad.dir[p].name));
                             } else {
                                 TXTaddEntry(TXT, pdir[p].name, NULL,
-                                            INVALIDINT, INVALIDINT, false,
-                                            false);
+                                            INVALIDINT, INVALIDINT, 0,
+                                            false, false);
                             }
                         }
                     }
