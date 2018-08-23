@@ -27,6 +27,9 @@ struct TXTFILE {
    supported by the input functions ! */
 extern struct TXTFILE TXTdummy;
 
+typedef uint16_t FLAGS;
+#define F_RAW    0x0001  /* insert/extract with no conversion */
+
 /*
 ** For any Reading of TEXT files
 */
@@ -38,8 +41,8 @@ void TXTcloseR(struct TXTFILE *TXT);
 */
 bool TXTskipComment(struct TXTFILE *TXT);
 bool TXTseekSection(struct TXTFILE *TXT, const char *def);
-bool TXTentryParse(char *name, char *filenam, int16_t * x, int16_t * y,
-                   bool * repeat, struct TXTFILE *TXT, bool XY);
+bool TXTparseEntry(char *name, char *filenam, int16_t * x, int16_t * y,
+                   FLAGS *flags, bool *repeat, struct TXTFILE *TXT, bool XY);
 /*
 ** To read textures
 */
@@ -62,6 +65,7 @@ void TXTcloseW(struct TXTFILE *TXT);
 */
 void TXTaddSection(struct TXTFILE *TXT, const char *def);
 void TXTaddEntry(struct TXTFILE *TXT, const char *name, const char
-                 *filenam, int16_t x, int16_t y, bool repeat, bool XY);
+                 *filenam, int16_t x, int16_t y, FLAGS flags,
+                 bool repeat, bool XY);
 void TXTaddComment(struct TXTFILE *TXT, const char *text);
 void TXTaddEmptyLine(struct TXTFILE *TXT);
