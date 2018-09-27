@@ -8,4 +8,5 @@ CLEANFILES = *.html
 	TZ=UTC asciidoc $<
 
 html: README.html NEWS.html
+	$(MAKE) -C man html
 endif
