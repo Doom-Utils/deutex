@@ -1,6 +1,24 @@
 DeuTex release notes
 ====================
 
+5.2.0 (2019-06-23)
+------------------
+
+Graphics
+~~~~~~~~
+  * DeuTex supports textures in TX_START and TX_END markers.  These
+    are used by certain editors/engines for textures, with support for
+    storing PNG and JPEG files directly in the WAD.  Extraction is
+    likewise handled for all formats.
+
+Build systems and code standards
+~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+  * Instances of `== true` and `!= false` were simplified to more
+    idiomatic C, such as `if (cond)` and `if (!cond)`.
+  * Manual page generation can be disabled, even if `a2x` is
+    available, by using `./configure --disable-man`.  This feature may
+    be useful for penguin distributions.
+
 5.1.2 (2018-08-12)
 ------------------
 
