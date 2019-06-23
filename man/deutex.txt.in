@@ -397,10 +397,17 @@ sprites are read from this directory.
 The *TEXTURE1* lump (all but Doom alpha 0.4 and 0.5).
 
 'dir'*/textures/texture2.txt*::
-The *TEXTURE2* lump (all commercial iwads except Doom 2).
+The *TEXTURE2* lump (all commercial IWADs except Doom 2).
 
 'dir'*/textures/textures.txt*::
 The *TEXTURES* lump (Doom alpha 0.4 and 0.5).
+
+'dir'*/tx_start/*::
+Special texture directory for certain engines such as ZDoom.
+Specifying a positive integer after the name in wadinfo.txt causes no
+format conversion to be performed (eg, PNGs and BMPs remain as PNGs
+and BMPs in the WAD), otherwise an attempt to convert to Doom’s patch
+format is done.
 
 'dir'*/wadinfo.txt*::
 The default master file.
