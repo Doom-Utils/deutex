@@ -1,6 +1,6 @@
 /*
   This file is Copyright © 1999-2005 André Majorel,
-               Copyright © 2006-2018 contributors to the DeuTex project.
+               Copyright © 2006-2019 contributors to the DeuTex project.
 
   Those functions allow to read little-endian and big-endian integers
   from memory regardless of the endianness of the CPU.

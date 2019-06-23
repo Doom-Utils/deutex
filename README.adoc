@@ -75,7 +75,7 @@ Copyright
 ---------
 
 Copyright © 1994-1996 Olivier Montanuy, © 1999-2005 André Majorel, ©
-2006-2018 contributors to the DeuTex project.
+2006-2019 contributors to the DeuTex project.
 
 This program is free software; you can redistribute it and/or modify
 it under the terms of the GNU General Public License as published by
