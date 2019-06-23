@@ -7,7 +7,16 @@ AC_PROG_CC_C99
 AM_SILENT_RULES([yes])
 
 AC_CHECK_PROG([ASCIIDOC], [a2x], [yes])
-AM_CONDITIONAL([ASCIIDOC], [test "$ASCIIDOC" = yes])
+AC_ARG_ENABLE([man],
+    AS_HELP_STRING([--disable-man],
+                   [Disable manpage generation])
+)
+AS_IF([test "x$enable_man" != "xno"],
+    AS_IF([test "x$ASCIIDOC" != "xyes"],
+        AC_MSG_ERROR([AsciiDoc a2x program is required in order to build the manual])
+    )
+)
+AM_CONDITIONAL([ASCIIDOC], [test "x$enable_man" != "xno"])
 
 AC_ARG_WITH([libpng],
     AS_HELP_STRING([--without-libpng],
