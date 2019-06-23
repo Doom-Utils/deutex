@@ -5,7 +5,7 @@
   Those functions allow to read little-endian and big-endian integers
   from a file regardless of the endianness of the CPU.
 
-  SPDX-License-Identifier: LGPL-2.1+
+  SPDX-License-Identifier: LGPL-2.1-or-later
 */
 
 #include "deutex.h"

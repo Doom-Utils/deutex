@@ -6,7 +6,7 @@
   DeuTex incorporates code derived from DEU 5.21 that was put in the
   public domain in 1994 by Raphaël Quinet and Brendon Wyber.
 
-  SPDX-License-Identifier: GPL-2.0+
+  SPDX-License-Identifier: GPL-2.0-or-later
 */
 
 #include "deutex.h"
