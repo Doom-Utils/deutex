@@ -1,6 +1,15 @@
 DeuTex release notes
 ====================
 
+5.2.1 (2019-08-10)
+------------------
+
+Build systems
+-------------
+  * `./configure` was broken in 5.2.0 for systems without AsciiDoc
+    installed.  It now properly checks for a2x conditionally along
+    with the possible `--disable-man` parameter.
+
 5.2.0 (2019-06-23)
 ------------------
 
