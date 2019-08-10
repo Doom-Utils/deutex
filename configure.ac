@@ -9,7 +9,13 @@ AM_SILENT_RULES([yes])
 AC_CHECK_PROG([ASCIIDOC], [a2x], [yes])
 AC_ARG_ENABLE([man],
     AS_HELP_STRING([--disable-man],
-                   [Disable manpage generation])
+                   [Disable manpage generation]),
+    [], [enable_man=check]
+)
+AS_IF([test "x$enable_man" = "xyes"],
+    AS_IF([test "x$ASCIIDOC" != "xyes"],
+        AC_MSG_ERROR([AsciiDoc a2x program is required in order to build the manual])
+    )
 )
 AM_CONDITIONAL([ASCIIDOC], [test "x$enable_man" != "xno" && test "x$ASCIIDOC" = "xyes"])
 
