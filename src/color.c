@@ -187,6 +187,7 @@ void COLinit(uint8_t invR, uint8_t invG, uint8_t invB, char *Colors,
     } else if (COLpal[33].R == 29 && COLpal[33].G == 32
                && COLpal[33].B == 29 && COLpal[255].R == 255
                && COLpal[255].G == 255 && COLpal[255].B == 255) {
+        i = 0xff;
         name = "Hexen";
     } else if (COLpal[0].R == 0 && COLpal[0].G == 0 && COLpal[0].B == 0
                && COLpal[240].R == 0 && COLpal[240].G == 0
