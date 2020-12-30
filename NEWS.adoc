@@ -1,6 +1,23 @@
 DeuTex release notes
 ====================
 
+5.2.2 (2020-12-30)
+------------------
+
+Build systems
+~~~~~~~~~~~~~
+  * `configure.ac` is now compatible with autoconf 2.70.  C99 is
+    assumed as a baseline default and should not be explicitly
+    called for.
+  * `./configure --enable-man` is now the only way an error occurs if
+    AsciiDoc (`a2x`) is not installed.
+
+Graphics
+~~~~~~~~
+  * Hexen graphics are now treated a bit more specially, the last
+    entry in the palette no longer counting as a candidate to produce
+    transparency in the output file.
+
 5.2.1 (2019-08-10)
 ------------------
 
