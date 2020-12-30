@@ -2,7 +2,6 @@ AC_INIT([DeuTex], [5.2.1], [https://github.com/Doom-Utils/deutex/issues])
 AC_PACKAGE_URL([https://github.com/Doom-Utils/deutex])
 AM_INIT_AUTOMAKE([foreign])
 AC_PROG_CC
-AC_PROG_CC_C99
 
 AM_SILENT_RULES([yes])
 
