@@ -39,6 +39,7 @@ Building and installing
 DeuTex uses an Autoconf+Automake build system, so its compilation and
 installation process is identical to most other Unix packages:
 
+    ./bootstrap
     ./configure
     make
     make install
