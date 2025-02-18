@@ -74,8 +74,8 @@ the second like “tech” (not “tex”!), owing from its namesake.
 Copyright
 ---------
 
-Copyright © 1994-1996 Olivier Montanuy, © 1999-2005 André Majorel, ©
-2006-2021 contributors to the DeuTex project.
+Copyright © Olivier Montanuy, André Majorel, contributors to the
+DeuTex project.
 
 This program is free software; you can redistribute it and/or modify
 it under the terms of the GNU General Public License as published by

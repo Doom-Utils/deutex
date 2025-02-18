@@ -1,6 +1,6 @@
 /*
-  This file is Copyright © 1999-2005 André Majorel,
-               Copyright © 2006-2021 contributors to the DeuTex project.
+  Copyright ® André Majorel,
+              contributors to the DeuTex project.
 
   Those functions allow to read little-endian and big-endian integers
   from a file regardless of the endianness of the CPU.
