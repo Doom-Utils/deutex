@@ -81,6 +81,7 @@ int32_t WADRdirAddPipo(struct WADINFO * info, int32_t start, int32_t size,
 void WADRopenR(struct WADINFO *info, const char *wadin)
 {                               /*directory */
     int32_t ntry, dirpos;
+    long filesize = 0x10000000L;
     int16_t n;
     struct WADDIR dir;
     if ((info->ok & WADR_RDWR))
@@ -91,6 +92,11 @@ void WADRopenR(struct WADINFO *info, const char *wadin)
     info->filename = Malloc(strlen(wadin) + 1);
     strcpy(info->filename, wadin);
     info->ok = WADR_READ;
+    if (fseek(info->fd, 0, SEEK_END) == 0)
+    {
+        filesize = ftell(info->fd);
+        fseek(info->fd, 0, SEEK_SET);
+    }
     /*signature */
     switch (WADRreadShort(info)) {
     case PWAD:
@@ -108,7 +114,7 @@ void WADRopenR(struct WADINFO *info, const char *wadin)
     if (ntry > 0xfce)
         Warning("WR11", "%s has more than 4046 lumps: vanilla-incompatible", fname(wadin));
     info->dirpos = dirpos = WADRreadLong(info);
-    if ((dirpos < 0) || (dirpos > 0x10000000L))
+    if ((dirpos < 0) || (dirpos >= filesize))
         ProgError("WR13", "%s: invalid directory offset %08lX",
                   fname(wadin), (unsigned long) dirpos);
     /*allocate directory */
